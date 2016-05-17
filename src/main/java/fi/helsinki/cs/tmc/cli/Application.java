@@ -1,8 +1,7 @@
 package fi.helsinki.cs.tmc.cli;
 
 public class Application {
-    int main(String[] args) {
+    public static void main(String[] args) {
         System.out.println("hello");
-        return 0;
     }
 }
