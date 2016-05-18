@@ -16,6 +16,7 @@ public class CommandMap {
     public CommandMap() {
         this.commands = new HashMap<>();
         createCommand(new TestCommand());
+        createCommand(new HelpCommand(this));
     }
 
     private void createCommand(Command command) {
@@ -29,5 +30,9 @@ public class CommandMap {
      */
     public Command getCommand(String name) {
         return commands.get(name);
+    }
+
+    public Map<String, Command> getCommands() {
+        return this.commands;
     }
 }
