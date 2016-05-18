@@ -16,6 +16,7 @@ public class CommandMap {
     public CommandMap() {
         this.commands = new HashMap<>();
         createCommand(new TestCommand());
+        createCommand(new ListCoursesCommand());
     }
 
     private void createCommand(Command command) {
