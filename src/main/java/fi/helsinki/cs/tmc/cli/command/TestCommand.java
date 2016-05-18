@@ -6,12 +6,12 @@ package fi.helsinki.cs.tmc.cli.command;
 public class TestCommand implements Command {
 
     @Override
-    public String description() {
+    public String getDescription() {
         return "This is an easter egg test command.";
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "EasterEgg";
     }
 

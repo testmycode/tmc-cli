@@ -9,13 +9,13 @@ public interface Command {
      * Get command description.
      * @return Description
      */
-    String description();
+    String getDescription();
 
     /**
      * Get default command name.
      * @return Name
      */
-    String name();
+    String getName();
 
     /**
      * Run command.

@@ -16,7 +16,7 @@ public class CommandMap {
     }
     
     private void createCommand(Command command) {
-        this.commands.put(command.name(), command);
+        this.commands.put(command.getName(), command);
     }
     
     public Command getCommand(String name) {
