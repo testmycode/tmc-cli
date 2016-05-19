@@ -34,7 +34,7 @@ public class ListCoursesCommand implements Command {
     }
 
     @Override
-    public void run() {
+    public void run(String[] args) {
         Callable<List<Course>> callable;
         List<Course> courses;
         TmcCore core;
