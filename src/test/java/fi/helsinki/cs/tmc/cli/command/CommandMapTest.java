@@ -2,6 +2,8 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertNotNull;
 
+import fi.helsinki.cs.tmc.cli.Application;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -25,7 +27,7 @@ public class CommandMapTest {
 
     @Before
     public void setUp() {
-        cm = new CommandMap();
+        cm = new CommandMap(new Application());
     }
 
     @After
