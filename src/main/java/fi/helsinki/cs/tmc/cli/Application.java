@@ -9,7 +9,7 @@ public class Application {
         Command command;
         CommandMap map = new CommandMap();
 
-        if(args.length == 0) {
+        if (args.length == 0) {
             map.getCommand("help").run();
             return;
         }
