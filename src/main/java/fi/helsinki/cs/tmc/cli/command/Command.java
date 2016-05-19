@@ -21,5 +21,5 @@ public interface Command {
     /**
      * Run command.
      */
-    void run();
+    void run(String[] args);
 }
