@@ -14,8 +14,7 @@ hs_err_pid*
 
 .idea/
 tmc-cli.iml
-.*.sw*
+*.sw*
 *~
 /nbproject/
 dependency-reduced-pom.xml
-
