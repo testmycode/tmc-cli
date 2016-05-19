@@ -12,6 +12,7 @@ public class Application {
         CommandMap map = new CommandMap();
 
         if(args.length == 0) {
+            System.out.println("TMC-CLI version " + getVersion());
             map.getCommand("help").run();
             return;
         }
