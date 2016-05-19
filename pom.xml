@@ -100,7 +100,7 @@
                     <encoding>UTF-8</encoding>
                     <linkXRef>false</linkXRef>
                     <excludes>**/name/fraser/neil/**/*</excludes>
-                    <failOnViolation>false</failOnViolation>
+                    <failOnViolation>true</failOnViolation>
                 </configuration>
                 <version>2.16</version>
                 <executions>
