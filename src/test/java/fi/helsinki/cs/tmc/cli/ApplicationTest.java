@@ -1,13 +1,15 @@
 package fi.helsinki.cs.tmc.cli;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
+
 
 public class ApplicationTest {
     Application app = new Application();
     
     @Test
-    public void TestingTest() {
+    public void testingTest() {
         assertTrue(true);
     }
 }
