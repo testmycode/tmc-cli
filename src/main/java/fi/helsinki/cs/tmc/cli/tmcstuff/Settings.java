@@ -14,13 +14,13 @@ import java.util.Locale;
 public class Settings implements TmcSettings {
 
     private String serverAddress;
-    private String password;
     private String username;
+    private String password;
 
-    public Settings(String serverAddress, String password, String username) {
+    public Settings(String serverAddress, String username, String password) {
         this.serverAddress = serverAddress;
-        this.password = password;
         this.username = username;
+        this.password = password;
     }
 
     @Override
