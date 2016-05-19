@@ -67,8 +67,10 @@ public class Application {
 
         String path = "/maven.prop";
         InputStream stream = Application.class.getResourceAsStream(path);
-        if (stream == null)
+        if (stream == null) {
             return "n/a";
+        }
+        
         Properties props = new Properties();
         try {
             props.load(stream);
