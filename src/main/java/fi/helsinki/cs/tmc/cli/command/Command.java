@@ -6,12 +6,14 @@ package fi.helsinki.cs.tmc.cli.command;
 public interface Command {
     /**
      * Get command description.
+     * 
      * @return Description
      */
     String getDescription();
 
     /**
      * Get default command name.
+     * 
      * @return Name
      */
     String getName();

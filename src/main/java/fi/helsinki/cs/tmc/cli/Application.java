@@ -6,24 +6,59 @@ import java.io.*;
 import java.util.Properties;
 
 public class Application {
-    public static void main(String[] args) {
-        String commandName;
-        Command command;
-        CommandMap map = new CommandMap();
+    private CommandMap commands;
+    //private TmcCore core;
+    private boolean initialized;
 
-        if(args.length == 0) {
+    public Application() {
+        this.initialized = false;
+    }
+
+    private void preinit() {
+        this.commands = new CommandMap(this);
+        this.initialized = true;
+    }
+
+    private boolean runCommand(String name, String[] args) {
+
+        if (name.equals("-v")) {
             System.out.println("TMC-CLI version " + getVersion());
-            map.getCommand("help").run();
-            return;
+            return true;
         }
 
-        commandName = args[0];
-        command = map.getCommand(commandName);
+        Command command = commands.getCommand(name);
         if (command == null) {
-            System.out.println("Command " + commandName + " doesn't exist.");
-            System.exit(0);
+            System.out.println("Command " + name + " doesn't exist.");
+            return false;
         }
+
         command.run();
+        return true;
+    }
+
+    public void run(String[] args) {
+        String commandName;
+
+        if (!this.initialized) {
+            preinit();
+        }
+
+        if (args.length > 0) {
+            commandName = args[0];
+        } else {
+            commandName = "help";
+        }
+
+        runCommand(commandName, args);
+    }
+
+    public CommandMap getCommandMap() {
+        return this.commands;
+    }
+
+    public static void main(String[] args) {
+        Application app = new Application();
+        app.run(args);
     }
 
     private static String getVersion() {
