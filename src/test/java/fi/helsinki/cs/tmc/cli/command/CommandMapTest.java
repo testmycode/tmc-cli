@@ -27,7 +27,8 @@ public class CommandMapTest {
 
     @Before
     public void setUp() {
-        cm = new CommandMap(new Application());
+        cm = new CommandMap();
+        cm.createCommands(new Application());
     }
 
     @After

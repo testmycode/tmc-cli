@@ -6,10 +6,9 @@ import org.junit.Test;
 
 
 public class ApplicationTest {
-    Application app = new Application();
-    
     @Test
-    public void testingTest() {
-        assertTrue(true);
+    public void testThatProgramWontCrashWithEmptyArguments() {
+        Application app = new Application();
+        app.run(new String[]{});
     }
 }

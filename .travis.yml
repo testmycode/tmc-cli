@@ -1,7 +1,7 @@
 language: java
 
 script:
-- mvn checkstyle:checkstyle
+- mvn checkstyle:check cobertura:check test
 
 after_success:
 - mvn clean cobertura:cobertura coveralls:report
