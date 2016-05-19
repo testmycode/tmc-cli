@@ -35,7 +35,7 @@ public class Application {
             return false;
         }
 
-        command.run();
+        command.run(args);
         return true;
     }
 
