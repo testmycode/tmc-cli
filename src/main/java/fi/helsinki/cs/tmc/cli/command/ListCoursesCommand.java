@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -28,13 +30,21 @@ public class ListCoursesCommand implements Command {
     @Override
     public void run() {
         Callable<List<Course>> callable;
+        List<Course> courses;
         TaskExecutor tmcLangs;
+        Settings settings = new Settings();
         TmcCore core;
-        String filename = System.getProperty("user.home") + File.separator + ".tmc";
 
         tmcLangs = new TaskExecutorImpl();
-        //core = new TmcCore(settings, tmcLangs);
-        //callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
-        //List<Course> list = callable.call();
+        core = new TmcCore(settings, tmcLangs);
+        callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
+        try {
+            courses = callable.call();
+        } catch (Exception e) {
+            return;
+        }
+        for (Course course : courses) {
+            System.out.println(course.getName());
+        }
     }
 }
