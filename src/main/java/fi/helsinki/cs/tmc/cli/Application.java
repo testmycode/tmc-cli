@@ -2,6 +2,8 @@ package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
+import java.io.*;
+import java.util.Properties;
 
 public class Application {
     public static void main(String[] args) {
@@ -21,5 +23,21 @@ public class Application {
             System.exit(0);
         }
         command.run();
+    }
+
+    private static String getVersion() {
+
+        String path = "/maven.prop";
+        InputStream stream = Application.class.getResourceAsStream(path);
+        if (stream == null)
+            return "n/a";
+        Properties props = new Properties();
+        try {
+            props.load(stream);
+            stream.close();
+            return (String) props.get("version");
+        } catch (IOException e) {
+            return "n/a";
+        }
     }
 }
