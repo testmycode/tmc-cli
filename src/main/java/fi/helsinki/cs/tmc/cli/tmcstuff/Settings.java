@@ -69,12 +69,14 @@ public class Settings implements TmcSettings {
 
     @Override
     public String clientName() {
-        return "tmc-cli";
+        //return "tmc-cli";
+        return "";
     }
 
     @Override
     public String clientVersion() {
-        return "0.1.0";
+        //return "0.1.0";
+        return "0.9.3";
     }
 
     @Override
