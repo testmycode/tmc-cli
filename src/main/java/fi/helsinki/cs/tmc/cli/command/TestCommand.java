@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 
 /**
- * Class is a test command class
+ * Class is a test command class.
  */
 public class TestCommand implements Command {
     public TestCommand(Application app) {

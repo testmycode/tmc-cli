@@ -27,7 +27,9 @@ public class CommandMap {
 
     /**
      * Get command by default name.
-     * @param name
+     * 
+     * @param name Command name.
+     * 
      * @return Command
      */
     public Command getCommand(String name) {
