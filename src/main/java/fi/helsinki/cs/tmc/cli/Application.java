@@ -3,8 +3,8 @@ package fi.helsinki.cs.tmc.cli;
 import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 public class Application {
@@ -70,7 +70,7 @@ public class Application {
         if (stream == null) {
             return "n/a";
         }
-        
+
         Properties props = new Properties();
         try {
             props.load(stream);
