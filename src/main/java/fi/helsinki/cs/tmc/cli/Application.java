@@ -3,6 +3,10 @@ package fi.helsinki.cs.tmc.cli;
 import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 public class Application {
     private CommandMap commands;
     //private TmcCore core;
@@ -18,9 +22,13 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        Command command;
 
-        command = commands.getCommand(name);
+        if (name.equals("-v")) {
+            System.out.println("TMC-CLI version " + getVersion());
+            return true;
+        }
+
+        Command command = commands.getCommand(name);
         if (command == null) {
             System.out.println("Command " + name + " doesn't exist.");
             return false;
@@ -53,5 +61,21 @@ public class Application {
     public static void main(String[] args) {
         Application app = new Application();
         app.run(args);
+    }
+
+    private static String getVersion() {
+
+        String path = "/maven.prop";
+        InputStream stream = Application.class.getResourceAsStream(path);
+        if (stream == null)
+            return "n/a";
+        Properties props = new Properties();
+        try {
+            props.load(stream);
+            stream.close();
+            return (String) props.get("version");
+        } catch (IOException e) {
+            return "n/a";
+        }
     }
 }

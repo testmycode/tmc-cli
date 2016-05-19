@@ -100,7 +100,7 @@
                     <encoding>UTF-8</encoding>
                     <linkXRef>false</linkXRef>
                     <excludes>**/name/fraser/neil/**/*</excludes>
-                    <failOnViolation>false</failOnViolation>
+                    <failOnViolation>true</failOnViolation>
                 </configuration>
                 <version>2.16</version>
                 <executions>
@@ -124,6 +124,23 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/maven.prop</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/maven.prop</exclude>
+                </excludes>
+            </resource>
+        </resources>
     </build>
 
 </project>
