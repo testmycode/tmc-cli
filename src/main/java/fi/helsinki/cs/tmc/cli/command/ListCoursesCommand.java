@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.Application;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
@@ -17,6 +17,12 @@ import java.util.concurrent.Callable;
  * Command for listing all available courses to user.
  */
 public class ListCoursesCommand implements Command {
+    private Application app;
+
+    public ListCoursesCommand(Application app) {
+        this.app = app;
+    }
+
     @Override
     public String getDescription() {
         return "List the available courses.";
@@ -31,12 +37,9 @@ public class ListCoursesCommand implements Command {
     public void run() {
         Callable<List<Course>> callable;
         List<Course> courses;
-        TaskExecutor tmcLangs;
-        Settings settings = new Settings();
         TmcCore core;
 
-        tmcLangs = new TaskExecutorImpl();
-        core = new TmcCore(settings, tmcLangs);
+        core = this.app.getTmcCore();
         callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
         try {
             courses = callable.call();

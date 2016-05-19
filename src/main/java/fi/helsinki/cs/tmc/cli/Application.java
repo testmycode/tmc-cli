@@ -2,6 +2,12 @@ package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -9,7 +15,7 @@ import java.util.Properties;
 
 public class Application {
     private CommandMap commands;
-    //private TmcCore core;
+    private TmcCore tmcCore;
     private boolean initialized;
 
     public Application() {
@@ -55,8 +61,24 @@ public class Application {
         runCommand(commandName, args);
     }
 
+    private void createTmcCore() {
+        TaskExecutor tmcLangs;
+        Settings settings = new Settings();
+
+        tmcLangs = new TaskExecutorImpl();
+        this.tmcCore = new TmcCore(settings, tmcLangs);
+        /*XXX should we somehow check if the authentication is successful here */
+    }
+
     public CommandMap getCommandMap() {
         return this.commands;
+    }
+
+    public TmcCore getTmcCore() {
+        if (this.tmcCore == null) {
+            createTmcCore();
+        }
+        return this.tmcCore;
     }
 
     public static void main(String[] args) {

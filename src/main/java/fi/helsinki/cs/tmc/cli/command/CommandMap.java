@@ -22,7 +22,7 @@ public class CommandMap {
     public void createCommands(Application app) {
         createCommand(new TestCommand(app));
         createCommand(new HelpCommand(app));
-        createCommand(new ListCoursesCommand());
+        createCommand(new ListCoursesCommand(app));
     }
 
     private void createCommand(Command command) {
