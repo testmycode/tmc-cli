@@ -20,7 +20,7 @@ public class HelpCommand implements Command {
     }
 
     @Override
-    public void run() {
+    public void run(String[] args) {
         System.out.println("TMC commands:");
         for (Command command : this.commands.getCommands().values()) {
             System.out.println("  " + command.getName() + "\t" + command.getDescription());
