@@ -12,5 +12,9 @@
 hs_err_pid*
 /target/
 
-.*
-!.gitignore
+.idea/
+tmc-cli.iml
+*.sw*
+*~
+/nbproject/
+dependency-reduced-pom.xml
