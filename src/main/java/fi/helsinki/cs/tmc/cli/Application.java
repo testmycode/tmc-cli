@@ -17,7 +17,8 @@ public class Application {
     }
 
     private void preinit() {
-        this.commands = new CommandMap(this);
+        this.commands = new CommandMap();
+        this.commands.createCommands(this);
         this.initialized = true;
     }
 

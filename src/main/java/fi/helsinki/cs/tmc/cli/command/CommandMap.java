@@ -15,8 +15,11 @@ public class CommandMap {
     /**
      * Constructor.
      */
-    public CommandMap(Application app) {
+    public CommandMap() {
         this.commands = new HashMap<>();
+    }
+
+    public void createCommands(Application app) {
         createCommand(new TestCommand(app));
         createCommand(new HelpCommand(app));
     }
