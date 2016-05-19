@@ -1,11 +1,12 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.Application;
 
 public class HelpCommand implements Command {
     private CommandMap commands;
 
-    public HelpCommand(CommandMap commandMap) {
-        this.commands = commandMap;
+    public HelpCommand(Application app) {
+        this.commands = app.getCommandMap();
     }
 
     @Override

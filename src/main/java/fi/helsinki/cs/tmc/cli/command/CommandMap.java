@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.Application;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,10 +15,10 @@ public class CommandMap {
     /**
      * Constructor.
      */
-    public CommandMap() {
+    public CommandMap(Application app) {
         this.commands = new HashMap<>();
-        createCommand(new TestCommand());
-        createCommand(new HelpCommand(this));
+        createCommand(new TestCommand(app));
+        createCommand(new HelpCommand(app));
     }
 
     private void createCommand(Command command) {
