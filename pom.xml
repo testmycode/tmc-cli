@@ -63,11 +63,11 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                          <transformers>
-                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                              <mainClass>fi.helsinki.cs.tmc.cli.Application</mainClass>
-                            </transformer>
-                          </transformers>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>fi.helsinki.cs.tmc.cli.Application</mainClass>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
@@ -82,7 +82,10 @@
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <format>xml</format>
+                    <formats>
+                        <format>xml</format>
+                        <format>html</format>
+                    </formats>
                     <maxmem>256m</maxmem>
                     <instrumentation>
                         <ignoreTrivial>true</ignoreTrivial>
