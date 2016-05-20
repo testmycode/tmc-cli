@@ -34,7 +34,9 @@ public class ListExercisesCommand implements Command {
         TmcCore core;
         List<Exercise> exercises;
         Course course = null;
-
+        if(     args.length == 0 ) {
+            return;
+        }
         core = this.app.getTmcCore();
         callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
 
@@ -45,7 +47,7 @@ public class ListExercisesCommand implements Command {
         }
 
         for (Course item : courses) {
-            if (item.getName().equals(args[1])) {
+            if (item.getName().equals(args[0])) {
                 course = item;
             }
         }
