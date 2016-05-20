@@ -32,9 +32,8 @@ public class ListExercisesCommand implements Command {
         Callable<List<Course>> callable;
         List<Course> courses;
         TmcCore core;
-        List<Exercise> exercises;
         Course course = null;
-        if(     args.length == 0 ) {
+        if (args.length == 0) {
             return;
         }
         core = this.app.getTmcCore();
@@ -57,8 +56,7 @@ public class ListExercisesCommand implements Command {
         } catch (Exception e) {
             return;
         }
-
-        exercises = course.getExercises();
+        List<Exercise> exercises = course.getExercises();
 
         for (Exercise exercise : exercises) {
             System.out.println(exercise.getName());
