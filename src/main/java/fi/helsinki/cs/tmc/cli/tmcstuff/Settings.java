@@ -54,7 +54,8 @@ public class Settings implements TmcSettings {
 
     @Override
     public boolean userDataExists() {
-        return false;
+        return this.username != null && this.password != null
+                && !this.username.isEmpty() && !this.password.isEmpty();
     }
 
     @Override
@@ -75,13 +76,15 @@ public class Settings implements TmcSettings {
 
     @Override
     public String clientVersion() {
-        //return "0.1.0";
-        return "0.9.3";
+        return "0.1.0";
     }
 
     @Override
     public String getFormattedUserData() {
-        return null;
+        if (!userDataExists()) {
+            return "";
+        }
+        return this.username + ":" + this.password;
     }
 
     @Override
