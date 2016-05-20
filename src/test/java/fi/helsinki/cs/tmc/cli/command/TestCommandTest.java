@@ -27,14 +27,14 @@ public class TestCommandTest {
 
     @Test
     public void runWorksRightWithoutOption() {
-        String[] args = {"EasterEgg"};
+        String[] args = {"easter-egg"};
         app.run(args);
         assertTrue(os.toString().contains("Let's run easter egg."));
     }
     
     @Test
     public void runWorksRightWithOption() {
-        String[] args = {"EasterEgg", "-a"};
+        String[] args = {"easter-egg", "-a"};
         app.run(args);
         assertTrue(os.toString().contains("Let's run easter egg with -a"));
     }
