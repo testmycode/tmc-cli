@@ -23,6 +23,7 @@ public class CommandMap {
         createCommand(new TestCommand(app));
         createCommand(new HelpCommand(app));
         createCommand(new ListCoursesCommand(app));
+        createCommand(new ListExercisesCommand(app));
     }
 
     private void createCommand(Command command) {
