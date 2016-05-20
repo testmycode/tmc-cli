@@ -23,6 +23,20 @@ public class Settings implements TmcSettings {
         this.password = password;
     }
 
+    public Settings() {
+        this.serverAddress = System.getenv("TMC_SERVER_ADDRESS");
+        this.username = System.getenv("TMC_USERNAME");
+        this.password = System.getenv("TMC_PASSWORD");
+
+        if (this.serverAddress == null || this.username == null
+                || this.password == null) {
+            String msg = "Env variables for tmc-cli Settings are missing!"
+                    + "\nTMC_SERVER_ADDRESS, TMC_USERNAME, TMC_PASSWORD";
+            System.out.println(msg);
+            System.exit(1);
+        }
+    }
+
     @Override
     public String getServerAddress() {
         return serverAddress;
@@ -55,12 +69,14 @@ public class Settings implements TmcSettings {
 
     @Override
     public String clientName() {
-        return "tmc-cli";
+        //return "tmc-cli";
+        return "";
     }
 
     @Override
     public String clientVersion() {
-        return "0.1.0";
+        //return "0.1.0";
+        return "0.9.3";
     }
 
     @Override
