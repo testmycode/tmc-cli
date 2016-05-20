@@ -27,7 +27,7 @@ public class TestCommand implements Command {
 
     @Override
     public String getName() {
-        return "EasterEgg";
+        return "easter-egg";
     }
 
     @Override

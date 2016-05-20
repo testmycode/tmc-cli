@@ -12,6 +12,7 @@ reviewers:
   - mikkomaa
   - nygrenh
   - Salmela
+  - jclc
   name: default
   required: 1
   conditions:
