@@ -16,7 +16,8 @@ import java.nio.file.Paths;
  */
 public class SettingsIo {
 
-    private static final String CONFIGFILE = "tmc.conf";
+    private static final String CONFIGDIR = "tmc-cli";
+    private static final String CONFIGFILE = "tmc.json";
 
     public static Path getDefaultConfigRoot() {
         String fileSeparator;
@@ -26,7 +27,8 @@ public class SettingsIo {
 
         if (os.contains("windows")) {
             //TODO: Use proper Windows config file location
-            configPath = System.getProperty("user.home") + fileSeparator;
+            configPath = System.getProperty("user.home")
+                    + fileSeparator;
         } else {
             //Assume we're using Unix (Linux, Mac OS X or *BSD)
             String configEnv = System.getenv("XDG_CONFIG_HOME");
@@ -40,30 +42,30 @@ public class SettingsIo {
                         + fileSeparator;
             }
         }
-        configPath = configPath + "tmc-cli" + fileSeparator;
+        configPath = configPath + CONFIGDIR + fileSeparator;
         return Paths.get(configPath);
     }
 
-    private Path getFile(Path path) {
-        Path file = null;
+    private Path getConfigFile(Path path) throws IOException {
+        Path file = path.resolve(CONFIGFILE);
         if (!Files.exists(path)) {
-            Files.createFile()
+            Files.createFile(path);
         }
+        return file;
     }
 
     public void save(TmcSettings settings) throws IOException {
-        String fileSeparator = System.getProperty("file.separator");
-        Path location = settings.getConfigRoot().resolve(fileSeparator + CONFIGFILE);
+        //Temporarily always use the default directory
+        Path file = getConfigFile(getDefaultConfigRoot());
         Gson gson = new Gson();
         byte[] json = gson.toJson(settings).getBytes();
-        Files.write(location, json);
+        Files.write(file, json);
     }
 
     public TmcSettings load(Path configRoot) throws IOException {
-        String fileSeparator = System.getProperty("file.separator");
-        Path location = configRoot.resolve(fileSeparator + CONFIGFILE);
+        Path file = getConfigFile(configRoot);
         Gson gson = new Gson();
-        Reader reader = Files.newBufferedReader(location, Charset.forName("UTF-8"));
+        Reader reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         return gson.fromJson(reader, Settings.class);
     }
 

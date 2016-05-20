@@ -36,19 +36,20 @@ public class SettingsIoTest {
         Path path = SettingsIo.getDefaultConfigRoot();
         System.out.println(path.toString());
         String fs = System.getProperty("file.separator");
-        //assertTrue(path.toString().contains("tmc-cli"));
+        assertTrue(path.toString().contains("tmc-cli"));
         assertTrue(path.toString().contains(fs));
-        //assertTrue(!path.toString().contains(fs + fs));
+        assertTrue(!path.toString().contains(fs + fs));
     }
 
     @Test
     public void savingToFileWorks() {
+        String fs = System.getProperty("file.separator");
         try {
             settingsio.save(settings);
-        } catch(IOException e) {
+        } catch (IOException e) {
             Assert.fail();
         }
-        Path path = settings.getConfigRoot().resolve("tmc.conf");
+        Path path = settingsio.getDefaultConfigRoot().resolve("tmc-cli" + fs + "tmc.json");
         assertTrue(Files.exists(path));
     }
 }
