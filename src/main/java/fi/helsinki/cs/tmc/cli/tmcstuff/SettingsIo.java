@@ -44,6 +44,13 @@ public class SettingsIo {
         return Paths.get(configPath);
     }
 
+    private Path getFile(Path path) {
+        Path file = null;
+        if (!Files.exists(path)) {
+            Files.createFile()
+        }
+    }
+
     public void save(TmcSettings settings) throws IOException {
         String fileSeparator = System.getProperty("file.separator");
         Path location = settings.getConfigRoot().resolve(fileSeparator + CONFIGFILE);
