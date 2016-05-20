@@ -1,29 +1,17 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class CommandMapTest {
 
     CommandMap cm;
-
-    public CommandMapTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
 
     @Before
     public void setUp() {
@@ -31,17 +19,18 @@ public class CommandMapTest {
         cm.createCommands(new Application());
     }
 
-    @After
-    public void tearDown() {
-    }
-
     @Test
     public void constructorAddsCommands() {
-        assertNotNull(cm.getCommands());
+        assertTrue(!cm.getCommands().isEmpty());
     }
     
     @Test
     public void getCommandWorksWithRealCommand() {
-        assertNotNull(cm.getCommands());
+        assertNotNull(cm.getCommand("help"));
+    }
+    
+    @Test
+    public void getCommandWorksWithBadCommand() {
+        assertNull(cm.getCommand("foobar"));
     }
 }
