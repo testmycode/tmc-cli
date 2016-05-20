@@ -14,6 +14,8 @@ hs_err_pid*
 
 .idea/
 tmc-cli.iml
+tmc-cli.ipr
+tmc-cli.iws
 *.sw*
 *~
 /nbproject/
