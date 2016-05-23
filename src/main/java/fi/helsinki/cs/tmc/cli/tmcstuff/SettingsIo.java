@@ -18,12 +18,16 @@ public class SettingsIo {
 
     private static final String CONFIGDIR = "tmc-cli";
     private static final String CONFIGFILE = "tmc.json";
+    //The overrideRoot variable is intended only for testing
+    private String overrideRoot;
 
     public static Path getDefaultConfigRoot() {
         String fileSeparator;
         String configPath;
         String os = System.getProperty("os.name").toLowerCase();
         fileSeparator = System.getProperty("file.separator");
+
+
 
         if (os.contains("windows")) {
             //TODO: Use proper Windows config file location
@@ -47,6 +51,10 @@ public class SettingsIo {
     }
 
     private Path getConfigFile(Path path) throws IOException {
+        String fileSeparator = System.getProperty("file.separator");
+        if (this.overrideRoot != null) {
+            return Paths.get(this.overrideRoot + fileSeparator + CONFIGDIR + fileSeparator);
+        }
         Path file = path.resolve(CONFIGFILE);
         if (!Files.exists(path)) {
             Files.createFile(path);
@@ -71,5 +79,13 @@ public class SettingsIo {
 
     public TmcSettings load() throws IOException {
         return load((getDefaultConfigRoot()));
+    }
+
+    /**
+     * This is for testing purposes only. Otherwise use the default config path.
+     * @param override
+     */
+    protected void setOverrideRoot(String override) {
+        this.overrideRoot = override;
     }
 }
