@@ -2,6 +2,11 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -10,11 +15,18 @@ public class LoginCommand implements Command {
     // todo: use our own terminal IO when available
     private final Scanner scanner;
 
+    private final GnuParser parser;
+    private final Options options;
+
     private Application app;
 
     public LoginCommand(Application app) {
         this.app = app;
         this.scanner = new Scanner(System.in);
+        this.parser = new GnuParser();
+        this.options = new Options();
+        options.addOption("u", "user", true, "TMC username");
+        options.addOption("p", "password", true, "Password for the user");
     }
 
     @Override
@@ -33,13 +45,23 @@ public class LoginCommand implements Command {
         String password = null;
 
         try {
-            username = readLine("username: ");
-            password = readPassword("password: ");
-        } catch (Exception e) {
+            CommandLine line = this.parser.parse(options, args);
+
+            username = line.getOptionValue("u");
+            if (username == null) {
+                username = readLine("username: ");
+            }
+
+            password = line.getOptionValue("p");
+            if (password == null) {
+                password = readPassword("password: ");
+            }
+        } catch (ParseException | IOException e) {
             // todo: Logger
         }
 
-        //System.out.println(username + ":" + password);
+        // todo: do something
+        System.out.println(username + " : " + password);
     }
 
     // todo: use our own terminal IO when available
