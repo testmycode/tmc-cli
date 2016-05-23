@@ -71,7 +71,7 @@ public class SettingsIo {
         return file;
     }
 
-    public void save(TmcSettings settings) {
+    public Boolean save(TmcSettings settings) {
         //Temporarily always use the default directory
         Path file = getConfigFile(getDefaultConfigRoot());
         Gson gson = new Gson();
@@ -80,11 +80,12 @@ public class SettingsIo {
             Files.write(file, json);
         } catch (IOException e) {
             logger.error("Could not write settings to configuration file", e);
-            return;
+            return false;
         }
+        return true;
     }
 
-    public TmcSettings load(Path configRoot) {
+    public TmcSettings load(Path configRoot) throws IOException {
         Path file = getConfigFile(configRoot);
         Gson gson = new Gson();
         if (!Files.exists(file)) {
@@ -96,7 +97,7 @@ public class SettingsIo {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         } catch (IOException e) {
             logger.error("Configuration file located, but failed to read from it", e);
-            return null;
+            throw e;
         }
         return gson.fromJson(reader, Settings.class);
     }
