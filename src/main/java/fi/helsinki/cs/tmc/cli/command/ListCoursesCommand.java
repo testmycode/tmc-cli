@@ -3,13 +3,12 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
-import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -17,6 +16,7 @@ import java.util.concurrent.Callable;
  * Command for listing all available courses to user.
  */
 public class ListCoursesCommand implements Command {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private Application app;
 
     public ListCoursesCommand(Application app) {
@@ -44,6 +44,7 @@ public class ListCoursesCommand implements Command {
         try {
             courses = callable.call();
         } catch (Exception e) {
+            logger.warn("Failed to get courses to list", e);
             return;
         }
         for (Course course : courses) {
