@@ -1,16 +1,15 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * Command for listing all available courses to user.
@@ -35,18 +34,12 @@ public class ListCoursesCommand implements Command {
 
     @Override
     public void run(String[] args) {
-        Callable<List<Course>> callable;
         List<Course> courses;
         TmcCore core;
 
         core = this.app.getTmcCore();
-        callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
-        try {
-            courses = callable.call();
-        } catch (Exception e) {
-            logger.warn("Failed to get courses to list", e);
-            return;
-        }
+        courses = TmcUtil.listCourses(core);
+
         for (Course course : courses) {
             System.out.println(course.getName());
         }
