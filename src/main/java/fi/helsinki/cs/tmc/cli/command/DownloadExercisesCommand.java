@@ -53,6 +53,7 @@ public class DownloadExercisesCommand implements Command {
         try {
             course = core.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
         } catch (Exception e) {
+            System.out.println("Course not found.");
             return;
         }
         List<Exercise> exercises = course.getExercises();
