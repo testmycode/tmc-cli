@@ -37,11 +37,12 @@ public class SettingsIoTest {
 
     @After
     public void cleanUp() {
+        String tempDir = System.getProperty("java.io.tmpdir");
         try {
-            Files.delete(Paths.get("/tmp/tmc-cli/tmc.json"));
+            Files.delete(Paths.get(tempDir).resolve("tmc-cli").resolve("tmc.json"));
         } catch (Exception e) { }
         try {
-            Files.delete(Paths.get("/tmp/tmc-cli"));
+            Files.delete(Paths.get(tempDir).resolve("tmc-cli"));
         } catch (Exception e) { }
     }
 
