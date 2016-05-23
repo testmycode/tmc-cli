@@ -128,9 +128,8 @@ public class Application {
         runCommand(commandName, commandArgs);
     }
 
-    private void createTmcCore() {
+    public void createTmcCore(Settings settings) {
         TaskExecutor tmcLangs;
-        Settings settings = new Settings();
 
         tmcLangs = new TaskExecutorImpl();
         this.tmcCore = new TmcCore(settings, tmcLangs);
@@ -143,7 +142,7 @@ public class Application {
 
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
-            createTmcCore();
+            createTmcCore(new Settings());
         }
         return this.tmcCore;
     }
