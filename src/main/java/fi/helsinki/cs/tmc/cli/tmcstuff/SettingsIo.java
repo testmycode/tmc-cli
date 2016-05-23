@@ -97,7 +97,7 @@ public class SettingsIo {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         } catch (IOException e) {
             logger.error("Configuration file located, but failed to read from it", e);
-            throw e; 
+            throw e;
         }
         return gson.fromJson(reader, Settings.class);
     }

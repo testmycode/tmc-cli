@@ -76,7 +76,11 @@ public class SettingsIoTest {
             //String fs = System.getProperty("file.separator");
             Path path = Paths.get("/tmp");
             TmcSettings loadedSettings = null;
-            loadedSettings = settingsio.load(path);
+            try {
+                loadedSettings = settingsio.load(path);
+            } catch (IOException e) {
+                Assert.fail(e.toString());
+            }
             assertEquals(settings.getUsername(), loadedSettings.getUsername());
             assertEquals(settings.getPassword(), loadedSettings.getPassword());
             assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
@@ -92,8 +96,12 @@ public class SettingsIoTest {
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
             Path path = Paths.get("/tmp");
             TmcSettings loadedSettings = new Settings();
-            loadedSettings = settingsio.load(path);
-            assertEquals(loadedSettings, null);
+            try {
+                loadedSettings = settingsio.load(path);
+            } catch (IOException e) {
+                Assert.fail(e.toString());
+            }
+            assertEquals(null, loadedSettings);
         } else {
             assertTrue(TRUE);
         }
