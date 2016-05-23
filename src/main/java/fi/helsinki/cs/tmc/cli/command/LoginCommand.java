@@ -2,6 +2,8 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
@@ -10,6 +12,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +21,8 @@ import java.util.Scanner;
 import java.util.concurrent.Callable;
 
 public class LoginCommand implements Command {
+
+    private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
 
     // todo: use our own terminal IO when available
     private final Scanner scanner;
@@ -52,6 +58,7 @@ public class LoginCommand implements Command {
         String password = null;
         String serverAddress = null;
 
+        // todo: clean this.
         try {
             CommandLine line = this.parser.parse(options, args);
 
@@ -71,14 +78,19 @@ public class LoginCommand implements Command {
                 serverAddress = "https://tmc.mooc.fi";
             }
         } catch (ParseException | IOException e) {
-            // todo: Logger
+            logger.error("Unable to parse username or password.");
         }
 
         Settings settings = new Settings(serverAddress, username, password);
 
         if (loginPossible(settings)) {
-            // Todo. Save settings
-            System.out.println("Login is succesfull!");
+            SettingsIo settingsIo = new SettingsIo();
+            if (settingsIo.save(settings)) {
+                System.out.println("Login successful!");
+            } else {
+                System.out.println("Failed to write config file. "
+                        + "Login failed.");
+            }
         } else {
             System.out.println("Login failed.");
         }
@@ -98,6 +110,8 @@ public class LoginCommand implements Command {
         try {
             callable.call();
         } catch (Exception e) {
+            logger.error("Unable to login into server "
+                    + settings.getServerAddress());
             // todo: if 401, 404 do something
             return false;
         }
@@ -119,6 +133,8 @@ public class LoginCommand implements Command {
             char[] pwd = System.console().readPassword(prompt);
             return new String(pwd);
         }
+        logger.info("System.console not present, unable to read password "
+                + "securely. Reading password in cleartext.");
         return this.readLine(prompt);
     }
 }
