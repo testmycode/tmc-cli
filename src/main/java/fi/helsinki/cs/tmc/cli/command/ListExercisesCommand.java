@@ -1,16 +1,19 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.Callable;
 
 public class ListExercisesCommand implements Command {
+    private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
     private Application app;
 
     public ListExercisesCommand(Application app) {
@@ -42,6 +45,7 @@ public class ListExercisesCommand implements Command {
         try {
             courses = callable.call();
         } catch (Exception e) {
+            logger.warn("Failed to get courses to list the exercises", e);
             return;
         }
 
@@ -54,6 +58,7 @@ public class ListExercisesCommand implements Command {
         try {
             course = core.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
         } catch (Exception e) {
+            logger.warn("Failed to get course details to list the exercises", e);
             return;
         }
         List<Exercise> exercises = course.getExercises();
