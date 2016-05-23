@@ -4,6 +4,9 @@ import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 
 import com.google.gson.Gson;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -16,6 +19,7 @@ import java.nio.file.Paths;
  */
 public class SettingsIo {
 
+    private static final Logger logger = LoggerFactory.getLogger(SettingsIo.class);
     private static final String CONFIGDIR = "tmc-cli";
     private static final String CONFIGFILE = "tmc.json";
     //The overrideRoot variable is intended only for testing
@@ -67,18 +71,33 @@ public class SettingsIo {
         return file;
     }
 
-    public void save(TmcSettings settings) throws IOException {
+    public void save(TmcSettings settings) {
         //Temporarily always use the default directory
         Path file = getConfigFile(getDefaultConfigRoot());
         Gson gson = new Gson();
         byte[] json = gson.toJson(settings).getBytes();
-        Files.write(file, json);
+        try {
+            Files.write(file, json);
+        } catch (IOException e) {
+            logger.error("Could not write settings to configuration file", e);
+            return;
+        }
     }
 
-    public TmcSettings load(Path configRoot) throws IOException {
+    public TmcSettings load(Path configRoot) {
         Path file = getConfigFile(configRoot);
         Gson gson = new Gson();
-        Reader reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
+        if (!Files.exists(file)) {
+            //Return null if file is not found, this is normal behaviour
+            return null;
+        }
+        Reader reader = null;
+        try {
+            reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            logger.error("Configuration file located, but failed to read from it", e);
+            return null;
+        }
         return gson.fromJson(reader, Settings.class);
     }
 
