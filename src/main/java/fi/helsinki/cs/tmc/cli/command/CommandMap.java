@@ -12,9 +12,6 @@ public class CommandMap {
 
     private Map<String, Command> commands;
 
-    /**
-     * Constructor.
-     */
     public CommandMap() {
         this.commands = new HashMap<>();
     }
@@ -31,13 +28,6 @@ public class CommandMap {
         this.commands.put(command.getName(), command);
     }
 
-    /**
-     * Get command by default name.
-     * 
-     * @param name Command name.
-     * 
-     * @return Command
-     */
     public Command getCommand(String name) {
         return commands.get(name);
     }

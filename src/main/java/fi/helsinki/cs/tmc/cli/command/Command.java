@@ -5,21 +5,21 @@ package fi.helsinki.cs.tmc.cli.command;
  */
 public interface Command {
     /**
-     * Get command description.
+     * Method returns command description.
      * 
      * @return Description
      */
     String getDescription();
 
     /**
-     * Get default command name.
+     * Method returns default command name.
      * 
      * @return Name
      */
     String getName();
 
     /**
-     * Run command.
+     * Method runs command.
      */
     void run(String[] args);
 }
