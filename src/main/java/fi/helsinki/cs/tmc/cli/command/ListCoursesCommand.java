@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
  * Command for listing all available courses to user.
  */
 public class ListCoursesCommand implements Command {
-    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
     private Application app;
 
     public ListCoursesCommand(Application app) {

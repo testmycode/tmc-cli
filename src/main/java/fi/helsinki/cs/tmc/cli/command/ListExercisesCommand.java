@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public class ListExercisesCommand implements Command {
-    private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
     private Application app;
 
     public ListExercisesCommand(Application app) {
