@@ -24,6 +24,7 @@ public class CommandMap {
         createCommand(new HelpCommand(app));
         createCommand(new ListCoursesCommand(app));
         createCommand(new ListExercisesCommand(app));
+        createCommand(new LoginCommand(app));
     }
 
     private void createCommand(Command command) {
