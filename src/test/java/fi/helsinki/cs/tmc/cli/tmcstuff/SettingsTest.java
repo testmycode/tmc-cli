@@ -6,15 +6,18 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Locale;
 
 public class SettingsTest {
 
     private Settings settings;
+    private File file;
 
     @Before
     public void setUp() {
         settings = new Settings("testserver", "testuser", "testpassword");
+        file = new File(".");
     }
 
     @Test
@@ -80,10 +83,10 @@ public class SettingsTest {
 
     @Test
     public void tmcProjectDirectoryIsSetCorrectly() {
-        assertTrue("/tmp/tmc-cli".equals(
+        assertTrue(file.getAbsolutePath().equals(
                 settings.getTmcProjectDirectory().toString()));
     }
-    
+
     @Test
     public void configRootIsSetCorrectly() {
         /*assertTrue("/tmp/tmc-cli".equals(
