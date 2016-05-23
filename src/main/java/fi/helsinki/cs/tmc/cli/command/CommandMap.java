@@ -22,6 +22,7 @@ public class CommandMap {
         createCommand(new ListCoursesCommand(app));
         createCommand(new ListExercisesCommand(app));
         createCommand(new LoginCommand(app));
+        createCommand(new DownloadExercisesCommand(app));
     }
 
     private void createCommand(Command command) {
