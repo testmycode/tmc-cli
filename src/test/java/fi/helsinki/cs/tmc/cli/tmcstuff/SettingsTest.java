@@ -91,7 +91,6 @@ public class SettingsTest {
     public void configRootIsSetCorrectly() {
         /*assertTrue("/tmp/tmc-cli".equals(
                 settings.getConfigRoot().toString()));*/
-
     }
 
     @Test
