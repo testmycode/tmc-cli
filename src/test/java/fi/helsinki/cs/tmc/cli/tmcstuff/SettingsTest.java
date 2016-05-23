@@ -91,6 +91,7 @@ public class SettingsTest {
     public void configRootIsSetCorrectly() {
         assertTrue(file.getAbsolutePath().equals(
                 settings.getConfigRoot().toString()));
+
     }
 
     @Test
