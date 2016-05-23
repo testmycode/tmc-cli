@@ -50,14 +50,19 @@ public class SettingsIo {
         return Paths.get(configPath);
     }
 
-    private Path getConfigFile(Path path) throws IOException {
+    private Path getConfigFile(Path path) {
         String fileSeparator = System.getProperty("file.separator");
         if (this.overrideRoot != null) {
-            return Paths.get(this.overrideRoot + fileSeparator + CONFIGDIR + fileSeparator);
+            path = Paths.get(this.overrideRoot + fileSeparator + CONFIGDIR + fileSeparator);
         }
         Path file = path.resolve(CONFIGFILE);
         if (!Files.exists(path)) {
-            Files.createFile(path);
+            try {
+                Files.createDirectories(path);
+            } catch (Exception e) { }
+            try {
+                Files.createFile(path);
+            } catch (Exception e) { }
         }
         return file;
     }
@@ -83,7 +88,6 @@ public class SettingsIo {
 
     /**
      * This is for testing purposes only. Otherwise use the default config path.
-     * @param override
      */
     protected void setOverrideRoot(String override) {
         this.overrideRoot = override;

@@ -3,12 +3,13 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 import static java.lang.Boolean.TRUE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
-import org.junit.*;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,19 +34,20 @@ public class SettingsIoTest {
         settingsio.setOverrideRoot("/tmp");
     }
 
-    @AfterClass
-    public static void cleanUp() {
+    @After
+    public void cleanUp() {
         try {
             Files.delete(Paths.get("/tmp/tmc-cli/tmc.json"));
-        } catch (Exception e) {
-            return;
-        }
+        } catch (Exception e) { }
+        try {
+            Files.delete(Paths.get("/tmp/tmc-cli"));
+        } catch (Exception e) { }
     }
 
     @Test
     public void correctConfigPath() {
         Path path = SettingsIo.getDefaultConfigRoot();
-        System.out.println(path.toString());
+        //System.out.println(path.toString());
         String fs = System.getProperty("file.separator");
         assertTrue(path.toString().contains("tmc-cli"));
         assertTrue(path.toString().contains(fs));
@@ -74,8 +76,13 @@ public class SettingsIoTest {
     public void loadingFromFileWorks() {
         //TODO: make tests work properly on Windows
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+            try {
+                settingsio.save(settings);
+            } catch (IOException e) {
+                Assert.fail(e.toString());
+            }
             //String fs = System.getProperty("file.separator");
-            Path path = Paths.get("/tmp/tmc-cli");
+            Path path = Paths.get("/tmp");
             TmcSettings loadedSettings = null;
             try {
                 loadedSettings = settingsio.load(path);
