@@ -52,4 +52,15 @@ public class TmcUtil {
 
         return TmcUtil.getDetails(core, course);
     }
+
+    public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises) {
+        try {
+            return core.downloadOrUpdateExercises(ProgressObserver.NULL_OBSERVER, exercises)
+                    .call();
+        } catch (Exception e) {
+            logger.warn("Failed to download exercises", e);
+            return null;
+        }
+
+    }
 }

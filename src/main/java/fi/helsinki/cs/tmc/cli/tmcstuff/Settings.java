@@ -7,6 +7,7 @@ import com.google.common.base.Optional;
 
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -89,7 +90,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public Path getTmcProjectDirectory() {
-        return Paths.get("/tmp/tmc-cli");
+        return Paths.get(new File(".").getAbsolutePath());
     }
 
     @Override
