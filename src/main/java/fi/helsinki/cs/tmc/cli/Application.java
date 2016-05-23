@@ -5,7 +5,6 @@ import fi.helsinki.cs.tmc.cli.command.CommandMap;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
@@ -14,6 +13,8 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.util.Properties;
  * somewhere else from here.
  */
 public class Application {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private CommandMap commands;
     private TmcCore tmcCore;
     private boolean initialized;
@@ -166,6 +168,7 @@ public class Application {
             stream.close();
             return (String) props.get("version");
         } catch (IOException e) {
+            logger.warn("Failed to get version", e);
             return "n/a";
         }
     }
