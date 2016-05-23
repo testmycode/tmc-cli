@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.clii;
 
 import static org.junit.Assert.assertTrue;
 
@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-public class TestCommandTest {
+public class ApplicationTest {
 
     Application app;
     OutputStream os;
@@ -26,17 +26,16 @@ public class TestCommandTest {
     }
 
     @Test
-    public void runWorksRightWithoutOption() {
-        String[] args = {"easter-egg"};
+    public void versionWorksWithRightParameter() {
+        String[] args = {"-v"};
         app.run(args);
-        assertTrue(os.toString().contains("Let's run easter egg."));
+        assertTrue(os.toString().contains("TMC-CLI version"));
     }
     
     @Test
-    public void runWorksRightWithOption() {
-        String[] args = {"easter-egg", "-a"};
+    public void runCommandWorksWithWrongParameter() {
+        String[] args = {"foo"};
         app.run(args);
-        assertTrue(os.toString().contains("Let's run easter egg with -a"));
+        assertTrue(os.toString().contains("Command foo doesn't exist"));
     }
-
 }

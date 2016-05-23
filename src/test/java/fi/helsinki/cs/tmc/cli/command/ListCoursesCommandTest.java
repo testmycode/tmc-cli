@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-public class TestCommandTest {
+public class ListCoursesCommandTest {
 
     Application app;
     OutputStream os;
@@ -26,17 +26,9 @@ public class TestCommandTest {
     }
 
     @Test
-    public void runWorksRightWithoutOption() {
-        String[] args = {"easter-egg"};
+    public void runWorksRight() {
+        String[] args = {"list-courses"};
         app.run(args);
-        assertTrue(os.toString().contains("Let's run easter egg."));
+        assertTrue(os.toString().contains("demo"));
     }
-    
-    @Test
-    public void runWorksRightWithOption() {
-        String[] args = {"easter-egg", "-a"};
-        app.run(args);
-        assertTrue(os.toString().contains("Let's run easter egg with -a"));
-    }
-
 }
