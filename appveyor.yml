@@ -1,0 +1,12 @@
+environment:
+  TMC_PASSWORD:
+    secure: yHwF55rZGpgUDCEGjHQtuw==
+  TMC_USERNAME:
+    secure: yHwF55rZGpgUDCEGjHQtuw==
+  TMC_SERVER_ADDRESS:
+    secure: mGLqF/XXSWBgTAeL3TZT3vIX0VTyvNdt0XM2V3yA1As=
+build_script:
+  - mvn clean install
+test_script:
+  - mvn clean install
+
