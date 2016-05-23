@@ -59,11 +59,7 @@ public class SettingsIoTest {
         //TODO: make tests work properly on Windows
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
             //String fs = System.getProperty("file.separator");
-            try {
-                settingsio.save(settings);
-            } catch (IOException e) {
-                Assert.fail(e.toString());
-            }
+            settingsio.save(settings);
             Path path = Paths.get("/tmp/tmc-cli/tmc.json");
             //settingsio.getDefaultConfigRoot().resolve("tmc-cli" + fs + "tmc.json");
             assertTrue(Files.exists(path));
@@ -76,11 +72,7 @@ public class SettingsIoTest {
     public void loadingFromFileWorks() {
         //TODO: make tests work properly on Windows
         if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
-            try {
-                settingsio.save(settings);
-            } catch (IOException e) {
-                Assert.fail(e.toString());
-            }
+            settingsio.save(settings);
             //String fs = System.getProperty("file.separator");
             Path path = Paths.get("/tmp");
             TmcSettings loadedSettings = null;
@@ -88,12 +80,28 @@ public class SettingsIoTest {
                 loadedSettings = settingsio.load(path);
             } catch (IOException e) {
                 Assert.fail(e.toString());
-                return;
             }
             assertEquals(settings.getUsername(), loadedSettings.getUsername());
             assertEquals(settings.getPassword(), loadedSettings.getPassword());
             assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
             //settingsio.getDefaultConfigRoot().resolve("tmc-cli" + fs + "tmc.json");
+        } else {
+            assertTrue(TRUE);
+        }
+    }
+
+    @Test
+    public void loadingWhenNoFilePresentReturnsNull() {
+        //TODO: make tests work properly on Windows
+        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+            Path path = Paths.get("/tmp");
+            TmcSettings loadedSettings = new Settings();
+            try {
+                loadedSettings = settingsio.load(path);
+            } catch (IOException e) {
+                Assert.fail(e.toString());
+            }
+            assertEquals(null, loadedSettings);
         } else {
             assertTrue(TRUE);
         }
