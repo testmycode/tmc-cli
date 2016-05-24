@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
@@ -144,7 +145,20 @@ public class Application {
 
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
-            createTmcCore(new Settings());
+            SettingsIo settingsio = new SettingsIo();
+            Settings settings = null;
+
+            try {
+                settings = (Settings) settingsio.load();
+            } catch (IOException e) {
+                logger.error("Failed to load settings", e);
+            }
+
+            if (settings == null) {
+                System.out.println("You are not logged in. Log in using: tmc login");
+                return null;
+            }
+            createTmcCore(settings);
         }
         return this.tmcCore;
     }
@@ -154,7 +168,7 @@ public class Application {
         app.run(args);
     }
 
-    private static String getVersion() {
+    public static String getVersion() {
         String path = "/maven.prop";
         InputStream stream = Application.class.getResourceAsStream(path);
         if (stream == null) {

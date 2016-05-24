@@ -42,6 +42,9 @@ public class ListExercisesCommand implements Command {
         }
 
         core = this.app.getTmcCore();
+        if (core == null) {
+            return;
+        }
         course = TmcUtil.findCourse(core, args[0]);
         exercises = course.getExercises();
 
