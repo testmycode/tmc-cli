@@ -33,14 +33,14 @@ public class SettingsIoTest {
         this.settingsio = new SettingsIo();
         String tempDir = System.getProperty("java.io.tmpdir");
         settingsio.setOverrideRoot(tempDir);
+        try {
+            Files.delete(Paths.get(tempDir).resolve("tmc-cli"));
+        } catch (Exception e) { }
     }
 
     @After
     public void cleanUp() {
         String tempDir = System.getProperty("java.io.tmpdir");
-        try {
-            Files.delete(Paths.get(tempDir).resolve("tmc-cli").resolve("tmc.json"));
-        } catch (Exception e) { }
         try {
             Files.delete(Paths.get(tempDir).resolve("tmc-cli"));
         } catch (Exception e) { }
@@ -81,16 +81,16 @@ public class SettingsIoTest {
         assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
     }
 
-//    @Test
-//    public void loadingWhenNoFilePresentReturnsNull() {
-//        String tempDir = System.getProperty("java.io.tmpdir");
-//        Path path = Paths.get(tempDir);
-//        TmcSettings loadedSettings = new Settings();
-//        try {
-//            loadedSettings = settingsio.load(path);
-//        } catch (IOException e) {
-//            Assert.fail(e.toString());
-//        }
-//        assertEquals(null, loadedSettings);
-//    }
+    @Test
+    public void loadingWhenNoFilePresentReturnsNull() {
+        String tempDir = System.getProperty("java.io.tmpdir");
+        Path path = Paths.get(tempDir);
+        TmcSettings loadedSettings = new Settings();
+        try {
+            loadedSettings = settingsio.load(path);
+        } catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        assertEquals(null, loadedSettings);
+    }
 }
