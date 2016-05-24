@@ -42,13 +42,29 @@ public class LoginCommandTest {
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        String[] args = {"login",
-            "-s", LoginCommandTest.serverAddress,
-            "-u", LoginCommandTest.username,
-            "-p", LoginCommandTest.password};
+        String[] args = createArgs(
+                LoginCommandTest.serverAddress,
+                LoginCommandTest.username,
+                LoginCommandTest.password);
 
         app.run(args);
         String output = os.toString();
         assertTrue(output.contains("Login successful!"));
+    }
+
+    private String[] createArgs(String server, String username, String pwd) {
+        return new String[]{
+            "login",
+            "-s", server,
+            "-u", username,
+            "-p", pwd};
+    }
+
+    private String[] createArgs(String username, String pwd) {
+        return new String[]{
+            "login",
+            "-s", LoginCommandTest.serverAddress,
+            "-u", username,
+            "-p", pwd};
     }
 }
