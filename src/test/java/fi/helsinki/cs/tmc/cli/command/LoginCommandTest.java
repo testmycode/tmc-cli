@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -29,6 +30,10 @@ public class LoginCommandTest {
         LoginCommandTest.serverAddress = System.getenv("TMC_SERVER_ADDRESS");
         LoginCommandTest.username = System.getenv("TMC_USERNAME");
         LoginCommandTest.password = System.getenv("TMC_PASSWORD");
+
+        assertNotNull(LoginCommandTest.serverAddress);
+        assertNotNull(LoginCommandTest.username);
+        assertNotNull(LoginCommandTest.password);
     }
 
     @Before
