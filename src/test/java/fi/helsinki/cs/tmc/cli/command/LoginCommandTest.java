@@ -52,6 +52,19 @@ public class LoginCommandTest {
         assertTrue(output.contains("Login successful!"));
     }
 
+    @Test
+    public void catches401IfCorrectServerAndWrongUsername() {
+        String[] args = createArgs(
+                LoginCommandTest.serverAddress,
+                "",
+                LoginCommandTest.password);
+
+        app.run(args);
+        String output = os.toString();
+        assertTrue(output.contains("Incorrect username or password."));
+        assertTrue(output.contains("Login failed."));
+    }
+
     private String[] createArgs(String server, String username, String pwd) {
         return new String[]{
             "login",
