@@ -23,17 +23,17 @@ public class SettingsIo {
     
     // CONFIG_DIR is the sub-directory located within the system specific
     // configuration folder, ex. /home/user/.config/CONFIG_DIR/
-    private static final String CONFIG_DIR = "tmc-cli";
+    public static final String CONFIG_DIR = "tmc-cli";
     
     // ACCOUNTS_CONFIG is the _global_ configuration file containing all
     // user login information including usernames, passwords (in plain text)
     // and servers. Is located under CONFIG_DIR
-    private static final String ACCOUNTS_CONFIG = "accounts.json";
+    public static final String ACCOUNTS_CONFIG = "accounts.json";
     
     // COURSE_CONFIG is the _local_ configuration file containing course
     // information and is located in the root of each different course.
     // Contains username, server and course name.
-    private static final String COURSE_CONFIG = ".tmc.json";
+    public static final String COURSE_CONFIG = ".tmc.json";
     //The overrideRoot variable is intended only for testing
     private String overrideRoot;
 
