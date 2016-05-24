@@ -55,9 +55,8 @@ public class SettingsIo {
     }
 
     private Path getConfigFile(Path path) {
-        String fileSeparator = System.getProperty("file.separator");
         if (this.overrideRoot != null) {
-            path = Paths.get(this.overrideRoot + fileSeparator + CONFIGDIR + fileSeparator);
+            path = Paths.get(this.overrideRoot).resolve(CONFIGDIR);
         }
         Path file = path.resolve(CONFIGFILE);
         if (!Files.exists(path)) {

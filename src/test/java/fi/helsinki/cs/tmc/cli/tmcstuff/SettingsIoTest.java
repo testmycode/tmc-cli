@@ -31,7 +31,8 @@ public class SettingsIoTest {
     public void setUp() {
         this.settings = new Settings("testserver", "testuser", "testpassword");
         this.settingsio = new SettingsIo();
-        settingsio.setOverrideRoot("/tmp");
+        String tempDir = System.getProperty("java.io.tmpdir");
+        settingsio.setOverrideRoot(tempDir);
     }
 
     @After
@@ -47,63 +48,48 @@ public class SettingsIoTest {
     @Test
     public void correctConfigPath() {
         Path path = SettingsIo.getDefaultConfigRoot();
-        //System.out.println(path.toString());
         String fs = System.getProperty("file.separator");
         assertTrue(path.toString().contains("tmc-cli"));
         assertTrue(path.toString().contains(fs));
         assertTrue(!path.toString().contains(fs + fs));
+        assertTrue(path.toString().contains(System.getProperty("user.home")));
     }
 
     @Test
     public void savingToFileWorks() {
-        //TODO: make tests work properly on Windows
-        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
-            //String fs = System.getProperty("file.separator");
-            settingsio.save(settings);
-            Path path = Paths.get("/tmp/tmc-cli/tmc.json");
-            //settingsio.getDefaultConfigRoot().resolve("tmc-cli" + fs + "tmc.json");
-            assertTrue(Files.exists(path));
-        } else {
-            assertTrue(TRUE);
-        }
+        String tempDir = System.getProperty("java.io.tmpdir");
+        settingsio.save(settings);
+        Path path = Paths.get(tempDir).resolve("tmc-cli").resolve("tmc.json");
+        assertTrue(Files.exists(path));
     }
 
     @Test
     public void loadingFromFileWorks() {
-        //TODO: make tests work properly on Windows
-        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
-            settingsio.save(settings);
-            //String fs = System.getProperty("file.separator");
-            Path path = Paths.get("/tmp");
-            TmcSettings loadedSettings = null;
-            try {
-                loadedSettings = settingsio.load(path);
-            } catch (IOException e) {
-                Assert.fail(e.toString());
-            }
-            assertEquals(settings.getUsername(), loadedSettings.getUsername());
-            assertEquals(settings.getPassword(), loadedSettings.getPassword());
-            assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
-            //settingsio.getDefaultConfigRoot().resolve("tmc-cli" + fs + "tmc.json");
-        } else {
-            assertTrue(TRUE);
+        String tempDir = System.getProperty("java.io.tmpdir");
+        settingsio.setOverrideRoot(tempDir);
+        settingsio.save(settings);
+        Path path = Paths.get(tempDir);
+        TmcSettings loadedSettings = null;
+        try {
+            loadedSettings = settingsio.load(path);
+        } catch (IOException e) {
+            Assert.fail(e.toString());
         }
+        assertEquals(settings.getUsername(), loadedSettings.getUsername());
+        assertEquals(settings.getPassword(), loadedSettings.getPassword());
+        assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
     }
 
     @Test
     public void loadingWhenNoFilePresentReturnsNull() {
-        //TODO: make tests work properly on Windows
-        //if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
-            Path path = Paths.get(System.getProperty("java.io.tmpdir"));
-            TmcSettings loadedSettings = new Settings();
-            try {
-                loadedSettings = settingsio.load(path);
-            } catch (IOException e) {
-                Assert.fail(e.toString());
-            }
-            assertEquals(null, loadedSettings);
-//        } else {
-//            assertTrue(TRUE);
-//        }
+        String tempDir = System.getProperty("java.io.tmpdir");
+        Path path = Paths.get(tempDir);
+        TmcSettings loadedSettings = new Settings();
+        try {
+            loadedSettings = settingsio.load(path);
+        } catch (IOException e) {
+            Assert.fail(e.toString());
+        }
+        assertEquals(null, loadedSettings);
     }
 }
