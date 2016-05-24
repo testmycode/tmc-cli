@@ -42,6 +42,10 @@ public class ListExercisesCommand implements Command {
         }
 
         core = this.app.getTmcCore();
+        if (core == null) {
+            System.out.println("You are not logged in. Log in using: tmc login");
+            return;
+        }
         course = TmcUtil.findCourse(core, args[0]);
         exercises = course.getExercises();
 
