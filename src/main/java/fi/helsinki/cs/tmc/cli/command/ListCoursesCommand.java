@@ -39,7 +39,6 @@ public class ListCoursesCommand implements Command {
 
         core = this.app.getTmcCore();
         if (core == null) {
-            System.out.println("You are not logged in. Log in using: tmc login");
             return;
         }
         courses = TmcUtil.listCourses(core);
