@@ -149,7 +149,7 @@ public class Application {
             Settings settings = null;
 
             try {
-                settings = (Settings) settingsio.load();
+                settings = settingsio.load();
             } catch (IOException e) {
                 logger.error("Failed to load settings", e);
             }

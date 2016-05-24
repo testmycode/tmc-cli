@@ -82,7 +82,7 @@ public class SettingsIo {
         return file;
     }
 
-    public Boolean save(TmcSettings settings) {
+    public Boolean save(Settings settings) {
         //Temporarily always use the default directory
         Path file = getAccountsFile(getDefaultConfigRoot());
         Gson gson = new Gson();
@@ -96,7 +96,7 @@ public class SettingsIo {
         return true;
     }
 
-    public TmcSettings load(Path configRoot) {
+    public Settings load(Path configRoot) {
         Path file = getAccountsFile(configRoot);
         Gson gson = new Gson();
         if (!Files.exists(file)) {
@@ -113,7 +113,7 @@ public class SettingsIo {
         return gson.fromJson(reader, Settings.class);
     }
 
-    public TmcSettings load() throws IOException {
+    public Settings load() throws IOException {
         return load((getDefaultConfigRoot()));
     }
 
