@@ -131,21 +131,8 @@ public class Application {
         runCommand(commandName, commandArgs);
     }
 
-    private void createTmcCore() {
+    public void createTmcCore(Settings settings) {
         TaskExecutor tmcLangs;
-        SettingsIo settingsio = new SettingsIo();
-        Settings settings = null;
-
-        try {
-            settings = (Settings) settingsio.load();
-        } catch (IOException e) {
-            logger.error("Failed to load settings", e);
-        }
-
-        if (settings == null) {
-            logger.warn("No previous settings found, creating new settings");
-            settings = new Settings();
-        }
 
         tmcLangs = new TaskExecutorImpl();
         this.tmcCore = new TmcCore(settings, tmcLangs);
@@ -158,7 +145,20 @@ public class Application {
 
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
-            createTmcCore();
+            SettingsIo settingsio = new SettingsIo();
+            Settings settings = null;
+
+            try {
+                settings = (Settings) settingsio.load();
+            } catch (IOException e) {
+                logger.error("Failed to load settings", e);
+            }
+
+            if (settings == null) {
+                logger.warn("No previous settings found, creating new settings");
+                settings = new Settings();
+            }
+            createTmcCore(settings);
         }
         return this.tmcCore;
     }
