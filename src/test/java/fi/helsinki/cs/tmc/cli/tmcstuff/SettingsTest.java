@@ -12,12 +12,10 @@ import java.util.Locale;
 public class SettingsTest {
 
     private Settings settings;
-    private File file;
 
     @Before
     public void setUp() {
         settings = new Settings("testserver", "testuser", "testpassword");
-        file = new File(".");
     }
 
     @Test
@@ -83,7 +81,7 @@ public class SettingsTest {
 
     @Test
     public void tmcProjectDirectoryIsSetCorrectly() {
-        assertTrue(file.getAbsolutePath().equals(
+        assertTrue(System.getProperty("user.dir").equals(
                 settings.getTmcProjectDirectory().toString()));
     }
 
