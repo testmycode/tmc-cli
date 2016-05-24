@@ -93,8 +93,8 @@ public class SettingsIoTest {
     @Test
     public void loadingWhenNoFilePresentReturnsNull() {
         //TODO: make tests work properly on Windows
-        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
-            Path path = Paths.get("/tmp");
+        //if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+            Path path = Paths.get(System.getProperty("java.io.tmpdir"));
             TmcSettings loadedSettings = new Settings();
             try {
                 loadedSettings = settingsio.load(path);
@@ -102,8 +102,8 @@ public class SettingsIoTest {
                 Assert.fail(e.toString());
             }
             assertEquals(null, loadedSettings);
-        } else {
-            assertTrue(TRUE);
-        }
+//        } else {
+//            assertTrue(TRUE);
+//        }
     }
 }
