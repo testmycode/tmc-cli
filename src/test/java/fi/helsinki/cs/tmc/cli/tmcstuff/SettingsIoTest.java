@@ -1,18 +1,16 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
-import static java.lang.Boolean.TRUE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,7 +70,7 @@ public class SettingsIoTest {
         Path path = Paths.get(tempDir);
         TmcSettings loadedSettings = null;
         loadedSettings = settingsio.load(path);
-        assertNotNull(loadedSettings);
+        assertTrue(loadedSettings != null);
         assertEquals(settings.getUsername(), loadedSettings.getUsername());
         assertEquals(settings.getPassword(), loadedSettings.getPassword());
         assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
@@ -84,6 +82,6 @@ public class SettingsIoTest {
         Path path = Paths.get(tempDir);
         TmcSettings loadedSettings = new Settings();
         loadedSettings = settingsio.load(path);
-        assertNull(loadedSettings);
+        assertEquals(null, loadedSettings);
     }
 }
