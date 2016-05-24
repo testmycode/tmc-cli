@@ -40,6 +40,9 @@ public class DownloadExercisesCommand implements Command {
         }
 
         core = this.app.getTmcCore();
+        if (core == null) {
+            return;
+        }
         course = TmcUtil.findCourse(core, args[0]);
         exercises = course.getExercises();
         System.out.println(TmcUtil.downloadExercises(core, exercises));
