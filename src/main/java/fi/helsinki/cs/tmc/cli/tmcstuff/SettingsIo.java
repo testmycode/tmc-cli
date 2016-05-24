@@ -84,7 +84,7 @@ public class SettingsIo {
         return true;
     }
 
-    public TmcSettings load(Path configRoot) throws IOException {
+    public TmcSettings load(Path configRoot) {
         Path file = getConfigFile(configRoot);
         Gson gson = new Gson();
         if (!Files.exists(file)) {
@@ -96,13 +96,24 @@ public class SettingsIo {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         } catch (IOException e) {
             logger.error("Configuration file located, but failed to read from it", e);
-            throw e;
+            return null;
         }
         return gson.fromJson(reader, Settings.class);
     }
 
     public TmcSettings load() throws IOException {
         return load((getDefaultConfigRoot()));
+    }
+
+    public Boolean delete() {
+        Path file = getConfigFile(getDefaultConfigRoot());
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            logger.error("Could not delete config file in " + file.toString(), e);
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -1,11 +1,11 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import static java.lang.Boolean.TRUE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,7 +34,7 @@ public class SettingsIoTest {
         String tempDir = System.getProperty("java.io.tmpdir");
         settingsio.setOverrideRoot(tempDir);
         try {
-            Files.delete(Paths.get(tempDir).resolve("tmc-cli"));
+            FileUtils.deleteDirectory(Paths.get(tempDir).resolve("tmc-cli").toFile());
         } catch (Exception e) { }
     }
 
@@ -42,7 +42,7 @@ public class SettingsIoTest {
     public void cleanUp() {
         String tempDir = System.getProperty("java.io.tmpdir");
         try {
-            Files.delete(Paths.get(tempDir).resolve("tmc-cli"));
+            FileUtils.deleteDirectory(Paths.get(tempDir).resolve("tmc-cli").toFile());
         } catch (Exception e) { }
     }
 
@@ -71,11 +71,8 @@ public class SettingsIoTest {
         settingsio.save(settings);
         Path path = Paths.get(tempDir);
         TmcSettings loadedSettings = null;
-        try {
-            loadedSettings = settingsio.load(path);
-        } catch (IOException e) {
-            Assert.fail(e.toString());
-        }
+        loadedSettings = settingsio.load(path);
+        assertNotNull(loadedSettings);
         assertEquals(settings.getUsername(), loadedSettings.getUsername());
         assertEquals(settings.getPassword(), loadedSettings.getPassword());
         assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
@@ -86,11 +83,7 @@ public class SettingsIoTest {
         String tempDir = System.getProperty("java.io.tmpdir");
         Path path = Paths.get(tempDir);
         TmcSettings loadedSettings = new Settings();
-        try {
-            loadedSettings = settingsio.load(path);
-        } catch (IOException e) {
-            Assert.fail(e.toString());
-        }
-        assertEquals(null, loadedSettings);
+        loadedSettings = settingsio.load(path);
+        assertNull(loadedSettings);
     }
 }

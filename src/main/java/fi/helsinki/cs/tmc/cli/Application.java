@@ -168,7 +168,7 @@ public class Application {
         app.run(args);
     }
 
-    private static String getVersion() {
+    public static String getVersion() {
         String path = "/maven.prop";
         InputStream stream = Application.class.getResourceAsStream(path);
         if (stream == null) {

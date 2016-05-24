@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
@@ -77,7 +78,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public String clientVersion() {
-        return "0.1.0";
+        return Application.getVersion();
     }
 
     @Override
