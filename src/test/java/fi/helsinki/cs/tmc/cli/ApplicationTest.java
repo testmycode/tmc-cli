@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.clii;
+package fi.helsinki.cs.tmc.cli;
 
 import static org.junit.Assert.assertTrue;
 

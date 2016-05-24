@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
@@ -144,7 +145,20 @@ public class Application {
 
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
-            createTmcCore(new Settings());
+            SettingsIo settingsio = new SettingsIo();
+            Settings settings = null;
+
+            try {
+                settings = (Settings) settingsio.load();
+            } catch (IOException e) {
+                logger.error("Failed to load settings", e);
+            }
+
+            if (settings == null) {
+                logger.warn("No previous settings found, creating new settings");
+                settings = new Settings();
+            }
+            createTmcCore(settings);
         }
         return this.tmcCore;
     }
