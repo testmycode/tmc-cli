@@ -21,7 +21,7 @@ public class TmcUtilTest {
         Course course;
 
         app = new Application();
-        course = TmcUtil.findCourse(app.getTmcCore(), "demo");
+        course = TmcUtil.findCourse(app.getTmcCore(), "tmc-cli-unit-test-course");
         assertNotNull(course);
     }
 
