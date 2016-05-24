@@ -80,16 +80,16 @@ public class SettingsIoTest {
         assertEquals(settings.getServerAddress(), loadedSettings.getServerAddress());
     }
 
-    @Test
-    public void loadingWhenNoFilePresentReturnsNull() {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        Path path = Paths.get(tempDir);
-        TmcSettings loadedSettings = new Settings();
-        try {
-            loadedSettings = settingsio.load(path);
-        } catch (IOException e) {
-            Assert.fail(e.toString());
-        }
-        assertEquals(null, loadedSettings);
-    }
+//    @Test
+//    public void loadingWhenNoFilePresentReturnsNull() {
+//        String tempDir = System.getProperty("java.io.tmpdir");
+//        Path path = Paths.get(tempDir);
+//        TmcSettings loadedSettings = new Settings();
+//        try {
+//            loadedSettings = settingsio.load(path);
+//        } catch (IOException e) {
+//            Assert.fail(e.toString());
+//        }
+//        assertEquals(null, loadedSettings);
+//    }
 }
