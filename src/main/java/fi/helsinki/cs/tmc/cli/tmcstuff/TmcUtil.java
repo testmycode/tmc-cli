@@ -61,6 +61,5 @@ public class TmcUtil {
             logger.warn("Failed to download exercises", e);
             return null;
         }
-
     }
 }
