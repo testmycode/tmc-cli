@@ -40,10 +40,10 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void downloadWorks() throws IOException {
-        String[] args = {"download", "tmc-cli-unit-test-course"};
+        String[] args = {"download", "cert-test"};
         app.run(args);
 
-        assertTrue(Files.exists(Paths.get("./tmc-cli-unit-test-course")));
-        FileUtils.deleteDirectory(new File("tmc-cli-unit-test-course"));
+        assertTrue(Files.exists(Paths.get("./cert-test")));
+        FileUtils.deleteDirectory(new File("cert-test"));
     }
 }

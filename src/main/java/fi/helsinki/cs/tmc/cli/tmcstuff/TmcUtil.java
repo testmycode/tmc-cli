@@ -38,19 +38,15 @@ public class TmcUtil {
 
     public static Course findCourse(TmcCore core, String name) {
         List<Course> courses;
-        Course course = null;
         courses = TmcUtil.listCourses(core);
 
         for (Course item : courses) {
             if (item.getName().equals(name)) {
-                course = item;
+                return TmcUtil.getDetails(core, item);
             }
         }
-        if (course == null) {
-            return null;
-        }
 
-        return TmcUtil.getDetails(core, course);
+        return null;
     }
 
     public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises) {
