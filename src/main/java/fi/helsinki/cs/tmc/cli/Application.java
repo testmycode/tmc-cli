@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -113,10 +114,9 @@ public class Application {
             commandName = args[commandIndex];
 
             /* split the arguments to the tmc's and command's arguments */
-            tmcArgs = new String[commandIndex];
-            commandArgs = new String[args.length - commandIndex - 1];
-            System.arraycopy(args, 0, tmcArgs, 0, tmcArgs.length);
-            System.arraycopy(args, commandIndex + 1, commandArgs, 0, commandArgs.length);
+            tmcArgs = Arrays.copyOfRange(args, 0, commandIndex);
+            commandArgs = Arrays.copyOfRange(args, commandIndex + 1, args.length);
+
 
         } else {
             commandName = "help";
