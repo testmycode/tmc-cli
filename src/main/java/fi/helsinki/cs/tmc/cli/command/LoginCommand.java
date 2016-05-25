@@ -120,7 +120,7 @@ public class LoginCommand implements Command {
                     return false;
                 }
             }
-
+            logger.error("Unable to connect to server", e);
             System.out.println("Unable to connect to server "
                     + settings.getServerAddress());
             return false;
