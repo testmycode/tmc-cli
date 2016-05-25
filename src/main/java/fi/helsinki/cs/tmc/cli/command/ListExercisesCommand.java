@@ -33,11 +33,11 @@ public class ListExercisesCommand implements Command {
 
     @Override
     public void run(String[] args) {
-        List<Exercise> exercises;
-        Course course;
         TmcCore core;
+        String name;
 
         if (args.length == 0) {
+            System.out.println("USAGE: tmc " + getName() + " COURSE");
             return;
         }
 
@@ -45,7 +45,18 @@ public class ListExercisesCommand implements Command {
         if (core == null) {
             return;
         }
-        course = TmcUtil.findCourse(core, args[0]);
+        printExercises(core, args[0]);
+    }
+
+    public void printExercises(TmcCore core, String name) {
+        List<Exercise> exercises;
+        Course course;
+
+        course = TmcUtil.findCourse(core, name);
+        if (course == null) {
+            System.out.println("There is no course with name " + name + ".");
+            return;
+        }
         exercises = course.getExercises();
 
         for (Exercise exercise : exercises) {
