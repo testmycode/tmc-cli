@@ -16,9 +16,15 @@ public class CourseInfo {
         this.course = course;
     }
 
-    public String getUsername() { return this.username; };
+    public String getUsername() {
+        return this.username;
+    }
 
-    public String getServerAddress() { return this.serverAddress; };
+    public String getServerAddress() {
+        return this.serverAddress;
+    }
 
-    public String getCourse() { return this.course; };
+    public String getCourse() {
+        return this.course;
+    }
 }
