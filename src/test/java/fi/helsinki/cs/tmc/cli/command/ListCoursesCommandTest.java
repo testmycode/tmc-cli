@@ -31,6 +31,6 @@ public class ListCoursesCommandTest {
     public void normalCourseListingWorksRight() {
         String[] args = {"list-courses"};
         app.run(args);
-        assertTrue(os.toString().contains("tmc-cli-unit-test-course"));
+        assertTrue(os.toString().contains("demo"));
     }
 }
