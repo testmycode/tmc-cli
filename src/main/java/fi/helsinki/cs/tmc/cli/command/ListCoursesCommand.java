@@ -38,6 +38,9 @@ public class ListCoursesCommand implements Command {
         TmcCore core;
 
         core = this.app.getTmcCore();
+        if (core == null) {
+            return;
+        }
         courses = TmcUtil.listCourses(core);
 
         for (Course course : courses) {

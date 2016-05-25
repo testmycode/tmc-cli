@@ -155,8 +155,8 @@ public class Application {
             }
 
             if (settings == null) {
-                logger.warn("No previous settings found, creating new settings");
-                settings = new Settings();
+                System.out.println("You are not logged in. Log in using: tmc login");
+                return null;
             }
             createTmcCore(settings);
         }
@@ -168,7 +168,7 @@ public class Application {
         app.run(args);
     }
 
-    private static String getVersion() {
+    public static String getVersion() {
         String path = "/maven.prop";
         InputStream stream = Application.class.getResourceAsStream(path);
         if (stream == null) {
