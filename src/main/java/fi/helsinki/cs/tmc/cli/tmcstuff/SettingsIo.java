@@ -34,32 +34,25 @@ public class SettingsIo {
     private String overrideRoot;
 
     public static Path getDefaultConfigRoot() {
-        String fileSeparator;
-        String configPath;
+        Path configPath;
         String os = System.getProperty("os.name").toLowerCase();
-        fileSeparator = System.getProperty("file.separator");
-
-
 
         if (os.contains("windows")) {
             //TODO: Use proper Windows config file location
-            configPath = System.getProperty("user.home")
-                    + fileSeparator;
+            configPath = Paths.get(System.getProperty("user.home"));
         } else {
             //Assume we're using Unix (Linux, Mac OS X or *BSD)
             String configEnv = System.getenv("XDG_CONFIG_HOME");
 
             if (configEnv != null && configEnv.length() > 0) {
-                configPath = configEnv
-                        + fileSeparator;
+                configPath = Paths.get(configEnv);
             } else {
-                configPath = System.getProperty("user.home")
-                        + fileSeparator + ".config"
-                        + fileSeparator;
+                configPath = Paths.get(System.getProperty("user.home"))
+                        .resolve(".config");
             }
         }
-        configPath = configPath + CONFIG_DIR + fileSeparator;
-        return Paths.get(configPath);
+        configPath = configPath.resolve(CONFIG_DIR);
+        return configPath;
     }
 
     private Path getAccountsFile(Path path) {
