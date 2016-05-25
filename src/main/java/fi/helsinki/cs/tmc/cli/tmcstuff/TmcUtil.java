@@ -45,7 +45,18 @@ public class TmcUtil {
                 return TmcUtil.getDetails(core, item);
             }
         }
+        return null;
+    }
 
+    public static Exercise findExercise(Course course, String name) {
+        List<Exercise> exercises;
+        exercises = course.getExercises();
+
+        for (Exercise item : exercises) {
+            if (item.getName().equals(name)) {
+                return item;
+            }
+        }
         return null;
     }
 
