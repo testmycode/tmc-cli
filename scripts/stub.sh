@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 MYSELF=`which "$0" 2>/dev/null`
 [ $? -gt 0 -a -f "$0" ] && MYSELF="./$0"
 
@@ -17,6 +17,18 @@ if [ "$version" \< "1.7" ]; then
     echo "You must have 1.7 installed."
     exit 1
 fi
+
+AUTOCOMPLETE="$HOME/.tmc-autocomplete.sh"
+
+if [ -f $AUTOCOMPLETE ]; then
+	cat > $AUTOCOMPLETE <<- EOM
+TMC_AUTOCOMPLETE_SH
+EOM
+
+	echo $AUTOCOMPLETE >> ~/.bashrc 
+fi
+
+. $AUTOCOMPLETE
 
 exec "$java" $java_args -jar $MYSELF "$@"
 exit 0 
