@@ -58,8 +58,8 @@ public class SettingsIoTest {
     public void savingToFileWorks() {
         String tempDir = System.getProperty("java.io.tmpdir");
         Boolean success = settingsio.save(settings);
-        Path path = Paths.get(tempDir).resolve("tmc-cli").resolve("tmc.json");
         assertTrue(success);
+        Path path = Paths.get(tempDir).resolve("tmc-cli").resolve(SettingsIo.ACCOUNTS_CONFIG);
         assertTrue(Files.exists(path));
     }
 
