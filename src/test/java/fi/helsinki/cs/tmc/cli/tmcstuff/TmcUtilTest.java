@@ -21,6 +21,7 @@ public class TmcUtilTest {
         Course course;
 
         app = new Application();
+        app.createTmcCore(new Settings());
         course = TmcUtil.findCourse(app.getTmcCore(), "demo");
         assertNotNull(course);
     }
@@ -31,6 +32,7 @@ public class TmcUtilTest {
         Course course;
 
         app = new Application();
+        app.createTmcCore(new Settings());
         course = TmcUtil.findCourse(app.getTmcCore(), "afuwhf");
         assertNull(course);
     }
