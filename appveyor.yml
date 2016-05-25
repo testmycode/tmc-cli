@@ -4,7 +4,7 @@ environment:
   TMC_USERNAME:
     secure: yHwF55rZGpgUDCEGjHQtuw==
   TMC_SERVER_ADDRESS:
-    secure: mGLqF/XXSWBgTAeL3TZT3vIX0VTyvNdt0XM2V3yA1As=
+    secure: mGLqF/XXSWBgTAeL3TZT3vHHfGT8CFz4xa8Y88hOgkHyhlYZ0+nEhIkeUu5nYS8d
 install:
   - ps: |
       Add-Type -AssemblyName System.IO.Compression.FileSystem
