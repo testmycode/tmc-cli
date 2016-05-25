@@ -12,7 +12,8 @@ public class DirectoryUtil {
 
         while (this.courseDirectory != null) {
             this.configFile = new File(
-                    this.courseDirectory.getPath() + File.pathSeparator + CourseInfoIo.COURSE_CONFIG);
+                    this.courseDirectory.getPath() + File.pathSeparator
+                            + CourseInfoIo.COURSE_CONFIG);
             if (this.configFile.exists()) {
                 break;
             }
