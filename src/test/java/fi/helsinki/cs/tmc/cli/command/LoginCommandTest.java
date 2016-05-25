@@ -4,7 +4,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -38,11 +40,20 @@ public class LoginCommandTest {
 
     @Before
     public void setUp() {
+        // Unwanted behaviour? Will delete the real settings file atm.
+        new SettingsIo().delete();
+
         this.app = new Application();
         this.os = new ByteArrayOutputStream();
 
         PrintStream ps = new PrintStream(os);
         System.setOut(ps);
+    }
+
+    @After
+    public void tearDown() {
+        // Unwanted behaviour? Will delete the real settings file atm.
+        new SettingsIo().delete();
     }
 
     @Test
@@ -52,7 +63,9 @@ public class LoginCommandTest {
                 LoginCommandTest.username,
                 LoginCommandTest.password);
 
+        // Unwanted behaviour? Will create real settings file atm.
         app.run(args);
+
         String output = os.toString();
         assertTrue(output.contains("Login successful!"));
     }
