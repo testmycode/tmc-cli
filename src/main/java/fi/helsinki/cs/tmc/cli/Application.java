@@ -148,11 +148,7 @@ public class Application {
             SettingsIo settingsio = new SettingsIo();
             Settings settings = null;
 
-            try {
-                settings = settingsio.load();
-            } catch (IOException e) {
-                logger.error("Failed to load settings", e);
-            }
+            settings = settingsio.load();
 
             if (settings == null) {
                 System.out.println("You are not logged in. Log in using: tmc login");

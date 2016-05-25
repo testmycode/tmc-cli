@@ -69,7 +69,7 @@ public class SettingsIo {
         Path file = path.resolve(ACCOUNTS_CONFIG);
         if (!Files.exists(path)) {
             try {
-                Files.createDirectories(path);
+                Files.createDirectories(path).getParent();
             } catch (Exception e) { }
             try {
                 Files.createFile(path);
