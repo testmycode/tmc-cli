@@ -1,27 +1,30 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class DirectoryUtil {
-    private File courseDirectory;
-    private File configFile;
+    private Path courseDirectory;
+    private Path configFile;
     private String exercise;
 
     public DirectoryUtil() {
-        this.courseDirectory = new File(System.getProperty("user.dir"));
+        this.courseDirectory = Paths.get(System.getProperty("user.dir"));
 
-        while (this.courseDirectory != null) {
-            this.configFile = new File(
-                    this.courseDirectory.getPath() + File.pathSeparator + ".tmc.json");
-            if (this.configFile.exists()) {
+        while (this.courseDirectory.getParent() != null) {
+            this.configFile = Paths.get(
+                    this.courseDirectory.toString() + File.separator + ".tmc.json");
+            if (Files.exists(this.configFile)) {
                 break;
             }
-            this.exercise = this.courseDirectory.getName();
-            this.courseDirectory = this.courseDirectory.getParentFile();
+            this.exercise = this.courseDirectory.toString();
+            this.courseDirectory = this.courseDirectory.getParent();
         }
     }
 
-    public File getConfigFile() {
+    public Path getConfigFile() {
         return configFile;
     }
 
@@ -29,7 +32,7 @@ public class DirectoryUtil {
         return exercise;
     }
 
-    public File getCourseDirectory() {
+    public Path getCourseDirectory() {
         return courseDirectory;
     }
 }
