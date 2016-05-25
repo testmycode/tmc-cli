@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -110,9 +111,18 @@ public class LoginCommand implements Command {
         try {
             callable.call();
         } catch (Exception e) {
-            logger.error("Unable to login into server "
+            Throwable cause = e.getCause();
+            if (cause instanceof FailedHttpResponseException) {
+                FailedHttpResponseException httpEx
+                        = (FailedHttpResponseException) cause;
+                if (httpEx.getStatusCode() == 401) {
+                    System.out.println("Incorrect username or password.");
+                    return false;
+                }
+            }
+
+            System.out.println("Unable to connect to server "
                     + settings.getServerAddress());
-            // todo: if 401, 404 do something
             return false;
         }
 
