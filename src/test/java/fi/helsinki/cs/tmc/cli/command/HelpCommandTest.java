@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,7 @@ public class HelpCommandTest {
     @Before
     public void setUp() {
         app = new Application();
+        app.createTmcCore(new Settings());
 
         os = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(os);
