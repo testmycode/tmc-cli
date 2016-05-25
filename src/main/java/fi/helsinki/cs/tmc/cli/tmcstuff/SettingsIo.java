@@ -109,7 +109,7 @@ public class SettingsIo {
         return gson.fromJson(reader, Settings.class);
     }
 
-    public Settings load() throws IOException {
+    public Settings load() {
         return load((getDefaultConfigRoot()));
     }
 

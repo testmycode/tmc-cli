@@ -32,6 +32,9 @@ public class CourseInfoIo {
 
 
     public Boolean save(CourseInfo course) {
+        if (!this.makeFile()) {
+            return false;
+        }
         Path file = this.courseInfoFile;
         Gson gson = new Gson();
         byte[] json = gson.toJson(course).getBytes();
@@ -59,5 +62,18 @@ public class CourseInfoIo {
             return null;
         }
         return gson.fromJson(reader, CourseInfo.class);
+    }
+
+    public Boolean makeFile() {
+        //ensures the file exists before writing to it
+        if (!Files.exists(this.courseInfoFile)) {
+            try {
+                Files.createDirectories(this.courseInfoFile.getParent());
+            } catch (Exception e) { }
+            try {
+                Files.createFile(this.courseInfoFile);
+            } catch (Exception e) { }
+        }
+        return Files.exists(this.courseInfoFile);
     }
 }
