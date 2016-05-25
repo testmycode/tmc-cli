@@ -5,14 +5,19 @@ import static org.junit.Assert.assertTrue;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
-public class TestCommandTest {
+public class DownloadExercisesCommandTest {
 
     Application app;
     OutputStream os;
@@ -28,17 +33,19 @@ public class TestCommandTest {
     }
 
     @Test
-    public void runWorksRightWithoutOption() {
-        String[] args = {"easter-egg"};
+    public void failIfCourseArgumentNotGiven() {
+        String[] args = {"download"};
         app.run(args);
-        assertTrue(os.toString().contains("Let's run easter egg."));
-    }
-    
-    @Test
-    public void runWorksRightWithOption() {
-        String[] args = {"easter-egg", "-a"};
-        app.run(args);
-        assertTrue(os.toString().contains("Let's run easter egg with -a"));
+        assertTrue(os.toString().contains("You must give"));
     }
 
+    @Test
+    public void downloadWorks() throws IOException {
+        String course = "cert-test";
+        String[] args = {"download", course};
+        app.run(args);
+
+        assertTrue(Files.exists(Paths.get("./" + course)));
+        FileUtils.deleteDirectory(new File(course));
+    }
 }

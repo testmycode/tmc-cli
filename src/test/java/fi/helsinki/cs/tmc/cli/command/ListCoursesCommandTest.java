@@ -28,7 +28,7 @@ public class ListCoursesCommandTest {
     }
 
     @Test
-    public void runWorksRight() {
+    public void normalCourseListingWorksRight() {
         String[] args = {"list-courses"};
         app.run(args);
         assertTrue(os.toString().contains("demo"));
