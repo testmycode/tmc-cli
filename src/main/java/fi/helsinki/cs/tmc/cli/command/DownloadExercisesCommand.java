@@ -34,6 +34,8 @@ public class DownloadExercisesCommand implements Command {
         TmcCore core;
 
         if (args.length == 0) {
+            System.out.println("You must give course name as argument.");
+            System.out.println("USAGE: tmc " + getName() + " COURSE");
             return;
         }
 

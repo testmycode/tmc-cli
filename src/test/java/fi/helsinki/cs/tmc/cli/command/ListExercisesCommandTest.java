@@ -29,8 +29,8 @@ public class ListExercisesCommandTest {
 
     @Test
     public void runWorksRight() {
-        String[] args = {"list-exercises", "demo"};
+        String[] args = {"list-exercises", "tmc-cli-unit-test-course"};
         app.run(args);
-        assertTrue(os.toString().contains("HeiMaailma"));
+        assertTrue(os.toString().contains("arith_funcs"));
     }
 }
