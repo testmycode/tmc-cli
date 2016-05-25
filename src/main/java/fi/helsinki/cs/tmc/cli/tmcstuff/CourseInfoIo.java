@@ -32,7 +32,7 @@ public class CourseInfoIo {
 
 
     public Boolean save(CourseInfo course) {
-        if (!this.makeFile()) {
+        if (!this.getCourseFile()) {
             return false;
         }
         Path file = this.courseInfoFile;
@@ -64,15 +64,21 @@ public class CourseInfoIo {
         return gson.fromJson(reader, CourseInfo.class);
     }
 
-    public Boolean makeFile() {
+    private Boolean getCourseFile() {
         //ensures the file exists before writing to it
         if (!Files.exists(this.courseInfoFile)) {
             try {
                 Files.createDirectories(this.courseInfoFile.getParent());
-            } catch (Exception e) { }
+            } catch (Exception e) {
+                logger.warn("Could not create parent directories for course file: "
+                        + this.courseInfoFile.getParent(), e);
+            }
             try {
                 Files.createFile(this.courseInfoFile);
-            } catch (Exception e) { }
+            } catch (Exception e) {
+                logger.error("Could not create course file: "
+                        + this.courseInfoFile, e);
+            }
         }
         return Files.exists(this.courseInfoFile);
     }

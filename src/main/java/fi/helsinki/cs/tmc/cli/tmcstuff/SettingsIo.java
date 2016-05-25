@@ -58,6 +58,8 @@ public class SettingsIo {
     private Path getAccountsFile(Path path) {
         if (this.overrideRoot != null) {
             path = Paths.get(this.overrideRoot).resolve(CONFIG_DIR);
+        } else {
+            path = path.resolve(CONFIG_DIR);
         }
         Path file = path.resolve(ACCOUNTS_CONFIG);
         if (!Files.exists(path)) {
@@ -74,24 +76,34 @@ public class SettingsIo {
     public Boolean save(Settings settings) {
         //Temporarily always use the default directory
         Path file = getAccountsFile(getDefaultConfigRoot());
-        Gson gson = new Gson();
-        byte[] json = gson.toJson(settings).getBytes();
-        try {
-            Files.write(file, json);
-        } catch (IOException e) {
-            logger.error("Could not write settings to configuration file", e);
-            return false;
+        SettingsHolder holder;
+        if (!Files.exists(file)) {
+            holder = new SettingsHolder();
+        } else {
+            holder = getHolderFromJson(file);
         }
-        return true;
+        holder.addSettings(settings);
+        return saveHolderToJson(holder, file);
     }
 
-    public Settings load(Path configRoot) {
-        Path file = getAccountsFile(configRoot);
-        Gson gson = new Gson();
+    public Settings load(String username, String server) {
+        Path file = getAccountsFile(getDefaultConfigRoot());
         if (!Files.exists(file)) {
-            //Return null if file is not found, this is normal behaviour
             return null;
         }
+        SettingsHolder holder = getHolderFromJson(file);
+        Settings ret = holder.getSettings(username, server);
+        saveHolderToJson(holder, file);
+        return ret;
+    }
+
+    public Settings load() {
+        // Calling the method without parametres returns the last used settings
+        return load(null, null);
+    }
+
+    private SettingsHolder getHolderFromJson(Path file) {
+        Gson gson = new Gson();
         Reader reader = null;
         try {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
@@ -99,11 +111,19 @@ public class SettingsIo {
             logger.error("Configuration file located, but failed to read from it", e);
             return null;
         }
-        return gson.fromJson(reader, Settings.class);
+        return gson.fromJson(reader, SettingsHolder.class);
     }
 
-    public Settings load() {
-        return load((getDefaultConfigRoot()));
+    private Boolean saveHolderToJson(SettingsHolder holder, Path file) {
+        Gson gson = new Gson();
+        byte[] json = gson.toJson(holder).getBytes();
+        try {
+            Files.write(file, json);
+        } catch (IOException e) {
+            logger.error("Could not write settings to configuration file", e);
+            return false;
+        }
+        return true;
     }
 
     public Boolean delete() {
