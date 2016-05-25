@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
  * This is a class for storing course information in .tmc.json files.
  */
 public class CourseInfo {
+
     private String username;
     private String serverAddress;
     private String course;
