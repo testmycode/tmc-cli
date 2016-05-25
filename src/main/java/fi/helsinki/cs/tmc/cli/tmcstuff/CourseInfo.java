@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 
 /**
- * Created by jclakkis on 24.5.2016.
+ * This is a class for storing course information in .tmc.json files.
  */
 public class CourseInfo {
     private String username;
