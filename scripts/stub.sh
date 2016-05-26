@@ -20,17 +20,19 @@ fi
 
 AUTOCOMPLETE="$HOME/.tmc-autocomplete.sh"
 
+# this is used in autocompletion file
+SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 if [ ! -f $AUTOCOMPLETE ]; then
 	cat > $AUTOCOMPLETE <<- EOM
 TMC_AUTOCOMPLETE_SH
 EOM
 
-	echo $AUTOCOMPLETE >> ~/.bashrc 
+	echo ". $AUTOCOMPLETE" >> ~/.bashrc
+
+	chmod +x $AUTOCOMPLETE
+	. $AUTOCOMPLETE
 fi
-
-chmod +x $AUTOCOMPLETE
-
-. $AUTOCOMPLETE
 
 exec "$java" $java_args -jar $MYSELF "$@"
 exit 0 
