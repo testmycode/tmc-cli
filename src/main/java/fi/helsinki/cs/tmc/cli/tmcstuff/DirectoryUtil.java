@@ -15,7 +15,7 @@ public class DirectoryUtil {
 
         while (this.courseDirectory.getParent() != null) {
             this.configFile = Paths.get(
-                    this.courseDirectory.toString() + File.separator + ".tmc.json");
+                    this.courseDirectory.toString() + File.separator + CourseInfoIo.COURSE_CONFIG);
             if (Files.exists(this.configFile)) {
                 break;
             }
@@ -28,7 +28,7 @@ public class DirectoryUtil {
         return configFile;
     }
 
-    public String getExerciseDirectory() {
+    public String getExerciseName() {
         return exercise;
     }
 

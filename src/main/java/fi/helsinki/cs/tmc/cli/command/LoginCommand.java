@@ -89,7 +89,7 @@ public class LoginCommand implements Command {
             if (settingsIo.save(settings)) {
                 System.out.println("Login successful!");
             } else {
-                System.out.println("Failed to write config file. "
+                System.out.println("Failed to write config file.\n"
                         + "Login failed.");
             }
         } else {
