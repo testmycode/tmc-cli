@@ -18,7 +18,11 @@ tmc-cli.ipr
 tmc-cli.iws
 *.sw*
 *~
+tmc
 
 nbactions.xml
 /nbproject/
 dependency-reduced-pom.xml
+
+# our tmc-cli log files
+/logs/
