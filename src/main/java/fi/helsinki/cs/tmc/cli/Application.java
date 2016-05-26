@@ -2,10 +2,14 @@ package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
@@ -146,11 +150,28 @@ public class Application {
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
             SettingsIo settingsio = new SettingsIo();
-            Settings settings = null;
+            DirectoryUtil dirutil = new DirectoryUtil();
+            Settings settings;
 
-            settings = settingsio.load();
+            if (dirutil.getConfigFile() != null) {
+                // If we're in a course directory, we load settings matching the course
+                // Otherwise we just load the last used settings
+                CourseInfoIo courseio = new CourseInfoIo(dirutil.getConfigFile());
+                CourseInfo courseinfo = courseio.load();
+                if (courseinfo == null) {
+                    System.out.println("Course configuration file "
+                            + dirutil.getConfigFile().toString()
+                            + "is invalid.");
+                    return null;
+                }
+                settings = settingsio.load(courseinfo.getUsername(),
+                        courseinfo.getServerAddress());
+            } else {
+                settings = settingsio.load();
+            }
 
             if (settings == null) {
+                // If no settings are present
                 System.out.println("You are not logged in. Log in using: tmc login");
                 return null;
             }
