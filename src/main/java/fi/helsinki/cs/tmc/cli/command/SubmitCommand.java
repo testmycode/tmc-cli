@@ -1,6 +1,12 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 public class SubmitCommand implements Command {
     private Application app;
@@ -21,5 +27,21 @@ public class SubmitCommand implements Command {
 
     @Override
     public void run(String[] args) {
+        TmcCore core;
+        Course course;
+        SubmissionResult submit;
+
+        core = this.app.getTmcCore();
+        course = TmcUtil.findCourse(core, "cert-test");
+
+        try {
+            submit = core.submit(ProgressObserver.NULL_OBSERVER,
+                    TmcUtil.findExercise(course, args[0])).call();
+
+        } catch (Exception e) {
+            return;
+        }
+
+        System.out.println(submit);
     }
 }
