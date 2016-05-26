@@ -67,7 +67,7 @@ public class LoginCommandTest {
         app.run(args);
 
         String output = os.toString();
-        assertTrue(output.contains("Login successful!"));
+        assertTrue(output.contains("succesful"));
     }
 
     @Test
@@ -80,7 +80,6 @@ public class LoginCommandTest {
         app.run(args);
         String output = os.toString();
         assertTrue(output.contains("Incorrect username or password."));
-        assertTrue(output.contains("Login failed."));
     }
 
     private String[] createArgs(String server, String username, String pwd) {
