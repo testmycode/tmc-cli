@@ -14,20 +14,30 @@ public class DirectoryUtil {
         this.courseDirectory = Paths.get(System.getProperty("user.dir"));
 
         while (this.courseDirectory.getParent() != null) {
-            this.configFile = Paths.get(
-                    this.courseDirectory.toString() + File.separator + CourseInfoIo.COURSE_CONFIG);
+            this.configFile = this.courseDirectory.resolve(CourseInfoIo.COURSE_CONFIG);
             if (Files.exists(this.configFile)) {
-                break;
+                return;
             }
             this.exercise = this.courseDirectory.toString();
             this.courseDirectory = this.courseDirectory.getParent();
         }
+        this.exercise = null;
+        this.configFile = null;
+        this.courseDirectory = null;
     }
 
+    /**
+     * If called from a course directory or any of its subdirectories,
+     * return the appropriate course config file (.tmc.json)
+     */
     public Path getConfigFile() {
         return configFile;
     }
 
+    /**
+     * If called from an exercise directory, return the name of the exercise.
+     * Otherwise null, even if in a course directory.
+     */
     public String getExerciseName() {
         return exercise;
     }
