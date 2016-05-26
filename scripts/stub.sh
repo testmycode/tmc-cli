@@ -20,7 +20,7 @@ fi
 
 AUTOCOMPLETE="$HOME/.tmc-autocomplete.sh"
 
-if [ -f $AUTOCOMPLETE ]; then
+if [ ! -f $AUTOCOMPLETE ]; then
 	cat > $AUTOCOMPLETE <<- EOM
 TMC_AUTOCOMPLETE_SH
 EOM
