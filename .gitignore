@@ -23,3 +23,6 @@ tmc
 nbactions.xml
 /nbproject/
 dependency-reduced-pom.xml
+
+# our tmc-cli log files
+/logs/
