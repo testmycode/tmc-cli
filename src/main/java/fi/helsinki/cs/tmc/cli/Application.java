@@ -35,6 +35,7 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private CommandMap commands;
     private TmcCore tmcCore;
+    private Settings settings;
     private boolean initialized;
 
     private Options options;
@@ -139,6 +140,7 @@ public class Application {
         TaskExecutor tmcLangs;
 
         tmcLangs = new TaskExecutorImpl();
+        this.settings = settings;
         this.tmcCore = new TmcCore(settings, tmcLangs);
         /*XXX should we somehow check if the authentication is successful here */
     }
@@ -201,5 +203,9 @@ public class Application {
             logger.warn("Failed to get version", e);
             return "n/a";
         }
+    }
+
+    public CourseInfo createCourseInfo(String courseName) {
+        return new CourseInfo(settings, courseName);
     }
 }

@@ -8,6 +8,8 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
+import java.nio.file.Path;
+
 public class SubmitCommand implements Command {
     private Application app;
 
@@ -30,9 +32,13 @@ public class SubmitCommand implements Command {
         TmcCore core;
         Course course;
         SubmissionResult submit;
+        DirectoryUtil dirUtil;
 
+        dirUtil = new DirectoryUtil();
         core = this.app.getTmcCore();
-        course = TmcUtil.findCourse(core, "cert-test");
+        Path dir = dirUtil.getCourseDirectory();
+
+        course = TmcUtil.findCourse(core, dir.getName(dir.getNameCount() - 1).toString());
 
         try {
             submit = core.submit(ProgressObserver.NULL_OBSERVER,
