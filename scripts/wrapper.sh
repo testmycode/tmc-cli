@@ -8,3 +8,5 @@ sed '/TMC_AUTOCOMPLETE_SH/ {
 d }' scripts/stub.sh > tmc
 
 cat $jar_file >> tmc && chmod +x tmc
+
+chmod +x tmc

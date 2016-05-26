@@ -28,6 +28,8 @@ EOM
 	echo $AUTOCOMPLETE >> ~/.bashrc 
 fi
 
+chmod +x $AUTOCOMPLETE
+
 . $AUTOCOMPLETE
 
 exec "$java" $java_args -jar $MYSELF "$@"
