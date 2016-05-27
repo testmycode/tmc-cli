@@ -20,7 +20,7 @@ public class DirectoryUtil {
             }
             this.exercise = this.courseDirectory
                     .getName(this.courseDirectory.getNameCount() - 1)
-                    .toString();;
+                    .toString();
             this.courseDirectory = this.courseDirectory.getParent();
         }
         this.exercise = null;
