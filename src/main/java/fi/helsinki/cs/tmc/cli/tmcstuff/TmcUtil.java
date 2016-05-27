@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -62,7 +63,7 @@ public class TmcUtil {
 
     public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises) {
         try {
-            return core.downloadOrUpdateExercises(ProgressObserver.NULL_OBSERVER, exercises)
+            return core.downloadOrUpdateExercises(new TmcCliProgressObserver(), exercises)
                     .call();
         } catch (Exception e) {
             logger.warn("Failed to download exercises", e);
