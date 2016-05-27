@@ -33,7 +33,7 @@ public class SettingsIoTest {
         this.settings = new Settings("testserver", "testuser", "testpassword");
         this.settingsio = new SettingsIo();
         String tempDir = System.getProperty("java.io.tmpdir");
-        settingsio.setOverrideRoot(tempDir);
+        settingsio.setOverrideRoot(Paths.get(tempDir));
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir).resolve("tmc-cli").toFile());
         } catch (Exception e) { }

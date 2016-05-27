@@ -31,8 +31,12 @@ public class SettingsIo {
     public static final String ACCOUNTS_CONFIG = "accounts.json";
 
     //The overrideRoot variable is intended only for testing
-    private String overrideRoot;
+    private Path overrideRoot;
 
+    /**
+     * Get the correct directory in which config files go,
+     * NOT the directory in which the config DIRECTORY goes.
+     */
     public static Path getDefaultConfigRoot() {
         Path configPath;
         String os = System.getProperty("os.name").toLowerCase();
@@ -57,9 +61,7 @@ public class SettingsIo {
 
     private Path getAccountsFile(Path path) {
         if (this.overrideRoot != null) {
-            path = Paths.get(this.overrideRoot).resolve(CONFIG_DIR);
-        } else {
-            path = path.resolve(CONFIG_DIR);
+            path = this.overrideRoot;
         }
         Path file = path.resolve(ACCOUNTS_CONFIG);
         if (!Files.exists(path)) {
@@ -138,9 +140,11 @@ public class SettingsIo {
     }
 
     /**
-     * This is for testing purposes only. Otherwise use the default config path.
+     * This is for testing purposes only. Otherwise use the default config dir path.
+     * When calling this function, do not append the CONFIG_DIR - we do it here.
      */
-    protected void setOverrideRoot(String override) {
-        this.overrideRoot = override;
+    protected void setOverrideRoot(Path override) {
+        this.overrideRoot = override
+                .resolve(CONFIG_DIR);
     }
 }
