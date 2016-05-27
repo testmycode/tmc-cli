@@ -96,7 +96,11 @@ public class Settings implements TmcSettings {
 
     @Override
     public Path getTmcProjectDirectory() {
-        return Paths.get(System.getProperty("user.dir"));
+        Path path = new DirectoryUtil().getCourseDirectory();
+        if (path == null) {
+            return Paths.get(System.getProperty("user.dir"));
+        }
+        return path.getParent();
     }
 
     @Override
