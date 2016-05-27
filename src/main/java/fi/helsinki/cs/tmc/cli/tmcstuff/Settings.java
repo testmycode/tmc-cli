@@ -26,6 +26,11 @@ public class Settings implements TmcSettings {
     }
 
     public Settings() {
+
+    }
+
+    // TODO: get rid of this shit (use mockito)
+    public Settings(Boolean test) {
         this.serverAddress = System.getenv("TMC_SERVER_ADDRESS");
         this.username = System.getenv("TMC_USERNAME");
         this.password = System.getenv("TMC_PASSWORD");
