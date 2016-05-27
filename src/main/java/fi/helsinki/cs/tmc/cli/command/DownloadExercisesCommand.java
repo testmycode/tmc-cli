@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class DownloadExercisesCommand implements Command {
+
     private Application app;
 
     public DownloadExercisesCommand(Application app) {
@@ -53,7 +54,9 @@ public class DownloadExercisesCommand implements Command {
             System.out.println("Course doesn't exist.");
             return;
         }
-        System.out.println(TmcUtil.downloadAllExercises(core, course));
+
+        List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course);
+        System.out.println(exercises);
 
         Path configFile = Paths.get(System.getProperty("user.dir"))
                 .resolve(args[0])
