@@ -20,7 +20,7 @@ public class ListCoursesCommandTest {
     @Before
     public void setUp() {
         app = new Application();
-        app.createTmcCore(new Settings());
+        app.createTmcCore(new Settings(true));
 
         os = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(os);

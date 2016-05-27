@@ -30,6 +30,7 @@ public class TmcUtilTest {
     @Test
     public void findCouseIfItExists() {
         Course course;
+        app.createTmcCore(new Settings(true));
         course = TmcUtil.findCourse(app.getTmcCore(), "demo");
         assertNotNull(course);
     }
