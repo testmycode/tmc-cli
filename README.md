@@ -6,3 +6,38 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
 
 This is our super awesome command line client for tmc!
+
+
+Usage
+=====
+
+Installing
+----------
+Run these commands on command line to make the client easier to use.
+~~~~
+./tmc
+. ~/.bashrc
+~~~~
+
+Log in
+------
+After these login with your tmc account with command.
+~~~~
+tmc login
+~~~~
+If your institution uses different server than official Mooc server then you have to give its server address like this:
+~~~~
+tmc login -s SERVER_ADDRESS
+~~~~
+
+Download course
+---------------
+Get course with following command.
+~~~~
+tmc download COURSE_NAME
+~~~~
+If you don't remember the course's official name, then you can get list of courses with command:
+~~~~
+tmc courses
+~~~~
+
