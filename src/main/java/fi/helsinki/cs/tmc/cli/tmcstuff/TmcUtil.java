@@ -4,7 +4,6 @@ import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,7 @@ public class TmcUtil {
 
     public static List<Course> listCourses(TmcCore core) {
         Callable<List<Course>> callable;
-        callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
+        callable = core.listCourses(new TmcCliProgressObserver());
 
         try {
             return callable.call();
@@ -30,7 +29,7 @@ public class TmcUtil {
 
     public static Course getDetails(TmcCore core, Course course) {
         try {
-            return core.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
+            return core.getCourseDetails(new TmcCliProgressObserver(), course).call();
         } catch (Exception e) {
             logger.warn("Failed to get course details to list the exercises", e);
             return null;

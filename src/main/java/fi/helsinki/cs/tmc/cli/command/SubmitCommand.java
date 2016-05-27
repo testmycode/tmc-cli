@@ -1,11 +1,11 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import java.nio.file.Path;
@@ -46,7 +46,7 @@ public class SubmitCommand implements Command {
         String exerciseName = dirUtil.getExerciseName();
 
         try {
-            submit = core.submit(ProgressObserver.NULL_OBSERVER,
+            submit = core.submit(new TmcCliProgressObserver(),
                     TmcUtil.findExercise(course, exerciseName)).call();
 
         } catch (Exception e) {
