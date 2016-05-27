@@ -34,8 +34,6 @@ public class DownloadExercisesCommand implements Command {
 
     @Override
     public void run(String[] args) {
-        List<Exercise> exercises;
-        List<Exercise> downloaded;
         Course course;
         TmcCore core;
 
@@ -51,8 +49,11 @@ public class DownloadExercisesCommand implements Command {
         }
         DirectoryUtil dirUtil = new DirectoryUtil();
         course = TmcUtil.findCourse(core, args[0]);
-        exercises = course.getExercises();
-        System.out.println(TmcUtil.downloadExercises(core, exercises));
+        if (course == null) {
+            System.out.println("Course doesn't exist.");
+            return;
+        }
+        System.out.println(TmcUtil.downloadAllExercises(core, course));
 
         Path configFile = Paths.get(System.getProperty("user.dir"))
                 .resolve(args[0])
