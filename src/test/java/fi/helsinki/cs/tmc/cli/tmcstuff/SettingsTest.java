@@ -60,7 +60,7 @@ public class SettingsTest {
     public void formattedUserDataIsCorrectIfSet() {
         assertEquals("testuser:testpassword", settings.getFormattedUserData());
     }
-    
+
     @Test
     public void formattedUserDataIsCorrectIfNotSet() {
         settings = new Settings("testserver", null, "testpassword");
@@ -82,22 +82,16 @@ public class SettingsTest {
     }
 
     @Test
-    public void tmcProjectDirectoryIsSetCorrectly() {
-        assertTrue(System.getProperty("user.dir").equals(
-                settings.getTmcProjectDirectory().toString()));
-    }
-
-    @Test
     public void configRootIsSetCorrectly() {
         /*assertTrue("/tmp/tmc-cli".equals(
-                settings.getConfigRoot().toString()));*/
+         settings.getConfigRoot().toString()));*/
     }
 
     @Test
     public void noCourseIsSetByDefault() {
         assertTrue(!settings.getCurrentCourse().isPresent());
     }
-    
+
     @Test
     public void noProxyByDefault() {
         assertEquals(null, settings.proxy());
