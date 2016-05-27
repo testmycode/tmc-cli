@@ -24,13 +24,16 @@ public class TmcUtilTest {
     @Before
     public void setUp() {
         app = new Application();
-        app.createTmcCore(new Settings());
+        app.createTmcCore(new Settings(true));
+        try {
+            FileUtils.deleteDirectory(new File("cert-test"));
+        } catch (IOException e) {
+        }
     }
 
     @Test
-    public void findCouseIfItExists() {
+    public void findCourseIfItExists() {
         Course course;
-        app.createTmcCore(new Settings(true));
         course = TmcUtil.findCourse(app.getTmcCore(), "demo");
         assertNotNull(course);
     }
@@ -59,35 +62,9 @@ public class TmcUtilTest {
     }
 
     @Test
-    public void downloadExercise() {
-        Course course;
-        course = TmcUtil.findCourse(app.getTmcCore(), "demo");
-        assertNotNull(course);
-        TmcUtil.findExercise(course, "xhu4ew");
-    }
-
-    @Test
-    public void downloadFailsIfCourseDontExist() {
-        Course course;
-        String name = "urfhuw";
-        course = TmcUtil.findCourse(app.getTmcCore(), name);
-        assertNotNull(course);
-        TmcUtil.downloadAllExercises(app.getTmcCore(), course);
-
-        boolean exists = Files.exists(Paths.get("./" + name));
-        assertFalse(exists);
-        if (exists) {
-            try {
-                FileUtils.deleteDirectory(new File(name));
-            } catch (IOException e) {
-            }
-        }
-    }
-
-    @Test
     public void downloadExercisesWorks() {
         Course course;
-        String name = "demo";
+        String name = "cert-test";
         course = TmcUtil.findCourse(app.getTmcCore(), name);
         assertNotNull(course);
         TmcUtil.downloadAllExercises(app.getTmcCore(), course);
