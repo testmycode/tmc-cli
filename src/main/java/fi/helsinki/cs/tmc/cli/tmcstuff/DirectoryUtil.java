@@ -18,7 +18,9 @@ public class DirectoryUtil {
             if (Files.exists(this.configFile)) {
                 return;
             }
-            this.exercise = this.courseDirectory.toString();
+            this.exercise = this.courseDirectory
+                    .getName(this.courseDirectory.getNameCount() - 1)
+                    .toString();
             this.courseDirectory = this.courseDirectory.getParent();
         }
         this.exercise = null;

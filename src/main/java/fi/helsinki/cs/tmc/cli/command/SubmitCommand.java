@@ -37,16 +37,17 @@ public class SubmitCommand implements Command {
         dirUtil = new DirectoryUtil();
         core = this.app.getTmcCore();
         Path dir = dirUtil.getCourseDirectory();
-        
+
         if (dir == null) {
             System.out.println("You are not in course directory");
             return;
         }
         course = TmcUtil.findCourse(core, dir.getName(dir.getNameCount() - 1).toString());
+        String exerciseName = dirUtil.getExerciseName();
 
         try {
             submit = core.submit(ProgressObserver.NULL_OBSERVER,
-                    TmcUtil.findExercise(course, args[0])).call();
+                    TmcUtil.findExercise(course, exerciseName)).call();
 
         } catch (Exception e) {
             return;
