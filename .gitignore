@@ -18,7 +18,7 @@ tmc-cli.ipr
 tmc-cli.iws
 *.sw*
 *~
-tmc
+/tmc
 
 nbactions.xml
 /nbproject/
