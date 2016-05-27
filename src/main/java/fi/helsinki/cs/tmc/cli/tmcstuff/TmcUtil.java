@@ -69,4 +69,12 @@ public class TmcUtil {
             return null;
         }
     }
+
+    public static List<Exercise> downloadAllExercises(TmcCore core, Course course) {
+        if (!course.isExercisesLoaded()) {
+            course = getDetails(core, course);
+        }
+        List<Exercise> exercises = course.getExercises();
+        return downloadExercises(core, exercises);
+    }
 }
