@@ -1,6 +1,9 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -51,12 +54,18 @@ public class ListExercisesCommand implements Command {
     public void printExercises(TmcCore core, String name) {
         List<Exercise> exercises;
         Course course;
-
-        course = TmcUtil.findCourse(core, name);
-        if (course == null) {
-            System.out.println("There is no course with name " + name + ".");
+        if (name == null) {
+            // If no arguments are given, check if the current directory is a course directory
+            DirectoryUtil dirutil = new DirectoryUtil();
+            CourseInfo courseinfo = new CourseInfoIo(dirutil.getConfigFile()).load();
+        }
+        if (name == null) {
+            System.out.println("No course specified. Either run the command "
+                    + "inside a course directory or enter\n"
+                    + "the course as a parametre.");
             return;
         }
+        course = TmcUtil.findCourse(core, name);
         exercises = course.getExercises();
 
         for (Exercise exercise : exercises) {
