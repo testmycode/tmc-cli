@@ -1,6 +1,14 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+
+import java.nio.file.Path;
 
 public class SubmitCommand implements Command {
     private Application app;
@@ -21,5 +29,29 @@ public class SubmitCommand implements Command {
 
     @Override
     public void run(String[] args) {
+        TmcCore core;
+        Course course;
+        SubmissionResult submit;
+        DirectoryUtil dirUtil;
+
+        dirUtil = new DirectoryUtil();
+        core = this.app.getTmcCore();
+        Path dir = dirUtil.getCourseDirectory();
+        
+        if (dir == null) {
+            System.out.println("You are not in course directory");
+            return;
+        }
+        course = TmcUtil.findCourse(core, dir.getName(dir.getNameCount() - 1).toString());
+
+        try {
+            submit = core.submit(ProgressObserver.NULL_OBSERVER,
+                    TmcUtil.findExercise(course, args[0])).call();
+
+        } catch (Exception e) {
+            return;
+        }
+
+        System.out.println(submit);
     }
 }
