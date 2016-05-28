@@ -31,7 +31,7 @@ public class SubmitCommand implements Command {
     public void run(String[] args) {
         TmcCore core;
         Course course;
-        SubmissionResult submit;
+        SubmissionResult result;
         DirectoryUtil dirUtil;
 
         dirUtil = new DirectoryUtil();
@@ -46,13 +46,13 @@ public class SubmitCommand implements Command {
         String exerciseName = dirUtil.getExerciseName();
 
         try {
-            submit = core.submit(ProgressObserver.NULL_OBSERVER,
+            result = core.submit(ProgressObserver.NULL_OBSERVER,
                     TmcUtil.findExercise(course, exerciseName)).call();
 
         } catch (Exception e) {
             return;
         }
 
-        System.out.println(submit);
+        System.out.println(result);
     }
 }
