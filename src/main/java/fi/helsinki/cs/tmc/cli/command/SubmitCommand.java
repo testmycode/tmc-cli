@@ -12,9 +12,15 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.langs.domain.TestCase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 
 public class SubmitCommand implements Command {
+
+    private static final Logger logger
+            = LoggerFactory.getLogger(SubmitCommand.class);
 
     private final Io io;
     private Application app;
@@ -57,6 +63,7 @@ public class SubmitCommand implements Command {
                     TmcUtil.findExercise(course, exerciseName)).call();
 
         } catch (Exception e) {
+            logger.error("Could not submit exercise.", e);
             return;
         }
 
