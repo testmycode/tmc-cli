@@ -10,21 +10,12 @@ import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import java.nio.file.Path;
 
-public class SubmitCommand implements Command {
+@Command(name = "submit", desc = "Submit exercises")
+public class SubmitCommand implements CommandInterface {
     private Application app;
 
     public SubmitCommand(Application app) {
         this.app = app;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Submit exercises";
-    }
-
-    @Override
-    public String getName() {
-        return "submit";
     }
 
     @Override

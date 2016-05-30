@@ -2,9 +2,10 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
 
-public class HelpCommand implements Command {
+@Command(name = "help", desc = "Lists every command")
+public class HelpCommand implements CommandInterface {
     private Application app;
-    private CommandMap commands;
+    private CommandFactory commands;
 
     public HelpCommand(Application app) {
         this.app = app;
@@ -12,21 +13,11 @@ public class HelpCommand implements Command {
     }
 
     @Override
-    public String getDescription() {
-        return "Lists every command";
-    }
-
-    @Override
-    public String getName() {
-        return "help";
-    }
-
-    @Override
     public void run(String[] args) {
         System.out.println("Usage: tmc-cli [args] COMMAND [command-args]\n");
         System.out.println("TMC commands:");
-        for (Command command : this.commands.getCommands().values()) {
-            System.out.println("  " + command.getName() + "\t" + command.getDescription());
+        for (Command command : this.commands.getCommands()) {
+            System.out.println("  " + command.name() + "\t" + command.desc());
         }
         System.out.println("");
         app.printHelp();

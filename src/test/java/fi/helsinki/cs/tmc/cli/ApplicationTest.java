@@ -31,7 +31,7 @@ public class ApplicationTest {
         app.run(args);
         assertTrue(os.toString().contains("TMC-CLI version"));
     }
-    
+
     @Test
     public void runCommandWorksWithWrongParameter() {
         String[] args = {"foo"};

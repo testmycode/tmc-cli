@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.cli;
 
-import fi.helsinki.cs.tmc.cli.command.Command;
-import fi.helsinki.cs.tmc.cli.command.CommandMap;
+import fi.helsinki.cs.tmc.cli.command.CommandFactory;
+import fi.helsinki.cs.tmc.cli.command.CommandInterface;
 
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
@@ -28,31 +28,24 @@ import java.util.Properties;
 
 /**
  * The application class for the program.
- * TODO: we should move all the commandline related code to
+ * TODO: we should move all the command line related code to
  * somewhere else from here.
  */
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
-    private CommandMap commands;
+    private CommandFactory commands;
     private TmcCore tmcCore;
     private Settings settings;
-    private boolean initialized;
 
     private Options options;
     private GnuParser parser;
 
     public Application() {
-        this.initialized = false;
         this.parser = new GnuParser();
         this.options = new Options();
+        this.commands = new CommandFactory();
         options.addOption("h", "help", false, "Display help information about tmc-cli.");
         options.addOption("v", "version", false, "Give the version of the tmc-cli.");
-    }
-
-    private void preinit() {
-        this.commands = new CommandMap();
-        this.commands.createCommands(this);
-        this.initialized = true;
     }
 
     /**
@@ -68,7 +61,7 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        Command command = commands.getCommand(name);
+        CommandInterface command = commands.getCommand(this, name);
         if (command == null) {
             System.out.println("Command " + name + " doesn't exist.");
             return false;
@@ -83,7 +76,7 @@ public class Application {
         try {
             line = this.parser.parse(this.options, args);
         } catch (ParseException e) {
-            System.out.println("Invalid command line arguments.");
+            System.out.println("Invalid command line arguments. " + e);
             return false;
         }
 
@@ -108,10 +101,6 @@ public class Application {
         String[] commandArgs;
         String commandName;
         int commandIndex;
-
-        if (!this.initialized) {
-            preinit();
-        }
 
         commandIndex = findCommand(args);
 
@@ -145,7 +134,7 @@ public class Application {
         /*XXX should we somehow check if the authentication is successful here */
     }
 
-    public CommandMap getCommandMap() {
+    public CommandFactory getCommandMap() {
         return this.commands;
     }
 

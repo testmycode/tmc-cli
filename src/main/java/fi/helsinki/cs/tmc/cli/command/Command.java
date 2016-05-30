@@ -1,25 +1,16 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-/**
- * Class is an interface for commands.
- */
-public interface Command {
-    /**
-     * Method returns command description.
-     * 
-     * @return Description
-     */
-    String getDescription();
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Command {
     /**
-     * Method returns default command name.
-     * 
-     * @return Name
+     * Name of the command.
      */
-    String getName();
-
+    String name() default "";
     /**
-     * Method runs command.
+     * Command description.
      */
-    void run(String[] args);
+    String desc() default "";
 }

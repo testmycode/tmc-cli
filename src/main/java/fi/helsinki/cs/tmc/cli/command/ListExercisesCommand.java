@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
-public class ListExercisesCommand implements Command {
+@Command(name = "list-exercises", desc = "List the exercises for a specific course")
+public class ListExercisesCommand implements CommandInterface {
     private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
     private Application app;
 
@@ -25,22 +25,12 @@ public class ListExercisesCommand implements Command {
     }
 
     @Override
-    public String getDescription() {
-        return "List the exercises for a specific course";
-    }
-
-    @Override
-    public String getName() {
-        return "list-exercises";
-    }
-
-    @Override
     public void run(String[] args) {
         TmcCore core;
         String name;
 
         if (args.length == 0) {
-            System.out.println("USAGE: tmc " + getName() + " COURSE");
+            System.out.println("USAGE: tmc exercise COURSE");
             return;
         }
 

@@ -15,22 +15,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class DownloadExercisesCommand implements Command {
+@Command(name = "download", desc = "Download exercises for a specific course")
+public class DownloadExercisesCommand implements CommandInterface {
 
     private Application app;
 
     public DownloadExercisesCommand(Application app) {
         this.app = app;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Download exercises for a specific course";
-    }
-
-    @Override
-    public String getName() {
-        return "download";
     }
 
     @Override
@@ -40,7 +31,7 @@ public class DownloadExercisesCommand implements Command {
 
         if (args.length == 0) {
             System.out.println("You must give course name as argument.");
-            System.out.println("USAGE: tmc " + getName() + " COURSE");
+            System.out.println("USAGE: tmc download COURSE");
             return;
         }
 
