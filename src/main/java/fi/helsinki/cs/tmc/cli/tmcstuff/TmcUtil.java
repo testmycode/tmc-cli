@@ -4,10 +4,12 @@ import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -76,5 +78,19 @@ public class TmcUtil {
         }
         List<Exercise> exercises = course.getExercises();
         return downloadExercises(core, exercises);
+    }
+
+    public static SubmissionResult submitExercise(TmcCore core, Course course, String name) {
+        // Exercise has directories separated with a - but core needs them to be separated with a / for submission
+        Exercise exercise = TmcUtil.findExercise(course, name);
+        String fixedName = exercise.getName().replace("-", "/");
+        exercise.setName(fixedName);
+        try {
+            return core.submit(new TmcCliProgressObserver(),
+                    exercise).call();
+        } catch (Exception e) {
+            logger.warn("Failed to submit the exercise", e);
+            return null;
+        }
     }
 }
