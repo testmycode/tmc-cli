@@ -60,6 +60,8 @@ public class DownloadExercisesCommand implements Command {
                 .resolve(args[0])
                 .resolve(CourseInfoIo.COURSE_CONFIG);
         CourseInfoIo infoIo = new CourseInfoIo(configFile);
-        infoIo.save(app.createCourseInfo(args[0]));
+        CourseInfo info = app.createCourseInfo(args[0]);
+        info.setExercises(exercises);
+        infoIo.save(info);
     }
 }
