@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -46,12 +47,13 @@ public class SubmitCommand implements Command {
         course = TmcUtil.findCourse(core, courseName);
         String exerciseName;
 
-        Path directory = Paths.get(System.getProperty("user.dir"));
+        Path currentDir = Paths.get(System.getProperty("user.dir"));
 
+        // If not in the course directory root, adds the name of the directory you are in to the exerciseName. For courses that are formatted like this: course/week/exercise
         // If no args given, use the exercise directory where the program is run
         if (args.length > 0) {
-            if (!directory.equals(dirUtil.getCourseDirectory())) {
-                exerciseName = directory.getName(directory.getNameCount() - 1)
+            if (!currentDir.equals(dirUtil.getCourseDirectory())) {
+                exerciseName = currentDir.getName(currentDir.getNameCount() - 1)
                         .toString() + "-" + args[0];
             } else {
                 exerciseName = args[0];
@@ -59,6 +61,7 @@ public class SubmitCommand implements Command {
         } else {
             exerciseName = dirUtil.getExerciseName();
         }
+
         System.out.println(exerciseName);
 
         SubmissionResult result;
