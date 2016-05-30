@@ -21,7 +21,6 @@ public class CommandFactory {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
     private Map<String, Class> commands;
-    private static String COMMAND_PACKAGE = "fi.helsinki.cs.tmc.cli.command";
 
     public CommandFactory() {
         this.commands = new HashMap<>();
@@ -31,9 +30,8 @@ public class CommandFactory {
 
     private void commandDiscoverer() {
         CommandAnnotationProcessor processor = new CommandAnnotationProcessor();
-        processor.getCommands();
+        System.out.println(processor.getCommands());
     }
-
 
     private void createCommands() {
         createCommand(TestCommand.class);
