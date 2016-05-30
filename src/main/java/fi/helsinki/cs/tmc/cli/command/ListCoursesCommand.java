@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -33,7 +34,7 @@ public class ListCoursesCommand implements Command {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Io io) {
         List<Course> courses;
         TmcCore core;
 
@@ -44,7 +45,7 @@ public class ListCoursesCommand implements Command {
         courses = TmcUtil.listCourses(core);
 
         for (Course course : courses) {
-            System.out.println(course.getName());
+            io.println(course.getName());
         }
     }
 }

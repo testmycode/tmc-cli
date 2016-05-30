@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 
 import org.junit.Before;
@@ -19,7 +20,7 @@ public class ListExercisesCommandTest {
 
     @Before
     public void setUp() {
-        app = new Application();
+        app = new Application(new TerminalIo());
         app.createTmcCore(new Settings(true));
 
         os = new ByteArrayOutputStream();

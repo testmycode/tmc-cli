@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.Io;
 
 public class HelpCommand implements Command {
     private Application app;
@@ -22,13 +23,13 @@ public class HelpCommand implements Command {
     }
 
     @Override
-    public void run(String[] args) {
-        System.out.println("Usage: tmc-cli [args] COMMAND [command-args]\n");
-        System.out.println("TMC commands:");
+    public void run(String[] args, Io io) {
+        io.println("Usage: tmc-cli [args] COMMAND [command-args]\n");
+        io.println("TMC commands:");
         for (Command command : this.commands.getCommands().values()) {
-            System.out.println("  " + command.getName() + "\t" + command.getDescription());
+            io.println("  " + command.getName() + "\t" + command.getDescription());
         }
-        System.out.println("");
+        io.println("");
         app.printHelp();
     }
 }

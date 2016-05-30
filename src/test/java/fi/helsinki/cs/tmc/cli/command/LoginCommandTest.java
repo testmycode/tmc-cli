@@ -4,16 +4,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 public class LoginCommandTest {
 
@@ -22,7 +19,7 @@ public class LoginCommandTest {
     private static String password;
 
     private Application app;
-    private OutputStream os;
+    TestIo testIo;
 
     public LoginCommandTest() {
     }
@@ -32,7 +29,7 @@ public class LoginCommandTest {
         LoginCommandTest.serverAddress = System.getenv("TMC_SERVER_ADDRESS");
         LoginCommandTest.username = System.getenv("TMC_USERNAME");
         LoginCommandTest.password = System.getenv("TMC_PASSWORD");
-
+        
         assertNotNull(LoginCommandTest.serverAddress);
         assertNotNull(LoginCommandTest.username);
         assertNotNull(LoginCommandTest.password);
@@ -43,11 +40,8 @@ public class LoginCommandTest {
         // Unwanted behaviour? Will delete the real settings file atm.
         new SettingsIo().delete();
 
-        this.app = new Application();
-        this.os = new ByteArrayOutputStream();
-
-        PrintStream ps = new PrintStream(os);
-        System.setOut(ps);
+        testIo = new TestIo();
+        app = new Application(testIo);
     }
 
     @After
@@ -65,9 +59,7 @@ public class LoginCommandTest {
 
         // Unwanted behaviour? Will create real settings file atm.
         app.run(args);
-
-        String output = os.toString();
-        assertTrue(output.contains("succesful"));
+        assertTrue(testIo.printedText.contains("succesful"));
     }
 
     @Test
@@ -78,8 +70,7 @@ public class LoginCommandTest {
                 LoginCommandTest.password);
 
         app.run(args);
-        String output = os.toString();
-        assertTrue(output.contains("Incorrect username or password."));
+        assertTrue(testIo.printedText.contains("Incorrect username or password."));
     }
 
     private String[] createArgs(String server, String username, String pwd) {

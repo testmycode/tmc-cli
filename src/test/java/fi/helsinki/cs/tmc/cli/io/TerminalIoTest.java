@@ -1,36 +1,29 @@
 package fi.helsinki.cs.tmc.cli.io;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 public class TerminalIoTest {
 
-    Io mockIo;
+    Io io = new TerminalIo();
+    OutputStream os;
 
     @Before
     public void setUp() {
-        mockIo = mock(TerminalIo.class);
+        os = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(os);
+        System.setOut(ps);
     }
 
     @Test
-    public void printIsCalledWithRightParameter() {
-        mockIo.print("foo");
-        verify(mockIo).print(eq("foo"));
-    }
-
-    @Test
-    public void readLineIsCalledWithRightParameter() {
-        mockIo.readLine("prompt");
-        verify(mockIo).readLine(eq("prompt"));
-    }
-
-    @Test
-    public void readPasswordIsCalledWithRightParameter() {
-        mockIo.readPassword("prompt");
-        verify(mockIo).readPassword(eq("prompt"));
+    public void printlnWorksRight() {
+        io.println("foo");
+        assertTrue(os.toString().equals("foo\n"));
     }
 }

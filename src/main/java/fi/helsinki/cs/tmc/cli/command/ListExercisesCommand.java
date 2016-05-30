@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 public class ListExercisesCommand implements Command {
     private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
@@ -35,9 +35,8 @@ public class ListExercisesCommand implements Command {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Io io) {
         TmcCore core;
-        String name;
 
         if (args.length == 0) {
             System.out.println("USAGE: tmc " + getName() + " COURSE");
