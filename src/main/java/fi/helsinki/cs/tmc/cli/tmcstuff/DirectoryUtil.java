@@ -10,22 +10,36 @@ public class DirectoryUtil {
     private Path configFile;
     private String exercise;
 
-    public DirectoryUtil() {
+    public DirectoryUtil(Path subdir) {
         this.courseDirectory = Paths.get(System.getProperty("user.dir"));
+        if (subdir != null) {
+            this.courseDirectory = this.courseDirectory.resolve(subdir);
+        }
+        this.exercise = null;
 
         while (this.courseDirectory.getParent() != null) {
             this.configFile = this.courseDirectory.resolve(CourseInfoIo.COURSE_CONFIG);
             if (Files.exists(this.configFile)) {
                 return;
             }
-            this.exercise = this.courseDirectory
-                    .getName(this.courseDirectory.getNameCount() - 1)
-                    .toString();
+            if (this.exercise == null) {
+                this.exercise = this.courseDirectory
+                        .getName(this.courseDirectory.getNameCount() - 1)
+                        .toString();
+            } else {
+                this.exercise = this.courseDirectory
+                        .getName(this.courseDirectory.getNameCount() - 1)
+                        .toString() + "-" + this.exercise;
+            }
             this.courseDirectory = this.courseDirectory.getParent();
         }
         this.exercise = null;
         this.configFile = null;
         this.courseDirectory = null;
+    }
+
+    public DirectoryUtil() {
+        this(null);
     }
 
     /**
