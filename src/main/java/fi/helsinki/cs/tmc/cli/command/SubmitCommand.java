@@ -8,8 +8,11 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SubmitCommand implements Command {
     private Application app;
@@ -45,28 +48,29 @@ public class SubmitCommand implements Command {
         core = this.app.getTmcCore();
         String courseName = dir.getName(dir.getNameCount() - 1).toString();
         course = TmcUtil.findCourse(core, courseName);
-        String exerciseName;
 
         Path currentDir = Paths.get(System.getProperty("user.dir"));
 
         // If not in the course directory root, adds the name of the directory you are in to the exerciseName. For courses that are formatted like this: course/week/exercise
         // If no args given, use the exercise directory where the program is run
-        if (args.length > 0) {
-            if (!currentDir.equals(dirUtil.getCourseDirectory())) {
-                exerciseName = currentDir.getName(currentDir.getNameCount() - 1)
-                        .toString() + "-" + args[0];
-            } else {
-                exerciseName = args[0];
-            }
-        } else {
-            exerciseName = dirUtil.getExerciseName();
-        }
+//        if (args.length > 0) {
+//            if (!currentDir.equals(dirUtil.getCourseDirectory())) {
+//                exerciseName = currentDir.getName(currentDir.getNameCount() - 1)
+//                        .toString() + "-" + args[0];
+//            } else {
+//                exerciseName = args[0];
+//            }
+//        } else {
+//            exerciseName = dirUtil.getExerciseName();
+//        }
 
-        System.out.println(exerciseName);
-
+        List<String> exercises;
+        exercises = dirUtil.getExerciseNames(args);
         SubmissionResult result;
-        result = TmcUtil.submitExercise(core, course, exerciseName);
 
-        System.out.println(result);
+        for (String exerciseName : exercises) {
+            result = TmcUtil.submitExercise(core, course, exerciseName);
+            System.out.println(result);
+        }
     }
 }
