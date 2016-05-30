@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +17,7 @@ public class CommandMapTest {
     @Before
     public void setUp() {
         cm = new CommandMap();
-        cm.createCommands(new Application());
+        cm.createCommands(new Application(new TerminalIo()));
     }
 
     @Test

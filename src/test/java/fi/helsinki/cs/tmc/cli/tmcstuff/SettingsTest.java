@@ -8,7 +8,6 @@ import fi.helsinki.cs.tmc.cli.Application;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.Locale;
 
 public class SettingsTest {

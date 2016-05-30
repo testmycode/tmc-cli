@@ -2,15 +2,15 @@ package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
+import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
@@ -38,16 +38,18 @@ public class Application {
     private TmcCore tmcCore;
     private Settings settings;
     private boolean initialized;
+    private Io io;
 
     private Options options;
     private GnuParser parser;
 
-    public Application() {
+    public Application(Io io) {
         this.initialized = false;
         this.parser = new GnuParser();
         this.options = new Options();
         options.addOption("h", "help", false, "Display help information about tmc-cli.");
         options.addOption("v", "version", false, "Give the version of the tmc-cli.");
+        this.io = io;
     }
 
     private void preinit() {
@@ -71,11 +73,11 @@ public class Application {
     private boolean runCommand(String name, String[] args) {
         Command command = commands.getCommand(name);
         if (command == null) {
-            System.out.println("Command " + name + " doesn't exist.");
+            io.println("Command " + name + " doesn't exist.");
             return false;
         }
 
-        command.run(args);
+        command.run(args, io);
         return true;
     }
 
@@ -84,7 +86,7 @@ public class Application {
         try {
             line = this.parser.parse(this.options, args);
         } catch (ParseException e) {
-            System.out.println("Invalid command line arguments.");
+            io.println("Invalid command line arguments.");
             return false;
         }
 
@@ -93,7 +95,7 @@ public class Application {
             return false;
         }
         if (line.hasOption("v")) {
-            System.out.println("TMC-CLI version " + getVersion());
+            io.println("TMC-CLI version " + getVersion());
             return false;
         }
         return true;
@@ -162,7 +164,7 @@ public class Application {
                 CourseInfoIo courseio = new CourseInfoIo(dirutil.getConfigFile());
                 CourseInfo courseinfo = courseio.load();
                 if (courseinfo == null) {
-                    System.out.println("Course configuration file "
+                    io.println("Course configuration file "
                             + dirutil.getConfigFile().toString()
                             + "is invalid.");
                     return null;
@@ -175,7 +177,7 @@ public class Application {
 
             if (settings == null) {
                 // If no settings are present
-                System.out.println("You are not logged in. Log in using: tmc login");
+                io.println("You are not logged in. Log in using: tmc login");
                 return null;
             }
             createTmcCore(settings);
@@ -184,7 +186,7 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        Application app = new Application();
+        Application app = new Application(new TerminalIo());
         app.run(args);
     }
 

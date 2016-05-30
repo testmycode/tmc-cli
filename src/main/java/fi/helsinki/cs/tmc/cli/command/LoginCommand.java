@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -23,20 +22,18 @@ import java.util.concurrent.Callable;
 public class LoginCommand implements Command {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
-    private final Io io;
+    private Io io;
     private final Options options;
     private Application app;
 
-    // TODO: TerminalIo should be injected in constructor
     public LoginCommand(Application app) {
         this.app = app;
-        this.io = new TerminalIo();
         this.options = new Options();
         options.addOption("u", "user", true, "TMC username");
         options.addOption("p", "password", true, "Password for the user");
         options.addOption("s", "server", true, "Address for TMC server");
     }
-
+    
     @Override
     public String getDescription() {
         return "Login to TMC server.";
@@ -48,7 +45,8 @@ public class LoginCommand implements Command {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Io io) {
+        this.io = io;
         CommandLine line = parseData(args);
         String username = getUsername(line);
         String password = getPassword(line);
