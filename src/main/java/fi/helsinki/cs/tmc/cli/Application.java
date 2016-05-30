@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli;
 import fi.helsinki.cs.tmc.cli.command.Command;
 import fi.helsinki.cs.tmc.cli.command.CommandMap;
 
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
