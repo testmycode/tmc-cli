@@ -9,9 +9,15 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 
 public class RunTestsCommand implements Command {
+
+    private static final Logger logger
+            = LoggerFactory.getLogger(RunTestsCommand.class);
 
     private final Application app;
 
@@ -49,7 +55,9 @@ public class RunTestsCommand implements Command {
         try {
             runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
         } catch (Exception ex) {
-            System.out.println("Failed to run tests.");
+            System.out.println("Failed to run tests. Please make sure you are in"
+                    + " exercise directory.");
+            logger.error("Failed to run tests.", ex);
             return;
         }
 
