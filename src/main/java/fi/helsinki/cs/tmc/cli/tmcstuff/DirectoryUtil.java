@@ -12,12 +12,13 @@ import java.util.List;
 public class DirectoryUtil {
     private Path courseDirectory;
     private Path configFile;
+    private Path workingDirectory;
     private String exercise;
 
-    public DirectoryUtil(Path subdir) {
-        this.courseDirectory = Paths.get(System.getProperty("user.dir"));
-        if (subdir != null) {
-            this.courseDirectory = this.courseDirectory.resolve(subdir);
+    public DirectoryUtil(Path workingDir, Path subDir) {
+        this.courseDirectory = workingDir;
+        if (subDir != null) {
+            this.courseDirectory = this.courseDirectory.resolve(subDir);
         }
         this.exercise = null;
 
@@ -40,6 +41,11 @@ public class DirectoryUtil {
         this.exercise = null;
         this.configFile = null;
         this.courseDirectory = null;
+        this.workingDirectory = workingDir;
+    }
+
+    public DirectoryUtil(Path subDir) {
+        this(Paths.get(System.getProperty("user.dir")), subDir);
     }
 
     public DirectoryUtil() {
@@ -64,25 +70,28 @@ public class DirectoryUtil {
     }
 
     /**
-     * Parse parametres and return all matching exercises by reading
-     * the course config file
+     * Parse parametres and return all matching exercises by reading the course config file.
      * @param: arguments given when searching for exercises
      * @return: return exercises as List
      */
     public List<String> getExerciseNames(String[] params) {
-        Path dir = Paths.get(System.getProperty("user.dir"));
         for (int i = 0; i < params.length; i++) {
             // Convert given parametres to either full exercise names
-            // Or substrings, eg. "viikko1/teht1" -> "viikko1-teht1"
-            String param = this.courseDirectory.relativize(dir.resolve(params[1])).toString();
+            // Or substrings, eg. if the user is in subdirectory called "viikko1"
+            // and gives parametre "teht2", it will be converted to "viikko1-teht2"
+            String param = this.courseDirectory
+                    .relativize(this.workingDirectory.resolve(params[i])).toString();
             params[i] = param.replace(File.separator, "-");
         }
         CourseInfoIo infoio = new CourseInfoIo(this.configFile);
         CourseInfo info = infoio.load();
         List<Exercise> exercises = info.getExercises();
-        List<String> exerciseNames = new ArrayList<String>();
+        List<String> exerciseNames = new ArrayList<>();
         for (Exercise exercise : exercises) {
             for (String param : params) {
+                // Match only exercises that begin with our parametres, so that
+                // exercises with identical names in other subdirectories won't
+                // be selected.
                 if (exercise.getName().matches("^" + param)) {
                     exerciseNames.add(exercise.getName());
                 }
@@ -92,7 +101,7 @@ public class DirectoryUtil {
     }
 
     /**
-     * Returns the root directory of the course containing the config file
+     * Returns the root directory of the course containing the config file.
      */
     public Path getCourseDirectory() {
         return courseDirectory;
