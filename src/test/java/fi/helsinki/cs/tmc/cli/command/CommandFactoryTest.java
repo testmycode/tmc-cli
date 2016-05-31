@@ -18,8 +18,8 @@ public class CommandFactoryTest {
 
     @Before
     public void setUp() {
-        factory = new CommandFactory();
         app = new Application(new TerminalIo());
+        factory = app.getCommandFactory();
     }
 
     @Test

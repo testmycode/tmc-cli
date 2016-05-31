@@ -26,7 +26,7 @@ public class HelpCommand implements CommandInterface {
             if ((Class)commandClass == (Class)TestCommand.class) {
                 continue;
             }
-            System.out.println("  " + command.name() + "\t" + command.desc());
+            io.println("  " + command.name() + "\t" + command.desc());
         }
         io.println("");
         app.printHelp();
