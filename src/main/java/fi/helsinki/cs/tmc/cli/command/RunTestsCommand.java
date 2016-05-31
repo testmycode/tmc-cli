@@ -20,6 +20,7 @@ public class RunTestsCommand implements Command {
             = LoggerFactory.getLogger(RunTestsCommand.class);
 
     private final Application app;
+    private Io io;
 
     public RunTestsCommand(Application app) {
         this.app = app;
@@ -42,6 +43,7 @@ public class RunTestsCommand implements Command {
             return;
         }
 
+        this.io = io;
         DirectoryUtil dirUtil = new DirectoryUtil();
         Path courseDir = dirUtil.getCourseDirectory();
         String courseName = courseDir.getName(courseDir.getNameCount() - 1).toString();
@@ -50,12 +52,12 @@ public class RunTestsCommand implements Command {
         Exercise exercise = new Exercise(exerciseName, courseName);
         RunResult runResult;
 
-        System.out.println("Running tests...");
+        io.println("Running tests...");
 
         try {
             runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
         } catch (Exception ex) {
-            System.out.println("Failed to run tests. Please make sure you are in"
+            io.println("Failed to run tests. Please make sure you are in"
                     + " exercise directory.");
             logger.error("Failed to run tests.", ex);
             return;
@@ -67,23 +69,19 @@ public class RunTestsCommand implements Command {
     private void printRunResult(RunResult runResult) {
         for (TestResult testResult : runResult.testResults) {
             if (testResult.passed) {
-                System.out.println(colorString("Passed: " + testResult.name, ANSI_GREEN));
+                io.println(colorString("Passed: " + testResult.name, ANSI_GREEN));
             } else {
-                System.out.println(colorString("Failed: " + testResult.name
+                io.println(colorString("Failed: " + testResult.name
                         + "\n\t" + testResult.errorMessage, ANSI_RED));
             }
         }
 
         if (runResult.status == RunResult.Status.PASSED) {
-            System.out.println("All tests passed! Submit to server with 'tmc submit'.");
+            io.println("All tests passed! Submit to server with 'tmc submit'.");
         } else if (runResult.status == RunResult.Status.TESTS_FAILED) {
-            System.out.println("Some tests did not pass, please review your "
+            io.println("Some tests did not pass, please review your "
                     + "answer before submitting.");
         }
-    }
-
-    private String colorString(String string, String color) {
-        return color + string + ANSI_RESET;
     }
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -95,4 +93,8 @@ public class RunTestsCommand implements Command {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
+
+    private String colorString(String string, String color) {
+        return color + string + ANSI_RESET;
+    }
 }
