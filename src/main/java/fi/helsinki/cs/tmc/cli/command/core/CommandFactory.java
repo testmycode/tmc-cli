@@ -25,14 +25,15 @@ public class CommandFactory {
     }
 
     private void addCommand(Class commandClass) {
-        Class<?> klass = commandClass;
+        Class<Command> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
         Command command = (Command) annotation;
-        this.commands.put(command.name(), commandClass);
+        this.commands.put(command.name(), klass);
     }
 
     public void addCommand(String name, Class commandClass) {
-        this.commands.put(name, commandClass);
+        Class<Command> klass = commandClass;
+        this.commands.put(name, klass);
     }
 
     public CommandInterface createCommand(Application app, String name)  {
