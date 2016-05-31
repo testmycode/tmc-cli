@@ -18,7 +18,7 @@ public class HelpCommand implements CommandInterface {
 
     @Override
     public void run(String[] args, Io io) {
-        io.println("Usage: tmc-cli [args] COMMAND [command-args]\n");
+        io.println("Usage: tmc [args] COMMAND [command-args]\n");
         io.println("TMC commands:");
 
         for (Class<Command> commandClass : this.commands.getCommands()) {
