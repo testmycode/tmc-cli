@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.cli.command.core;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             bwriter.append("package ");
             bwriter.append(PACKAGE_NAME);
             bwriter.append(";\n\n");
-            bwriter.append("import " + PACKAGE_NAME + ".CommandFactory;\n\n");
+            bwriter.append("import " + PACKAGE_NAME + ".core.CommandFactory;\n\n");
             for (Entry<String, String> entry : map.entrySet()) {
                 bwriter.append("import " + entry.getValue() + ";\n");
             }

@@ -1,6 +1,9 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
+import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 
 @Command(name = "help", desc = "Lists every command")
 public class HelpCommand implements CommandInterface {

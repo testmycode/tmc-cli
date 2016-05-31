@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli;
 
-import fi.helsinki.cs.tmc.cli.command.CommandFactory;
-import fi.helsinki.cs.tmc.cli.command.CommandInterface;
 import fi.helsinki.cs.tmc.cli.command.CommandList;
+import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
+import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;

@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.cli.command.core;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
