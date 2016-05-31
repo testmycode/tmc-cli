@@ -19,6 +19,7 @@ import java.util.List;
 public class ListExercisesCommand implements Command {
     private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
     private Application app;
+    private Io io;
 
     public ListExercisesCommand(Application app) {
         this.app = app;
@@ -37,9 +38,10 @@ public class ListExercisesCommand implements Command {
     @Override
     public void run(String[] args, Io io) {
         TmcCore core;
+        this.io = io;
 
         if (args.length == 0) {
-            System.out.println("USAGE: tmc " + getName() + " COURSE");
+            this.io.println("USAGE: tmc " + getName() + " COURSE");
             return;
         }
 
@@ -59,16 +61,22 @@ public class ListExercisesCommand implements Command {
             CourseInfo courseinfo = new CourseInfoIo(dirutil.getConfigFile()).load();
         }
         if (name == null) {
-            System.out.println("No course specified. Either run the command "
+            this.io.println("No course specified. Either run the command "
                     + "inside a course directory or enter\n"
                     + "the course as a parametre.");
             return;
         }
         course = TmcUtil.findCourse(core, name);
+
+        if (course == null) {
+            this.io.println("Course doesn't exist.");
+            return;
+        }
+
         exercises = course.getExercises();
 
         for (Exercise exercise : exercises) {
-            System.out.println(exercise.getName());
+            this.io.println(exercise.getName());
         }
     }
 }
