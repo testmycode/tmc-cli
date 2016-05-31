@@ -61,7 +61,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
                     continue;
                 }
                 String className = parts[parts.length - 1];
-                bwriter.append(TAB + TAB + "factory.createCommand(\""
+                bwriter.append(TAB + TAB + "factory.addCommand(\""
                         + entry.getKey() + "\", "
                         + className + ".class);\n");
             }

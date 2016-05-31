@@ -26,20 +26,18 @@ public class CommandFactory {
         commands = new HashMap<>();
     }
 
-    /*TODO rename addCommand */
-    private void createCommand(Class commandClass) {
+    private void addCommand(Class commandClass) {
         Class<?> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
         Command command = (Command) annotation;
         this.commands.put(command.name(), commandClass);
     }
 
-    public void createCommand(String name, Class commandClass) {
+    public void addCommand(String name, Class commandClass) {
         this.commands.put(name, commandClass);
     }
 
-    /*TODO rename createCommand */
-    public CommandInterface getCommand(Application app, String name)  {
+    public CommandInterface createCommand(Application app, String name)  {
         Class commandClass = commands.get(name);
         Constructor<?> cons;
         if (commandClass == null) {

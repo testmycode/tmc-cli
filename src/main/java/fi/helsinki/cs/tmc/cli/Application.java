@@ -63,7 +63,7 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        CommandInterface command = commands.getCommand(this, name);
+        CommandInterface command = commands.createCommand(this, name);
         if (command == null) {
             System.out.println("Command " + name + " doesn't exist.");
             return false;
