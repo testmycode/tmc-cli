@@ -186,6 +186,7 @@ public class Application {
     }
 
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new ShutdownHandler());
         Application app = new Application(new TerminalIo());
         app.run(args);
     }
