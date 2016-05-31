@@ -4,6 +4,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
@@ -24,6 +25,6 @@ public class ShutdownHandlerTest {
     @Test
     public void printsAnsiResetAtRun() {
         shutdownHandler.run();
-        verify(mockIo).println(eq("\u001B[0m"));
+        verify(mockIo).println(eq(Color.ANSI_RESET));
     }
 }
