@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
+/**
+ * Quick and dirty.
+ */
 public class RunTestsCommand implements Command {
 
     private static final Logger logger
@@ -33,7 +36,7 @@ public class RunTestsCommand implements Command {
 
     @Override
     public String getName() {
-        return "run-tests";
+        return "run-tests-j";
     }
 
     @Override
@@ -84,6 +87,7 @@ public class RunTestsCommand implements Command {
         }
     }
 
+    // All this this color printing stuff should prob be moved to io?
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
