@@ -5,10 +5,7 @@ import static junit.framework.Assert.assertNull;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.persistance.ConfigFileIO;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,8 +19,8 @@ import java.util.List;
 public class DirectoryUtilTest {
     private DirectoryUtil dirutil;
 
-    @Before
-    public void setup() {
+    @BeforeClass
+    static public void setup() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
         try {
             Files.createDirectories(workDir);
@@ -50,11 +47,13 @@ public class DirectoryUtilTest {
         exercises.add(new Exercise("viikko2-teht2"));
         exercises.add(new Exercise("viikko2-subdir-teht3"));
         CourseInfo info = new CourseInfo(new Settings(true), "dirUtilTest");
+        info.setExercises(exercises);
         CourseInfoIo infoio = new CourseInfoIo(workDir.resolve(CourseInfoIo.COURSE_CONFIG));
+        infoio.save(info);
     }
 
-    @After
-    public void cleanUp() {
+    @AfterClass
+    static public void cleanUp() {
         String tempDir = System.getProperty("java.io.tmpdir");
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir).resolve("dirUtilTest").toFile());
@@ -64,7 +63,7 @@ public class DirectoryUtilTest {
     @Test
     public void failsIfNotInCourseDirectory() {
         DirectoryUtil dirutil = new DirectoryUtil(
-                Paths.get(System.getProperty("java.io.tmpdir"), null));
+                Paths.get(System.getProperty("java.io.tmpdir")), null);
         assertNull(dirutil.getCourseDirectory());
         assertNull(dirutil.getConfigFile());
         assertNull(dirutil.getExerciseName());

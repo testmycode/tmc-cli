@@ -112,11 +112,13 @@ public class TmcCliProgressObserver extends ProgressObserver {
 
     private String percentage(double progress) {
         int percent = (int) progress;
-        String percentage = "";
+        String percentage;
         if (percent < 10) {
             percentage = "  ";
         } else if (percent < 100) {
             percentage = " ";
+        } else {
+            percentage = "";
         }
         return percentage + percent + "%";
     }

@@ -12,6 +12,7 @@
 hs_err_pid*
 /target/
 
+.vscode/
 .idea/
 tmc-cli.iml
 tmc-cli.ipr

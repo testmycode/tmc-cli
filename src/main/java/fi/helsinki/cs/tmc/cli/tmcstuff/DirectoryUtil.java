@@ -75,18 +75,34 @@ public class DirectoryUtil {
      * @return: return exercises as List
      */
     public List<String> getExerciseNames(String[] params) {
-        for (int i = 0; i < params.length; i++) {
-            // Convert given parametres to either full exercise names
-            // Or substrings, eg. if the user is in subdirectory called "viikko1"
-            // and gives parametre "teht2", it will be converted to "viikko1-teht2"
-            String param = this.courseDirectory
-                    .relativize(this.workingDirectory.resolve(params[i])).toString();
-            params[i] = param.replace(File.separator, "-");
-        }
         CourseInfoIo infoio = new CourseInfoIo(this.configFile);
         CourseInfo info = infoio.load();
         List<Exercise> exercises = info.getExercises();
         List<String> exerciseNames = new ArrayList<>();
+        if (params != null || params.length > 0) {
+            if (this.workingDirectory.equals(this.courseDirectory)) {
+                // In course root dir and no params - return all exercises
+                for (Exercise exercise : exercises) {
+                    exerciseNames.add(exercise.getName());
+                }
+                return exerciseNames;
+            }
+            // If parametres are empty but we are in a subdirectory, create an array
+            // with a single element and make that element the relative subdirectory
+            params = new String[1];
+            String param = this.courseDirectory
+                    .relativize(this.workingDirectory).toString();
+            params[0] = param.replace(File.separator, "-");
+        } else {
+            for (int i = 0; i < params.length; i++) {
+                // Convert given parametres to either full exercise names
+                // Or substrings, eg. if the user is in subdirectory called "viikko1"
+                // and gives parametre "teht2", it will be converted to "viikko1-teht2"
+                String param = this.courseDirectory
+                        .relativize(this.workingDirectory.resolve(params[i])).toString();
+                params[i] = param.replace(File.separator, "-");
+            }
+        }
         for (Exercise exercise : exercises) {
             for (String param : params) {
                 // Match only exercises that begin with our parametres, so that
