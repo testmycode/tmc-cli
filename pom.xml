@@ -88,14 +88,62 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
-                    <!-- Disable annotation processing for ourselves.-->
-                    <compilerArgument>-proc:none</compilerArgument>
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
+                <executions>
+                    <!-- Generate the annotation processor -->
+                    <execution>
+                        <id>compiler-processor</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-proc:none</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                    <!-- Generate sourses with our custom processor -->
+                    <execution>
+                        <id>process-annotations</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <annotationProcessors>
+                                <arg>fi.helsinki.cs.tmc.cli.command.CommandAnnotationProcessor</arg>
+                            </annotationProcessors>
+                            <fork>true</fork> <!-- bug; non-forked compiler has basedir set to user.dir or sth -->
+                        </configuration>
+                    </execution>
+                    <!-- TODO compile only generated classes -->
+                    <execution>
+                        <id>default-compile</id> <!-- using an id of default-compile will override the default execution -->
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <!--<compileSourceRoots>
+                                <root>${project.build.directory}/generated-sources/anno</root>
+                            </compileSourceRoots>-->
+                            <!--<excludes>
+                                <exclude>**/AnnotationProcessor.java</exclude>
+                            </excludes>-->
+                            <compilerArgs>
+                                <arg>-proc:none</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>

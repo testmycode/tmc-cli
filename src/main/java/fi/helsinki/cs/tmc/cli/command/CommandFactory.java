@@ -20,20 +20,11 @@ import java.util.Map;
 public class CommandFactory {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
-    private Map<String, Class> commands;
+    private static Map<String, Class> commands;
 
     public CommandFactory() {
-        this.commands = new HashMap<>();
-        createCommands();
-        commandDiscoverer();
-    }
+        CommandFactory.commands = new HashMap<>();
 
-    private void commandDiscoverer() {
-        CommandAnnotationProcessor processor = new CommandAnnotationProcessor();
-        System.out.println(processor.getCommands());
-    }
-
-    private void createCommands() {
         createCommand(TestCommand.class);
         createCommand(HelpCommand.class);
         createCommand(ListCoursesCommand.class);
@@ -44,9 +35,10 @@ public class CommandFactory {
     }
 
     private void createCommand(Class commandClass) {
-        Annotation annotation = commandClass.getAnnotation(Command.class);
-        Command command = (Command)annotation;
-        this.commands.put(command.name(), commandClass);
+        Class<?> klass = commandClass;
+        Annotation annotation = klass.getAnnotation(Command.class);
+        Command command = (Command) annotation;
+        CommandFactory.commands.put(command.name(), commandClass);
     }
 
     public CommandInterface getCommand(Application app, String name)  {
@@ -56,7 +48,8 @@ public class CommandFactory {
             return null;
         }
         try {
-            cons = commandClass.getConstructor(Application.class);
+            Class<?> klass = commandClass;
+            cons = klass.getConstructor(Application.class);
         } catch (NoSuchMethodException ex) {
             logger.error("Every command MUST have constructor that takes "
                     + "Application object as argument", ex);
@@ -78,7 +71,8 @@ public class CommandFactory {
     public List<Command> getCommands() {
         List<Command> list = new ArrayList<>();
         for (Class command : this.commands.values()) {
-            Annotation annotation = command.getAnnotation(Command.class);
+            Class<?> klass = command;
+            Annotation annotation = klass.getAnnotation(Command.class);
             list.add((Command)annotation);
         }
         return list;
