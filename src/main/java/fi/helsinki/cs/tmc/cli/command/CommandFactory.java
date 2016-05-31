@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.CommandList;
 
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +15,6 @@ import java.util.Map;
 
 /**
  * Class creates a map for commands.
- * The code below may blow your mind.
- * Proceed at your own risk.
  */
 public class CommandFactory {
 
@@ -25,13 +24,7 @@ public class CommandFactory {
     public CommandFactory() {
         CommandFactory.commands = new HashMap<>();
 
-        createCommand(TestCommand.class);
-        createCommand(HelpCommand.class);
-        createCommand(ListCoursesCommand.class);
-        createCommand(ListExercisesCommand.class);
-        createCommand(LoginCommand.class);
-        createCommand(DownloadExercisesCommand.class);
-        createCommand(SubmitCommand.class);
+        new CommandList().run();
     }
 
     private void createCommand(Class commandClass) {
@@ -39,6 +32,10 @@ public class CommandFactory {
         Annotation annotation = klass.getAnnotation(Command.class);
         Command command = (Command) annotation;
         CommandFactory.commands.put(command.name(), commandClass);
+    }
+
+    public static void createCommand(String name, Class commandClass) {
+        CommandFactory.commands.put(name, commandClass);
     }
 
     public CommandInterface getCommand(Application app, String name)  {

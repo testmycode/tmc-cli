@@ -99,7 +99,7 @@
                 <executions>
                     <!-- Generate the annotation processor -->
                     <execution>
-                        <id>compiler-processor</id>
+                        <id>compile-processor</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>compile</goal>
@@ -108,6 +108,9 @@
                             <compilerArgs>
                                 <arg>-proc:none</arg>
                             </compilerArgs>
+                            <includes>
+                                <include>**/CommandAnnotationProcessor.java</include>
+                            </includes>
                         </configuration>
                     </execution>
                     <!-- Generate sourses with our custom processor -->
@@ -122,6 +125,9 @@
                                 <arg>fi.helsinki.cs.tmc.cli.command.CommandAnnotationProcessor</arg>
                             </annotationProcessors>
                             <fork>true</fork> <!-- bug; non-forked compiler has basedir set to user.dir or sth -->
+                            <excludes>
+                                <exclude>**/CommandFactory.java</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                     <!-- TODO compile only generated classes -->
@@ -176,6 +182,7 @@
                     <encoding>UTF-8</encoding>
                     <linkXRef>false</linkXRef>
                     <failOnViolation>true</failOnViolation>
+                    <excludes>**/CommandList.java</excludes>
                 </configuration>
                 <version>2.16</version>
                 <executions>
