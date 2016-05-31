@@ -1,5 +1,9 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static fi.helsinki.cs.tmc.cli.io.Color.ANSI_GREEN;
+import static fi.helsinki.cs.tmc.cli.io.Color.ANSI_RED;
+import static fi.helsinki.cs.tmc.cli.io.Color.colorString;
+
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
@@ -34,32 +38,34 @@ public class RunTestsCommand implements CommandInterface {
 
     @Override
     public void run(String[] args, Io io) {
-        TmcCore core = app.getTmcCore();
-        if (core == null) {
-            return;
-        }
-
         this.io = io;
         DirectoryUtil dirUtil = new DirectoryUtil();
-        Path courseDir = dirUtil.getCourseDirectory();
-        String courseName = courseDir.getName(courseDir.getNameCount() - 1).toString();
+        String courseName = getCourseName(dirUtil);
         String exerciseName = dirUtil.getExerciseName();
 
-        Exercise exercise = new Exercise(exerciseName, courseName);
-        RunResult runResult;
-
         io.println("Running tests...");
-
+        RunResult runResult;
         try {
+            TmcCore core = app.getTmcCore();
+            Exercise exercise = new Exercise(exerciseName, courseName);
             runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
         } catch (Exception ex) {
             io.println("Failed to run tests. Please make sure you are in"
-                    + " exercise directory.");
+                    + " course and exercise directory.");
             logger.error("Failed to run tests.", ex);
             return;
         }
 
         printRunResult(runResult);
+    }
+
+    private String getCourseName(DirectoryUtil dirUtil) {
+        Path courseDir = dirUtil.getCourseDirectory();
+        try {
+            return courseDir.getName(courseDir.getNameCount() - 1).toString();
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     private void printRunResult(RunResult runResult) {
@@ -80,18 +86,4 @@ public class RunTestsCommand implements CommandInterface {
         }
     }
 
-    // All this this color printing stuff should prob be moved to io?
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
-
-    private String colorString(String string, String color) {
-        return color + string + ANSI_RESET;
-    }
 }
