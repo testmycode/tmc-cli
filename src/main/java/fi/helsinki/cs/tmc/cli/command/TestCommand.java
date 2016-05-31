@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Io;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -24,16 +25,16 @@ public class TestCommand implements CommandInterface {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Io io) {
         try {
             CommandLine line = this.parser.parse(options, args);
             if (line.hasOption("a")) {
-                System.out.println("Let's run easter egg with -a");
+                io.println("Let's run easter egg with -a");
             } else {
-                System.out.println("Let's run easter egg.");
+                io.println("Let's run easter egg.");
             }
         } catch (ParseException exp) {
-            System.err.println("Parsing failed.  Reason: " + exp.getMessage());
+            io.println("Parsing failed. Reason: " + exp.getMessage());
         }
     }
 }

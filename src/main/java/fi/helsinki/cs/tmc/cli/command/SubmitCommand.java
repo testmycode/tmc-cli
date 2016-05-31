@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
@@ -21,7 +22,7 @@ public class SubmitCommand implements CommandInterface {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Io io) {
         TmcCore core;
         Course course;
         SubmissionResult submit;
@@ -32,7 +33,7 @@ public class SubmitCommand implements CommandInterface {
         Path dir = dirUtil.getCourseDirectory();
 
         if (dir == null) {
-            System.out.println("You are not in course directory");
+            io.println("You are not in course directory");
             return;
         }
         course = TmcUtil.findCourse(core, dir.getName(dir.getNameCount() - 1).toString());
@@ -46,6 +47,6 @@ public class SubmitCommand implements CommandInterface {
             return;
         }
 
-        System.out.println(submit);
+        io.println(submit.toString());
     }
 }

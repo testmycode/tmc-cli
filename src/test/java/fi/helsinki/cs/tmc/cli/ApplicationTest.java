@@ -2,40 +2,40 @@ package fi.helsinki.cs.tmc.cli;
 
 import static org.junit.Assert.assertTrue;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-
 public class ApplicationTest {
 
     Application app;
-    OutputStream os;
+    TestIo testIo;
 
     @Before
     public void setUp() {
-        app = new Application();
-
-        os = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(os);
-        System.setOut(ps);
+        testIo = new TestIo();
+        app = new Application(testIo);
     }
 
     @Test
     public void versionWorksWithRightParameter() {
         String[] args = {"-v"};
         app.run(args);
-        assertTrue(os.toString().contains("TMC-CLI version"));
+        assertTrue(testIo.printedText.contains("TMC-CLI version"));
+    }
+    
+    @Test
+    public void helpWorksWithRightParameter() {
+        String[] args = {"-h"};
+        app.run(args);
+        assertTrue(testIo.printedText.contains("Usage: tmc-cli [args] COMMAND [command-args]"));
     }
 
     @Test
     public void runCommandWorksWithWrongParameter() {
         String[] args = {"foo"};
         app.run(args);
-        assertTrue(os.toString().contains("Command foo doesn't exist"));
+        assertTrue(testIo.printedText.contains("Command foo doesn't exist"));
     }
 }

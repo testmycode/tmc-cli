@@ -1,19 +1,20 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 public class LoginCommandTest {
 
@@ -22,32 +23,25 @@ public class LoginCommandTest {
     private static String password;
 
     private Application app;
-    private OutputStream os;
-
-    public LoginCommandTest() {
-    }
+    Io mockIo;
 
     @BeforeClass
     public static void setUpClass() {
-        LoginCommandTest.serverAddress = System.getenv("TMC_SERVER_ADDRESS");
-        LoginCommandTest.username = System.getenv("TMC_USERNAME");
-        LoginCommandTest.password = System.getenv("TMC_PASSWORD");
-
-        assertNotNull(LoginCommandTest.serverAddress);
-        assertNotNull(LoginCommandTest.username);
-        assertNotNull(LoginCommandTest.password);
+        serverAddress = System.getenv("TMC_SERVER_ADDRESS");
+        username = System.getenv("TMC_USERNAME");
+        password = System.getenv("TMC_PASSWORD");
+        
+        assertNotNull(serverAddress);
+        assertNotNull(username);
+        assertNotNull(password);
     }
 
     @Before
     public void setUp() {
         // Unwanted behaviour? Will delete the real settings file atm.
         new SettingsIo().delete();
-
-        this.app = new Application();
-        this.os = new ByteArrayOutputStream();
-
-        PrintStream ps = new PrintStream(os);
-        System.setOut(ps);
+        mockIo = mock(TerminalIo.class);
+        app = new Application(mockIo);
     }
 
     @After
@@ -58,43 +52,38 @@ public class LoginCommandTest {
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        String[] args = createArgs(
-                LoginCommandTest.serverAddress,
-                LoginCommandTest.username,
-                LoginCommandTest.password);
-
-        // Unwanted behaviour? Will create real settings file atm.
+        String[] args = {"login", "-s", serverAddress, "-u", username, "-p", password};
         app.run(args);
-
-        String output = os.toString();
-        assertTrue(output.contains("succesful"));
+        verify(mockIo).println(eq("Login succesful."));
     }
 
     @Test
     public void catches401IfCorrectServerAndWrongUsername() {
-        String[] args = createArgs(
-                LoginCommandTest.serverAddress,
-                "",
-                LoginCommandTest.password);
-
+        String[] args = {"login", "-s", serverAddress, "-u", "foo", "-p", password};
         app.run(args);
-        String output = os.toString();
-        assertTrue(output.contains("Incorrect username or password."));
+        verify(mockIo).println(eq("Incorrect username or password."));
     }
-
-    private String[] createArgs(String server, String username, String pwd) {
-        return new String[]{
-            "login",
-            "-s", server,
-            "-u", username,
-            "-p", pwd};
+    
+    @Test
+    public void loginAsksUsernameFromUser() {
+        String[] args = {"login", "-s", serverAddress, "-p", password};
+        when(mockIo.readLine("username: ")).thenReturn(username);
+        app.run(args);
+        verify(mockIo).readLine(eq("username: "));
     }
-
-    private String[] createArgs(String username, String pwd) {
-        return new String[]{
-            "login",
-            "-s", LoginCommandTest.serverAddress,
-            "-u", username,
-            "-p", pwd};
+    
+    @Test
+    public void loginAsksPasswordFromUser() {
+        String[] args = {"login", "-s", serverAddress, "-u", username};
+        when(mockIo.readPassword("password: ")).thenReturn(password);
+        app.run(args);
+        verify(mockIo).readPassword(eq("password: "));
+    }
+    
+    @Test
+    public void loginGetsRightServerAddressIfNotGiven() {
+        String[] args = {"login", "-u", username, "-p", password};
+        app.run(args);
+        verify(mockIo).println(eq("Login succesful."));
     }
 }

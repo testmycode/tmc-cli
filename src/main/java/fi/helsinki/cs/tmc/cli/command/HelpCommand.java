@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Io;
 
 @Command(name = "help", desc = "Lists every command")
 public class HelpCommand implements CommandInterface {
@@ -16,9 +17,9 @@ public class HelpCommand implements CommandInterface {
     }
 
     @Override
-    public void run(String[] args) {
-        System.out.println("Usage: tmc-cli [args] COMMAND [command-args]\n");
-        System.out.println("TMC commands:");
+    public void run(String[] args, Io io) {
+        io.println("Usage: tmc-cli [args] COMMAND [command-args]\n");
+        io.println("TMC commands:");
 
         for (Class<Command> commandClass : this.commands.getCommands()) {
             Command command = commands.getCommand(commandClass);
@@ -27,7 +28,7 @@ public class HelpCommand implements CommandInterface {
             }
             System.out.println("  " + command.name() + "\t" + command.desc());
         }
-        System.out.println("");
+        io.println("");
         app.printHelp();
     }
 }

@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
@@ -21,18 +22,19 @@ import java.util.List;
 public class ListExercisesCommand implements CommandInterface {
     private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
     private Application app;
+    private Io io;
 
     public ListExercisesCommand(Application app) {
         this.app = app;
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Io io) {
         TmcCore core;
-        String name;
+        this.io = io;
 
         if (args.length == 0) {
-            System.out.println("USAGE: tmc exercise COURSE");
+            this.io.println("USAGE: tmc exercise COURSE");
             return;
         }
 
@@ -52,16 +54,22 @@ public class ListExercisesCommand implements CommandInterface {
             CourseInfo courseinfo = new CourseInfoIo(dirutil.getConfigFile()).load();
         }
         if (name == null) {
-            System.out.println("No course specified. Either run the command "
+            this.io.println("No course specified. Either run the command "
                     + "inside a course directory or enter\n"
                     + "the course as a parametre.");
             return;
         }
         course = TmcUtil.findCourse(core, name);
+
+        if (course == null) {
+            this.io.println("Course doesn't exist.");
+            return;
+        }
+
         exercises = course.getExercises();
 
         for (Exercise exercise : exercises) {
-            System.out.println(exercise.getName());
+            this.io.println(exercise.getName());
         }
     }
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import org.apache.commons.io.FileUtils;
@@ -23,7 +24,7 @@ public class TmcUtilTest {
 
     @Before
     public void setUp() {
-        app = new Application();
+        app = new Application(new TerminalIo());
         app.createTmcCore(new Settings(true));
         try {
             FileUtils.deleteDirectory(new File("cert-test"));
