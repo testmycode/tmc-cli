@@ -16,7 +16,12 @@ public class HelpCommand implements CommandInterface {
     public void run(String[] args) {
         System.out.println("Usage: tmc-cli [args] COMMAND [command-args]\n");
         System.out.println("TMC commands:");
-        for (Command command : this.commands.getCommands()) {
+
+        for (Class<Command> commandClass : this.commands.getCommands()) {
+            Command command = commands.getCommand(commandClass);
+            if ((Class)commandClass == (Class)TestCommand.class) {
+                continue;
+            }
             System.out.println("  " + command.name() + "\t" + command.desc());
         }
         System.out.println("");

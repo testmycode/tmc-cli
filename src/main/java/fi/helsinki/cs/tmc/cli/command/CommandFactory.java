@@ -9,8 +9,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class creates a map for commands.
@@ -64,13 +66,13 @@ public class CommandFactory {
         return null;
     }
 
-    public List<Command> getCommands() {
-        List<Command> list = new ArrayList<>();
-        for (Class command : this.commands.values()) {
-            Class<?> klass = command;
-            Annotation annotation = klass.getAnnotation(Command.class);
-            list.add((Command)annotation);
-        }
-        return list;
+    public Command getCommand(Class<Command> commandClass) {
+        Class<?> klass = commandClass;
+        Annotation annotation = klass.getAnnotation(Command.class);
+        return (Command)annotation;
+    }
+
+    public Set<Class<Command>> getCommands() {
+        return new HashSet<>(this.commands.values());
     }
 }
