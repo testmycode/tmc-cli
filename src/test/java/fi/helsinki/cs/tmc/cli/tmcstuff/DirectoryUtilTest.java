@@ -4,6 +4,8 @@ import static junit.framework.Assert.assertNull;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.persistance.ConfigFileIO;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +51,14 @@ public class DirectoryUtilTest {
         exercises.add(new Exercise("viikko2-subdir-teht3"));
         CourseInfo info = new CourseInfo(new Settings(true), "dirUtilTest");
         CourseInfoIo infoio = new CourseInfoIo(workDir.resolve(CourseInfoIo.COURSE_CONFIG));
+    }
 
+    @After
+    public void cleanUp() {
+        String tempDir = System.getProperty("java.io.tmpdir");
+        try {
+            FileUtils.deleteDirectory(Paths.get(tempDir).resolve("dirUtilTest").toFile());
+        } catch (Exception e) { }
     }
 
     @Test
