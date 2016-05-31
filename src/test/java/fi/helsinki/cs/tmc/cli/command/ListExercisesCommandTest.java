@@ -38,5 +38,4 @@ public class ListExercisesCommandTest {
         app.run(args);
         verify(mockIo).println(Mockito.contains("No course specified"));
     }
-
 }
