@@ -178,7 +178,9 @@
                     <encoding>UTF-8</encoding>
                     <linkXRef>false</linkXRef>
                     <failOnViolation>true</failOnViolation>
-                    <excludes>**/CommandList.java</excludes>
+                    <configuration>
+                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    </configuration>
                 </configuration>
                 <executions>
                     <execution>
