@@ -178,9 +178,7 @@
                     <encoding>UTF-8</encoding>
                     <linkXRef>false</linkXRef>
                     <failOnViolation>true</failOnViolation>
-                    <excludes>
-                        <exclude>**/CommandList.java</exclude>
-                    </excludes>
+                    <excludes>**/CommandList.java</excludes>
                 </configuration>
                 <executions>
                     <execution>
