@@ -4,12 +4,12 @@ import fi.helsinki.cs.tmc.cli.Application;
 
 @Command(name = "help", desc = "Lists every command")
 public class HelpCommand implements CommandInterface {
-    private Application app;
-    private CommandFactory commands;
+    private final Application app;
+    private final CommandFactory commands;
 
     public HelpCommand(Application app) {
         this.app = app;
-        this.commands = app.getCommandMap();
+        this.commands = app.getCommandFactory();
     }
 
     @Override

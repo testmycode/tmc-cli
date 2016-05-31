@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.command.CommandFactory;
 import fi.helsinki.cs.tmc.cli.command.CommandInterface;
+import fi.helsinki.cs.tmc.cli.command.CommandList;
 
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
@@ -44,6 +45,7 @@ public class Application {
         this.parser = new GnuParser();
         this.options = new Options();
         this.commands = new CommandFactory();
+        new CommandList().run(this.commands);
         options.addOption("h", "help", false, "Display help information about tmc-cli.");
         options.addOption("v", "version", false, "Give the version of the tmc-cli.");
     }
@@ -134,7 +136,7 @@ public class Application {
         /*XXX should we somehow check if the authentication is successful here */
     }
 
-    public CommandFactory getCommandMap() {
+    public CommandFactory getCommandFactory() {
         return this.commands;
     }
 

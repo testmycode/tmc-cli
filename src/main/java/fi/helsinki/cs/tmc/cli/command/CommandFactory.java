@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.command.CommandList;
 
 import org.slf4j.LoggerFactory;
 
@@ -19,25 +18,25 @@ import java.util.Map;
 public class CommandFactory {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
-    private static Map<String, Class> commands;
+    private final Map<String, Class<Command>> commands;
 
     public CommandFactory() {
-        CommandFactory.commands = new HashMap<>();
-
-        new CommandList().run();
+        commands = new HashMap<>();
     }
 
+    /*TODO rename addCommand */
     private void createCommand(Class commandClass) {
         Class<?> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
         Command command = (Command) annotation;
-        CommandFactory.commands.put(command.name(), commandClass);
+        this.commands.put(command.name(), commandClass);
     }
 
-    public static void createCommand(String name, Class commandClass) {
-        CommandFactory.commands.put(name, commandClass);
+    public void createCommand(String name, Class commandClass) {
+        this.commands.put(name, commandClass);
     }
 
+    /*TODO rename createCommand */
     public CommandInterface getCommand(Application app, String name)  {
         Class commandClass = commands.get(name);
         Constructor<?> cons;
