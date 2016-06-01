@@ -15,16 +15,32 @@ import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.langs.domain.TestCase;
 import fi.helsinki.cs.tmc.langs.domain.TestCase.Status;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 
 @Command(name = "submit", desc = "Submit exercises")
 public class SubmitCommand implements CommandInterface {
 
+    private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
+    private final Options options;
+
     private Application app;
     private Io io;
+    private boolean showAll;
+    private boolean showDetails;
 
     public SubmitCommand(Application app) {
         this.app = app;
+        this.options = new Options();
+
+        options.addOption("a", "all", false, "Show all test results");
+        options.addOption("d", "details", false, "Show detailed error message");
     }
 
     @Override
@@ -33,9 +49,16 @@ public class SubmitCommand implements CommandInterface {
         SubmissionResult submit;
         DirectoryUtil dirUtil;
 
+        if (!parseArgs(args)) {
+            return;
+        }
+
         this.io = io;
         dirUtil = new DirectoryUtil();
         core = this.app.getTmcCore();
+        if (core == null) {
+            return;
+        }
         Path dir = dirUtil.getCourseDirectory();
 
         if (dir == null) {
@@ -57,6 +80,20 @@ public class SubmitCommand implements CommandInterface {
         printResults(submit);
     }
 
+    private boolean parseArgs(String[] args) {
+        GnuParser parser = new GnuParser();
+        CommandLine line;
+        try {
+            line = parser.parse(options, args);
+        } catch (ParseException e) {
+            logger.warn("Unable to parse arguments.", e);
+            return false;
+        }
+        this.showAll = line.hasOption("a");
+        this.showDetails = line.hasOption("d");
+        return true;
+    }
+
     private void printResults(SubmissionResult result) {
 
         int passedTestCases = 0;
@@ -65,8 +102,11 @@ public class SubmitCommand implements CommandInterface {
                 passedTestCases++;
             }
         }
+        int failedTestCases = result.getTestCases().size() - passedTestCases;
 
-        io.println("");
+        if (failedTestCases != 0 || (passedTestCases != 0 && showAll)) {
+            io.println("");
+        }
 
         if (result.isAllTestsPassed()) {
             io.println(Color.colorString("All tests passed on the server!", Color.ANSI_GREEN));
@@ -76,19 +116,22 @@ public class SubmitCommand implements CommandInterface {
             //io.println(Color.colorString("Exercise '" + result.getExerciseName() + "' failed.", Color.ANSI_RED));
             String msg;
             if (passedTestCases == 0) {
-                msg = "All tests failed on the server.";
+                io.println(Color.colorString("All tests failed on the server.",
+                        Color.ANSI_GREEN));
             } else {
-                msg = "Some tests failed on the server.";
+                io.println(Color.colorString(passedTestCases
+                        + " tests passed on the server.", Color.ANSI_GREEN));
+                io.println(Color.colorString(failedTestCases
+                        + " tests failed on the server.", Color.ANSI_RED));
             }
-            io.println(Color.colorString(msg, Color.ANSI_RED));
-        }
 
-        System.out.println("\n\n\n\n" + result.toString());
+        }
     }
 
+    // We get a broken TestCase obj atm so there's lots of weird stuff here...
     private boolean printTestCase(TestCase testCase) {
-        String className = "MysteryTestClass"; //testCase.className;
-        String methodName = "MysteryTestMethod"; //testCase.methodName
+        String className = "TestClassName"; //testCase.className;
+        String methodName = "TestMethodName"; //testCase.methodName
         Status status; //testCase.status;
 
         // TEMP: Until JSON -> TestCase parsing is fixed, non empty message
@@ -102,11 +145,16 @@ public class SubmitCommand implements CommandInterface {
         String infoMsg = status.name() + ": " + className + " " + methodName;
         switch (status) {
             case FAILED:
+                infoMsg += "\n        " + testCase.message;
                 io.println(Color.colorString(infoMsg, Color.ANSI_RED));
-                io.println(Color.colorString("\t" + testCase.message, Color.ANSI_RED));
+                if (showDetails && testCase.exception != null) {
+                    io.println(testCase.exception.toString());
+                }
                 break;
             case PASSED:
-                io.println(Color.colorString(infoMsg, Color.ANSI_GREEN));
+                if (showAll) {
+                    io.println(Color.colorString(infoMsg, Color.ANSI_GREEN));
+                }
                 break;
             default:
                 io.println("wot?");
