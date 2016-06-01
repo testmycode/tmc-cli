@@ -3,9 +3,12 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 import static junit.framework.Assert.assertNull;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.persistance.ConfigFileIO;
+
 import org.apache.commons.io.FileUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,7 +23,7 @@ public class DirectoryUtilTest {
     private DirectoryUtil dirutil;
 
     @BeforeClass
-    static public void setup() {
+    public static void setup() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
         try {
             Files.createDirectories(workDir);
@@ -53,7 +56,7 @@ public class DirectoryUtilTest {
     }
 
     @AfterClass
-    static public void cleanUp() {
+    public static void cleanUp() {
         String tempDir = System.getProperty("java.io.tmpdir");
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir).resolve("dirUtilTest").toFile());
@@ -70,6 +73,31 @@ public class DirectoryUtilTest {
     }
 
     @Test
+    public void returnsCorrectValuesInCourseDirectory() {
+        Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
+        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        Assert.assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
+                dirutil.getCourseDirectory());
+        Assert.assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
+                dirutil.getWorkingDirectory());
+    }
+
+    @Test
+    public void returnsCorrectValuesInSubDirectory() {
+        Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
+        DirectoryUtil dirutil = new DirectoryUtil(workDir, Paths.get("viikko1"));
+        Assert.assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
+                dirutil.getCourseDirectory());
+        Assert.assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
+                        .resolve("viikko1"),
+                dirutil.getWorkingDirectory());
+    }
+
+    @Test
     public void worksIfInCourseDirectoryWithNoParams() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
         DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
@@ -78,6 +106,7 @@ public class DirectoryUtilTest {
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 dirutil.getConfigFile());
         List<String> exercises = dirutil.getExerciseNames(new String[] {});
+        Assert.assertEquals(3, exercises.size());
         Assert.assertTrue(exercises.contains("viikko1-teht1"));
         Assert.assertTrue(exercises.contains("viikko2-teht2"));
         Assert.assertTrue(exercises.contains("viikko2-subdir-teht3"));
@@ -93,6 +122,7 @@ public class DirectoryUtilTest {
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 dirutil.getConfigFile());
         List<String> exercises = dirutil.getExerciseNames(new String[] {});
+        Assert.assertEquals(2, exercises.size());
         Assert.assertFalse(exercises.contains("viikko1-teht1"));
         Assert.assertTrue(exercises.contains("viikko2-teht2"));
         Assert.assertTrue(exercises.contains("viikko2-subdir-teht3"));
@@ -108,6 +138,7 @@ public class DirectoryUtilTest {
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 dirutil.getConfigFile());
         List<String> exercises = dirutil.getExerciseNames(new String[] {});
+        Assert.assertEquals(1, exercises.size());
         Assert.assertFalse(exercises.contains("viikko1-teht1"));
         Assert.assertFalse(exercises.contains("viikko2-teht2"));
         Assert.assertTrue(exercises.contains("viikko2-subdir-teht3"));
@@ -122,10 +153,12 @@ public class DirectoryUtilTest {
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 dirutil.getConfigFile());
         List<String> exercises = dirutil.getExerciseNames(new String[] {"viikko2"});
+        Assert.assertEquals(2, exercises.size());
         Assert.assertFalse(exercises.contains("viikko1-teht1"));
         Assert.assertTrue(exercises.contains("viikko2-teht2"));
         Assert.assertTrue(exercises.contains("viikko2-subdir-teht3"));
         exercises = dirutil.getExerciseNames(new String[] {"teht"});
+        Assert.assertEquals(0, exercises.size());
         Assert.assertFalse(exercises.contains("viikko1-teht1"));
         Assert.assertFalse(exercises.contains("viikko2-teht2"));
         Assert.assertFalse(exercises.contains("viikko2-subdir-teht3"));
@@ -141,6 +174,7 @@ public class DirectoryUtilTest {
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 dirutil.getConfigFile());
         List<String> exercises = dirutil.getExerciseNames(new String[] {"teht"});
+        Assert.assertEquals(1, exercises.size());
         Assert.assertFalse(exercises.contains("viikko1-teht1"));
         Assert.assertTrue(exercises.contains("viikko2-teht2"));
         Assert.assertFalse(exercises.contains("viikko2-subdir-teht3"));
@@ -156,6 +190,7 @@ public class DirectoryUtilTest {
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 dirutil.getConfigFile());
         List<String> exercises = dirutil.getExerciseNames(new String[] {"teht"});
+        Assert.assertEquals(1, exercises.size());
         Assert.assertFalse(exercises.contains("viikko1-teht1"));
         Assert.assertFalse(exercises.contains("viikko2-teht2"));
         Assert.assertTrue(exercises.contains("viikko2-subdir-teht3"));

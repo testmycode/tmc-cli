@@ -16,10 +16,12 @@ public class DirectoryUtil {
     private String exercise;
 
     public DirectoryUtil(Path workingDir, Path subDir) {
-        this.courseDirectory = workingDir;
         if (subDir != null) {
-            this.courseDirectory = this.courseDirectory.resolve(subDir);
+            this.workingDirectory = workingDir.resolve(subDir);
+        } else {
+            this.workingDirectory = workingDir;
         }
+        this.courseDirectory = this.workingDirectory;
         this.exercise = null;
 
         while (this.courseDirectory.getParent() != null) {
@@ -41,7 +43,6 @@ public class DirectoryUtil {
         this.exercise = null;
         this.configFile = null;
         this.courseDirectory = null;
-        this.workingDirectory = workingDir;
     }
 
     public DirectoryUtil(Path subDir) {
@@ -79,7 +80,7 @@ public class DirectoryUtil {
         CourseInfo info = infoio.load();
         List<Exercise> exercises = info.getExercises();
         List<String> exerciseNames = new ArrayList<>();
-        if (params != null || params.length > 0) {
+        if (params == null || params.length == 0) {
             if (this.workingDirectory.equals(this.courseDirectory)) {
                 // In course root dir and no params - return all exercises
                 for (Exercise exercise : exercises) {
@@ -108,7 +109,7 @@ public class DirectoryUtil {
                 // Match only exercises that begin with our parametres, so that
                 // exercises with identical names in other subdirectories won't
                 // be selected.
-                if (exercise.getName().matches("^" + param)) {
+                if (exercise.getName().matches("^" + param + ".*")) {
                     exerciseNames.add(exercise.getName());
                 }
             }
@@ -121,5 +122,9 @@ public class DirectoryUtil {
      */
     public Path getCourseDirectory() {
         return courseDirectory;
+    }
+
+    public Path getWorkingDirectory() {
+        return this.workingDirectory;
     }
 }
