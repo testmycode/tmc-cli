@@ -17,7 +17,6 @@ import java.util.List;
 
 @Command(name = "list-exercises", desc = "List the exercises for a specific course")
 public class ListExercisesCommand implements CommandInterface {
-    private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
     private Application app;
     private Io io;
 
