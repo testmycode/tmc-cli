@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import org.apache.commons.cli.CommandLine;
@@ -11,7 +13,8 @@ import org.apache.commons.cli.ParseException;
 /**
  * Class is a test command class.
  */
-public class TestCommand implements Command {
+@Command(name = "easter-egg", desc = "This is an easter egg test command.")
+public class TestCommand implements CommandInterface {
     private Options options;
     private GnuParser parser;
 
@@ -19,16 +22,6 @@ public class TestCommand implements Command {
         this.parser = new GnuParser();
         this.options = new Options();
         options.addOption("a", false, "testikomento");
-    }
-
-    @Override
-    public String getDescription() {
-        return "This is an easter egg test command.";
-    }
-
-    @Override
-    public String getName() {
-        return "easter-egg";
     }
 
     @Override

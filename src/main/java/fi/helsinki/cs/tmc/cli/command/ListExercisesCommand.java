@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
@@ -13,22 +15,13 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import java.util.List;
 
-public class ListExercisesCommand implements Command {
+@Command(name = "list-exercises", desc = "List the exercises for a specific course")
+public class ListExercisesCommand implements CommandInterface {
     private Application app;
     private Io io;
 
     public ListExercisesCommand(Application app) {
         this.app = app;
-    }
-
-    @Override
-    public String getDescription() {
-        return "List the exercises for a specific course";
-    }
-
-    @Override
-    public String getName() {
-        return "list-exercises";
     }
 
     @Override
@@ -48,6 +41,7 @@ public class ListExercisesCommand implements Command {
                 courseName = courseinfo.getCourse();
 
             } else  {
+                this.io.println("USAGE: tmc exercise COURSE");
                 this.io.println("No course specified. Either run the command "
                         + "inside a course directory or enter\n"
                         + "the course as a parameter.");
@@ -65,7 +59,7 @@ public class ListExercisesCommand implements Command {
         printExercises(core, courseName);
     }
 
-    //This one can be moved to TmcUtil maybe?
+    // This one can be moved to TmcUtil maybe?
     private void printExercises(TmcCore core, String name) {
         List<Exercise> exercises;
         Course course;

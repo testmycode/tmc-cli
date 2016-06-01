@@ -5,6 +5,8 @@ import static fi.helsinki.cs.tmc.cli.io.Color.ANSI_RED;
 import static fi.helsinki.cs.tmc.cli.io.Color.colorString;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
@@ -18,7 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
-public class RunTestsCommand implements Command {
+/**
+ * Quick and dirty.
+ */
+@Command(name = "run-tests", desc = "Run local exercise tests.")
+public class RunTestsCommand implements CommandInterface {
 
     private static final Logger logger
             = LoggerFactory.getLogger(RunTestsCommand.class);
@@ -28,16 +34,6 @@ public class RunTestsCommand implements Command {
 
     public RunTestsCommand(Application app) {
         this.app = app;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Run local exercise tests";
-    }
-
-    @Override
-    public String getName() {
-        return "run-tests";
     }
 
     @Override
