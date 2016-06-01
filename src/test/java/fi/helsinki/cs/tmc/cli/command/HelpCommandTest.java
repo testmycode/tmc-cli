@@ -22,9 +22,9 @@ public class HelpCommandTest {
     }
 
     @Test
-    public void runWorksRight() {
+    public void helpListsAllCommands() {
         String[] args = {"help"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("This is an easter egg test command."));
+        assertTrue(testIo.printedText.contains("help"));
     }
 }

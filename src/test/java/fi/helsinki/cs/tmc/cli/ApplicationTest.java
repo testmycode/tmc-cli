@@ -29,9 +29,9 @@ public class ApplicationTest {
     public void helpWorksWithRightParameter() {
         String[] args = {"-h"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("Usage: tmc-cli [args] COMMAND [command-args]"));
+        assertTrue(testIo.printedText.contains("Usage: tmc"));
     }
-    
+
     @Test
     public void runCommandWorksWithWrongParameter() {
         String[] args = {"foo"};

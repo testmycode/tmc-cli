@@ -88,6 +88,67 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
+                </configuration>
+                <executions>
+                    <!-- Generate the annotation processor -->
+                    <execution>
+                        <id>compile-processor</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compilerArgs>
+                                <arg>-proc:none</arg>
+                            </compilerArgs>
+                            <includes>
+                                <include>**/CommandAnnotationProcessor.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <!-- Generate sourses with our custom processor -->
+                    <execution>
+                        <id>process-annotations</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <annotationProcessors>
+                                <arg>fi.helsinki.cs.tmc.cli.command.core.CommandAnnotationProcessor</arg>
+                            </annotationProcessors>
+                            <fork>true</fork> <!-- bug; non-forked compiler has basedir set to user.dir or sth -->
+                            <excludes>
+                                <exclude>**/CommandFactory.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <!-- TODO compile only generated classes -->
+                    <execution>
+                        <id>default-compile</id> <!-- using an id of default-compile will override the default execution -->
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <!--<compileSourceRoots>
+                                <root>${project.build.directory}/generated-sources/anno</root>
+                            </compileSourceRoots>-->
+                            <compilerArgs>
+                                <arg>-proc:none</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.1.0</version>
@@ -104,22 +165,23 @@
                     <maxmem>256m</maxmem>
                     <instrumentation>
                         <ignoreTrivial>true</ignoreTrivial>
-                        <excludes>
-                        </excludes>
                     </instrumentation>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.16</version>
                 <configuration>
                     <configLocation>${basedir}/src/main/resources/google_checks.xml</configLocation>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <encoding>UTF-8</encoding>
                     <linkXRef>false</linkXRef>
                     <failOnViolation>true</failOnViolation>
+                    <configuration>
+                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    </configuration>
                 </configuration>
-                <version>2.16</version>
                 <executions>
                     <execution>
                         <id>verify</id>
@@ -172,6 +234,7 @@
                     <plugin>
                         <artifactId>exec-maven-plugin</artifactId>
                         <groupId>org.codehaus.mojo</groupId>
+                        <version>1.5.0</version>
                         <executions>
                             <execution><!-- Create a wrapper for java binary -->
                                 <id>Script wrapper</id>

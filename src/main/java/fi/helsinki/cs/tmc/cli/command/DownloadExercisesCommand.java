@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
@@ -14,22 +16,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class DownloadExercisesCommand implements Command {
+@Command(name = "download", desc = "Download exercises for a specific course")
+public class DownloadExercisesCommand implements CommandInterface {
 
     private Application app;
 
     public DownloadExercisesCommand(Application app) {
         this.app = app;
-    }
-
-    @Override
-    public String getDescription() {
-        return "Download exercises for a specific course";
-    }
-
-    @Override
-    public String getName() {
-        return "download";
     }
 
     @Override
@@ -39,7 +32,7 @@ public class DownloadExercisesCommand implements Command {
 
         if (args.length == 0) {
             io.println("You must give course name as argument.");
-            io.println("USAGE: tmc " + getName() + " COURSE");
+            io.println("Usage: tmc download COURSE");
             return;
         }
 
