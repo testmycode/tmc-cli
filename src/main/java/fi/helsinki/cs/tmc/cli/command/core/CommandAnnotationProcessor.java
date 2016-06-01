@@ -49,10 +49,12 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             bwriter.append("package ");
             bwriter.append(PACKAGE_NAME);
             bwriter.append(";\n\n");
+            bwriter.append("//CHECKSTYLE:OFF\n");
             bwriter.append("import " + PACKAGE_NAME + ".core.CommandFactory;\n\n");
             for (Entry<String, String> entry : map.entrySet()) {
                 bwriter.append("import " + entry.getValue() + ";\n");
             }
+            bwriter.append("//CHECKSTYLE:ON\n");
             bwriter.append("\npublic class " + CLASS_NAME + " {\n");
             bwriter.append(TAB + "public void run(CommandFactory factory) {\n");
             for (Entry<String, String> entry : map.entrySet()) {
