@@ -11,14 +11,11 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
 public class ListExercisesCommand implements Command {
-    private static final Logger logger = LoggerFactory.getLogger(ListExercisesCommand.class);
     private Application app;
+    private Io io;
 
     public ListExercisesCommand(Application app) {
         this.app = app;
@@ -37,38 +34,51 @@ public class ListExercisesCommand implements Command {
     @Override
     public void run(String[] args, Io io) {
         TmcCore core;
+        this.io = io;
+        String courseName;
 
+        // If no args given, check if the current directory is a course directory and set courseName as the name of that course.
+        // Else, print out a help message.
         if (args.length == 0) {
-            System.out.println("USAGE: tmc " + getName() + " COURSE");
-            return;
+            DirectoryUtil dirUtil = new DirectoryUtil();
+            System.out.println(dirUtil.getConfigFile());
+
+            if (dirUtil.getConfigFile() != null) {
+                CourseInfo courseinfo = new CourseInfoIo(dirUtil.getConfigFile()).load();
+                courseName = courseinfo.getCourse();
+
+            } else  {
+                this.io.println("No course specified. Either run the command "
+                        + "inside a course directory or enter\n"
+                        + "the course as a parameter.");
+                return;
+            }
+
+        } else {
+            courseName = args[0];
         }
 
         core = this.app.getTmcCore();
         if (core == null) {
             return;
         }
-        printExercises(core, args[0]);
+        printExercises(core, courseName);
     }
 
-    public void printExercises(TmcCore core, String name) {
+    //This one can be moved to TmcUtil maybe?
+    private void printExercises(TmcCore core, String name) {
         List<Exercise> exercises;
         Course course;
-        if (name == null) {
-            // If no arguments are given, check if the current directory is a course directory
-            DirectoryUtil dirutil = new DirectoryUtil();
-            CourseInfo courseinfo = new CourseInfoIo(dirutil.getConfigFile()).load();
-        }
-        if (name == null) {
-            System.out.println("No course specified. Either run the command "
-                    + "inside a course directory or enter\n"
-                    + "the course as a parametre.");
+
+        course = TmcUtil.findCourse(core, name);
+        if (course == null) {
+            this.io.println("Course doesn't exist.");
             return;
         }
-        course = TmcUtil.findCourse(core, name);
-        exercises = course.getExercises();
 
+        exercises = course.getExercises();
         for (Exercise exercise : exercises) {
-            System.out.println(exercise.getName());
+            this.io.println(exercise.getName());
         }
     }
 }
