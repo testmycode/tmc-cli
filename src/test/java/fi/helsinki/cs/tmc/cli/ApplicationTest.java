@@ -22,21 +22,21 @@ public class ApplicationTest {
     @Test
     public void versionWorksWithRightParameter() {
         String[] args = {"-v"};
-        this.app.run(args);
+        app.run(args);
         assertTrue(testIo.printedText.contains("TMC-CLI version"));
     }
     
     @Test
     public void helpWorksWithRightParameter() {
         String[] args = {"-h"};
-        this.app.run(args);
-        assertTrue(testIo.printedText.contains("Usage: tmc-cli [args] COMMAND [command-args]"));
+        app.run(args);
+        assertTrue(testIo.printedText.contains("Usage: tmc"));
     }
-    
+
     @Test
     public void runCommandWorksWithWrongParameter() {
         String[] args = {"foo"};
-        this.app.run(args);
+        app.run(args);
         assertTrue(testIo.printedText.contains("Command foo doesn't exist"));
     }
 }

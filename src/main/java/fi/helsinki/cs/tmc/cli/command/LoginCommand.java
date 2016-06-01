@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
@@ -19,7 +21,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class LoginCommand implements Command {
+@Command(name = "login", desc = "Login to TMC server.")
+public class LoginCommand implements CommandInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
     private Io io;
@@ -32,16 +35,6 @@ public class LoginCommand implements Command {
         options.addOption("u", "user", true, "TMC username");
         options.addOption("p", "password", true, "Password for the user");
         options.addOption("s", "server", true, "Address for TMC server");
-    }
-    
-    @Override
-    public String getDescription() {
-        return "Login to TMC server.";
-    }
-
-    @Override
-    public String getName() {
-        return "login";
     }
 
     @Override

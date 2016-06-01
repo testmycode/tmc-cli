@@ -26,16 +26,16 @@ public class ListExercisesCommandTest {
     }
 
     @Test
-    public void runWorksRight() {
+    public void listExercisesGivesCorrectExercise() {
         String[] args = {"list-exercises", "demo"};
         app.run(args);
         verify(mockIo).println(Mockito.contains("HeiMaailma"));
     }
 
     @Test
-    public void commandWorksWithEmptyArgs() {
+    public void emptyArgsGivesAnErrorMessage() {
         String[] args = {"list-exercises"};
         app.run(args);
-        verify(mockIo).println(Mockito.contains("USAGE: tmc"));
+        verify(mockIo).println(Mockito.contains("No course specified"));
     }
 }
