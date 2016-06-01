@@ -177,7 +177,9 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        Application app = new Application(new TerminalIo());
+        Io io = new TerminalIo();
+        Runtime.getRuntime().addShutdownHook(new ShutdownHandler(io));
+        Application app = new Application(io);
         app.run(args);
     }
 
