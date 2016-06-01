@@ -24,10 +24,16 @@ public class CommandFactory {
         commands = new HashMap<>();
     }
 
-    private void addCommand(Class commandClass) {
+    public void addCommand(Class commandClass) {
         Class<Command> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
+        if (annotation == null) {
+            throw new RuntimeException("Command must have Command annotation");
+        }
         Command command = (Command) annotation;
+        if (!CommandInterface.class.isAssignableFrom(commandClass)) {
+            throw new RuntimeException("Command must implement CommandInterface");
+        }
         this.commands.put(command.name(), klass);
     }
 
@@ -36,31 +42,30 @@ public class CommandFactory {
         this.commands.put(name, klass);
     }
 
-    public CommandInterface createCommand(Application app, String name)  {
+    public CommandInterface createCommand(Application app, String name) {
         Class commandClass = commands.get(name);
         Constructor<?> cons;
         if (commandClass == null) {
             return null;
         }
         try {
+            //NOTE: if you create the command as inner class then
+            //      you HAVE TO make it static class.
             Class<?> klass = commandClass;
             cons = klass.getConstructor(Application.class);
         } catch (NoSuchMethodException ex) {
-            logger.error("Every command MUST have constructor that takes "
-                    + "Application object as argument", ex);
-            System.exit(1);
-            return null;
+            throw new RuntimeException("Every command MUST have constructor "
+                    + "that takes Application object as it's only argument.", ex);
         } catch (SecurityException ex) {
-            logger.error("getCommand failed ", ex);
+            logger.error("getCommand failed.", ex);
             return null;
         }
         try {
             return (CommandInterface)cons.newInstance(app);
         } catch (InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException ex) {
-            logger.error("getCommand failed", ex);
+            throw new RuntimeException("getCommand failed", ex);
         }
-        return null;
     }
 
     public Command getCommand(Class<Command> commandClass) {

@@ -9,8 +9,12 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
@@ -18,11 +22,10 @@ import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
-/**
- * Quick and dirty.
- */
 @Command(name = "run-tests", desc = "Run local exercise tests.")
 public class RunTestsCommand implements CommandInterface {
 
@@ -31,6 +34,7 @@ public class RunTestsCommand implements CommandInterface {
 
     private final Application app;
     private Io io;
+    private Course course;
 
     public RunTestsCommand(Application app) {
         this.app = app;
@@ -41,22 +45,29 @@ public class RunTestsCommand implements CommandInterface {
         this.io = io;
         DirectoryUtil dirUtil = new DirectoryUtil();
         String courseName = getCourseName(dirUtil);
-        String exerciseName = dirUtil.getExerciseName();
+        List<String> exerciseNames = dirUtil.getExerciseNames(args);
+
+        TmcCore core = app.getTmcCore();
+        course = TmcUtil.findCourse(core, courseName);
 
         io.println("Running tests...");
         RunResult runResult;
+
         try {
-            TmcCore core = app.getTmcCore();
-            Exercise exercise = new Exercise(exerciseName, courseName);
-            runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
+            for (String name : exerciseNames) {
+                io.println("Testing: " + name);
+                name = name.replace("-", File.separator);
+                Exercise exercise = new Exercise(name, courseName);
+
+                runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
+                printRunResult(runResult);
+            }
+
         } catch (Exception ex) {
             io.println("Failed to run tests. Please make sure you are in"
                     + " course and exercise directory.");
             logger.error("Failed to run tests.", ex);
-            return;
         }
-
-        printRunResult(runResult);
     }
 
     private String getCourseName(DirectoryUtil dirUtil) {

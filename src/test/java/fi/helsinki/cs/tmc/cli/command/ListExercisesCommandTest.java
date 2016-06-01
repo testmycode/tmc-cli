@@ -26,7 +26,7 @@ public class ListExercisesCommandTest {
     }
 
     @Test
-    public void runWorksRight() {
+    public void listExercisesGivesCorrectExercise() {
         String[] args = {"list-exercises", "demo"};
         app.run(args);
         verify(mockIo).println(Mockito.contains("HeiMaailma"));

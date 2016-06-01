@@ -5,7 +5,8 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
+import java.util.List;
 
 @Command(name = "submit", desc = "Submit exercises")
 public class SubmitCommand implements CommandInterface {
@@ -46,13 +48,13 @@ public class SubmitCommand implements CommandInterface {
     @Override
     public void run(String[] args, Io io) {
         TmcCore core;
-        SubmissionResult submit;
         DirectoryUtil dirUtil;
 
-        if (!parseArgs(args)) {
+        String[] exerciseNames = parseArgs(args);
+
+        if (exerciseNames == null) {
             return;
         }
-
         this.io = io;
         dirUtil = new DirectoryUtil();
         core = this.app.getTmcCore();
@@ -60,38 +62,41 @@ public class SubmitCommand implements CommandInterface {
             return;
         }
         Path dir = dirUtil.getCourseDirectory();
+        Path courseDir = dirUtil.getCourseDirectory();
 
-        if (dir == null) {
-            io.println("You are not in course directory");
-            return;
-        }
-        Course course = TmcUtil.findCourse(core, dir.getName(dir.getNameCount() - 1).toString());
-        String exerciseName = dirUtil.getExerciseName();
-
-        io.println("Submitting to server...");
-        try {
-            submit = core.submit(new TmcCliProgressObserver(),
-                    TmcUtil.findExercise(course, exerciseName)).call();
-
-        } catch (Exception e) {
+        if (courseDir == null) {
+            System.out.println("Not a course directory");
             return;
         }
 
-        printResults(submit);
+        CourseInfoIo infoIo = new CourseInfoIo(dirUtil.getConfigFile());
+        CourseInfo info = infoIo.load();
+        String courseName = info.getCourse();
+        Course course = TmcUtil.findCourse(core, courseName);
+
+        List<String> exercises;
+        exercises = dirUtil.getExerciseNames(exerciseNames);
+        SubmissionResult result;
+
+        for (String exerciseName : exercises) {
+            io.println("Submitting: " + exerciseName);
+            result = TmcUtil.submitExercise(core, course, exerciseName);
+            printResults(result);
+        }
     }
 
-    private boolean parseArgs(String[] args) {
+    private String[] parseArgs(String[] args) {
         GnuParser parser = new GnuParser();
         CommandLine line;
         try {
             line = parser.parse(options, args);
         } catch (ParseException e) {
             logger.warn("Unable to parse arguments.", e);
-            return false;
+            return null;
         }
         this.showAll = line.hasOption("a");
         this.showDetails = line.hasOption("d");
-        return true;
+        return line.getArgs();
     }
 
     private void printResults(SubmissionResult result) {
@@ -117,7 +122,7 @@ public class SubmitCommand implements CommandInterface {
             String msg;
             if (passedTestCases == 0) {
                 io.println(Color.colorString("All tests failed on the server.",
-                        Color.ANSI_GREEN));
+                        Color.ANSI_RED));
             } else {
                 io.println(Color.colorString(passedTestCases
                         + " tests passed on the server.", Color.ANSI_GREEN));
