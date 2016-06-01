@@ -34,5 +34,6 @@ EOM
 	. $AUTOCOMPLETE
 fi
 
+export COLUMNS=$(tput cols)
 exec "$java" $java_args -jar $MYSELF "$@"
 exit 0 

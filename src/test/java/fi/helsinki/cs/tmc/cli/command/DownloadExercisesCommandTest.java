@@ -40,7 +40,9 @@ public class DownloadExercisesCommandTest {
         String[] args = {"download", course};
         app.run(args);
 
-        assertTrue(Files.exists(Paths.get("./" + course)));
-        FileUtils.deleteDirectory(new File(course));
+        assertTrue(Files.exists(Paths.get(System.getProperty("user.dir")).resolve(course)));
+        try {
+            FileUtils.deleteDirectory(new File(course));
+        } catch (Exception e) { }
     }
 }
