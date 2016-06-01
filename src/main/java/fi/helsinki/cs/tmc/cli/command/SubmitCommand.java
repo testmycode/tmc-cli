@@ -98,11 +98,11 @@ public class SubmitCommand implements CommandInterface {
         return line.getArgs();
     }
 
+    // todo: Clean up and perhaps move to some sort of ResultPrinter class.
     private void printResults(SubmissionResult result) {
-
         int passedTestCases = 0;
-        for (TestResult testCase : result.getTestCases()) {
-            if (printTestCase(testCase)) {
+        for (TestResult testResult : result.getTestCases()) {
+            if (printTestResult(testResult)) {
                 passedTestCases++;
             }
         }
@@ -116,33 +116,35 @@ public class SubmitCommand implements CommandInterface {
             io.println(Color.colorString("All tests passed on the server!", Color.ANSI_GREEN));
             io.println("Points permanently awarded: " + result.getPoints());
             io.println("Model solution: " + result.getSolutionUrl());
+        } else if (passedTestCases == 0) {
+            io.println(Color.colorString("All tests failed on the server.",
+                    Color.ANSI_RED));
         } else {
-            if (passedTestCases == 0) {
-                io.println(Color.colorString("All tests failed on the server.",
-                        Color.ANSI_RED));
-            } else {
-                io.println(Color.colorString(passedTestCases
-                        + " tests passed on the server.", Color.ANSI_GREEN));
-                io.println(Color.colorString(failedTestCases
-                        + " tests failed on the server.", Color.ANSI_RED));
-            }
-
+            io.println(Color.colorString(passedTestCases
+                    + " tests passed on the server.", Color.ANSI_GREEN));
+            io.println(Color.colorString(failedTestCases
+                    + " tests failed on the server.", Color.ANSI_RED));
         }
     }
 
-    private boolean printTestCase(TestResult testCase) {
-        String status = testCase.isSuccessful() ? "Passed: " : "Failed: ";
-        String infoMsg = status + testCase.getName();
-        if (!testCase.isSuccessful()) {
-            infoMsg += "\n        " + testCase.getMessage();
+    /**
+     * todo: Clean up, still messy from TestCase null bug. Also RunResult and
+     * SubmissionResult now both use TestResults so maybe make a ResultPrinter
+     * class?
+     */
+    private boolean printTestResult(TestResult testResult) {
+        String status = testResult.isSuccessful() ? "Passed: " : "Failed: ";
+        String infoMsg = status + testResult.getName();
+        if (!testResult.isSuccessful()) {
+            infoMsg += "\n        " + testResult.getMessage();
             io.println(Color.colorString(infoMsg, Color.ANSI_RED));
-            if (showDetails && testCase.getDetailedMessage() != null) {
-                io.println(testCase.getDetailedMessage().toString());
+            if (showDetails && testResult.getDetailedMessage() != null) {
+                io.println(testResult.getDetailedMessage().toString());
             }
         } else if (showAll) {
             io.println(Color.colorString(infoMsg, Color.ANSI_GREEN));
         }
 
-        return testCase.isSuccessful();
+        return testResult.isSuccessful();
     }
 }
