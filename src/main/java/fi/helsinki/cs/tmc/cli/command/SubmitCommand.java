@@ -5,13 +5,17 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import java.nio.file.Path;
+import java.util.List;
 
 @Command(name = "submit", desc = "Submit exercises")
 public class SubmitCommand implements CommandInterface {
@@ -25,28 +29,30 @@ public class SubmitCommand implements CommandInterface {
     public void run(String[] args, Io io) {
         TmcCore core;
         Course course;
-        SubmissionResult submit;
         DirectoryUtil dirUtil;
 
         dirUtil = new DirectoryUtil();
+        Path courseDir = dirUtil.getCourseDirectory();
+
+        if (courseDir == null) {
+            System.out.println("Not a course directory");
+            return;
+        }
+        CourseInfoIo infoIo = new CourseInfoIo(dirUtil.getConfigFile());
+        CourseInfo info = infoIo.load();
+        String courseName = info.getCourse();
         core = this.app.getTmcCore();
-        Path dir = dirUtil.getCourseDirectory();
+        course = TmcUtil.findCourse(core, courseName);
 
-        if (dir == null) {
-            io.println("You are not in course directory");
-            return;
+        List<String> exercises;
+        exercises = dirUtil.getExerciseNames(args);
+        SubmissionResult result;
+
+        for (String exerciseName : exercises) {
+            System.out.println("Submitting: " + exerciseName);
+            result = TmcUtil.submitExercise(core, course, exerciseName);
+            System.out.println(result);
         }
-        course = TmcUtil.findCourse(core, dir.getName(dir.getNameCount() - 1).toString());
-        String exerciseName = dirUtil.getExerciseName();
-
-        try {
-            submit = core.submit(new TmcCliProgressObserver(),
-                    TmcUtil.findExercise(course, exerciseName)).call();
-
-        } catch (Exception e) {
-            return;
-        }
-
-        io.println(submit.toString());
     }
 }
+
