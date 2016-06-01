@@ -81,11 +81,11 @@ public class RunTestsCommand implements CommandInterface {
 
     private void printRunResult(RunResult runResult) {
         for (TestResult testResult : runResult.testResults) {
-            if (testResult.passed) {
-                io.println(colorString("Passed: " + testResult.name, ANSI_GREEN));
+            if (testResult.isSuccessful()) {
+                io.println(colorString("Passed: " + testResult.getName(), ANSI_GREEN));
             } else {
-                io.println(colorString("Failed: " + testResult.name
-                        + "\n\t" + testResult.errorMessage, ANSI_RED));
+                io.println(colorString("Failed: " + testResult.getName()
+                        + "\n\t" + testResult.getMessage(), ANSI_RED));
             }
         }
 

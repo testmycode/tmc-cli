@@ -13,8 +13,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
-import fi.helsinki.cs.tmc.langs.domain.TestCase;
-import fi.helsinki.cs.tmc.langs.domain.TestCase.Status;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -102,7 +101,7 @@ public class SubmitCommand implements CommandInterface {
     private void printResults(SubmissionResult result) {
 
         int passedTestCases = 0;
-        for (TestCase testCase : result.getTestCases()) {
+        for (TestResult testCase : result.getTestCases()) {
             if (printTestCase(testCase)) {
                 passedTestCases++;
             }
@@ -118,8 +117,6 @@ public class SubmitCommand implements CommandInterface {
             io.println("Points permanently awarded: " + result.getPoints());
             io.println("Model solution: " + result.getSolutionUrl());
         } else {
-            //io.println(Color.colorString("Exercise '" + result.getExerciseName() + "' failed.", Color.ANSI_RED));
-            String msg;
             if (passedTestCases == 0) {
                 io.println(Color.colorString("All tests failed on the server.",
                         Color.ANSI_RED));
@@ -133,38 +130,19 @@ public class SubmitCommand implements CommandInterface {
         }
     }
 
-    // We get a broken TestCase obj atm so there's lots of weird stuff here...
-    private boolean printTestCase(TestCase testCase) {
-        String className = "TestClassName"; //testCase.className;
-        String methodName = "TestMethodName"; //testCase.methodName
-        Status status; //testCase.status;
-
-        // TEMP: Until JSON -> TestCase parsing is fixed, non empty message
-        // indicates the test is failed. Empty message means it passed.
-        if (testCase.message == null || testCase.message.equals("")) {
-            status = Status.PASSED;
-        } else {
-            status = Status.FAILED;
+    private boolean printTestCase(TestResult testCase) {
+        String status = testCase.isSuccessful() ? "Passed: " : "Failed: ";
+        String infoMsg = status + testCase.getName();
+        if (!testCase.isSuccessful()) {
+            infoMsg += "\n        " + testCase.getMessage();
+            io.println(Color.colorString(infoMsg, Color.ANSI_RED));
+            if (showDetails && testCase.getDetailedMessage() != null) {
+                io.println(testCase.getDetailedMessage().toString());
+            }
+        } else if (showAll) {
+            io.println(Color.colorString(infoMsg, Color.ANSI_GREEN));
         }
 
-        String infoMsg = status.name() + ": " + className + " " + methodName;
-        switch (status) {
-            case FAILED:
-                infoMsg += "\n        " + testCase.message;
-                io.println(Color.colorString(infoMsg, Color.ANSI_RED));
-                if (showDetails && testCase.exception != null) {
-                    io.println(testCase.exception.toString());
-                }
-                break;
-            case PASSED:
-                if (showAll) {
-                    io.println(Color.colorString(infoMsg, Color.ANSI_GREEN));
-                }
-                break;
-            default:
-                io.println("wot?");
-        }
-
-        return status == Status.PASSED;
+        return testCase.isSuccessful();
     }
 }
