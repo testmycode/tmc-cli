@@ -78,6 +78,7 @@ public class RunTestsCommand implements CommandInterface {
 
                 runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
                 resultPrinter.printRunResult(runResult);
+                io.println("");
             }
 
         } catch (Exception ex) {

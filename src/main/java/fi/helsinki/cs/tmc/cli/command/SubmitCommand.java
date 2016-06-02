@@ -82,6 +82,7 @@ public class SubmitCommand implements CommandInterface {
             io.println("Submitting: " + exerciseName);
             result = TmcUtil.submitExercise(core, course, exerciseName);
             resultPrinter.printSubmissionResult(result);
+            io.println("");
         }
     }
 
