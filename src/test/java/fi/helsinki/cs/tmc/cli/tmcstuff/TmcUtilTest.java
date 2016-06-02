@@ -1,11 +1,16 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+
 import org.apache.commons.io.FileUtils;
 
 import org.junit.Before;
@@ -16,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
 
 public class TmcUtilTest {
 
