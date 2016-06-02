@@ -81,7 +81,8 @@ public class Application {
         try {
             line = this.parser.parse(this.options, args);
         } catch (ParseException e) {
-            io.println("Invalid command line arguments." + e);
+            io.println("Invalid command line arguments.");
+            io.println(e.getMessage());
             return false;
         }
 

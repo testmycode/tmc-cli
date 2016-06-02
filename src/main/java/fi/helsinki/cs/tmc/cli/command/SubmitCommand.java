@@ -46,6 +46,7 @@ public class SubmitCommand implements CommandInterface {
 
     @Override
     public void run(String[] args, Io io) {
+        this.io = io;
         TmcCore core;
         DirectoryUtil dirUtil;
 
@@ -54,7 +55,6 @@ public class SubmitCommand implements CommandInterface {
         if (exerciseNames == null) {
             return;
         }
-        this.io = io;
         dirUtil = new DirectoryUtil();
         core = this.app.getTmcCore();
         if (core == null) {
@@ -93,7 +93,8 @@ public class SubmitCommand implements CommandInterface {
         try {
             line = parser.parse(options, args);
         } catch (ParseException e) {
-            logger.warn("Unable to parse arguments.", e);
+            io.println("Invalid command line arguments.");
+            io.println(e.getMessage());
             return null;
         }
         this.showAll = line.hasOption("a");

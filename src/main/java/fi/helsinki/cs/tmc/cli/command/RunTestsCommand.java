@@ -104,7 +104,8 @@ public class RunTestsCommand implements CommandInterface {
         try {
             line = parser.parse(options, args);
         } catch (ParseException e) {
-            logger.warn("Unable to parse arguments.", e);
+            io.println("Invalid command line arguments.");
+            io.println(e.getMessage());
             return null;
         }
         this.showPassed = line.hasOption("a");
