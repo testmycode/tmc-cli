@@ -1,24 +1,23 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static fi.helsinki.cs.tmc.cli.io.Color.ANSI_GREEN;
-import static fi.helsinki.cs.tmc.cli.io.Color.ANSI_RED;
-import static fi.helsinki.cs.tmc.cli.io.Color.colorString;
-
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
-import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,24 +32,42 @@ public class RunTestsCommand implements CommandInterface {
             = LoggerFactory.getLogger(RunTestsCommand.class);
 
     private final Application app;
+    private final Options options;
+
     private Io io;
     private Course course;
+    private boolean showPassed;
+    private boolean showDetails;
 
     public RunTestsCommand(Application app) {
         this.app = app;
+        this.options = new Options();
+
+        options.addOption("a", "all", false, "Show all test results");
+        options.addOption("d", "details", false, "Show detailed error message");
     }
 
     @Override
     public void run(String[] args, Io io) {
         this.io = io;
+
+        String[] exercisesFromArgs = parseArgs(args);
+        if (exercisesFromArgs == null) {
+            return;
+        }
+
         DirectoryUtil dirUtil = new DirectoryUtil();
         String courseName = getCourseName(dirUtil);
-        List<String> exerciseNames = dirUtil.getExerciseNames(args);
+        List<String> exerciseNames = dirUtil.getExerciseNames(exercisesFromArgs);
 
         TmcCore core = app.getTmcCore();
+        if (core == null) {
+            return;
+        }
         course = TmcUtil.findCourse(core, courseName);
 
-        io.println("Running tests...");
+        ResultPrinter resultPrinter
+                = new ResultPrinter(io, this.showDetails, this.showPassed);
         RunResult runResult;
 
         try {
@@ -60,7 +77,7 @@ public class RunTestsCommand implements CommandInterface {
                 Exercise exercise = new Exercise(name, courseName);
 
                 runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
-                printRunResult(runResult);
+                resultPrinter.printRunResult(runResult);
             }
 
         } catch (Exception ex) {
@@ -79,22 +96,17 @@ public class RunTestsCommand implements CommandInterface {
         return null;
     }
 
-    private void printRunResult(RunResult runResult) {
-        for (TestResult testResult : runResult.testResults) {
-            if (testResult.passed) {
-                io.println(colorString("Passed: " + testResult.name, ANSI_GREEN));
-            } else {
-                io.println(colorString("Failed: " + testResult.name
-                        + "\n\t" + testResult.errorMessage, ANSI_RED));
-            }
+    private String[] parseArgs(String[] args) {
+        GnuParser parser = new GnuParser();
+        CommandLine line;
+        try {
+            line = parser.parse(options, args);
+        } catch (ParseException e) {
+            logger.warn("Unable to parse arguments.", e);
+            return null;
         }
-
-        if (runResult.status == RunResult.Status.PASSED) {
-            io.println("All tests passed! Submit to server with 'tmc submit'.");
-        } else if (runResult.status == RunResult.Status.TESTS_FAILED) {
-            io.println("Some tests did not pass, please review your "
-                    + "answer before submitting.");
-        }
+        this.showPassed = line.hasOption("a");
+        this.showDetails = line.hasOption("d");
+        return line.getArgs();
     }
-
 }
