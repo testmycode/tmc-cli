@@ -23,20 +23,20 @@ public class ApplicationTest {
     public void versionWorksWithRightParameter() {
         String[] args = {"-v"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("TMC-CLI version"));
+        assertTrue(testIo.getPrint().contains("TMC-CLI version"));
     }
     
     @Test
     public void helpWorksWithRightParameter() {
         String[] args = {"-h"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("Usage: tmc"));
+        assertTrue(testIo.getPrint().contains("Usage: tmc"));
     }
 
     @Test
     public void runCommandWorksWithWrongParameter() {
         String[] args = {"foo"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("Command foo doesn't exist"));
+        assertTrue(testIo.getPrint().contains("Command foo doesn't exist"));
     }
 }

@@ -34,7 +34,6 @@ public class ListExercisesCommand implements CommandInterface {
         // Else, print out a help message.
         if (args.length == 0) {
             DirectoryUtil dirUtil = new DirectoryUtil();
-            System.out.println(dirUtil.getConfigFile());
 
             if (dirUtil.getConfigFile() != null) {
                 CourseInfo courseinfo = new CourseInfoIo(dirUtil.getConfigFile()).load();

@@ -25,6 +25,6 @@ public class ListCoursesCommandTest {
     public void normalCourseListingWorksRight() {
         String[] args = {"list-courses"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("demo"));
+        assertTrue(testIo.getPrint().contains("demo"));
     }
 }

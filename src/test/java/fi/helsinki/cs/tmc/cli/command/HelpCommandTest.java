@@ -25,6 +25,6 @@ public class HelpCommandTest {
     public void helpListsAllCommands() {
         String[] args = {"help"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("help"));
+        assertTrue(testIo.getPrint().contains("help"));
     }
 }
