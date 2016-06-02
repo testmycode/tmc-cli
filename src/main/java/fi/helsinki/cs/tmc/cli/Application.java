@@ -178,9 +178,11 @@ public class Application {
 
     public static void main(String[] args) {
         Io io = new TerminalIo();
-        Runtime.getRuntime().addShutdownHook(new ShutdownHandler(io));
+        ShutdownHandler shutdownHandler = new ShutdownHandler(io);
+        Runtime.getRuntime().addShutdownHook(shutdownHandler);
         Application app = new Application(io);
         app.run(args);
+        Runtime.getRuntime().removeShutdownHook(shutdownHandler);
     }
 
     public static String getVersion() {
