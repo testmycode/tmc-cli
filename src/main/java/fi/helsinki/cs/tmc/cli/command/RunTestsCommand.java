@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
@@ -72,7 +73,7 @@ public class RunTestsCommand implements CommandInterface {
 
         try {
             for (String name : exerciseNames) {
-                io.println("Testing: " + name);
+                io.println(Color.colorString("Testing: " + name, Color.ANSI_YELLOW));
                 name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 

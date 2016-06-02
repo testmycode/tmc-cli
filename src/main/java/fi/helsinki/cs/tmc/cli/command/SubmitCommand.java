@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -79,7 +80,7 @@ public class SubmitCommand implements CommandInterface {
         SubmissionResult result;
 
         for (String exerciseName : exercises) {
-            io.println("Submitting: " + exerciseName);
+            io.println(Color.colorString("Submitting: " + exerciseName, Color.ANSI_YELLOW));
             result = TmcUtil.submitExercise(core, course, exerciseName);
             resultPrinter.printSubmissionResult(result);
             io.println("");
