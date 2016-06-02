@@ -31,7 +31,7 @@ public class DownloadExercisesCommandTest {
     public void failIfCourseArgumentNotGiven() {
         String[] args = {"download"};
         app.run(args);
-        assertTrue(testIo.printedText.contains("You must give"));
+        assertTrue(testIo.getPrint().contains("You must give"));
     }
 
     @Test

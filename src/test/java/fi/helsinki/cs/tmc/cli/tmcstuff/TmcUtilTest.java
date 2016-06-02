@@ -1,12 +1,15 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.core.domain.Course;
+
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.io.FileUtils;
 
@@ -18,13 +21,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+
 public class TmcUtilTest {
 
     Application app;
+    TestIo testio;
 
     @Before
     public void setUp() {
-        app = new Application(new TerminalIo());
+        testio = new TestIo();
+        app = new Application(testio);
         app.createTmcCore(new Settings(true));
         try {
             FileUtils.deleteDirectory(new File("cert-test"));
@@ -51,7 +57,9 @@ public class TmcUtilTest {
         Course course;
         course = TmcUtil.findCourse(app.getTmcCore(), "demo");
         assertNotNull(course);
-        TmcUtil.findExercise(course, "viikko1-002.HeiMaailma");
+        Exercise ex = TmcUtil.findExercise(course, "viikko1-002.HeiMaailma");
+        assertNotNull(ex);
+        assertEquals("viikko1-002.HeiMaailma", ex.getName());
     }
 
     @Test
@@ -59,7 +67,8 @@ public class TmcUtilTest {
         Course course;
         course = TmcUtil.findCourse(app.getTmcCore(), "demo");
         assertNotNull(course);
-        TmcUtil.findExercise(course, "xhu4ew");
+        Exercise ex = TmcUtil.findExercise(course, "xhu4ew");
+        assertNull(ex);
     }
 
     @Test
@@ -70,7 +79,7 @@ public class TmcUtilTest {
         assertNotNull(course);
         TmcUtil.downloadAllExercises(app.getTmcCore(), course);
 
-        boolean exists = Files.exists(Paths.get("./" + name));
+        boolean exists = Files.exists(Paths.get(System.getProperty("user.dir")).resolve(name));
         assertTrue(exists);
         try {
             FileUtils.deleteDirectory(new File(name));
