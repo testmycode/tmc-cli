@@ -3,8 +3,8 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
-import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
@@ -13,7 +13,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
-import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -75,12 +74,14 @@ public class SubmitCommand implements CommandInterface {
 
         List<String> exercises;
         exercises = dirUtil.getExerciseNames(exerciseNames);
+
+        ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
         SubmissionResult result;
 
         for (String exerciseName : exercises) {
             io.println("Submitting: " + exerciseName);
             result = TmcUtil.submitExercise(core, course, exerciseName);
-            printResults(result);
+            resultPrinter.printSubmissionResult(result);
         }
     }
 
@@ -96,55 +97,5 @@ public class SubmitCommand implements CommandInterface {
         this.showAll = line.hasOption("a");
         this.showDetails = line.hasOption("d");
         return line.getArgs();
-    }
-
-    // todo: Clean up and perhaps move to some sort of ResultPrinter class.
-    private void printResults(SubmissionResult result) {
-        int passedTestCases = 0;
-        for (TestResult testResult : result.getTestCases()) {
-            if (printTestResult(testResult)) {
-                passedTestCases++;
-            }
-        }
-        int failedTestCases = result.getTestCases().size() - passedTestCases;
-
-        if (failedTestCases != 0 || (passedTestCases != 0 && showAll)) {
-            io.println("");
-        }
-
-        if (result.isAllTestsPassed()) {
-            io.println(Color.colorString("All tests passed on the server!", Color.ANSI_GREEN));
-            io.println("Points permanently awarded: " + result.getPoints());
-            io.println("Model solution: " + result.getSolutionUrl());
-        } else if (passedTestCases == 0) {
-            io.println(Color.colorString("All tests failed on the server.",
-                    Color.ANSI_RED));
-        } else {
-            io.println(Color.colorString(passedTestCases
-                    + " tests passed on the server.", Color.ANSI_GREEN));
-            io.println(Color.colorString(failedTestCases
-                    + " tests failed on the server.", Color.ANSI_RED));
-        }
-    }
-
-    /**
-     * todo: Clean up, still messy from TestCase null bug. Also RunResult and
-     * SubmissionResult now both use TestResults so maybe make a ResultPrinter
-     * class?
-     */
-    private boolean printTestResult(TestResult testResult) {
-        String status = testResult.isSuccessful() ? "Passed: " : "Failed: ";
-        String infoMsg = status + testResult.getName();
-        if (!testResult.isSuccessful()) {
-            infoMsg += "\n        " + testResult.getMessage();
-            io.println(Color.colorString(infoMsg, Color.ANSI_RED));
-            if (showDetails && testResult.getDetailedMessage() != null) {
-                io.println(testResult.getDetailedMessage().toString());
-            }
-        } else if (showAll) {
-            io.println(Color.colorString(infoMsg, Color.ANSI_GREEN));
-        }
-
-        return testResult.isSuccessful();
     }
 }
