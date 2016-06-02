@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
@@ -72,12 +73,13 @@ public class RunTestsCommand implements CommandInterface {
 
         try {
             for (String name : exerciseNames) {
-                io.println("Testing: " + name);
+                io.println(Color.colorString("Testing: " + name, Color.ANSI_YELLOW));
                 name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 
                 runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
                 resultPrinter.printRunResult(runResult);
+                io.println("");
             }
 
         } catch (Exception ex) {
@@ -102,7 +104,8 @@ public class RunTestsCommand implements CommandInterface {
         try {
             line = parser.parse(options, args);
         } catch (ParseException e) {
-            logger.warn("Unable to parse arguments.", e);
+            io.println("Invalid command line arguments.");
+            io.println(e.getMessage());
             return null;
         }
         this.showPassed = line.hasOption("a");

@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -45,6 +46,7 @@ public class SubmitCommand implements CommandInterface {
 
     @Override
     public void run(String[] args, Io io) {
+        this.io = io;
         TmcCore core;
         DirectoryUtil dirUtil;
 
@@ -53,7 +55,6 @@ public class SubmitCommand implements CommandInterface {
         if (exerciseNames == null) {
             return;
         }
-        this.io = io;
         dirUtil = new DirectoryUtil();
         core = this.app.getTmcCore();
         if (core == null) {
@@ -79,9 +80,10 @@ public class SubmitCommand implements CommandInterface {
         SubmissionResult result;
 
         for (String exerciseName : exercises) {
-            io.println("Submitting: " + exerciseName);
+            io.println(Color.colorString("Submitting: " + exerciseName, Color.ANSI_YELLOW));
             result = TmcUtil.submitExercise(core, course, exerciseName);
             resultPrinter.printSubmissionResult(result);
+            io.println("");
         }
     }
 
@@ -91,7 +93,8 @@ public class SubmitCommand implements CommandInterface {
         try {
             line = parser.parse(options, args);
         } catch (ParseException e) {
-            logger.warn("Unable to parse arguments.", e);
+            io.println("Invalid command line arguments.");
+            io.println(e.getMessage());
             return null;
         }
         this.showAll = line.hasOption("a");
