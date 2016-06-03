@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -105,7 +106,7 @@ public class LoginCommand implements CommandInterface {
         app.createTmcCore(settings);
         TmcCore core = this.app.getTmcCore();
         Callable<List<Course>> callable = core.listCourses(
-                ProgressObserver.NULL_OBSERVER);
+                new TmcCliProgressObserver());
 
         try {
             callable.call();
