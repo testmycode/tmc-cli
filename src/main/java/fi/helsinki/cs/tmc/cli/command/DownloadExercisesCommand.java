@@ -31,7 +31,7 @@ public class DownloadExercisesCommand implements CommandInterface {
         TmcCore core;
 
         if (args.length == 0) {
-            io.println("You must give course name as argument.");
+            io.println("You must give course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
         }
