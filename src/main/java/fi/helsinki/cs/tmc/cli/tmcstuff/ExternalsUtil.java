@@ -5,7 +5,9 @@ import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Desktop;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +29,7 @@ public class ExternalsUtil {
      */
     public static String getUserEditedMessage(
             String template, String filename, boolean escapeComments) {
+
         Path tempFile = Paths.get(System.getProperty("java.io.tmpdir"))
                 .resolve(filename);
         try {
@@ -49,7 +52,7 @@ public class ExternalsUtil {
         }
         List<String> messageLines;
         // User writes to file
-        execExternal(editor, tempFile);
+        execExternal(editor, tempFile.toString(), true);
         try {
             // Read from file
             messageLines = Files.readAllLines(tempFile, StandardCharsets.UTF_8);
@@ -60,9 +63,8 @@ public class ExternalsUtil {
         }
         StringBuilder sb = new StringBuilder();
         for (String messageLine : messageLines) {
-            // remove comments and empty lines
-            if (messageLine.length() > 0
-                    && (messageLine.charAt(0) != '#' || escapeComments == false)) {
+            if (messageLine.length() == 0
+                    || (messageLine.charAt(0) != '#' || escapeComments == false)) {
                 sb.append(messageLine + "\n");
             }
         }
@@ -72,6 +74,7 @@ public class ExternalsUtil {
     /**
      * Show a file in a pager for the user.
      * Use less in Linux/Unix and more in Windows.
+     * Specify a custom pager with PAGER env var.
      * @param file File to be shown to the user (eg. a log file)
      */
     public static void showFileInPager(Path file) {
@@ -83,24 +86,53 @@ public class ExternalsUtil {
                 pager = "less";
             }
         }
-        execExternal(pager, file);
+        execExternal(pager, file.toString(), true);
     }
 
-    private static void execExternal(String program, Path file) {
+    /**
+     * Open a URI in the default browser.
+     * By default use the Java Desktop API.
+     * If BROWSER env var is set, use that.
+     * @param uri Link to be opened in browser
+     */
+    public static void openInBrowser(URI uri) {
+        Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
+        String browser = System.getenv("BROWSER");
+        if (browser != null) {
+            execExternal(browser, uri.toString(), false);
+        } else {
+            if (Desktop.isDesktopSupported()) {
+                try {
+                    Desktop.getDesktop().browse(uri);
+                } catch (Exception e) {
+                    logger.error("Exception when launching browser", e);
+                    return;
+                }
+            }
+            logger.warn("Cannot launch browser");
+            return;
+        }
+    }
+
+    private static void execExternal(String program, String arg, boolean wait) {
+        Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
+        logger.info("Launching external program " + program + " with arg " + arg);
         String[] exec;
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            exec = new String[]{program + " \'" + file.toString() + "\'"};
+            exec = new String[]{program + " \'" + arg.toString() + "\'"};
         } else {
             exec = new String[]{
-                    "sh", "-c", program + " \'" + file.toString() + "\'"
+                    "sh", "-c", program + " \'" + arg.toString() + "\'"
                     + " </dev/tty >/dev/tty"};
         }
         Process proc = null;
         try {
             proc = Runtime.getRuntime().exec(exec);
-            proc.waitFor();
+            if (wait) {
+                logger.info("Waiting for " + program + " to finish executing");
+                proc.waitFor();
+            }
         } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
             logger.error("Exception when running external program", e);
         }
     }
