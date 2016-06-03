@@ -46,6 +46,19 @@ public class PasteCommand implements CommandInterface {
     public void run(String[] args, Io io) {
         this.io = io;
         CommandLine line = parseData(args);
+        TmcCore core = this.app.getTmcCore();
+        if (core == null) {
+            return;
+        }
+        DirectoryUtil dirutil = new DirectoryUtil();
+        List<String> exerciseNames = dirutil.getExerciseNames(line.getArgs());
+        if (exerciseNames == null || exerciseNames.size() != 1) {
+            io.println(
+                    "No exercise specified. Please use this command from an exercise directory or "
+                    + "pass the name of the exercise as an argument.");
+            return;
+        }
+
         String message = line.getOptionValue("m");
         if (message == null) {
             message = ExternalsUtil.getUserEditedMessage(
@@ -56,18 +69,8 @@ public class PasteCommand implements CommandInterface {
                     "tmc_paste_message.txt",
                     true);
         }
-        io.println(message);
         if (message == null || message.length() == 0) {
             io.println("Paste message empty, aborting");
-            return;
-        }
-        TmcCore core = this.app.getTmcCore();
-        DirectoryUtil dirutil = new DirectoryUtil();
-        List<String> exerciseNames = dirutil.getExerciseNames(line.getArgs());
-        if (exerciseNames.size() != 0) {
-            io.println(
-                    "No exercise specified. Please use this command from an exercise directory or"
-                    + "\npass the name of the exercise as an argument.");
             return;
         }
 
@@ -91,7 +94,8 @@ public class PasteCommand implements CommandInterface {
                 return;
             }
             logger.error("Unable to connect to server", e);
-            io.println("Unable to connect to server");
+            io.println("Unable to connect to server:");
+            io.println(e.toString());
             return;
         }
         io.println("Paste sent for exercise " + exercise.getName());
