@@ -26,7 +26,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
-@Command(name = "run-tests", desc = "Run local exercise tests.")
+@Command(name = "run-tests", desc = "Run local exercise tests")
 public class RunTestsCommand implements CommandInterface {
 
     private static final Logger logger
