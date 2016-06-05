@@ -28,10 +28,10 @@ Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an ali
 To summarise:
 ```
 ~ $ cd Downloads/
-~ $ chmod u+x tmc
-~ $ ./tmc
-~ $ . ~/.bashrc
-~ $ echo "Now you can run tmc anywhere."
+~/Downloads $ chmod u+x tmc
+~/Downloads $ ./tmc
+~/Downloads $ . ~/.bashrc
+~/Downloads $ echo "Now you can run tmc anywhere."
 ```
 
 If for some reason the alias was not added to your .bashrc, you can manually add the following line `alias tmc="[PATH_TO_TMC]"`
@@ -56,7 +56,7 @@ By default, tmc-cli connects to Helsinki University MOOC server. To log in to an
 
 ##Listing courses
 
-Once you have logged in, you can list all the available courses on the server with `tmc list-courses`
+Once you have logged in, you can list all the available courses on the server with `tmc list-courses`.
 ```
 ~ $ tmc list-courses
 java-programming-basics
@@ -69,7 +69,7 @@ Note that you can only submit exercises on courses for which you have enrolled.
 
 ##Downloading courses
 
-Navigate to a suitable directory in which you wish to download your courses. Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it.
+Navigate to a suitable directory in which you wish to download your course(s). Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it.
 
 ```
 ~ $ mkdir tmc-courses; cd tmc-courses
@@ -77,17 +77,17 @@ Navigate to a suitable directory in which you wish to download your courses. The
 Downloading: test-course
 [exercise1, exercise2, exercise3, exercise4]
 ~/tmc-courses $ cd test-course
-~/tmc-courses/test-course/ $ ls -a
+~/tmc-courses/test-course $ ls -a
 exercise1/ exercise2/ exercise3/ exercise4/ .tmc.json
 ```
 Course-specific information is stored in .tmc.json. Do not manually edit or remove it unless you are completely done with the course - doing so will cause tmc to not function properly.
 
 ##Running tests
 
-After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc run-tests`. If you are in the course root directory, you can also give the name(s) of the exercise(s) as an argument: `tmc run-tests exercise1 exercise2`. Running `tmc run-tests` in the course root with no arguments will run tests on all exercises.
+After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc run-tests`. If you are in the course root directory, you can also give the names of the exercises as arguments: `tmc run-tests exercise1 exercise2`. Running `tmc run-tests` in the course root with no arguments will run tests on all exercises.
 
 ```
-~/tmc-courses/test-course/exercise1/ $ tmc run-tests
+~/tmc-courses/test-course/exercise1 $ tmc run-tests
 Testing: exercise1
 Test results: 1/1 tests passed
 All tests passed! Submit to server with 'tmc submit'
@@ -95,10 +95,10 @@ All tests passed! Submit to server with 'tmc submit'
 
 ##Submitting exercises
 
-You have now completed your first exercise! To submit your exercise, run `tmc submit`. The syntax is the same as running tests.
+You have now completed your first exercise! To submit your exercise, run `tmc submit`. The syntax is the same as for running tests.
 
 ```
-~/tmc-courses/test-course/exercise1/ $ tmc submit
+~/tmc-courses/test-course/exercise1 $ tmc submit
 Submitting: exercise1
 Test results: 1/1 tests passed
 All tests passed on server!
