@@ -108,6 +108,6 @@ Model solution: https://link.to.model/solution
 
 ##Disclaimer
 
-[This software is licensed under the MIT license](https://raw.githubusercontent.com/tmc-cli/tmc-cli/instructions/LICENSE)
+This software is licensed under [the MIT license](https://raw.githubusercontent.com/tmc-cli/tmc-cli/instructions/LICENSE).
 
 This software comes with no warranty. Helsinki University and the tmc-cli developers are not responsible for any damages caused by misuse or misbehaviour of this software.
