@@ -6,7 +6,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
 # tmc-cli
 
-TMC-CLI is the command client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
+TMC-CLI is the command-line client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
 
 ##Requirements
 
@@ -36,13 +36,13 @@ To summarise:
 
 If for some reason the alias was not added to your .bashrc, you can manually add the following line `alias tmc="[PATH_TO_TMC]"`
 
-If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar <path to tmc-cli.jar>`. In the following examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
+If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`.
 
 ##Logging in
 
-Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or C:\Users\[USERNAME]\tmc-cli\ on Windows) - you will only have to log in once.
+Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or C:\\Users\\[USERNAME]\\tmc-cli\\ on Windows) - you will only have to log in once.
 ```
 ~ $ tmc login
 username: my-username
@@ -54,7 +54,7 @@ By default, tmc-cli connects to Helsinki University MOOC server. To log in to an
 ~ $ tmc login -s [SERVER_ADDRESS]
 ```
 
-##List courses
+##Listing courses
 
 Once you have logged in, you can list all the available courses on the server with `tmc list-courses`
 ```
@@ -67,7 +67,7 @@ javascript-for-lazy-hipsters
 ```
 Note that you can only submit exercises on courses for which you have enrolled.
 
-##Download a course
+##Downloading courses
 
 Navigate to a suitable directory in which you wish to download your courses. Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it.
 
