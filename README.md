@@ -7,14 +7,14 @@
 # tmc-cli
 
 TMC-CLI is the command client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for student exercise testing and submission.
----
+
 ##Requirements
 
 * Java Runtime Environment 7
 * Bash is required for auto-completion
 * Linux, Mac OS X or Microsoft Windows
   * Currently limited support for Windows
----
+
 ##Installation
 
 Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases).
@@ -34,7 +34,7 @@ $ echo "Now you can run tmc anywhere!"
 ```
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar <path to tmc-cli.jar>`. In the future examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml)
----
+
 ##Log in
 
 Once installation is complete, you must login using `tmc login`. This saves your TMC login information to a configuration file in your home directory - you will only have to login once.
