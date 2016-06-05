@@ -11,9 +11,9 @@ TMC-CLI is the command client for Helsinki University's Test My Code -framework.
 ##Requirements
 
 * Java Runtime Environment 7
-* Bash is required for auto-completion
 * Linux, Mac OS X or Microsoft Windows
   * Currently limited support for Windows
+* Bash is required for auto-completion
 
 ##Installation
 
