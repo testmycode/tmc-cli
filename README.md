@@ -6,7 +6,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
 # tmc-cli
 
-TMC-CLI is the command-line client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
+TMC-CLI is the command-line client for University of Helsinki's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
 
 ##Requirements
 
@@ -49,7 +49,7 @@ username: my-username
 password:
 Login successful.
 ```
-By default, tmc-cli connects to Helsinki University MOOC server. To log in to another server, specify the server with the "-s" or "--server" switch:
+By default, tmc-cli connects to University of Helsinki MOOC server. To log in to another server, specify the server with the "-s" or "--server" switch:
 ```
 ~ $ tmc login -s [SERVER_ADDRESS]
 ```
@@ -110,4 +110,4 @@ Model solution: https://link.to.model/solution
 
 This software is licensed under [the MIT license](https://raw.githubusercontent.com/tmc-cli/tmc-cli/instructions/LICENSE).
 
-This software comes with no warranty. Helsinki University and the tmc-cli developers are not responsible for any damages caused by misuse or misbehaviour of this software.
+This software comes with no warranty. University of Helsinki and the tmc-cli developers are not responsible for any damages caused by misuse or misbehaviour of this software.
