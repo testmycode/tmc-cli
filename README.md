@@ -19,7 +19,7 @@ TMC-CLI is the command client for Helsinki University's Test My Code -framework.
 ##Installation
 
 Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases).
-If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-<version>.jar".
+If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
 
 If you downloaded "tmc", navigate to the download directory on your terminal and make it executable with `chmod u+x ./tmc`.
 
@@ -27,38 +27,38 @@ Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an ali
 
 To summarise:
 ```
-$ cd Downloads/
-$ chmod u+x tmc
-$ ./tmc
-$ . ~/.bashrc
-$ echo "Now you can run tmc anywhere."
+~ $ cd Downloads/
+~ $ chmod u+x tmc
+~ $ ./tmc
+~ $ . ~/.bashrc
+~ $ echo "Now you can run tmc anywhere."
 ```
 
 If for some reason the alias was not added to your .bashrc, you can manually add the following line `alias tmc="[PATH_TO_TMC]"`
 
-If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar <path to tmc-cli.jar>`. In the future examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml)
+If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar <path to tmc-cli.jar>`. In the following examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`.
 
 ##Logging in
 
-Once installation is complete, you can login using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ - you will only have to log in once.
+Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or C:\Users\[USERNAME]\tmc-cli\ on Windows) - you will only have to log in once.
 ```
-$ tmc login
+~ $ tmc login
 username: my-username
 password:
 Login successful.
 ```
 By default, tmc-cli connects to Helsinki University MOOC server. To log in to another server, specify the server with the "-s" or "--server" switch:
 ```
-$ tmc login -s [SERVER_ADDRESS]
+~ $ tmc login -s [SERVER_ADDRESS]
 ```
 
 ##List courses
 
 Once you have logged in, you can list all the available courses on the server with `tmc list-courses`
 ```
-$ tmc list-courses
+~ $ tmc list-courses
 java-programming-basics
 java-programming-advanced
 algorithms-101
@@ -67,23 +67,24 @@ javascript-for-lazy-hipsters
 ```
 Note that you can only submit exercises on courses for which you have enrolled.
 
-##Download courses
+##Download a course
 
 Navigate to a suitable directory in which you wish to download your courses. Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it.
 
 ```
-$ mkdir tmc-courses; cd tmc-courses
+~ $ mkdir tmc-courses; cd tmc-courses
 ~/tmc-courses $ tmc download test-course
 Downloading: test-course
 [exercise1, exercise2, exercise3, exercise4]
-~/tmc-courses $ ls -a
+~/tmc-courses $ cd test-course
+~/tmc-courses/test-course/ $ ls -a
 exercise1/ exercise2/ exercise3/ exercise4/ .tmc.json
 ```
 Course-specific information is stored in .tmc.json. Do not manually edit or remove it unless you are completely done with the course - doing so will cause tmc to not function properly.
 
 ##Running tests
 
-After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc run-tests`. If you are in the course root directory, you can also give the name of the exercise as an argument: `tmc run-tests exercise1`. Running `tmc run-tests` in the course root with not arguments will run tests on all exercises.
+After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc run-tests`. If you are in the course root directory, you can also give the name(s) of the exercise(s) as an argument: `tmc run-tests exercise1 exercise2`. Running `tmc run-tests` in the course root with no arguments will run tests on all exercises.
 
 ```
 ~/tmc-courses/test-course/exercise1/ $ tmc run-tests
@@ -106,5 +107,7 @@ Model solution: https://link.to.model/solution
 ```
 
 ##Disclaimer
+
+[This software is licensed under the MIT license](https://raw.githubusercontent.com/tmc-cli/tmc-cli/instructions/LICENSE)
 
 This software comes with no warranty. Helsinki University and the tmc-cli developers are not responsible for any damages caused by misuse or misbehaviour of this software.
