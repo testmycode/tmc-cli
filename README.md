@@ -6,14 +6,15 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
 # tmc-cli
 
-TMC-CLI is the command client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for student exercise testing and submission.
+TMC-CLI is the command client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
 
 ##Requirements
 
 * Java Runtime Environment 7
 * Linux, Mac OS X or Microsoft Windows
-  * Currently limited support for Windows
-* Bash is required for auto-completion
+  * Currently only limited support for Windows
+  * Other Unix-like systems may work, but are not tested
+* Bash is required for auto-completion - may work on other shells
 
 ##Installation
 
@@ -30,33 +31,80 @@ $ cd Downloads/
 $ chmod u+x tmc
 $ ./tmc
 $ . ~/.bashrc
-$ echo "Now you can run tmc anywhere!"
+$ echo "Now you can run tmc anywhere."
 ```
+
+If for some reason the alias was not added to your .bashrc, you can manually add the following line `alias tmc="[PATH_TO_TMC]"`
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar <path to tmc-cli.jar>`. In the future examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml)
 
-##Log in
+Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`.
 
-Once installation is complete, you must login using `tmc login`. This saves your TMC login information to a configuration file in your home directory - you will only have to login once.
+##Logging in
+
+Once installation is complete, you can login using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ - you will only have to log in once.
 ```
 $ tmc login
 username: my-username
 password:
+Login successful.
+```
+By default, tmc-cli connects to Helsinki University MOOC server. To log in to another server, specify the server with the "-s" or "--server" switch:
+```
+$ tmc login -s [SERVER_ADDRESS]
+```
+
+##List courses
+
+Once you have logged in, you can list all the available courses on the server with `tmc list-courses`
+```
+$ tmc list-courses
+java-programming-basics
+java-programming-advanced
+algorithms-101
+c-mooc
+javascript-for-lazy-hipsters
+```
+Note that you can only submit exercises on courses for which you have enrolled.
+
+##Download courses
+
+Navigate to a suitable directory in which you wish to download your courses. Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it.
 
 ```
-If your institution uses different server than official Mooc server then you have to give its server address like this:
-~~~~
-tmc login -s SERVER_ADDRESS
-~~~~
+$ mkdir tmc-courses; cd tmc-courses
+~/tmc-courses $ tmc download test-course
+Downloading: test-course
+[exercise1, exercise2, exercise3, exercise4]
+~/tmc-courses $ ls -a
+exercise1/ exercise2/ exercise3/ exercise4/ .tmc.json
+```
+Course-specific information is stored in .tmc.json. Do not manually edit or remove it unless you are completely done with the course - doing so will cause tmc to not function properly.
 
-Download course
----------------
-Get course with following command.
-~~~~
-tmc download COURSE_NAME
-~~~~
-If you don't remember the course's official name, then you can get list of courses with command:
-~~~~
-tmc courses
-~~~~
+##Running tests
 
+After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc run-tests`. If you are in the course root directory, you can also give the name of the exercise as an argument: `tmc run-tests exercise1`. Running `tmc run-tests` in the course root with not arguments will run tests on all exercises.
+
+```
+~/tmc-courses/test-course/exercise1/ $ tmc run-tests
+Testing: exercise1
+Test results: 1/1 tests passed
+All tests passed! Submit to server with 'tmc submit'
+```
+
+##Submitting exercises
+
+You have now completed your first exercise! To submit your exercise, run `tmc submit`. The syntax is the same as running tests.
+
+```
+~/tmc-courses/test-course/exercise1/ $ tmc submit
+Submitting: exercise1
+Test results: 1/1 tests passed
+All tests passed on server!
+Points permanently awarded: [exercise1]
+Model solution: https://link.to.model/solution
+```
+
+##Disclaimer
+
+This software comes with no warranty. Helsinki University and the tmc-cli developers are not responsible for any damages caused by misuse or misbehaviour of this software.
