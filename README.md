@@ -5,19 +5,19 @@
 [![Coverage Status](https://coveralls.io/repos/github/tmc-cli/tmc-cli/badge.svg?branch=master)](https://coveralls.io/github/tmc-cli/tmc-cli?branch=master)
 [![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
 
-TMC-CLI is the command client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
+TMC-CLI is the command client for Helsinki University's Test My Code -framework. Test My Code is used by various online programming courses for student exercise testing and submission.
 ---
 ##Requirements
 
 * Java Runtime Environment 7
 * Linux, Mac OS X or Microsoft Windows
-	* Currently limited support for Windows
+  * Currently limited support for Windows
 * Bash is required for auto-completion
 ---
 ##Installation
 
-Download the latest release from ["releases"](https://github.com/tmc-cli/tmc-cli/releases)
-If you use Linux or OS X, choose "tmc". If you use Windows, choose tmc-cli-<version>.jar.
+Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases).
+If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-<version>.jar".
 
 If you downloaded "tmc", navigate to the download directory on your terminal and make it executable with `chmod u+x ./tmc`.
 
@@ -25,14 +25,14 @@ Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an ali
 
 To summarise:
 ```
-$ cd Downloads
+$ cd Downloads/
 $ chmod u+x tmc
 $ ./tmc
 $ . ~/.bashrc
 $ echo "Now you can run tmc anywhere!"
 ```
 
-If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar <path to tmc-cli.jar>`. In the future examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help article](https://www.java.com/en/download/help/path.xml)
+If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar <path to tmc-cli.jar>`. In the future examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml)
 ---
 ##Log in
 
