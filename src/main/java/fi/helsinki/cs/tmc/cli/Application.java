@@ -48,8 +48,8 @@ public class Application {
         this.options = new Options();
         this.commands = new CommandFactory();
         new CommandList().run(this.commands);
-        options.addOption("h", "help", false, "Display help information about tmc-cli.");
-        options.addOption("v", "version", false, "Give the version of the tmc-cli.");
+        options.addOption("h", "help", false, "Display help information about tmc-cli");
+        options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
     }
 
