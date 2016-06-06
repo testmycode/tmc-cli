@@ -1,7 +1,8 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
+
 import junit.framework.Assert;
-import org.apache.commons.collections.comparators.BooleanComparator;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -27,7 +28,7 @@ public class CourseInfoIoTest {
                 .resolve("test course")
                 .resolve(".tmc.json");
         this.settings = new Settings();
-        this.course = new CourseInfo(this.settings, "test course");
+        this.course = new CourseInfo(this.settings, new Course("test-course"));
         this.courseio = new CourseInfoIo(this.courseFile);
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir)
@@ -62,7 +63,7 @@ public class CourseInfoIoTest {
         CourseInfo loadedInfo = this.courseio.load();
         Assert.assertEquals(this.course.getServerAddress(), loadedInfo.getServerAddress());
         Assert.assertEquals(this.course.getUsername(), loadedInfo.getUsername());
-        Assert.assertEquals(this.course.getCourse(), loadedInfo.getCourse());
+        Assert.assertEquals(this.course.getCourseName(), loadedInfo.getCourseName());
     }
 
 }

@@ -93,7 +93,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
         for (int i = this.maxline - length; i > 0; i--) {
             sb.append(' ');
         }
-        io.print(sb.toString());
+        io.print(sb);
     }
 
     private String progressBar(double progress) {
