@@ -6,8 +6,13 @@ import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
-@Command(name = "help", desc = "Lists every command")
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+@Command(name = "help", desc = "List every command")
 public class HelpCommand implements CommandInterface {
+    private final int longestName = 14; // Length of the longest command name
     private final Application app;
     private final CommandFactory commands;
 
@@ -20,15 +25,36 @@ public class HelpCommand implements CommandInterface {
     public void run(String[] args, Io io) {
         io.println("Usage: tmc [args] COMMAND [command-args]\n");
         io.println("TMC commands:");
-
+        
+        List<String> commandStrings = getCommandStrings();
+        Collections.sort(commandStrings);
+        for (String commandString : commandStrings) {
+            io.println(commandString);
+        }
+        
+        io.println("");
+        app.printHelp();
+    }
+    
+    private List<String> getCommandStrings() {
+        List<String> strings = new ArrayList<>();
         for (Class<Command> commandClass : this.commands.getCommands()) {
             Command command = commands.getCommand(commandClass);
             if ((Class)commandClass == (Class)TestCommand.class) {
                 continue;
             }
-            io.println("  " + command.name() + "\t" + command.desc());
+            strings.add(createCommandString(command));
         }
-        io.println("");
-        app.printHelp();
+        return strings;
+    }
+    
+    private String createCommandString(Command command) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("  " + command.name());
+        for (int i = 0; i < longestName - command.name().length() + 2; i++) {
+            builder.append(" ");
+        }
+        builder.append(command.desc());
+        return builder.toString();
     }
 }

@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-@Command(name = "login", desc = "Login to TMC server.")
+@Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand implements CommandInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
