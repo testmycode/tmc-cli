@@ -170,6 +170,9 @@
                     <maxmem>256m</maxmem>
                     <instrumentation>
                         <ignoreTrivial>true</ignoreTrivial>
+                        <ignores>
+                            <ignore>fi.helsinki.cs.tmc.cli.command.CommandList</ignore>
+                        </ignores>
                     </instrumentation>
                 </configuration>
             </plugin>
