@@ -39,9 +39,7 @@ public class SettingsIo {
      */
     public static Path getDefaultConfigRoot() {
         Path configPath;
-        String os = System.getProperty("os.name").toLowerCase();
-
-        if (os.contains("windows")) {
+        if (isWindows()) {
             //TODO: Use proper Windows config file location
             configPath = Paths.get(System.getProperty("user.home"));
         } else {
@@ -57,6 +55,12 @@ public class SettingsIo {
         }
         configPath = configPath.resolve(CONFIG_DIR);
         return configPath;
+    }
+
+    // TODO: move to some better place?
+    public static boolean isWindows() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("windows");
     }
 
     private Path getAccountsFile(Path path) {

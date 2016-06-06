@@ -68,7 +68,7 @@ public class ExternalsUtil {
                 sb.append(messageLine + "\n");
             }
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     /**
@@ -106,11 +106,10 @@ public class ExternalsUtil {
                     Desktop.getDesktop().browse(uri);
                 } catch (Exception e) {
                     logger.error("Exception when launching browser", e);
-                    return;
                 }
+                return;
             }
-            logger.warn("Cannot launch browser");
-            return;
+            logger.error("Desktop is not supported, cannot launch browser");
         }
     }
 
@@ -119,10 +118,10 @@ public class ExternalsUtil {
         logger.info("Launching external program " + program + " with arg " + arg);
         String[] exec;
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            exec = new String[]{program + " \'" + arg.toString() + "\'"};
+            exec = new String[]{program + " \'" + arg + "\'"};
         } else {
             exec = new String[]{
-                    "sh", "-c", program + " \'" + arg.toString() + "\'"
+                    "sh", "-c", program + " \'" + arg + "\'"
                     + " </dev/tty >/dev/tty"};
         }
         Process proc = null;
@@ -133,7 +132,7 @@ public class ExternalsUtil {
                 proc.waitFor();
             }
         } catch (Exception e) {
-            logger.error("Exception when running external program", e);
+            logger.error("Exception when running external program " + program + " " + arg, e);
         }
     }
 }

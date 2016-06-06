@@ -63,16 +63,19 @@ public class PasteCommand implements CommandInterface {
         if (message == null) {
             message = ExternalsUtil.getUserEditedMessage(
                     "\n"
-                    + "#Write a message for your paste. "
-                    + "Leaving the message empty will abort the paste.\n"
+                    + "#Write a message for your paste.\n"
                     + "#Lines beginning with # are comments and will be ignored.",
                     "tmc_paste_message.txt",
                     true);
         }
-        if (message == null || message.length() == 0) {
+
+        /*
+        // Uncomment this block if we wish to abort empty pastes
+        if (message == null || message.isEmpty()) {
             io.println("Paste message empty, aborting");
             return;
         }
+        */
 
         String exerciseName = exerciseNames.get(0);
         CourseInfoIo infoio = new CourseInfoIo(dirutil.getConfigFile());
