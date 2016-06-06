@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
@@ -204,7 +205,7 @@ public class Application {
         }
     }
 
-    public CourseInfo createCourseInfo(String courseName) {
-        return new CourseInfo(settings, courseName);
+    public CourseInfo createCourseInfo(Course course) {
+        return new CourseInfo(settings, course);
     }
 }

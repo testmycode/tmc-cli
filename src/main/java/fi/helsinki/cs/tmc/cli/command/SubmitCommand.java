@@ -69,7 +69,7 @@ public class SubmitCommand implements CommandInterface {
 
         CourseInfoIo infoIo = new CourseInfoIo(dirUtil.getConfigFile());
         CourseInfo info = infoIo.load();
-        String courseName = info.getCourse();
+        String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
 
         List<String> exercises;
