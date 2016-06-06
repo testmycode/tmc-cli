@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
@@ -49,8 +50,8 @@ public class Application {
         this.options = new Options();
         this.commands = new CommandFactory();
         new CommandList().run(this.commands);
-        options.addOption("h", "help", false, "Display help information about tmc-cli.");
-        options.addOption("v", "version", false, "Give the version of the tmc-cli.");
+        options.addOption("h", "help", false, "Display help information about tmc-cli");
+        options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
     }
 
@@ -208,7 +209,7 @@ public class Application {
         }
     }
 
-    public CourseInfo createCourseInfo(String courseName) {
-        return new CourseInfo(settings, courseName);
+    public CourseInfo createCourseInfo(Course course) {
+        return new CourseInfo(settings, course);
     }
 }
