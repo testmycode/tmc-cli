@@ -41,21 +41,21 @@ if [ ! -f $AUTOCOMPLETE ]; then
 	. $AUTOCOMPLETE
 fi
 
-export COLUMNS=$(tput cols)
-exec "$java" $java_args -jar $MYSELF "$@"
-
-if [ "$?" == "37" ]; then
+if [ "$1" == "?internal-update" ]; then
 	if [ ! -f tmc.new ]; then
 		echo "Could not find the updated file."
 		exit 127
 	fi
 
-	# get the new update_autocomplete function
-	. tmc.new
-
 	mv tmc tmc.orig
 	mv tmc.new tmc
+	rm tmc.orig
 	tmc_update
+
+	#echo "To use new autocompletion run the following on command line:"
+	#echo ". ~/.bashrc"
 fi
+
+exec "$java" $java_args -jar $MYSELF "$@"
 
 exit 0 
