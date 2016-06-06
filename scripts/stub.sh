@@ -23,17 +23,39 @@ AUTOCOMPLETE="$HOME/.tmc-autocomplete.sh"
 # this is used in autocompletion file
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ ! -f $AUTOCOMPLETE ]; then
+function tmc_update_autocomplete {
 	cat > $AUTOCOMPLETE <<- EOM
 TMC_AUTOCOMPLETE_SH
 EOM
+	chmod +x $AUTOCOMPLETE
+}
+
+function tmc_update {
+	tmc_update_autocomplete
+}
+
+if [ ! -f $AUTOCOMPLETE ]; then
+	tmc_update_autocomplete
 
 	echo ". $AUTOCOMPLETE" >> ~/.bashrc
-
-	chmod +x $AUTOCOMPLETE
 	. $AUTOCOMPLETE
 fi
 
 export COLUMNS=$(tput cols)
 exec "$java" $java_args -jar $MYSELF "$@"
+
+if [ "$?" == "37" ]; then
+	if [ ! -f tmc.new ]; then
+		echo "Could not find the updated file."
+		exit 127
+	fi
+
+	# get the new update_autocomplete function
+	. tmc.new
+
+	mv tmc tmc.orig
+	mv tmc.new tmc
+	tmc_update
+fi
+
 exit 0 
