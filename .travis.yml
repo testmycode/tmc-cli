@@ -4,4 +4,4 @@ script:
 - mvn checkstyle:check cobertura:cobertura test
 
 after_success:
-- mvn clean cobertura:cobertura coveralls:report
+- mvn coveralls:report
