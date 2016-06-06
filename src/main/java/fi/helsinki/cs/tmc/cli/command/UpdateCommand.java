@@ -42,8 +42,7 @@ public class UpdateCommand implements CommandInterface {
         DirectoryUtil dirUtil = new DirectoryUtil();
         CourseInfoIo infoio = new CourseInfoIo(dirUtil.getConfigFile());
         CourseInfo info = infoio.load();
-        Course course = TmcUtil.findCourse(core, info.getCourse().getName());
-        System.out.println(course.getName());
+        Course course = info.getCourse();
         List<Exercise> exercises;
 
         try {
@@ -52,10 +51,15 @@ public class UpdateCommand implements CommandInterface {
             System.out.println(e);
             return;
         }
-        System.out.println(exercises.size());
 
+        if (exercises.isEmpty()) {
+            io.println("All exercises are up-to-date");
+            return;
+        }
+
+        io.println("Updates available for:");
         for (Exercise exercise : exercises) {
-            System.out.println(exercise.getName());
+            io.println(exercise.getName());
         }
     }
 }
