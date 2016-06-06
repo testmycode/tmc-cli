@@ -16,12 +16,17 @@ public class TmcCliProgressObserver extends ProgressObserver {
 
     private int pips;
     private int maxline;
+    private String color;
 
     public TmcCliProgressObserver() {
         this(new TerminalIo());
     }
 
     public TmcCliProgressObserver(Io io) {
+        this(io, Color.ANSI_BLUE);
+    }
+
+    public TmcCliProgressObserver(Io io, String color) {
         this.io = io;
         String colEnv = System.getenv("COLUMNS");
         if (colEnv != null) {
@@ -34,13 +39,13 @@ public class TmcCliProgressObserver extends ProgressObserver {
             this.maxline = 69;
         }
         this.pips = (this.maxline - 6) / 3;
+        this.color = color;
     }
 
     @Override
     public void progress(long id, String message) {
         if (message.length() > this.maxline) {
-            // Shorten message if necessary
-            message = message.substring(0, this.maxline - 3) + "...";
+            message = shorten(message, this.maxline);
         }
         this.io.print("\r" + message);
         flush(message.length());
@@ -49,8 +54,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     @Override
     public void progress(long id, Double progress, String message) {
         if (message.length() > this.maxline - (this.pips + 6)) {
-            // Shorten message if necessary
-            message = message.substring(0, this.maxline - (this.pips + 6) - 3) + "...";
+            message = shorten(message, this.maxline - (this.pips + 6));
         }
         this.io.print("\r" + message
                 + fillMiddle(this.maxline - (message.length() + this.pips + 6))
@@ -64,6 +68,14 @@ public class TmcCliProgressObserver extends ProgressObserver {
     @Override
     public void end(long id) {
         this.io.println("");
+    }
+
+    private String shorten(String str, int length) {
+        if (str.length() <= length) {
+            return str;
+        } else {
+            return str.substring(0, length - 3) + "...";
+        }
     }
 
     private String fillMiddle(int length) {
@@ -99,15 +111,15 @@ public class TmcCliProgressObserver extends ProgressObserver {
     private String progressBar(double progress) {
         int pipsDone = ((this.pips * (int) progress)) / 100;
         StringBuilder sb = new StringBuilder(this.pips);
-        sb.append(BARLEFT);
         for (int i = 0; i < pipsDone; i++) {
             sb.append(PIPCHAR);
         }
         for (int i = 0; i < this.pips - pipsDone; i++) {
             sb.append(EMPTYCHAR);
         }
-        sb.append(BARRIGHT);
-        return sb.toString();
+        return BARLEFT
+                + Color.colorString(sb.toString(), this.color)
+                + BARRIGHT;
     }
 
     private String percentage(double progress) {
@@ -122,4 +134,5 @@ public class TmcCliProgressObserver extends ProgressObserver {
         }
         return percentage + percent + "%";
     }
+    
 }
