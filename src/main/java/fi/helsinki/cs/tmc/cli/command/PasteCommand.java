@@ -77,7 +77,7 @@ public class PasteCommand implements CommandInterface {
         String exerciseName = exerciseNames.get(0);
         CourseInfoIo infoio = new CourseInfoIo(dirutil.getConfigFile());
         CourseInfo courseinfo = infoio.load();
-        Exercise exercise = null;
+        Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(
                 new TmcCliProgressObserver(), exercise, message);
         URI uri;
@@ -86,12 +86,12 @@ public class PasteCommand implements CommandInterface {
         } catch (Exception e) {
             logger.error("Unable to connect to server", e);
             io.println("Unable to connect to server:");
-            io.println(e.printStackTrace(););
+            e.printStackTrace();
             return;
         }
         io.println("Paste sent for exercise " + exercise.getName());
         io.println(uri.toString());
-        if (options.hasOption("open")) {
+        if (line.hasOption("o")) {
             ExternalsUtil.openInBrowser(uri);
         }
     }
