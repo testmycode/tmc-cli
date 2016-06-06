@@ -84,18 +84,9 @@ public class PasteCommand implements CommandInterface {
         try {
             uri = callable.call();
         } catch (Exception e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof FailedHttpResponseException) {
-                FailedHttpResponseException httpEx
-                        = (FailedHttpResponseException) cause;
-                if (httpEx.getStatusCode() == 401) {
-                    io.println("Authentication failed. Are you logged in?");
-                }
-                return;
-            }
             logger.error("Unable to connect to server", e);
             io.println("Unable to connect to server:");
-            io.println(e.toString());
+            io.println(e.printStackTrace(););
             return;
         }
         io.println("Paste sent for exercise " + exercise.getName());
