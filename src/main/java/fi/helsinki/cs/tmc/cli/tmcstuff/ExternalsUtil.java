@@ -68,7 +68,7 @@ public class ExternalsUtil {
                 sb.append(messageLine + "\n");
             }
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     /**
@@ -106,11 +106,10 @@ public class ExternalsUtil {
                     Desktop.getDesktop().browse(uri);
                 } catch (Exception e) {
                     logger.error("Exception when launching browser", e);
-                    return;
                 }
+                return;
             }
             logger.warn("Cannot launch browser");
-            return;
         }
     }
 
