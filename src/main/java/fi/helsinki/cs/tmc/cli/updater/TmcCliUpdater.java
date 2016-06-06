@@ -30,9 +30,11 @@ public class TmcCliUpdater {
             = LoggerFactory.getLogger(TmcCliUpdater.class);
 
     private final Io io;
+    private final boolean isWindows;
 
     public TmcCliUpdater(Io io) {
         this.io = io;
+        this.isWindows = SettingsIo.isWindows();
     }
 
     /**
@@ -45,21 +47,28 @@ public class TmcCliUpdater {
             return;
         }
 
-        io.println("A new version of tmc-cli is available.");
+        io.println("A new version of tmc-cli is available!");
+
+        if (isWindows) { // just show a link for Windows users
+            io.println("Download: https://github.com/tmc-cli/tmc-cli/releases/latest");
+            return;
+        }
+
         String answer = io.readLine("Do you want to download it? (y/N): ");
         if (!"y".equalsIgnoreCase(answer) && !"yes".equalsIgnoreCase(answer)) {
             return;
         }
 
-        JsonObject binAsset = findCorrectAsset(release, SettingsIo.isWindows());
+        JsonObject binAsset = findCorrectAsset(release, isWindows);
         if (binAsset == null) {
             return;
         }
 
-        String binName = binAsset.get("name").getAsString() + "-new";
+        String binName = binAsset.get("name").getAsString() + ".new";
         String dlUrl = binAsset.get("browser_download_url").getAsString();
         File destination = new File(binName);
 
+        io.println("Downloading...");
         fetchTmcCliBinary(dlUrl, destination);
     }
 

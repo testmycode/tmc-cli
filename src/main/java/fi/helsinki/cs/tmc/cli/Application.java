@@ -183,8 +183,7 @@ public class Application {
         ShutdownHandler shutdownHandler = new ShutdownHandler(io);
         Runtime.getRuntime().addShutdownHook(shutdownHandler);
 
-        // Slow and annoying atm
-        //new TmcCliUpdater(io).run();
+        new TmcCliUpdater(io).run();
 
         Application app = new Application(io);
         app.run(args);
