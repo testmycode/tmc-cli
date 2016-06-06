@@ -16,9 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.Level;
 
 public class TmcCliUpdater {
 
@@ -152,7 +150,8 @@ public class TmcCliUpdater {
     private static String getJarLocation() {
         try {
             return new File(TmcCliUpdater.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI()).getParent() + File.separator;
+                    .getCodeSource().getLocation().toURI()).getParent()
+                    + File.separator;
         } catch (Exception ex) {
             return "";
         }
