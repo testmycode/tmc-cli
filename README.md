@@ -4,7 +4,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tmc-cli/tmc-cli/master/LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/tmc-cli/tmc-cli/badge.svg?branch=master)](https://coveralls.io/github/tmc-cli/tmc-cli?branch=master)
 [![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
-# tmc-cli
+#tmc-cli
 
 TMC-CLI is the command-line client for University of Helsinki's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
 
@@ -14,7 +14,7 @@ TMC-CLI is the command-line client for University of Helsinki's Test My Code -fr
 * Linux, Mac OS X or Microsoft Windows
   * Currently only limited support for Windows
   * Other Unix-like systems may work, but are not tested
-* Bash is required for auto-completion - may work on other shells
+* If you want autocompletion, Bash or a Bash-compatible shell is required
 
 ##Installation
 
@@ -27,14 +27,13 @@ Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an ali
 
 To summarise:
 ```
-~ $ cd Downloads/
-~/Downloads $ chmod u+x tmc
-~/Downloads $ ./tmc
-~/Downloads $ . ~/.bashrc
-~/Downloads $ echo "Now you can run tmc anywhere."
+~ $ chmod u+x tmc
+~ $ ./tmc
+~ $ . ~/.bashrc
+~ $ echo "Now you can run tmc anywhere."
 ```
 
-If for some reason the alias was not added to your .bashrc or your shell of choice is not bash, you can manually add the following line `alias tmc="[PATH_TO_TMC]"` to your .bashrc / other shell rc file.
+If for some reason the alias was not added to your .bashrc or your shell of choice is not Bash, you can manually add the following line `alias tmc="[PATH_TO_TMC]"` to your .bashrc / other shell rc file.
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
