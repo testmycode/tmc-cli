@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Level;
 
 public class TmcCliUpdater {
 
@@ -49,7 +51,7 @@ public class TmcCliUpdater {
 
         io.println("A new version of tmc-cli is available!");
 
-        if (isWindows) { // just show a link for Windows users
+        if (isWindows) { //just show a link for Windows users now, todo...
             io.println("Download: https://github.com/tmc-cli/tmc-cli/releases/latest");
             return;
         }
@@ -66,7 +68,7 @@ public class TmcCliUpdater {
 
         String binName = binAsset.get("name").getAsString() + ".new";
         String dlUrl = binAsset.get("browser_download_url").getAsString();
-        File destination = new File(binName);
+        File destination = new File(getJarLocation() + binName);
 
         io.println("Downloading...");
         fetchTmcCliBinary(dlUrl, destination);
@@ -145,5 +147,14 @@ public class TmcCliUpdater {
             return jsonElement.getAsJsonObject();
         }
         return null;
+    }
+
+    private static String getJarLocation() {
+        try {
+            return new File(TmcCliUpdater.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI()).getParent() + File.separator;
+        } catch (Exception ex) {
+            return "";
+        }
     }
 }
