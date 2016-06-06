@@ -11,6 +11,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
+import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
@@ -182,6 +183,9 @@ public class Application {
         Io io = new TerminalIo();
         ShutdownHandler shutdownHandler = new ShutdownHandler(io);
         Runtime.getRuntime().addShutdownHook(shutdownHandler);
+
+        new TmcCliUpdater(io).run();
+
         Application app = new Application(io);
         app.run(args);
         Runtime.getRuntime().removeShutdownHook(shutdownHandler);
