@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import static junit.framework.Assert.assertNull;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.io.FileUtils;
@@ -49,7 +50,7 @@ public class DirectoryUtilTest {
         exercises.add(new Exercise("viikko1-teht1"));
         exercises.add(new Exercise("viikko2-teht2"));
         exercises.add(new Exercise("viikko2-subdir-teht3"));
-        CourseInfo info = new CourseInfo(new Settings(true), "dirUtilTest");
+        CourseInfo info = new CourseInfo(new Settings(true), new Course("dirUtilTest"));
         info.setExercises(exercises);
         CourseInfoIo infoio = new CourseInfoIo(workDir.resolve(CourseInfoIo.COURSE_CONFIG));
         infoio.save(info);

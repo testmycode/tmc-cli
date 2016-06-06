@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Command for listing all available courses to user.
  */
-@Command(name = "list-courses", desc = "List the available courses.")
+@Command(name = "list-courses", desc = "List the available courses")
 public class ListCoursesCommand implements CommandInterface {
     private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
     private Application app;
