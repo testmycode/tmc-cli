@@ -37,7 +37,7 @@ public class ListExercisesCommand implements CommandInterface {
 
             if (dirUtil.getConfigFile() != null) {
                 CourseInfo courseinfo = new CourseInfoIo(dirUtil.getConfigFile()).load();
-                courseName = courseinfo.getCourse();
+                courseName = courseinfo.getCourseName();
 
             } else  {
                 this.io.println("USAGE: tmc exercise COURSE");

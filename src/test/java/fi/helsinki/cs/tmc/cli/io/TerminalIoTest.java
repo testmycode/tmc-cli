@@ -22,8 +22,26 @@ public class TerminalIoTest {
     }
 
     @Test
-    public void printlnWorksRight() {
+    public void printWord() {
+        io.print("foo");
+        assertTrue(os.toString().equals("foo"));
+    }
+
+    @Test
+    public void printLineWithNewLine() {
         io.println("foo");
         assertTrue(os.toString().equals("foo\n"));
+    }
+
+    @Test
+    public void printNull() {
+        io.print(null);
+        assertTrue(os.toString().equals("null"));
+    }
+
+    @Test
+    public void printInteger() {
+        io.print(5);
+        assertTrue(os.toString().equals("5"));
     }
 }
