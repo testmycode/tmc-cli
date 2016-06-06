@@ -66,7 +66,12 @@ public class TmcCliUpdater {
 
         String binName = binAsset.get("name").getAsString() + ".new";
         String dlUrl = binAsset.get("browser_download_url").getAsString();
-        File destination = new File(getJarLocation() + binName);
+        String currentBinLocation = getJarLocation();
+        if (currentBinLocation == null) {
+            io.println("Unable to find current program location, aborting update.");
+            return;
+        }
+        File destination = new File(currentBinLocation + binName);
 
         io.println("Downloading...");
         fetchTmcCliBinary(dlUrl, destination);
@@ -153,7 +158,8 @@ public class TmcCliUpdater {
                     .getCodeSource().getLocation().toURI()).getParent()
                     + File.separator;
         } catch (Exception ex) {
-            return "";
+            logger.warn("Unable to get current jar folder.", ex);
+            return null;
         }
     }
 }
