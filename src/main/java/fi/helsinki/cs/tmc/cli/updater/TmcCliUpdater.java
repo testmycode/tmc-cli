@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.logging.Level;
 
 public class TmcCliUpdater {
 
@@ -32,9 +31,9 @@ public class TmcCliUpdater {
     private final Io io;
     private final boolean isWindows;
 
-    public TmcCliUpdater(Io io) {
+    public TmcCliUpdater(Io io, boolean isWindosw) {
         this.io = io;
-        this.isWindows = Application.isWindows();
+        this.isWindows = isWindosw;
     }
 
     /**
