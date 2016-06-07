@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -160,8 +161,7 @@ public class Application {
             if (dirutil.getConfigFile() != null) {
                 // If we're in a course directory, we load settings matching the course
                 // Otherwise we just load the last used settings
-                CourseInfoIo courseio = new CourseInfoIo(dirutil.getConfigFile());
-                CourseInfo courseinfo = courseio.load();
+                CourseInfo courseinfo = CourseInfoIo.load(dirutil.getConfigFile());
                 if (courseinfo == null) {
                     io.println("Course configuration file "
                             + dirutil.getConfigFile().toString()
@@ -212,6 +212,54 @@ public class Application {
             logger.warn("Failed to get version", e);
             return "n/a";
         }
+    }
+
+    public void removeProperty(String prop) {
+        HashMap<String, String> props = getProperties();
+        props.remove(prop);
+        setProperties(props);
+    }
+
+    public void setProperty(String prop, String value) {
+        HashMap<String, String> props = getProperties();
+        if (value != null) {
+            props.put(prop, value);
+        } else {
+            props.remove(prop);
+        }
+        setProperties(props);
+    }
+
+    public void setProperty(String prop, int value) {
+        HashMap<String, String> props = getProperties();
+        props.put(prop, Integer.toString(value));
+        setProperties(props);
+    }
+
+    public String getPropertyString(String prop) {
+        HashMap<String, String> props = getProperties();
+        return props.get(prop);
+    }
+
+    public int getPropertyInt(String prop) throws NumberFormatException {
+        // If property is not set as integer or at all, throws exception
+        HashMap<String, String> props = getProperties();
+        return Integer.parseInt(props.get(prop));
+    }
+
+    private HashMap<String, String> getProperties() {
+        // Loads properties from the global configuration file in .config/tmc-cli/
+        return SettingsIo.loadProperties();
+    }
+
+    private Boolean setProperties(HashMap<String, String> properties) {
+        // Saves properties to the global configuration file in .config/tmc-cli/
+        return SettingsIo.saveProperties(properties);
+    }
+
+    public static boolean isWindows() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("windows");
     }
 
     public CourseInfo createCourseInfo(Course course) {
