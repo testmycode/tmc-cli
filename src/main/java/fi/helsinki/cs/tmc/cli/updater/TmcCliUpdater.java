@@ -90,7 +90,7 @@ public class TmcCliUpdater {
      * Downloads a JSON string that contains information about the latest
      * tmc-cli release.
      */
-    private String fetchLatestReleaseJson() {
+    protected String fetchLatestReleaseJson() {
         try {
             return IOUtils.toString(new URL(LATEST_RELEASE_URL), "UTF-8");
         } catch (IOException ex) {
@@ -103,7 +103,7 @@ public class TmcCliUpdater {
      * Downloads a binary file from downloadUrl and saves it to destination
      * file.
      */
-    private void fetchTmcCliBinary(String downloadUrl, File destination) {
+    protected void fetchTmcCliBinary(String downloadUrl, File destination) {
         try {
             URL url = new URL(downloadUrl);
             FileUtils.copyURLToFile(url, destination);
