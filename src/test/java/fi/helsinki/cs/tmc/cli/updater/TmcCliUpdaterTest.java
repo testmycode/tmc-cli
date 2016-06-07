@@ -62,6 +62,15 @@ public class TmcCliUpdaterTest {
         assertTrue(io.out().isEmpty());
     }
 
+    @Test
+    public void doNothingIfFetchingReleaseJsonFails() {
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.1", false));
+        when(updater.fetchLatestReleaseJson()).thenReturn(null);
+        updater.run();
+        verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+        assertTrue(io.out().isEmpty());
+    }
+
     // Expected to fail once autoupdater is properly implemented on Windows.
     @Test
     public void newReleaseShowsDownloadLinkOnWindows() {
