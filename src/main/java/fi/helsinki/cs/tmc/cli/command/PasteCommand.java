@@ -78,8 +78,7 @@ public class PasteCommand implements CommandInterface {
         */
 
         String exerciseName = exerciseNames.get(0);
-        CourseInfoIo infoio = new CourseInfoIo(dirutil.getConfigFile());
-        CourseInfo courseinfo = infoio.load();
+        CourseInfo courseinfo = CourseInfoIo.load(dirutil.getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(
                 new TmcCliProgressObserver(), exercise, message);

@@ -73,27 +73,13 @@ public class SettingsHolder {
         return this.settingsArray.size();
     }
 
-    public void removeProperty(String prop) {
-        this.properties.remove(prop);
+    public HashMap<String, String> getProperties() {
+        return this.properties;
     }
 
-    public void setProperty(String prop, String value) {
-        if (value != null) {
-            this.properties.put(prop, value);
-        } else {
-            this.properties.remove(prop);
-        }
+    public void setProperties(HashMap<String, String> properties) {
+        this.properties = properties;
     }
 
-    public void setProperty(String prop, int value) {
-        this.properties.put(prop, Integer.toString(value));
-    }
 
-    public String getPropertyString(String prop) {
-        return this.properties.get(prop);
-    }
-
-    public int getPropertyInt(String prop) {
-        return Integer.parseInt(this.properties.get(prop));
-    }
 }
