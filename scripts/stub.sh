@@ -47,13 +47,24 @@ if [ "$1" == "?internal-update" ]; then
 		exit 127
 	fi
 
+	echo "Moving the tmc files..."
 	mv tmc tmc.orig
 	mv tmc.new tmc
 	rm tmc.orig
+	echo "Running the new tmc update script..."
 	tmc_update
 
-	#echo "To use new autocompletion run the following on command line:"
-	#echo ". ~/.bashrc"
+	echo ""
+	if [ -f tmc ]; then
+		echo "Tmc cli installation was successful"
+		#echo ""
+		#echo "To use new autocompletion run the following on command line:"
+		#echo ". ~/.bashrc"
+	else
+		echo "Tmc cli installation failed."
+		exit 127
+	fi
+	exit
 fi
 
 exec "$java" $java_args -jar $MYSELF "$@"
