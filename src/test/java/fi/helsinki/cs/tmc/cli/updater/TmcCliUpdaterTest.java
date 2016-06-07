@@ -64,11 +64,30 @@ public class TmcCliUpdaterTest {
 
     @Test
     public void doNothingIfFetchingReleaseJsonFails() {
-        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.1", false));
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
         when(updater.fetchLatestReleaseJson()).thenReturn(null);
         updater.run();
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
         assertTrue(io.out().isEmpty());
+    }
+
+    @Test
+    public void doNothingIfFetchedJsonIsApiRateLimitExceeded() {
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
+        when(updater.fetchLatestReleaseJson()).thenReturn(apiLimitExeededJson);
+        updater.run();
+        verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+        assertTrue(io.out().isEmpty());
+    }
+
+    @Test
+    public void doNothingIfUserDoesntWantToUpdate() {
+        io.addLinePrompt("n");
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
+        when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
+        updater.run();
+        assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
+        verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
     }
 
     // Expected to fail once autoupdater is properly implemented on Windows.
