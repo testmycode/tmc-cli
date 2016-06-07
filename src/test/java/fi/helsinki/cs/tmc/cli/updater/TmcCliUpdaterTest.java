@@ -3,6 +3,8 @@ package fi.helsinki.cs.tmc.cli.updater;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -58,6 +60,17 @@ public class TmcCliUpdaterTest {
         updater.run();
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
         assertTrue(io.out().isEmpty());
+    }
+
+    // Expected to fail once autoupdater is properly implemented on Windows.
+    @Test
+    public void newReleaseShowsDownloadLinkOnWindows() {
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", true));
+        when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
+        updater.run();
+        assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
+        assertThat(io.out(), containsString("Download: https://"));
+        verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
     }
 
     private static String readResource(String resourceName) throws IOException {
