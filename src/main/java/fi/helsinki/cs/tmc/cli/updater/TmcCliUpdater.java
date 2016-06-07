@@ -160,7 +160,14 @@ public class TmcCliUpdater {
             return null;
         }
 
-        JsonElement jsonElement = new JsonParser().parse(jsonString);
+        JsonElement jsonElement;
+        try {
+            jsonElement = new JsonParser().parse(jsonString);
+        } catch (Exception e) {
+            logger.warn("Unable to parse malformed JSON string.");
+            return null;
+        }
+
         if (jsonElement.isJsonObject()) {
             return jsonElement.getAsJsonObject();
         }

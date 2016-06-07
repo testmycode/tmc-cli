@@ -29,6 +29,8 @@ public class TmcCliUpdaterTest {
 
     static String latestJson;
     static String apiLimitExeededJson;
+    static String malformedJson;
+    static String changedJson;
 
     TestIo io;
 
@@ -39,6 +41,12 @@ public class TmcCliUpdaterTest {
 
         apiLimitExeededJson = readResource("api_rate_limit_exeeded.json");
         assertNotNull(apiLimitExeededJson);
+
+        malformedJson = readResource("malformed.json");
+        assertNotNull(malformedJson);
+
+        changedJson = readResource("changed.json");
+        assertNotNull(changedJson);
     }
 
     @Before
@@ -115,6 +123,15 @@ public class TmcCliUpdaterTest {
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
         assertThat(io.out(), containsString("Download: https://"));
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+    }
+
+    @Test
+    public void doNothingIfJsonIsMalformed() {
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
+        when(updater.fetchLatestReleaseJson()).thenReturn(malformedJson);
+        updater.run();
+        verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+        assertTrue(io.out().isEmpty());
     }
 
     private static String readResource(String resourceName) throws IOException {
