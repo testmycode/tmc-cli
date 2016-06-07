@@ -76,14 +76,7 @@ public class TmcCliUpdater {
         io.println("Downloading...");
         fetchTmcCliBinary(dlUrl, destination);
 
-        try {
-            // Run the auto-update at the launch script
-            Runtime.getRuntime().exec(destination.getAbsolutePath() + " ?internal-update");
-        } catch (IOException ex) {
-            io.println("Failed to run the tmc-cli at " + destination.getAbsolutePath());
-            io.println("Run it with ?internal-update argument or contact the help desk");
-            logger.error("Failed to run the new tmc", ex);
-        }
+        runNewTmcCliBinary(destination.getAbsolutePath());
     }
 
     /**
@@ -110,6 +103,20 @@ public class TmcCliUpdater {
         } catch (IOException ex) {
             io.println("Failed to download tmc-cli.");
             logger.warn("Failed to download tmc-cli.", ex);
+        }
+    }
+
+    /**
+     * Finish the update by running downloaded binary.
+     */
+    protected void runNewTmcCliBinary(String pathToNewBinary) {
+        try {
+            // Run the auto-update at the launch script
+            Runtime.getRuntime().exec(pathToNewBinary + " ?internal-update");
+        } catch (IOException ex) {
+            io.println("Failed to run the tmc-cli at " + pathToNewBinary);
+            io.println("Run it with ?internal-update argument or contact the help desk");
+            logger.error("Failed to run the new tmc", ex);
         }
     }
 
