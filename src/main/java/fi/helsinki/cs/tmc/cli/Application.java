@@ -189,7 +189,7 @@ public class Application {
         ShutdownHandler shutdownHandler = new ShutdownHandler(io);
         Runtime.getRuntime().addShutdownHook(shutdownHandler);
 
-        new TmcCliUpdater(io, Application.isWindows()).run();
+        new TmcCliUpdater(io, getVersion(), isWindows()).run();
 
         Application app = new Application(io);
         app.run(args);

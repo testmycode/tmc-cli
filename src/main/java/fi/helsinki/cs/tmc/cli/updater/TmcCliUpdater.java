@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.updater;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import com.google.gson.JsonArray;
@@ -30,10 +29,12 @@ public class TmcCliUpdater {
 
     private final Io io;
     private final boolean isWindows;
+    private final String currentVersion;
 
-    public TmcCliUpdater(Io io, boolean isWindosw) {
+    public TmcCliUpdater(Io io, String currentVersion, boolean isWindows) {
         this.io = io;
-        this.isWindows = isWindosw;
+        this.currentVersion = currentVersion;
+        this.isWindows = isWindows;
     }
 
     /**
@@ -120,8 +121,7 @@ public class TmcCliUpdater {
             return false;
         }
         String releaseVersion = release.get("tag_name").getAsString();
-        String installedVersion = Application.getVersion();
-        return !installedVersion.equals(releaseVersion);
+        return !currentVersion.equals(releaseVersion);
     }
 
     /**
