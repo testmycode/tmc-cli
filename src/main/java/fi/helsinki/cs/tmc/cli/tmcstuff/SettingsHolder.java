@@ -1,15 +1,18 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This is a class for storing all different login settings as a single array.
  */
 public class SettingsHolder {
     private ArrayList<Settings> settingsArray;
+    private HashMap<String, String> properties;
 
     public SettingsHolder() {
-        this.settingsArray = new ArrayList<Settings>();
+        this.settingsArray = new ArrayList<>();
+        this.properties = new HashMap<>();
     }
 
     public Settings getSettings() {
@@ -68,5 +71,29 @@ public class SettingsHolder {
 
     public int settingsCount() {
         return this.settingsArray.size();
+    }
+
+    public void removeProperty(String prop) {
+        this.properties.remove(prop);
+    }
+
+    public void setProperty(String prop, String value) {
+        if (value != null) {
+            this.properties.put(prop, value);
+        } else {
+            this.properties.remove(prop);
+        }
+    }
+
+    public void setProperty(String prop, int value) {
+        this.properties.put(prop, Integer.toString(value));
+    }
+
+    public String getPropertyString(String prop) {
+        return this.properties.get(prop);
+    }
+
+    public int getPropertyInt(String prop) {
+        return Integer.parseInt(this.properties.get(prop));
     }
 }
