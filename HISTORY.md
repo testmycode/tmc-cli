@@ -1,3 +1,12 @@
+0.3.0 / 23.5.2016
+=================
+
+ * Command created for code pastes
+ * Exercises can be submitted
+ * Tests can be run locally
+ * Submission results are printed nicely
+ * Bug fixes
+
 0.2.0 / 23.5.2016
 =================
 
