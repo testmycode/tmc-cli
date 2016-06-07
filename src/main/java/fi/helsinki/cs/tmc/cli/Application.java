@@ -252,6 +252,11 @@ public class Application {
         return SettingsIo.saveProperties(properties);
     }
 
+    public static boolean isWindows() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("windows");
+    }
+
     public CourseInfo createCourseInfo(Course course) {
         return new CourseInfo(settings, course);
     }

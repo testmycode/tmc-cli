@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.Application;
+
 import com.google.gson.Gson;
 
 import org.slf4j.Logger;
@@ -29,16 +31,13 @@ public class SettingsIo {
     // and servers. Is located under CONFIG_DIR
     public static final String ACCOUNTS_CONFIG = "settings.json";
 
-    //The overrideRoot variable is intended only for testing
-    private Path overrideRoot;
-
     /**
-     * Get the correct directory in which config files go,
-     * NOT the directory in which the config DIRECTORY goes.
+     * Get the correct directory in which our config files go
+     * ie. /home/user/.config/tmc-cli/
      */
     public static Path getDefaultConfigRoot() {
         Path configPath;
-        if (isWindows()) {
+        if (Application.isWindows()) {
             String appdata = System.getenv("APPDATA");
             if (appdata == null) {
                 configPath = Paths.get(System.getProperty("user.home"));
@@ -56,24 +55,17 @@ public class SettingsIo {
                         .resolve(".config");
             }
         }
-        configPath = configPath.resolve(CONFIG_DIR);
-        return configPath;
+        return configPath.resolve(CONFIG_DIR);
     }
 
-    // TODO: move to some better place?
-    public static boolean isWindows() {
-        String os = System.getProperty("os.name").toLowerCase();
-        return os.contains("windows");
-    }
-
-    private static Path getConfigFile(Path path) {
-        Path file = path.resolve(ACCOUNTS_CONFIG);
-        if (!Files.exists(path)) {
+    private static Path getConfigFile(Path configRoot) {
+        Path file = configRoot.resolve(ACCOUNTS_CONFIG);
+        if (!Files.exists(configRoot)) {
             try {
-                Files.createDirectories(path).getParent();
+                Files.createDirectories(configRoot).getParent();
             } catch (Exception e) { }
             try {
-                Files.createFile(path);
+                Files.createFile(configRoot);
             } catch (Exception e) { }
         }
         return file;
@@ -104,6 +96,10 @@ public class SettingsIo {
         return load(null, null);
     }
 
+    public static Settings loadFrom(Path configRoot) {
+        return loadFrom(null, null, configRoot);
+    }
+
     public static Settings loadFrom(String username, String server, Path configRoot) {
         Path file = getConfigFile(configRoot);
         if (!Files.exists(file)) {
@@ -117,7 +113,7 @@ public class SettingsIo {
 
     private static SettingsHolder getHolderFromJson(Path file) {
         Gson gson = new Gson();
-        Reader reader = null;
+        Reader reader;
         try {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         } catch (IOException e) {

@@ -13,13 +13,10 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.ExternalsUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

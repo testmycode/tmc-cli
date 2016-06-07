@@ -18,18 +18,17 @@ import java.nio.file.Paths;
 public class CourseInfoIoTest {
     private Settings settings;
     private CourseInfo course;
-    private CourseInfoIo courseio;
     private Path courseFile;
+    private String tempDir;
 
     @Before
     public void setup() {
-        String tempDir = System.getProperty("java.io.tmpdir");
+        tempDir = System.getProperty("java.io.tmpdir");
         this.courseFile = Paths.get(tempDir)
                 .resolve("test course")
-                .resolve(".tmc.json");
+                .resolve(CourseInfoIo.COURSE_CONFIG);
         this.settings = new Settings();
         this.course = new CourseInfo(this.settings, new Course("test-course"));
-        this.courseio = new CourseInfoIo(this.courseFile);
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir)
                     .resolve("test course").toFile());
@@ -38,7 +37,6 @@ public class CourseInfoIoTest {
 
     @After
     public void cleanUp() {
-        String tempDir = System.getProperty("java.io.tmpdir");
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir)
                     .resolve("test course").toFile());
@@ -47,20 +45,17 @@ public class CourseInfoIoTest {
 
     @Test
     public void savingToFileWorks() {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        Boolean success = this.courseio.save(this.course);
-
+        Boolean success = CourseInfoIo.save(this.course, this.courseFile);
         Assert.assertTrue(success);
-        Assert.assertTrue(Files.exists(Paths.get(tempDir)
-                .resolve("test course").resolve(".tmc.json")));
+        Assert.assertTrue(Files.exists(this.courseFile));
     }
 
     @Test
     public void loadingFromFileWorks() {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        this.courseio.save(this.course);
+        CourseInfoIo.save(this.course, this.courseFile);
 
-        CourseInfo loadedInfo = this.courseio.load();
+        CourseInfo loadedInfo = CourseInfoIo.load(this.courseFile);
+        Assert.assertNotNull(loadedInfo);
         Assert.assertEquals(this.course.getServerAddress(), loadedInfo.getServerAddress());
         Assert.assertEquals(this.course.getUsername(), loadedInfo.getUsername());
         Assert.assertEquals(this.course.getCourseName(), loadedInfo.getCourseName());

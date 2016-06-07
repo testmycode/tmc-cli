@@ -34,7 +34,7 @@ public class TmcCliUpdater {
 
     public TmcCliUpdater(Io io) {
         this.io = io;
-        this.isWindows = SettingsIo.isWindows();
+        this.isWindows = Application.isWindows();
     }
 
     /**

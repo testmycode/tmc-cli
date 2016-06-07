@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import com.google.gson.Gson;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
