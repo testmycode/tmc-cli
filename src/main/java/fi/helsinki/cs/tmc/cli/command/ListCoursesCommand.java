@@ -36,9 +36,15 @@ public class ListCoursesCommand implements CommandInterface {
             return;
         }
         courses = TmcUtil.listCourses(core);
+        if (courses.isEmpty()) {
+            io.println("No courses found on this server.");
+            return;
+        }
 
         for (Course course : courses) {
             io.println(course.getName());
         }
+        io.println("Found " + courses.size() + " courses on this server.");
+        
     }
 }

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
 
 public class TmcCliUpdater {
 
@@ -74,6 +75,15 @@ public class TmcCliUpdater {
 
         io.println("Downloading...");
         fetchTmcCliBinary(dlUrl, destination);
+
+        try {
+            // Run the auto-update at the launch script
+            Runtime.getRuntime().exec(destination.getAbsolutePath() + " ?internal-update");
+        } catch (IOException ex) {
+            io.println("Failed to run the tmc-cli at " + destination.getAbsolutePath());
+            io.println("Run it with ?internal-update argument or contact the help desk");
+            logger.error("Failed to run the new tmc", ex);
+        }
     }
 
     /**

@@ -76,8 +76,8 @@ public class DirectoryUtil {
      * @return: return exercises as List
      */
     public List<String> getExerciseNames(String[] params) {
-        if (this.courseDirectory == null) {
-            return null;
+        if (this.configFile == null) {
+            return new ArrayList<>();
         }
         CourseInfo info = CourseInfoIo.load(this.configFile);
         List<Exercise> exercises = info.getExercises();
