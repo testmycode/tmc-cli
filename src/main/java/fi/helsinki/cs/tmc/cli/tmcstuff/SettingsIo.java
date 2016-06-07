@@ -40,8 +40,12 @@ public class SettingsIo {
     public static Path getDefaultConfigRoot() {
         Path configPath;
         if (isWindows()) {
-            //TODO: Use proper Windows config file location
-            configPath = Paths.get(System.getProperty("user.home"));
+            String appdata = System.getenv("APPDATA");
+            if (appdata == null) {
+                configPath = Paths.get(System.getProperty("user.home"));
+            } else {
+                configPath = Paths.get(appdata);
+            }
         } else {
             //Assume we're using Unix (Linux, Mac OS X or *BSD)
             String configEnv = System.getenv("XDG_CONFIG_HOME");
