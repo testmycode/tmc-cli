@@ -81,7 +81,7 @@ public class TmcCliUpdater {
             // Run the auto-update at the launch script
             Runtime.getRuntime().exec(destination.getAbsolutePath() + " ?internal-update");
         } catch (IOException ex) {
-            io.println("Failed to run the tmc-launher at " + destination.getAbsolutePath());
+            io.println("Failed to run the tmc-cli at " + destination.getAbsolutePath());
             io.println("Run it with ?internal-update argument or contact the help desk");
             logger.error("Failed to run the new tmc", ex);
         }
