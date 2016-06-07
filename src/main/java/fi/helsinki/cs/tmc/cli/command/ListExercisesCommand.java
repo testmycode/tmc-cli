@@ -70,6 +70,10 @@ public class ListExercisesCommand implements CommandInterface {
         }
 
         exercises = course.getExercises();
+        if (exercises.isEmpty()) {
+            this.io.println("Course doesn't have any exercises.");
+        }
+
         for (Exercise exercise : exercises) {
             this.io.println(exercise.getName());
         }
