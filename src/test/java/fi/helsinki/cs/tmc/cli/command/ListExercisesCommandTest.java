@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -56,11 +56,7 @@ public class ListExercisesCommandTest {
         Callable<List<Course>> callable = new Callable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
-                Course course = new Course("test-course123");
-
-                ArrayList<Course> tmp = new ArrayList<>();
-                tmp.add(course);
-                return tmp;
+                return Arrays.asList(new Course("test-course123"));
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
@@ -75,16 +71,14 @@ public class ListExercisesCommandTest {
         Callable<List<Course>> callable = new Callable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
-                List<Exercise> list = new ArrayList<>();
-                list.add(new Exercise("hello-exercise"));
-                list.add(new Exercise("cool-exercise"));
+                List<Exercise> list = Arrays.asList(
+                        new Exercise("hello-exercise"),
+                        new Exercise("cool-exercise"));
 
                 Course course = new Course("test-course123");
                 course.setExercises(list);
 
-                ArrayList<Course> tmp = new ArrayList<>();
-                tmp.add(course);
-                return tmp;
+                return Arrays.asList(course);
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
@@ -100,5 +94,20 @@ public class ListExercisesCommandTest {
         String[] args = {"list-exercises"};
         app.run(args);
         assertThat(io.out(), containsString("No course specified"));
+    }
+
+    @Test
+    public void failIfCourseExists() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                return Arrays.asList(new Course("hello-exercise"));
+            }
+        };
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+
+        String[] args = {"list-exercises", "abc"};
+        app.run(args);
+        assertThat(io.out(), containsString("Course doesn't exist"));
     }
 }
