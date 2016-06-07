@@ -47,6 +47,12 @@ public class TmcCliUpdater {
             return;
         }
 
+        JsonObject binAsset = findCorrectAsset(release, isWindows);
+        if (binAsset == null || !binAsset.has("name") || !binAsset.has("browser_download_url")) {
+            logger.warn("The JSON does not contain necessary information for update.");
+            return;
+        }
+
         io.println("A new version of tmc-cli is available!");
 
         if (isWindows) { //just show a link for Windows users now, todo...
@@ -56,11 +62,6 @@ public class TmcCliUpdater {
 
         String answer = io.readLine("Do you want to download it? (y/N): ");
         if (!"y".equalsIgnoreCase(answer) && !"yes".equalsIgnoreCase(answer)) {
-            return;
-        }
-
-        JsonObject binAsset = findCorrectAsset(release, isWindows);
-        if (binAsset == null) {
             return;
         }
 
@@ -137,6 +138,9 @@ public class TmcCliUpdater {
      */
     private JsonObject findCorrectAsset(JsonObject release, boolean isWindows) {
         JsonArray assets = release.getAsJsonArray("assets");
+        if (assets == null) {
+            return null;
+        }
 
         for (JsonElement assetElement : assets) {
             JsonObject asset = assetElement.getAsJsonObject();

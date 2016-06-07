@@ -134,6 +134,15 @@ public class TmcCliUpdaterTest {
         assertTrue(io.out().isEmpty());
     }
 
+    @Test
+    public void abortIfJsonDoesNotContainNecessaryInfo() {
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
+        when(updater.fetchLatestReleaseJson()).thenReturn(changedJson);
+        updater.run();
+        verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+        assertTrue(io.out().isEmpty());
+    }
+
     private static String readResource(String resourceName) throws IOException {
         InputStream inputStream = TmcCliUpdaterTest.class.getClassLoader()
                 .getResourceAsStream(resourceName);
