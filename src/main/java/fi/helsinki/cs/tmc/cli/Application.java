@@ -145,6 +145,11 @@ public class Application {
     public CommandFactory getCommandFactory() {
         return this.commands;
     }
+    
+    // Method is used to help testing
+    public void setTmcCore(TmcCore tmcCore) {
+        this.tmcCore = tmcCore;
+    }
 
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
