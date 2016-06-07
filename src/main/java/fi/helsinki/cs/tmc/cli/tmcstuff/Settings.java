@@ -1,9 +1,10 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
-import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
+
+import com.google.common.base.Optional;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import java.nio.file.Path;

@@ -17,8 +17,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.Assert.assertNull;
-
 /**
  * Created by jclakkis on 26.5.2016.
  */
