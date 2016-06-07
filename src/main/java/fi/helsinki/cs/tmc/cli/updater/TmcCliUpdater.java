@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.cli.updater;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,7 +34,7 @@ public class TmcCliUpdater {
 
     public TmcCliUpdater(Io io) {
         this.io = io;
-        this.isWindows = SettingsIo.isWindows();
+        this.isWindows = Application.isWindows();
     }
 
     /**

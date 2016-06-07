@@ -9,7 +9,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.commons.cli.CommandLine;
@@ -88,8 +87,7 @@ public class LoginCommand implements CommandInterface {
     }
 
     private boolean saveLoginSettings(Settings settings) {
-        SettingsIo settingsIo = new SettingsIo();
-        if (settingsIo.save(settings)) {
+        if (SettingsIo.save(settings)) {
             return true;
         } else {
             io.println("Login failed.");
