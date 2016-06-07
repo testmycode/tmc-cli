@@ -6,8 +6,10 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +90,20 @@ public class TmcCliUpdaterTest {
         updater.run();
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+    }
+
+    @Test
+    public void downloadsAndRunsNewBinaryIfOk() {
+        io.addLinePrompt("yes");
+        TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
+        when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
+        doNothing().when(updater).fetchTmcCliBinary(any(String.class), any(File.class));
+        doNothing().when(updater).runNewTmcCliBinary(any(String.class));
+        updater.run();
+        assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
+        assertThat(io.out(), containsString("Downloading..."));
+        verify(updater, times(1)).fetchTmcCliBinary(any(String.class), any(File.class));
+        verify(updater, times(1)).runNewTmcCliBinary(any(String.class));
     }
 
     // Expected to fail once autoupdater is properly implemented on Windows.
