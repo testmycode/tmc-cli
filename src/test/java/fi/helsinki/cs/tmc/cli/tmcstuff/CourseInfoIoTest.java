@@ -12,9 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * Created by jclakkis on 25.5.2016.
- */
 public class CourseInfoIoTest {
     private Settings settings;
     private CourseInfo course;
@@ -25,13 +22,13 @@ public class CourseInfoIoTest {
     public void setup() {
         tempDir = System.getProperty("java.io.tmpdir");
         this.courseFile = Paths.get(tempDir)
-                .resolve("test course")
+                .resolve("test-course")
                 .resolve(CourseInfoIo.COURSE_CONFIG);
         this.settings = new Settings();
         this.course = new CourseInfo(this.settings, new Course("test-course"));
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir)
-                    .resolve("test course").toFile());
+                    .resolve("test-course").toFile());
         } catch (Exception e) { }
     }
 
@@ -39,7 +36,7 @@ public class CourseInfoIoTest {
     public void cleanUp() {
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir)
-                    .resolve("test course").toFile());
+                    .resolve("test-course").toFile());
         } catch (Exception e) { }
     }
 

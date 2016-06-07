@@ -16,11 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-
-
-/**
- * Created by jclakkis on 20.5.2016.
- */
 public class SettingsIoTest {
     private Settings settings;
     private Path tempDir;
@@ -30,14 +25,14 @@ public class SettingsIoTest {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve(SettingsIo.CONFIG_DIR);
         this.settings = new Settings("testserver", "testuser", "testpassword");
         try {
-            FileUtils.deleteDirectory(tempDir.resolve(SettingsIo.CONFIG_DIR).toFile());
+            FileUtils.deleteDirectory(tempDir.toFile());
         } catch (Exception e) { }
     }
 
     @After
     public void cleanUp() {
         try {
-            FileUtils.deleteDirectory(tempDir.resolve(SettingsIo.CONFIG_DIR).toFile());
+            FileUtils.deleteDirectory(tempDir.toFile());
         } catch (Exception e) { }
     }
 

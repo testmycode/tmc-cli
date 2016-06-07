@@ -17,9 +17,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by jclakkis on 26.5.2016.
- */
 public class DirectoryUtilTest {
 
     @BeforeClass

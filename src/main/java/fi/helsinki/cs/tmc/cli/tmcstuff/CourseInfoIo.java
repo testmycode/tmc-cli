@@ -26,6 +26,7 @@ public class CourseInfoIo {
         Gson gson = new Gson();
         byte[] json = gson.toJson(course).getBytes();
         try {
+            Files.createDirectories(courseInfoFile.getParent());
             Files.write(courseInfoFile, json);
         } catch (IOException e) {
             logger.error("Could not create course file", e);
