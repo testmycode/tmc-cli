@@ -1,0 +1,13 @@
+{
+    "tag_name": "0.1.1",
+    "assets": [
+        {
+            "name": "tmc",
+            "browser_download_url": "https://test.url/tmc"
+        },
+        {
+            "name": "tmc-cli-0.1.1.jar",
+            "browser_download_url": "https://test.url/tmc-cli-0.1.1.jar"
+        }
+    ]
+

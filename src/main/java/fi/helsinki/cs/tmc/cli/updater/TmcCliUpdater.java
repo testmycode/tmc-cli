@@ -1,8 +1,6 @@
 package fi.helsinki.cs.tmc.cli.updater;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -31,10 +29,12 @@ public class TmcCliUpdater {
 
     private final Io io;
     private final boolean isWindows;
+    private final String currentVersion;
 
-    public TmcCliUpdater(Io io) {
+    public TmcCliUpdater(Io io, String currentVersion, boolean isWindows) {
         this.io = io;
-        this.isWindows = SettingsIo.isWindows();
+        this.currentVersion = currentVersion;
+        this.isWindows = isWindows;
     }
 
     /**
@@ -44,6 +44,12 @@ public class TmcCliUpdater {
     public void run() {
         JsonObject release = toJsonObject(fetchLatestReleaseJson());
         if (release == null || !isNewer(release)) {
+            return;
+        }
+
+        JsonObject binAsset = findCorrectAsset(release, isWindows);
+        if (binAsset == null || !binAsset.has("name") || !binAsset.has("browser_download_url")) {
+            logger.warn("The JSON does not contain necessary information for update.");
             return;
         }
 
@@ -59,11 +65,6 @@ public class TmcCliUpdater {
             return;
         }
 
-        JsonObject binAsset = findCorrectAsset(release, isWindows);
-        if (binAsset == null) {
-            return;
-        }
-
         String binName = binAsset.get("name").getAsString() + ".new";
         String dlUrl = binAsset.get("browser_download_url").getAsString();
         String currentBinLocation = getJarLocation();
@@ -75,13 +76,15 @@ public class TmcCliUpdater {
 
         io.println("Downloading...");
         fetchTmcCliBinary(dlUrl, destination);
+
+        runNewTmcCliBinary(destination.getAbsolutePath());
     }
 
     /**
      * Downloads a JSON string that contains information about the latest
      * tmc-cli release.
      */
-    private String fetchLatestReleaseJson() {
+    protected String fetchLatestReleaseJson() {
         try {
             return IOUtils.toString(new URL(LATEST_RELEASE_URL), "UTF-8");
         } catch (IOException ex) {
@@ -94,13 +97,27 @@ public class TmcCliUpdater {
      * Downloads a binary file from downloadUrl and saves it to destination
      * file.
      */
-    private void fetchTmcCliBinary(String downloadUrl, File destination) {
+    protected void fetchTmcCliBinary(String downloadUrl, File destination) {
         try {
             URL url = new URL(downloadUrl);
             FileUtils.copyURLToFile(url, destination);
         } catch (IOException ex) {
             io.println("Failed to download tmc-cli.");
             logger.warn("Failed to download tmc-cli.", ex);
+        }
+    }
+
+    /**
+     * Finish the update by running downloaded binary.
+     */
+    protected void runNewTmcCliBinary(String pathToNewBinary) {
+        try {
+            // Run the auto-update at the launch script
+            Runtime.getRuntime().exec(pathToNewBinary + " ?internal-update");
+        } catch (IOException ex) {
+            io.println("Failed to run the tmc-cli at " + pathToNewBinary);
+            io.println("Run it with ?internal-update argument or contact the help desk");
+            logger.error("Failed to run the new tmc", ex);
         }
     }
 
@@ -113,7 +130,7 @@ public class TmcCliUpdater {
         }
 
         Version releaseVer = new Version(release.get("tag_name").getAsString());
-        Version installedVer = new Version(Application.getVersion());
+        Version installedVer = new Version(currentVersion);
 
         return releaseVer.isNewerThan(installedVer);
     }
@@ -124,6 +141,9 @@ public class TmcCliUpdater {
      */
     private JsonObject findCorrectAsset(JsonObject release, boolean isWindows) {
         JsonArray assets = release.getAsJsonArray("assets");
+        if (assets == null) {
+            return null;
+        }
 
         for (JsonElement assetElement : assets) {
             JsonObject asset = assetElement.getAsJsonObject();
@@ -147,7 +167,14 @@ public class TmcCliUpdater {
             return null;
         }
 
-        JsonElement jsonElement = new JsonParser().parse(jsonString);
+        JsonElement jsonElement;
+        try {
+            jsonElement = new JsonParser().parse(jsonString);
+        } catch (Exception e) {
+            logger.warn("Unable to parse malformed JSON string.");
+            return null;
+        }
+
         if (jsonElement.isJsonObject()) {
             return jsonElement.getAsJsonObject();
         }

@@ -40,8 +40,7 @@ public class UpdateCommand implements CommandInterface {
             return;
         }
         DirectoryUtil dirUtil = new DirectoryUtil();
-        CourseInfoIo infoio = new CourseInfoIo(dirUtil.getConfigFile());
-        CourseInfo info = infoio.load();
+        CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
         Course course = info.getCourse();
         List<Exercise> exercises;
 
