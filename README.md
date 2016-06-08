@@ -8,6 +8,8 @@
 
 TMC-CLI is the command-line client for University of Helsinki's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
 
+![Demonstration](docs/demo.gif)
+
 ##Requirements
 
 * Java Runtime Environment 7
