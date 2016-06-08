@@ -128,8 +128,11 @@ public class TmcCliUpdater {
         if (!release.has("tag_name")) {
             return false;
         }
-        String releaseVersion = release.get("tag_name").getAsString();
-        return !currentVersion.equals(releaseVersion);
+
+        Version releaseVer = new Version(release.get("tag_name").getAsString());
+        Version installedVer = new Version(currentVersion);
+
+        return releaseVer.isNewerThan(installedVer);
     }
 
     /**
