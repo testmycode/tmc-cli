@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Command for listing all available courses to user.
  */
-@Command(name = "list-courses", desc = "List the available courses.")
+@Command(name = "list-courses", desc = "List the available courses")
 public class ListCoursesCommand implements CommandInterface {
     private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
     private Application app;
@@ -36,9 +36,15 @@ public class ListCoursesCommand implements CommandInterface {
             return;
         }
         courses = TmcUtil.listCourses(core);
+        if (courses.isEmpty()) {
+            io.println("No courses found on this server.");
+            return;
+        }
 
         for (Course course : courses) {
             io.println(course.getName());
         }
+        io.println("Found " + courses.size() + " courses on this server.");
+        
     }
 }

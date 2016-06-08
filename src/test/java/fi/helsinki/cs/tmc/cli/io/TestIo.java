@@ -27,6 +27,10 @@ public class TestIo extends Io {
         return printedText.toString();
     }
 
+    public String out() {
+        return printedText.toString();
+    }
+
     @Override
     public void print(String str) {
         printedText.append(str);

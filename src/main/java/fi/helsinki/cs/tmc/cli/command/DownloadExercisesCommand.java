@@ -31,7 +31,7 @@ public class DownloadExercisesCommand implements CommandInterface {
         TmcCore core;
 
         if (args.length == 0) {
-            io.println("You must give course name as argument.");
+            io.println("You must give course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
         }
@@ -53,9 +53,8 @@ public class DownloadExercisesCommand implements CommandInterface {
         Path configFile = Paths.get(System.getProperty("user.dir"))
                 .resolve(args[0])
                 .resolve(CourseInfoIo.COURSE_CONFIG);
-        CourseInfoIo infoIo = new CourseInfoIo(configFile);
-        CourseInfo info = app.createCourseInfo(args[0]);
+        CourseInfo info = app.createCourseInfo(course);
         info.setExercises(exercises);
-        infoIo.save(info);
+        CourseInfoIo.save(info, configFile);
     }
 }

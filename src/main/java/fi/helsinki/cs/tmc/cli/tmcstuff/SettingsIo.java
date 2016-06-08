@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
-import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
+import fi.helsinki.cs.tmc.cli.Application;
 
 import com.google.gson.Gson;
 
@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 /**
  * Reads and writes to config files on the system.
@@ -28,22 +29,21 @@ public class SettingsIo {
     // ACCOUNTS_CONFIG is the _global_ configuration file containing all
     // user login information including usernames, passwords (in plain text)
     // and servers. Is located under CONFIG_DIR
-    public static final String ACCOUNTS_CONFIG = "accounts.json";
-
-    //The overrideRoot variable is intended only for testing
-    private Path overrideRoot;
+    public static final String ACCOUNTS_CONFIG = "settings.json";
 
     /**
-     * Get the correct directory in which config files go,
-     * NOT the directory in which the config DIRECTORY goes.
+     * Get the correct directory in which our config files go
+     * ie. /home/user/.config/tmc-cli/
      */
     public static Path getDefaultConfigRoot() {
         Path configPath;
-        String os = System.getProperty("os.name").toLowerCase();
-
-        if (os.contains("windows")) {
-            //TODO: Use proper Windows config file location
-            configPath = Paths.get(System.getProperty("user.home"));
+        if (Application.isWindows()) {
+            String appdata = System.getenv("APPDATA");
+            if (appdata == null) {
+                configPath = Paths.get(System.getProperty("user.home"));
+            } else {
+                configPath = Paths.get(appdata);
+            }
         } else {
             //Assume we're using Unix (Linux, Mac OS X or *BSD)
             String configEnv = System.getenv("XDG_CONFIG_HOME");
@@ -55,29 +55,28 @@ public class SettingsIo {
                         .resolve(".config");
             }
         }
-        configPath = configPath.resolve(CONFIG_DIR);
-        return configPath;
+        return configPath.resolve(CONFIG_DIR);
     }
 
-    private Path getAccountsFile(Path path) {
-        if (this.overrideRoot != null) {
-            path = this.overrideRoot;
-        }
-        Path file = path.resolve(ACCOUNTS_CONFIG);
-        if (!Files.exists(path)) {
+    private static Path getConfigFile(Path configRoot) {
+        Path file = configRoot.resolve(ACCOUNTS_CONFIG);
+        if (!Files.exists(configRoot)) {
             try {
-                Files.createDirectories(path).getParent();
+                Files.createDirectories(configRoot).getParent();
             } catch (Exception e) { }
             try {
-                Files.createFile(path);
+                Files.createFile(configRoot);
             } catch (Exception e) { }
         }
         return file;
     }
 
-    public Boolean save(Settings settings) {
-        //Temporarily always use the default directory
-        Path file = getAccountsFile(getDefaultConfigRoot());
+    public static Boolean save(Settings settings) {
+        return saveTo(settings, getDefaultConfigRoot());
+    }
+
+    public static Boolean saveTo(Settings settings, Path configRoot) {
+        Path file = getConfigFile(configRoot);
         SettingsHolder holder;
         if (!Files.exists(file)) {
             holder = new SettingsHolder();
@@ -88,8 +87,21 @@ public class SettingsIo {
         return saveHolderToJson(holder, file);
     }
 
-    public Settings load(String username, String server) {
-        Path file = getAccountsFile(getDefaultConfigRoot());
+    public static Settings load(String username, String server) {
+        return loadFrom(username, server, getDefaultConfigRoot());
+    }
+
+    public static Settings load() {
+        // Calling the method without parametres returns the last used settings
+        return load(null, null);
+    }
+
+    public static Settings loadFrom(Path configRoot) {
+        return loadFrom(null, null, configRoot);
+    }
+
+    public static Settings loadFrom(String username, String server, Path configRoot) {
+        Path file = getConfigFile(configRoot);
         if (!Files.exists(file)) {
             return null;
         }
@@ -99,14 +111,9 @@ public class SettingsIo {
         return ret;
     }
 
-    public Settings load() {
-        // Calling the method without parametres returns the last used settings
-        return load(null, null);
-    }
-
-    private SettingsHolder getHolderFromJson(Path file) {
+    private static SettingsHolder getHolderFromJson(Path file) {
         Gson gson = new Gson();
-        Reader reader = null;
+        Reader reader;
         try {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         } catch (IOException e) {
@@ -116,7 +123,7 @@ public class SettingsIo {
         return gson.fromJson(reader, SettingsHolder.class);
     }
 
-    private Boolean saveHolderToJson(SettingsHolder holder, Path file) {
+    private static Boolean saveHolderToJson(SettingsHolder holder, Path file) {
         Gson gson = new Gson();
         byte[] json = gson.toJson(holder).getBytes();
         try {
@@ -128,8 +135,8 @@ public class SettingsIo {
         return true;
     }
 
-    public Boolean delete() {
-        Path file = getAccountsFile(getDefaultConfigRoot());
+    public static Boolean delete() {
+        Path file = getConfigFile(getDefaultConfigRoot());
         try {
             Files.deleteIfExists(file);
         } catch (IOException e) {
@@ -139,12 +146,16 @@ public class SettingsIo {
         return true;
     }
 
-    /**
-     * This is for testing purposes only. Otherwise use the default config dir path.
-     * When calling this function, do not append the CONFIG_DIR - we do it here.
-     */
-    protected void setOverrideRoot(Path override) {
-        this.overrideRoot = override
-                .resolve(CONFIG_DIR);
+    public static HashMap<String, String> loadProperties() {
+        Path file = getConfigFile(getDefaultConfigRoot());
+        SettingsHolder holder = getHolderFromJson(file);
+        return holder.getProperties();
+    }
+
+    public static Boolean saveProperties(HashMap<String, String> properties) {
+        Path file = getConfigFile(getDefaultConfigRoot());
+        SettingsHolder holder = getHolderFromJson(file);
+        holder.setProperties(properties);
+        return saveHolderToJson(holder, file);
     }
 }

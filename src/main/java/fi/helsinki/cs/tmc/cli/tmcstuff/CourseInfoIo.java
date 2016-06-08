@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import com.google.gson.Gson;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +9,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Class for reading and writing to course config files (.tmc.json)
@@ -24,22 +22,12 @@ public class CourseInfoIo {
     // Contains username, server and course name.
     public static final String COURSE_CONFIG = ".tmc.json";
 
-    private Path courseInfoFile;
-
-    public CourseInfoIo(Path courseInfoFile) {
-        this.courseInfoFile = courseInfoFile;
-    }
-
-
-    public Boolean save(CourseInfo course) {
-        if (!this.getCourseFile()) {
-            return false;
-        }
-        Path file = this.courseInfoFile;
+    public static Boolean save(CourseInfo course, Path courseInfoFile) {
         Gson gson = new Gson();
         byte[] json = gson.toJson(course).getBytes();
         try {
-            Files.write(file, json);
+            Files.createDirectories(courseInfoFile.getParent());
+            Files.write(courseInfoFile, json);
         } catch (IOException e) {
             logger.error("Could not create course file", e);
             return false;
@@ -47,39 +35,19 @@ public class CourseInfoIo {
         return true;
     }
 
-    public CourseInfo load() {
-        Path file = this.courseInfoFile;
+    public static CourseInfo load(Path courseInfoFile) {
         Gson gson = new Gson();
-        if (!Files.exists(file)) {
+        if (!Files.exists(courseInfoFile)) {
             //Return null if file is not found, this is normal behaviour
             return null;
         }
         Reader reader = null;
         try {
-            reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
+            reader = Files.newBufferedReader(courseInfoFile, Charset.forName("UTF-8"));
         } catch (IOException e) {
             logger.error("Course file located, but failed to read from it", e);
             return null;
         }
         return gson.fromJson(reader, CourseInfo.class);
-    }
-
-    private Boolean getCourseFile() {
-        //ensures the file exists before writing to it
-        if (!Files.exists(this.courseInfoFile)) {
-            try {
-                Files.createDirectories(this.courseInfoFile.getParent());
-            } catch (Exception e) {
-                logger.warn("Could not create parent directories for course file: "
-                        + this.courseInfoFile.getParent(), e);
-            }
-            try {
-                Files.createFile(this.courseInfoFile);
-            } catch (Exception e) {
-                logger.error("Could not create course file: "
-                        + this.courseInfoFile, e);
-            }
-        }
-        return Files.exists(this.courseInfoFile);
     }
 }

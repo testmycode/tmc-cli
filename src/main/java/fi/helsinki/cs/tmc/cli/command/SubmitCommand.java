@@ -60,7 +60,6 @@ public class SubmitCommand implements CommandInterface {
         if (core == null) {
             return;
         }
-        Path dir = dirUtil.getCourseDirectory();
         Path courseDir = dirUtil.getCourseDirectory();
 
         if (courseDir == null) {
@@ -68,13 +67,18 @@ public class SubmitCommand implements CommandInterface {
             return;
         }
 
-        CourseInfoIo infoIo = new CourseInfoIo(dirUtil.getConfigFile());
-        CourseInfo info = infoIo.load();
-        String courseName = info.getCourse();
+        CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
+        String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
 
         List<String> exercises;
         exercises = dirUtil.getExerciseNames(exerciseNames);
+        
+        if (exercises.isEmpty()) {
+            io.println("You have to be in the exercise root directory to submit."
+                    + " (This is a known problem.)");
+            return;
+        }
 
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
         SubmissionResult result;

@@ -13,6 +13,10 @@ public class Color {
     public static final String ANSI_WHITE = "\u001B[37m";
 
     public static String colorString(String string, String color) {
-        return color + string + ANSI_RESET;
+        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+            return color + string + ANSI_RESET;
+        } else {
+            return string;
+        }
     }
 }

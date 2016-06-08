@@ -8,10 +8,8 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
@@ -26,7 +24,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
-@Command(name = "run-tests", desc = "Run local exercise tests.")
+@Command(name = "run-tests", desc = "Run local exercise tests")
 public class RunTestsCommand implements CommandInterface {
 
     private static final Logger logger
@@ -36,7 +34,6 @@ public class RunTestsCommand implements CommandInterface {
     private final Options options;
 
     private Io io;
-    private Course course;
     private boolean showPassed;
     private boolean showDetails;
 
@@ -60,12 +57,17 @@ public class RunTestsCommand implements CommandInterface {
         DirectoryUtil dirUtil = new DirectoryUtil();
         String courseName = getCourseName(dirUtil);
         List<String> exerciseNames = dirUtil.getExerciseNames(exercisesFromArgs);
+        
+        if (exerciseNames.isEmpty()) {
+            io.println("You have to be in the exercise root directory to"
+                    + " run tests. (This is a known problem.)");
+            return;
+        }
 
         TmcCore core = app.getTmcCore();
         if (core == null) {
             return;
         }
-        course = TmcUtil.findCourse(core, courseName);
 
         ResultPrinter resultPrinter
                 = new ResultPrinter(io, this.showDetails, this.showPassed);

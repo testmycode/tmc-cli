@@ -12,38 +12,27 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-
-/**
- * Created by jclakkis on 20.5.2016.
- */
 public class SettingsIoTest {
     private Settings settings;
-    private SettingsIo settingsio;
-    private final PrintStream stdout = System.out;
-    private final ByteArrayOutputStream output = new ByteArrayOutputStream();
+    private Path tempDir;
 
     @Before
     public void setUp() {
+        tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve(SettingsIo.CONFIG_DIR);
         this.settings = new Settings("testserver", "testuser", "testpassword");
-        this.settingsio = new SettingsIo();
-        String tempDir = System.getProperty("java.io.tmpdir");
-        settingsio.setOverrideRoot(Paths.get(tempDir));
         try {
-            FileUtils.deleteDirectory(Paths.get(tempDir).resolve("tmc-cli").toFile());
+            FileUtils.deleteDirectory(tempDir.toFile());
         } catch (Exception e) { }
     }
 
     @After
     public void cleanUp() {
-        String tempDir = System.getProperty("java.io.tmpdir");
         try {
-            FileUtils.deleteDirectory(Paths.get(tempDir).resolve("tmc-cli").toFile());
+            FileUtils.deleteDirectory(tempDir.toFile());
         } catch (Exception e) { }
     }
 
@@ -51,7 +40,7 @@ public class SettingsIoTest {
     public void correctConfigPath() {
         Path path = SettingsIo.getDefaultConfigRoot();
         String fs = System.getProperty("file.separator");
-        assertTrue(path.toString().contains("tmc-cli"));
+        assertTrue(path.toString().contains(SettingsIo.CONFIG_DIR));
         assertTrue(path.toString().contains(fs));
         assertTrue(!path.toString().contains(fs + fs));
         assertTrue(path.toString().contains(System.getProperty("user.home")));
@@ -59,19 +48,18 @@ public class SettingsIoTest {
 
     @Test
     public void savingToFileWorks() {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        Boolean success = settingsio.save(settings);
+        Boolean success = SettingsIo.saveTo(settings, tempDir);
         assertTrue(success);
-        Path path = Paths.get(tempDir).resolve(SettingsIo.CONFIG_DIR)
+        Path path = tempDir
                 .resolve(SettingsIo.ACCOUNTS_CONFIG);
         assertTrue(Files.exists(path));
     }
 
     @Test
     public void loadingFromFileWorks() {
-        settingsio.save(this.settings);
+        SettingsIo.saveTo(this.settings, tempDir);
         TmcSettings loadedSettings;
-        loadedSettings = settingsio.load();
+        loadedSettings = SettingsIo.loadFrom(tempDir);
         assertNotNull(loadedSettings);
         assertEquals(settings.getUsername(), loadedSettings.getUsername());
         assertEquals(settings.getPassword(), loadedSettings.getPassword());
@@ -80,10 +68,8 @@ public class SettingsIoTest {
 
     @Test
     public void loadingWhenNoFilePresentReturnsNull() {
-        String tempDir = System.getProperty("java.io.tmpdir");
-        Path path = Paths.get(tempDir);
-        TmcSettings loadedSettings = new Settings();
-        loadedSettings = settingsio.load();
+        Path path = tempDir.getParent();
+        TmcSettings loadedSettings = SettingsIo.loadFrom(path);
         assertEquals(null, loadedSettings);
     }
 
@@ -133,6 +119,7 @@ public class SettingsIoTest {
         Settings wanted = new Settings("1", "2", "e");
         holder.addSettings(new Settings(":", "-", "D"));
         holder.addSettings(wanted);
+        holder.addSettings(new Settings("344", "wc", "fffssshhhh aaahhh"));
         Settings get = holder.getSettings("2", "1");
         assertSame(wanted, get);
     }

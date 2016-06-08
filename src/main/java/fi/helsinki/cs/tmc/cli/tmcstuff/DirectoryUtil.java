@@ -76,8 +76,10 @@ public class DirectoryUtil {
      * @return: return exercises as List
      */
     public List<String> getExerciseNames(String[] params) {
-        CourseInfoIo infoio = new CourseInfoIo(this.configFile);
-        CourseInfo info = infoio.load();
+        if (this.configFile == null) {
+            return new ArrayList<>();
+        }
+        CourseInfo info = CourseInfoIo.load(this.configFile);
         List<Exercise> exercises = info.getExercises();
         List<String> exerciseNames = new ArrayList<>();
         if (params == null || params.length == 0) {

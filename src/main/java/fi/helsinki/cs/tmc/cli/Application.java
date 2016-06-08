@@ -11,7 +11,9 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
+import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -48,8 +51,8 @@ public class Application {
         this.options = new Options();
         this.commands = new CommandFactory();
         new CommandList().run(this.commands);
-        options.addOption("h", "help", false, "Display help information about tmc-cli.");
-        options.addOption("v", "version", false, "Give the version of the tmc-cli.");
+        options.addOption("h", "help", false, "Display help information about tmc-cli");
+        options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
     }
 
@@ -143,6 +146,11 @@ public class Application {
     public CommandFactory getCommandFactory() {
         return this.commands;
     }
+    
+    // Method is used to help testing
+    public void setTmcCore(TmcCore tmcCore) {
+        this.tmcCore = tmcCore;
+    }
 
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
@@ -153,8 +161,7 @@ public class Application {
             if (dirutil.getConfigFile() != null) {
                 // If we're in a course directory, we load settings matching the course
                 // Otherwise we just load the last used settings
-                CourseInfoIo courseio = new CourseInfoIo(dirutil.getConfigFile());
-                CourseInfo courseinfo = courseio.load();
+                CourseInfo courseinfo = CourseInfoIo.load(dirutil.getConfigFile());
                 if (courseinfo == null) {
                     io.println("Course configuration file "
                             + dirutil.getConfigFile().toString()
@@ -181,6 +188,9 @@ public class Application {
         Io io = new TerminalIo();
         ShutdownHandler shutdownHandler = new ShutdownHandler(io);
         Runtime.getRuntime().addShutdownHook(shutdownHandler);
+
+        new TmcCliUpdater(io, getVersion(), isWindows()).run();
+
         Application app = new Application(io);
         app.run(args);
         Runtime.getRuntime().removeShutdownHook(shutdownHandler);
@@ -204,7 +214,55 @@ public class Application {
         }
     }
 
-    public CourseInfo createCourseInfo(String courseName) {
-        return new CourseInfo(settings, courseName);
+    public void removeProperty(String prop) {
+        HashMap<String, String> props = getProperties();
+        props.remove(prop);
+        setProperties(props);
+    }
+
+    public void setProperty(String prop, String value) {
+        HashMap<String, String> props = getProperties();
+        if (value != null) {
+            props.put(prop, value);
+        } else {
+            props.remove(prop);
+        }
+        setProperties(props);
+    }
+
+    public void setProperty(String prop, int value) {
+        HashMap<String, String> props = getProperties();
+        props.put(prop, Integer.toString(value));
+        setProperties(props);
+    }
+
+    public String getPropertyString(String prop) {
+        HashMap<String, String> props = getProperties();
+        return props.get(prop);
+    }
+
+    public int getPropertyInt(String prop) throws NumberFormatException {
+        // If property is not set as integer or at all, throws exception
+        HashMap<String, String> props = getProperties();
+        return Integer.parseInt(props.get(prop));
+    }
+
+    private HashMap<String, String> getProperties() {
+        // Loads properties from the global configuration file in .config/tmc-cli/
+        return SettingsIo.loadProperties();
+    }
+
+    private Boolean setProperties(HashMap<String, String> properties) {
+        // Saves properties to the global configuration file in .config/tmc-cli/
+        return SettingsIo.saveProperties(properties);
+    }
+
+    public static boolean isWindows() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("windows");
+    }
+
+    public CourseInfo createCourseInfo(Course course) {
+        return new CourseInfo(settings, course);
     }
 }
