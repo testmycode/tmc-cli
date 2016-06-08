@@ -53,9 +53,8 @@ public class DownloadExercisesCommand implements CommandInterface {
         Path configFile = Paths.get(System.getProperty("user.dir"))
                 .resolve(args[0])
                 .resolve(CourseInfoIo.COURSE_CONFIG);
-        CourseInfoIo infoIo = new CourseInfoIo(configFile);
         CourseInfo info = app.createCourseInfo(course);
         info.setExercises(exercises);
-        infoIo.save(info);
+        CourseInfoIo.save(info, configFile);
     }
 }

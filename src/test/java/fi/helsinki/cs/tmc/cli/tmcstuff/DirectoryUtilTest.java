@@ -17,11 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by jclakkis on 26.5.2016.
- */
 public class DirectoryUtilTest {
-    private DirectoryUtil dirutil;
 
     @BeforeClass
     public static void setup() {
@@ -52,8 +48,7 @@ public class DirectoryUtilTest {
         exercises.add(new Exercise("viikko2-subdir-teht3"));
         CourseInfo info = new CourseInfo(new Settings(true), new Course("dirUtilTest"));
         info.setExercises(exercises);
-        CourseInfoIo infoio = new CourseInfoIo(workDir.resolve(CourseInfoIo.COURSE_CONFIG));
-        infoio.save(info);
+        CourseInfoIo.save(info, workDir.resolve(CourseInfoIo.COURSE_CONFIG));
     }
 
     @AfterClass

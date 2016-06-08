@@ -36,7 +36,7 @@ public class ListExercisesCommand implements CommandInterface {
             DirectoryUtil dirUtil = new DirectoryUtil();
 
             if (dirUtil.getConfigFile() != null) {
-                CourseInfo courseinfo = new CourseInfoIo(dirUtil.getConfigFile()).load();
+                CourseInfo courseinfo = CourseInfoIo.load(dirUtil.getConfigFile());
                 courseName = courseinfo.getCourseName();
 
             } else  {
@@ -70,6 +70,10 @@ public class ListExercisesCommand implements CommandInterface {
         }
 
         exercises = course.getExercises();
+        if (exercises.isEmpty()) {
+            this.io.println("Course doesn't have any exercises.");
+        }
+
         for (Exercise exercise : exercises) {
             this.io.println(exercise.getName());
         }

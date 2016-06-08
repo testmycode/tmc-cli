@@ -79,8 +79,7 @@ public class DirectoryUtil {
         if (this.configFile == null) {
             return new ArrayList<>();
         }
-        CourseInfoIo infoio = new CourseInfoIo(this.configFile);
-        CourseInfo info = infoio.load();
+        CourseInfo info = CourseInfoIo.load(this.configFile);
         List<Exercise> exercises = info.getExercises();
         List<String> exerciseNames = new ArrayList<>();
         if (params == null || params.length == 0) {
