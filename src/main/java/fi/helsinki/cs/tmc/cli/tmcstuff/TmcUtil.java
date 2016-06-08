@@ -83,8 +83,8 @@ public class TmcUtil {
     public static SubmissionResult submitExercise(TmcCore core, Course course, String name) {
         // Exercise has directories separated with a - but core needs them to be separated with a / for submission
         Exercise exercise = TmcUtil.findExercise(course, name);
-        String fixedName = exercise.getName().replace("-", File.separator);
-        exercise.setName(fixedName);
+        //String fixedName = exercise.getName().replace("-", File.separator);
+        //exercise.setName(fixedName);
         try {
             return core.submit(new TmcCliProgressObserver(),
                     exercise).call();
