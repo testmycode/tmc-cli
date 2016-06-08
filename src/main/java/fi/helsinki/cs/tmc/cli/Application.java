@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
@@ -155,7 +155,7 @@ public class Application {
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
             SettingsIo settingsio = new SettingsIo();
-            DirectoryUtil dirutil = new DirectoryUtil();
+            WorkDir dirutil = new WorkDir();
             Settings settings;
 
             if (dirutil.getConfigFile() != null) {

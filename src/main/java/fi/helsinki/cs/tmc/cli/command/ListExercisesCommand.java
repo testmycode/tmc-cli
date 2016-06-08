@@ -6,7 +6,7 @@ import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -33,7 +33,7 @@ public class ListExercisesCommand implements CommandInterface {
         // If no args given, check if the current directory is a course directory and set courseName as the name of that course.
         // Else, print out a help message.
         if (args.length == 0) {
-            DirectoryUtil dirUtil = new DirectoryUtil();
+            WorkDir dirUtil = new WorkDir();
 
             if (dirUtil.getConfigFile() != null) {
                 CourseInfo courseinfo = CourseInfoIo.load(dirUtil.getConfigFile());
