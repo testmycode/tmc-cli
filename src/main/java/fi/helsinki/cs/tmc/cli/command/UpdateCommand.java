@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import java.nio.file.Path;
 import java.util.List;
 
 @Command(name = "update", desc = "Update exercises")
@@ -39,7 +40,14 @@ public class UpdateCommand implements CommandInterface {
         if (core == null) {
             return;
         }
+
         DirectoryUtil dirUtil = new DirectoryUtil();
+
+        if (dirUtil.getCourseDirectory() == null) {
+            io.println("Not a course directory");
+            return;
+        }
+
         CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
         Course course = info.getCourse();
         List<Exercise> exercises;
@@ -60,5 +68,7 @@ public class UpdateCommand implements CommandInterface {
         for (Exercise exercise : exercises) {
             io.println(exercise.getName());
         }
+
+        System.out.println(TmcUtil.downloadExercises(core, exercises));
     }
 }
