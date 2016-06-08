@@ -76,7 +76,7 @@ public class RunTestsCommand implements CommandInterface {
         try {
             for (String name : exerciseNames) {
                 io.println(Color.colorString("Testing: " + name, Color.ANSI_YELLOW));
-                name = name.replace("-", File.separator);
+                //name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 
                 runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
