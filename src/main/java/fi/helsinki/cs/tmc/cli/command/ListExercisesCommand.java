@@ -40,7 +40,7 @@ public class ListExercisesCommand implements CommandInterface {
                 courseName = courseinfo.getCourseName();
 
             } else  {
-                this.io.println("USAGE: tmc exercise COURSE");
+                this.io.println("USAGE: tmc list-exercises COURSE");
                 this.io.println("No course specified. Either run the command "
                         + "inside a course directory or enter\n"
                         + "the course as a parameter.");
