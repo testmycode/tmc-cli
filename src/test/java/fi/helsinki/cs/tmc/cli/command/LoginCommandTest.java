@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,80 +10,99 @@ import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
+import org.apache.http.entity.BasicHttpEntity;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class LoginCommandTest {
 
-    private static String serverAddress;
-    private static String username;
-    private static String password;
+    private static final String SERVER = "testserver";
+    private static final String USERNAME = "testuser";
+    private static final String PASSWORD = "testpassword";
 
-    private Application app;
+    Application app;
     Io mockIo;
-
-    @BeforeClass
-    public static void setUpClass() {
-        serverAddress = System.getenv("TMC_SERVER_ADDRESS");
-        username = System.getenv("TMC_USERNAME");
-        password = System.getenv("TMC_PASSWORD");
-        
-        assertNotNull(serverAddress);
-        assertNotNull(username);
-        assertNotNull(password);
-    }
+    TmcCore mockCore;
 
     @Before
     public void setUp() {
         // Unwanted behaviour? Will delete the real settings file atm.
-        new SettingsIo().delete();
+        SettingsIo.delete();
+
         mockIo = mock(TerminalIo.class);
         app = new Application(mockIo);
+        mockCore = mock(TmcCore.class);
+        app.setTmcCore(mockCore);
+        app = Mockito.spy(app);
+        when(app.getTmcCore()).thenReturn(mockCore);
     }
 
     @After
     public void tearDown() {
         // Unwanted behaviour? Will delete the real settings file atm.
-        new SettingsIo().delete();
+        SettingsIo.delete();
     }
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        String[] args = {"login", "-s", serverAddress, "-u", username, "-p", password};
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
         verify(mockIo).println(eq("Login succesful."));
     }
 
     @Test
     public void catches401IfCorrectServerAndWrongUsername() {
-        String[] args = {"login", "-s", serverAddress, "-u", "foo", "-p", password};
+        Callable<List<Course>> callable401 = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                throw new Exception(new FailedHttpResponseException(401, new BasicHttpEntity()));
+            }
+        };
+        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable401);
+        String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
         app.run(args);
         verify(mockIo).println(eq("Incorrect username or password."));
     }
-    
+
     @Test
     public void loginAsksUsernameFromUser() {
-        String[] args = {"login", "-s", serverAddress, "-p", password};
-        when(mockIo.readLine("username: ")).thenReturn(username);
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        String[] args = {"login", "-s", SERVER, "-p", PASSWORD};
+        when(mockIo.readLine("username: ")).thenReturn(USERNAME);
         app.run(args);
         verify(mockIo).readLine(eq("username: "));
     }
-    
+
     @Test
     public void loginAsksPasswordFromUser() {
-        String[] args = {"login", "-s", serverAddress, "-u", username};
-        when(mockIo.readPassword("password: ")).thenReturn(password);
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        String[] args = {"login", "-s", SERVER, "-u", USERNAME};
+        when(mockIo.readPassword("password: ")).thenReturn(PASSWORD);
         app.run(args);
         verify(mockIo).readPassword(eq("password: "));
     }
-    
-    @Test
-    public void loginGetsRightServerAddressIfNotGiven() {
-        String[] args = {"login", "-u", username, "-p", password};
-        app.run(args);
-        verify(mockIo).println(eq("Login succesful."));
+
+    private static Callable<List<Course>> successfulCallable() {
+        return new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                return new ArrayList<>();
+            }
+        };
     }
 }
