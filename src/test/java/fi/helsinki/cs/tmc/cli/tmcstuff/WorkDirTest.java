@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DirectoryUtilTest {
+public class WorkDirTest {
 
     @BeforeClass
     public static void setup() {
@@ -61,7 +61,7 @@ public class DirectoryUtilTest {
 
     @Test
     public void failsIfNotInCourseDirectory() {
-        DirectoryUtil dirutil = new DirectoryUtil(
+        WorkDir dirutil = new WorkDir(
                 Paths.get(System.getProperty("java.io.tmpdir")), null);
         assertNull(dirutil.getCourseDirectory());
         assertNull(dirutil.getConfigFile());
@@ -71,7 +71,7 @@ public class DirectoryUtilTest {
     @Test
     public void returnsCorrectValuesInCourseDirectory() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        WorkDir dirutil = new WorkDir(workDir, null);
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 dirutil.getCourseDirectory());
@@ -83,7 +83,7 @@ public class DirectoryUtilTest {
     @Test
     public void returnsCorrectValuesInSubDirectory() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, Paths.get("viikko1"));
+        WorkDir dirutil = new WorkDir(workDir, Paths.get("viikko1"));
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 dirutil.getCourseDirectory());
@@ -96,7 +96,7 @@ public class DirectoryUtilTest {
     @Test
     public void worksIfInCourseDirectoryWithNoParams() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        WorkDir dirutil = new WorkDir(workDir, null);
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
@@ -112,7 +112,7 @@ public class DirectoryUtilTest {
     public void worksIfInSubDirectoryWithNoParams() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
                 .resolve("viikko2");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        WorkDir dirutil = new WorkDir(workDir, null);
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
@@ -128,7 +128,7 @@ public class DirectoryUtilTest {
     public void worksIfInSubSubDirectoryWithNoParams() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
                 .resolve("viikko2").resolve("subdir");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        WorkDir dirutil = new WorkDir(workDir, null);
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
@@ -143,7 +143,7 @@ public class DirectoryUtilTest {
     @Test
     public void worksIfInCourseDirectoryWithParams() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        WorkDir dirutil = new WorkDir(workDir, null);
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
@@ -164,7 +164,7 @@ public class DirectoryUtilTest {
     public void worksIfInSubDirectoryWithParams() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
                 .resolve("viikko2");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        WorkDir dirutil = new WorkDir(workDir, null);
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
@@ -180,7 +180,7 @@ public class DirectoryUtilTest {
     public void worksIfInSubSubDirectoryWithParams() {
         Path workDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
                 .resolve("viikko2").resolve("subdir");
-        DirectoryUtil dirutil = new DirectoryUtil(workDir, null);
+        WorkDir dirutil = new WorkDir(workDir, null);
         Assert.assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),

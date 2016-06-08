@@ -7,7 +7,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -20,7 +20,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class RunTestsCommand implements CommandInterface {
             return;
         }
 
-        DirectoryUtil dirUtil = new DirectoryUtil();
+        WorkDir dirUtil = new WorkDir();
         String courseName = getCourseName(dirUtil);
         List<String> exerciseNames = dirUtil.getExerciseNames(exercisesFromArgs);
         
@@ -91,7 +90,7 @@ public class RunTestsCommand implements CommandInterface {
         }
     }
 
-    private String getCourseName(DirectoryUtil dirUtil) {
+    private String getCourseName(WorkDir dirUtil) {
         Path courseDir = dirUtil.getCourseDirectory();
         try {
             return courseDir.getName(courseDir.getNameCount() - 1).toString();

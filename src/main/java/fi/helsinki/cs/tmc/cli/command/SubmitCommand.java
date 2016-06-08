@@ -8,9 +8,8 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
@@ -48,14 +47,14 @@ public class SubmitCommand implements CommandInterface {
     public void run(String[] args, Io io) {
         this.io = io;
         TmcCore core;
-        DirectoryUtil dirUtil;
+        WorkDir dirUtil;
 
         String[] exerciseNames = parseArgs(args);
 
         if (exerciseNames == null) {
             return;
         }
-        dirUtil = new DirectoryUtil();
+        dirUtil = new WorkDir();
         core = this.app.getTmcCore();
         if (core == null) {
             return;

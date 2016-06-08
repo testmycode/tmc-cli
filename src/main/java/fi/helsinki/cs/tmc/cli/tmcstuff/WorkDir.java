@@ -9,13 +9,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DirectoryUtil {
+public class WorkDir {
     private Path courseDirectory;
     private Path configFile;
     private Path workingDirectory;
     private String exercise;
 
-    public DirectoryUtil(Path workingDir, Path subDir) {
+    public WorkDir(Path workingDir, Path subDir) {
         if (subDir != null) {
             this.workingDirectory = workingDir.resolve(subDir);
         } else {
@@ -45,11 +45,11 @@ public class DirectoryUtil {
         this.courseDirectory = null;
     }
 
-    public DirectoryUtil(Path subDir) {
+    public WorkDir(Path subDir) {
         this(Paths.get(System.getProperty("user.dir")), subDir);
     }
 
-    public DirectoryUtil() {
+    public WorkDir() {
         this(null);
     }
 
