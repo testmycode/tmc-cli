@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -19,12 +20,19 @@ import org.apache.http.entity.BasicHttpEntity;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import static org.mockito.Matchers.any;
+import org.powermock.api.easymock.PowerMock;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SettingsIo.class)
 public class LoginCommandTest {
 
     private static final String SERVER = "testserver";
@@ -56,8 +64,12 @@ public class LoginCommandTest {
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
+        //PowerMock.mockStatic(SettingsIo.class);
+        //when(SettingsIo.save(any(Settings.class))).thenReturn(true);
+
         when(mockCore.listCourses((ProgressObserver) anyObject()))
                 .thenReturn(successfulCallable());
+        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
         verify(mockIo).println(eq("Login succesful."));
