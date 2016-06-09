@@ -45,6 +45,11 @@ public class ResultPrinter {
     public void printSubmissionResult(SubmissionResult result) {
         printTestResults(result.getTestCases());
 
+        if (result.getStatus() == SubmissionResult.Status.ERROR) {
+            io.println("");
+            io.println(result.getError());
+        }
+
         String msg = null;
         switch (result.getTestResultStatus()) {
             case NONE_FAILED:
