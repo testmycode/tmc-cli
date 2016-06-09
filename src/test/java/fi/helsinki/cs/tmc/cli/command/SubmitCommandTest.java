@@ -1,32 +1,27 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
-import org.junit.After;
-import org.junit.AfterClass;
+import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.core.TmcCore;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SubmitCommandTest {
 
-    public SubmitCommandTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
+    Application app;
+    TestIo io;
+    TmcCore mockCore;
 
     @Before
     public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
+        io = new TestIo();
+        app = new Application(io);
+        mockCore = mock(TmcCore.class);
+        app.setTmcCore(mockCore);
     }
 
     @Test
