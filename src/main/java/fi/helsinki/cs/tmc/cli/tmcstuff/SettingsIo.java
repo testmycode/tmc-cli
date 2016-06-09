@@ -38,7 +38,7 @@ public class SettingsIo {
     public static Path getDefaultConfigRoot() {
         Path configPath;
         if (Application.isWindows()) {
-            String appdata = System.getenv("APPDATA");
+            String appdata = System.getenv("LOCALAPPDATA");
             if (appdata == null) {
                 configPath = Paths.get(System.getProperty("user.home"));
             } else {

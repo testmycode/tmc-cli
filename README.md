@@ -43,7 +43,7 @@ Now that you've installed tmc-cli, you can view all available commands by runnin
 
 ##Logging in
 
-Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or C:\\Users\\[USERNAME]\\tmc-cli\\ on Windows) - you will only have to log in once.
+Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (C:\\Users\\[USERNAME]\\AppData\\Local\\ or equivalent on Windows) - you will only have to log in once.
 ```
 ~ $ tmc login
 username: my-username
@@ -78,8 +78,8 @@ Navigate to a suitable directory in which you wish to download your course(s). T
 Downloading: test-course
 [exercise1, exercise2, exercise3, exercise4]
 ~/tmc-courses $ cd test-course
-~/tmc-courses/test-course $ ls -a
-exercise1/ exercise2/ exercise3/ exercise4/ .tmc.json
+~/tmc-courses/test-course $ ls -pA
+exercise1/  exercise2/  exercise3/  exercise4/  .tmc.json
 ```
 Course-specific information is stored in .tmc.json. Do not manually edit or remove it unless you are completely done with the course - doing so will cause tmc to not function properly.
 
