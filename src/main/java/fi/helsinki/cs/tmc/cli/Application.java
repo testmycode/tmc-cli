@@ -162,16 +162,15 @@ public class Application {
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
             SettingsIo settingsio = new SettingsIo();
-            WorkDir dirutil = new WorkDir();
             Settings settings;
 
-            if (dirutil.getConfigFile() != null) {
+            if (workDir.getConfigFile() != null) {
                 // If we're in a course directory, we load settings matching the course
                 // Otherwise we just load the last used settings
-                CourseInfo courseinfo = CourseInfoIo.load(dirutil.getConfigFile());
+                CourseInfo courseinfo = CourseInfoIo.load(workDir.getConfigFile());
                 if (courseinfo == null) {
                     io.println("Course configuration file "
-                            + dirutil.getConfigFile().toString()
+                            + workDir.getConfigFile().toString()
                             + "is invalid.");
                     return null;
                 }
@@ -189,6 +188,10 @@ public class Application {
             createTmcCore(settings);
         }
         return this.tmcCore;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 
     public static void main(String[] args) {
