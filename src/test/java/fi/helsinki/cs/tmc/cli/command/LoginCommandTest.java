@@ -79,11 +79,4 @@ public class LoginCommandTest {
         app.run(args);
         verify(mockIo).readPassword(eq("password: "));
     }
-    
-    @Test
-    public void loginGetsRightServerAddressIfNotGiven() {
-        String[] args = {"login", "-u", username, "-p", password};
-        app.run(args);
-        verify(mockIo).println(eq("Login succesful."));
-    }
 }
