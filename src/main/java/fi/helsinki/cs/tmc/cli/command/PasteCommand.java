@@ -34,7 +34,8 @@ public class PasteCommand implements CommandInterface {
     public PasteCommand(Application app) {
         this.app = app;
         this.options = new Options();
-        this.options.addOption("m", "message", true, "Add a message to your paste");
+        this.options.addOption("n", "no-message", false, "Don't send a message with your paste");
+        this.options.addOption("m", "message", true, "Add a message to your paste as a parameter");
         this.options.addOption("o", "open", false, "Open the link to your paste in a web browser");
     }
 
@@ -46,8 +47,7 @@ public class PasteCommand implements CommandInterface {
         if (core == null) {
             return;
         }
-        WorkDir dirutil = new WorkDir();
-        List<String> exerciseNames = dirutil.getExerciseNames(line.getArgs());
+        List<String> exerciseNames = app.getWorkDir().getExerciseNames(line.getArgs());
         if (exerciseNames == null || exerciseNames.size() != 1) {
             io.println(
                     "No exercise specified. Please use this command from an exercise directory or "
@@ -55,16 +55,20 @@ public class PasteCommand implements CommandInterface {
             return;
         }
 
-        String message = line.getOptionValue("m");
-        if (message == null) {
-            message = ExternalsUtil.getUserEditedMessage(
-                    "\n"
-                    + "#Write a message for your paste.\n"
-                    + "#Lines beginning with # are comments and will be ignored.",
-                    "tmc_paste_message.txt",
-                    true);
+        String message;
+        if (!line.hasOption("n")) {
+            message = line.getOptionValue("m");
+            if (message == null) {
+                message = ExternalsUtil.getUserEditedMessage(
+                        "\n"
+                                + "#Write a message for your paste.\n"
+                                + "#Lines beginning with # are comments and will be ignored.",
+                        "tmc_paste_message.txt",
+                        true);
+            }
+        } else {
+            message = "";
         }
-
         /*
         // Uncomment this block if we wish to abort empty pastes
         if (message == null || message.isEmpty()) {
@@ -74,7 +78,7 @@ public class PasteCommand implements CommandInterface {
         */
 
         String exerciseName = exerciseNames.get(0);
-        CourseInfo courseinfo = CourseInfoIo.load(dirutil.getConfigFile());
+        CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(
                 new TmcCliProgressObserver(), exercise, message);
