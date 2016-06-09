@@ -8,7 +8,6 @@ import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.ExternalsUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -42,7 +41,13 @@ public class PasteCommand implements CommandInterface {
     @Override
     public void run(String[] args, Io io) {
         this.io = io;
-        CommandLine line = parseData(args);
+        CommandLine line;
+        try {
+            line = parseData(args);
+        } catch (ParseException e) {
+            io.println("Unable to parse arguments: " + e.getMessage());
+            return;
+        }
         TmcCore core = this.app.getTmcCore();
         if (core == null) {
             return;
@@ -57,25 +62,25 @@ public class PasteCommand implements CommandInterface {
 
         String message;
         if (!line.hasOption("n")) {
-            message = line.getOptionValue("m");
-            if (message == null) {
+            if (!line.hasOption("m")) {
                 message = ExternalsUtil.getUserEditedMessage(
                         "\n"
-                                + "#Write a message for your paste.\n"
-                                + "#Lines beginning with # are comments and will be ignored.",
+                                + "#   Write a message for your paste in this file and save it.\n"
+                                + "#   If you don't want to send a message with your paste, "
+                                + "use the '-n' switch.\n"
+                                + "#   Lines beginning with # are comments and will be ignored.",
                         "tmc_paste_message.txt",
                         true);
+            } else {
+                message = line.getOptionValue("m");
+            }
+            if (message == null || message.isEmpty()) {
+                io.println("Paste message empty, aborting");
+                return;
             }
         } else {
             message = "";
         }
-        /*
-        // Uncomment this block if we wish to abort empty pastes
-        if (message == null || message.isEmpty()) {
-            io.println("Paste message empty, aborting");
-            return;
-        }
-        */
 
         String exerciseName = exerciseNames.get(0);
         CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
@@ -98,14 +103,9 @@ public class PasteCommand implements CommandInterface {
         }
     }
 
-    private CommandLine parseData(String[] args) {
+    private CommandLine parseData(String[] args) throws ParseException {
         GnuParser parser = new GnuParser();
-        try {
-            return parser.parse(options, args);
-        } catch (ParseException e) {
-            logger.warn("Unable to parse message.", e);
-        }
-        return null;
+        return parser.parse(options, args);
     }
 
 
