@@ -11,8 +11,12 @@ public class TestIo extends Io {
 
     public TestIo() {
         printedText = new StringBuilder();
-        linePrompts = new LinkedList<String>();
-        passwordPrompts = new LinkedList<String>();
+        linePrompts = new LinkedList<>();
+        passwordPrompts = new LinkedList<>();
+    }
+
+    public boolean allPromptsUsed() {
+        return linePrompts.isEmpty() && passwordPrompts.isEmpty();
     }
 
     public void addLinePrompt(String prompt) {
@@ -45,5 +49,5 @@ public class TestIo extends Io {
     public String readPassword(String prompt) {
         return passwordPrompts.pop();
     }
-    
+
 }
