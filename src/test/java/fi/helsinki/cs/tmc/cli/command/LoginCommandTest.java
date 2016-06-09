@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -22,14 +23,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import static org.mockito.Matchers.any;
-import org.powermock.api.easymock.PowerMock;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SettingsIo.class)
@@ -64,8 +64,8 @@ public class LoginCommandTest {
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        //PowerMock.mockStatic(SettingsIo.class);
-        //when(SettingsIo.save(any(Settings.class))).thenReturn(true);
+        PowerMockito.mockStatic(SettingsIo.class);
+        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
 
         when(mockCore.listCourses((ProgressObserver) anyObject()))
                 .thenReturn(successfulCallable());
