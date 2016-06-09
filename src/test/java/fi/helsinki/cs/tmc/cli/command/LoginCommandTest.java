@@ -45,28 +45,20 @@ public class LoginCommandTest {
 
     @Before
     public void setUp() {
-        // Unwanted behaviour? Will delete the real settings file atm.
-        SettingsIo.delete();
-
         mockIo = mock(TerminalIo.class);
         app = new Application(mockIo);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
+
         app = Mockito.spy(app);
         when(app.getTmcCore()).thenReturn(mockCore);
-    }
 
-    @After
-    public void tearDown() {
-        // Unwanted behaviour? Will delete the real settings file atm.
-        SettingsIo.delete();
+        PowerMockito.mockStatic(SettingsIo.class);
+        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
     }
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        PowerMockito.mockStatic(SettingsIo.class);
-        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
-
         when(mockCore.listCourses((ProgressObserver) anyObject()))
                 .thenReturn(successfulCallable());
         when(SettingsIo.save(any(Settings.class))).thenReturn(true);
