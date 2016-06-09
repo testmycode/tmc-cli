@@ -42,6 +42,7 @@ public class Application {
     private TmcCore tmcCore;
     private Settings settings;
     private Io io;
+    private WorkDir workDir;
 
     private Options options;
     private GnuParser parser;
@@ -54,6 +55,12 @@ public class Application {
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
+        this.workDir = new WorkDir();
+    }
+
+    public Application(Io io, WorkDir workDir) {
+        this(io);
+        this.workDir = workDir;
     }
 
     /**
@@ -212,6 +219,10 @@ public class Application {
             logger.warn("Failed to get version", e);
             return "n/a";
         }
+    }
+
+    public WorkDir getWorkDir() {
+        return this.workDir;
     }
 
     public void removeProperty(String prop) {
