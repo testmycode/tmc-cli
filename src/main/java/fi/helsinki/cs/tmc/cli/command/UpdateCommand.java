@@ -7,14 +7,12 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
-
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
-import java.nio.file.Path;
 import java.util.List;
 
 @Command(name = "update", desc = "Update exercises")
@@ -41,7 +39,7 @@ public class UpdateCommand implements CommandInterface {
             return;
         }
 
-        DirectoryUtil dirUtil = new DirectoryUtil();
+        WorkDir dirUtil = new WorkDir();
 
         if (dirUtil.getCourseDirectory() == null) {
             io.println("Not a course directory");

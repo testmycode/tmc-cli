@@ -7,7 +7,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -20,7 +20,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -54,9 +53,9 @@ public class RunTestsCommand implements CommandInterface {
             return;
         }
 
-        DirectoryUtil dirUtil = new DirectoryUtil();
-        String courseName = getCourseName(dirUtil);
-        List<String> exerciseNames = dirUtil.getExerciseNames(exercisesFromArgs);
+        WorkDir workDir = app.getWorkDir();
+        String courseName = getCourseName(workDir);
+        List<String> exerciseNames = workDir.getExerciseNames(exercisesFromArgs);
         
         if (exerciseNames.isEmpty()) {
             io.println("You have to be in the exercise root directory to"
@@ -91,7 +90,7 @@ public class RunTestsCommand implements CommandInterface {
         }
     }
 
-    private String getCourseName(DirectoryUtil dirUtil) {
+    private String getCourseName(WorkDir dirUtil) {
         Path courseDir = dirUtil.getCourseDirectory();
         try {
             return courseDir.getName(courseDir.getNameCount() - 1).toString();

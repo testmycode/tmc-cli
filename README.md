@@ -20,7 +20,7 @@ TMC-CLI is the command-line client for University of Helsinki's Test My Code -fr
 
 ##Installation
 
-Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases).
+Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases/latest).
 If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
 
 If you downloaded "tmc", navigate to the download directory on your terminal and make it executable with `chmod u+x ./tmc`.
@@ -37,7 +37,7 @@ To summarise:
 
 If for some reason the alias was not added to your .bashrc or your shell of choice is not Bash, you can manually add the following line `alias tmc="[PATH_TO_TMC]"` to your .bashrc / other shell rc file.
 
-If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace "tmc" with this command. (note: you must have set Java on your system %PATH%. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
+If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace `tmc` with this command. (note: you must have set Java on your system `%PATH%`. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`.
 

@@ -6,8 +6,8 @@ import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -40,7 +40,7 @@ public class DownloadExercisesCommand implements CommandInterface {
         if (core == null) {
             return;
         }
-        DirectoryUtil dirUtil = new DirectoryUtil();
+        WorkDir dirUtil = new WorkDir();
         course = TmcUtil.findCourse(core, args[0]);
         if (course == null) {
             io.println("Course doesn't exist.");

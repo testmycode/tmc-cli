@@ -8,9 +8,9 @@ import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -42,6 +42,7 @@ public class Application {
     private TmcCore tmcCore;
     private Settings settings;
     private Io io;
+    private WorkDir workDir;
 
     private Options options;
     private GnuParser parser;
@@ -54,6 +55,12 @@ public class Application {
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
+        this.workDir = new WorkDir();
+    }
+
+    public Application(Io io, WorkDir workDir) {
+        this(io);
+        this.workDir = workDir;
     }
 
     /**
@@ -155,7 +162,7 @@ public class Application {
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
             SettingsIo settingsio = new SettingsIo();
-            DirectoryUtil dirutil = new DirectoryUtil();
+            WorkDir dirutil = new WorkDir();
             Settings settings;
 
             if (dirutil.getConfigFile() != null) {
@@ -212,6 +219,10 @@ public class Application {
             logger.warn("Failed to get version", e);
             return "n/a";
         }
+    }
+
+    public WorkDir getWorkDir() {
+        return this.workDir;
     }
 
     public void removeProperty(String prop) {

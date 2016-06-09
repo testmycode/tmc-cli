@@ -7,8 +7,8 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.DirectoryUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.ExternalsUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -46,7 +46,7 @@ public class PasteCommand implements CommandInterface {
         if (core == null) {
             return;
         }
-        DirectoryUtil dirutil = new DirectoryUtil();
+        WorkDir dirutil = new WorkDir();
         List<String> exerciseNames = dirutil.getExerciseNames(line.getArgs());
         if (exerciseNames == null || exerciseNames.size() != 1) {
             io.println(
