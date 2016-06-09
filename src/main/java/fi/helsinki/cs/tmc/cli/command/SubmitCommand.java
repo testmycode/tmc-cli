@@ -46,21 +46,20 @@ public class SubmitCommand implements CommandInterface {
     @Override
     public void run(String[] args, Io io) {
         this.io = io;
-        TmcCore core;
-        WorkDir dirUtil;
 
         String[] exerciseNames = parseArgs(args);
-
         if (exerciseNames == null) {
             return;
         }
-        dirUtil = new WorkDir();
-        core = this.app.getTmcCore();
+
+        TmcCore core = this.app.getTmcCore();
         if (core == null) {
             return;
         }
-        Path courseDir = dirUtil.getCourseDirectory();
 
+        WorkDir dirUtil = new WorkDir();
+
+        Path courseDir = dirUtil.getCourseDirectory();
         if (courseDir == null) {
             System.out.println("Not a course directory");
             return;
@@ -70,9 +69,7 @@ public class SubmitCommand implements CommandInterface {
         String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
 
-        List<String> exercises;
-        exercises = dirUtil.getExerciseNames(exerciseNames);
-        
+        List<String> exercises = dirUtil.getExerciseNames(exerciseNames);
         if (exercises.isEmpty()) {
             io.println("You have to be in the exercise root directory to submit."
                     + " (This is a known problem.)");
@@ -80,21 +77,19 @@ public class SubmitCommand implements CommandInterface {
         }
 
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
-        SubmissionResult result;
 
         for (String exerciseName : exercises) {
             io.println(Color.colorString("Submitting: " + exerciseName, Color.ANSI_YELLOW));
-            result = TmcUtil.submitExercise(core, course, exerciseName);
+            SubmissionResult result = TmcUtil.submitExercise(core, course, exerciseName);
             resultPrinter.printSubmissionResult(result);
             io.println("");
         }
     }
 
     private String[] parseArgs(String[] args) {
-        GnuParser parser = new GnuParser();
         CommandLine line;
         try {
-            line = parser.parse(options, args);
+            line = new GnuParser().parse(this.options, args);
         } catch (ParseException e) {
             io.println("Invalid command line arguments.");
             io.println(e.getMessage());
