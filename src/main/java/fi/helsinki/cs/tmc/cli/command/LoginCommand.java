@@ -81,7 +81,7 @@ public class LoginCommand implements CommandInterface {
         String serverAddress = line.getOptionValue("s");
         if (serverAddress == null) {
             // todo: don't hardcode the default value, get it from somewhere
-            serverAddress = "https://tmc.mooc.fi/staging";
+            serverAddress = "https://tmc.mooc.fi/mooc";
         }
         return serverAddress;
     }

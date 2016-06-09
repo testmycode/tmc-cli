@@ -1,15 +1,15 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -18,7 +18,6 @@ import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.http.entity.BasicHttpEntity;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,39 +39,31 @@ public class LoginCommandTest {
     private static final String PASSWORD = "testpassword";
 
     Application app;
-    Io mockIo;
+    TestIo io;
     TmcCore mockCore;
 
     @Before
     public void setUp() {
-        // Unwanted behaviour? Will delete the real settings file atm.
-        SettingsIo.delete();
-
-        mockIo = mock(TerminalIo.class);
-        app = new Application(mockIo);
+        io = new TestIo();
+        app = new Application(io);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
+
         app = Mockito.spy(app);
         when(app.getTmcCore()).thenReturn(mockCore);
-    }
 
-    @After
-    public void tearDown() {
-        // Unwanted behaviour? Will delete the real settings file atm.
-        SettingsIo.delete();
+        PowerMockito.mockStatic(SettingsIo.class);
+        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
     }
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        PowerMockito.mockStatic(SettingsIo.class);
-        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
-
         when(mockCore.listCourses((ProgressObserver) anyObject()))
                 .thenReturn(successfulCallable());
         when(SettingsIo.save(any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
-        verify(mockIo).println(eq("Login succesful."));
+        assertThat(io.out(), containsString("Login succesful."));
     }
 
     @Test
@@ -86,27 +77,27 @@ public class LoginCommandTest {
         when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable401);
         String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
         app.run(args);
-        verify(mockIo).println(eq("Incorrect username or password."));
+        assertThat(io.out(), containsString("Incorrect username or password."));
     }
 
     @Test
-    public void loginAsksUsernameFromUser() {
+    public void loginAsksUsernameFromUserIfNotGiven() {
         when(mockCore.listCourses((ProgressObserver) anyObject()))
                 .thenReturn(successfulCallable());
         String[] args = {"login", "-s", SERVER, "-p", PASSWORD};
-        when(mockIo.readLine("username: ")).thenReturn(USERNAME);
+        io.addLinePrompt(USERNAME);
         app.run(args);
-        verify(mockIo).readLine(eq("username: "));
+        assertTrue(io.allPromptsUsed());
     }
 
     @Test
-    public void loginAsksPasswordFromUser() {
+    public void loginAsksPasswordFromUserIfNotGiven() {
         when(mockCore.listCourses((ProgressObserver) anyObject()))
                 .thenReturn(successfulCallable());
         String[] args = {"login", "-s", SERVER, "-u", USERNAME};
-        when(mockIo.readPassword("password: ")).thenReturn(PASSWORD);
+        io.addPasswordPrompt(PASSWORD);
         app.run(args);
-        verify(mockIo).readPassword(eq("password: "));
+        assertTrue(io.allPromptsUsed());
     }
 
     private static Callable<List<Course>> successfulCallable() {
