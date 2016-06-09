@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
+import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,9 @@ import java.util.List;
 /** Utility class for using external programs.
  */
 public class ExternalsUtil {
+
+    private static final Logger logger
+            = LoggerFactory.getLogger(TmcCliUpdater.class);
 
     /**
      * Create a temp file with a template and open an editor for the user.
@@ -89,6 +94,14 @@ public class ExternalsUtil {
         execExternal(pager, file.toString(), true);
     }
 
+    public static void runUpdater(Io io, String pathToNewBinary) {
+        if (!execExternal(pathToNewBinary, "!internal-update", true)) {
+            io.println("Failed to run the tmc-cli at " + pathToNewBinary);
+            io.println("Run it with ?internal-update argument or contact the help desk");
+            logger.error("Failed to run the new tmc");
+        }
+    }
+
     /**
      * Open a URI in the default browser.
      * By default use the Java Desktop API.
@@ -113,7 +126,7 @@ public class ExternalsUtil {
         }
     }
 
-    private static void execExternal(String program, String arg, boolean wait) {
+    private static boolean execExternal(String program, String arg, boolean wait) {
         Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
         logger.info("Launching external program " + program + " with arg " + arg);
         String[] exec;
@@ -124,15 +137,16 @@ public class ExternalsUtil {
                     "sh", "-c", program + " \'" + arg + "\'"
                     + " </dev/tty >/dev/tty"};
         }
-        Process proc = null;
         try {
-            proc = Runtime.getRuntime().exec(exec);
+            Process proc = Runtime.getRuntime().exec(exec);
             if (wait) {
                 logger.info("Waiting for " + program + " to finish executing");
                 proc.waitFor();
             }
         } catch (Exception e) {
             logger.error("Exception when running external program " + program + " " + arg, e);
+            return false;
         }
+        return true;
     }
 }
