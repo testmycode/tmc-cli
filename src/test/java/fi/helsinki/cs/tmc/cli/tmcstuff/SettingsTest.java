@@ -38,7 +38,7 @@ public class SettingsTest {
 
     @Test
     public void correctClientName() {
-        assertEquals("", settings.clientName());
+        assertEquals("tmc_cli", settings.clientName());
     }
 
     @Test
