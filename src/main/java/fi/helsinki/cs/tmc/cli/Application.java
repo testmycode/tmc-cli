@@ -42,6 +42,7 @@ public class Application {
     private TmcCore tmcCore;
     private Settings settings;
     private Io io;
+    private WorkDir workDir;
 
     private Options options;
     private GnuParser parser;
@@ -54,6 +55,12 @@ public class Application {
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
+        this.workDir = new WorkDir();
+    }
+
+    public Application(Io io, WorkDir workDir) {
+        this(io);
+        this.workDir = workDir;
     }
 
     /**
@@ -155,16 +162,15 @@ public class Application {
     public TmcCore getTmcCore() {
         if (this.tmcCore == null) {
             SettingsIo settingsio = new SettingsIo();
-            WorkDir dirutil = new WorkDir();
             Settings settings;
 
-            if (dirutil.getConfigFile() != null) {
+            if (workDir.getConfigFile() != null) {
                 // If we're in a course directory, we load settings matching the course
                 // Otherwise we just load the last used settings
-                CourseInfo courseinfo = CourseInfoIo.load(dirutil.getConfigFile());
+                CourseInfo courseinfo = CourseInfoIo.load(workDir.getConfigFile());
                 if (courseinfo == null) {
                     io.println("Course configuration file "
-                            + dirutil.getConfigFile().toString()
+                            + workDir.getConfigFile().toString()
                             + "is invalid.");
                     return null;
                 }
@@ -182,6 +188,10 @@ public class Application {
             createTmcCore(settings);
         }
         return this.tmcCore;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 
     public static void main(String[] args) {
@@ -212,6 +222,10 @@ public class Application {
             logger.warn("Failed to get version", e);
             return "n/a";
         }
+    }
+
+    public WorkDir getWorkDir() {
+        return this.workDir;
     }
 
     public void removeProperty(String prop) {

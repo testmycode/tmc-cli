@@ -1,89 +1,111 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
-import org.junit.After;
+import org.apache.http.entity.BasicHttpEntity;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SettingsIo.class)
 public class LoginCommandTest {
 
-    private static String serverAddress;
-    private static String username;
-    private static String password;
+    private static final String SERVER = "testserver";
+    private static final String USERNAME = "testuser";
+    private static final String PASSWORD = "testpassword";
 
-    private Application app;
-    Io mockIo;
-
-    @BeforeClass
-    public static void setUpClass() {
-        serverAddress = System.getenv("TMC_SERVER_ADDRESS");
-        username = System.getenv("TMC_USERNAME");
-        password = System.getenv("TMC_PASSWORD");
-        
-        assertNotNull(serverAddress);
-        assertNotNull(username);
-        assertNotNull(password);
-    }
+    Application app;
+    TestIo io;
+    TmcCore mockCore;
 
     @Before
     public void setUp() {
-        // Unwanted behaviour? Will delete the real settings file atm.
-        new SettingsIo().delete();
-        mockIo = mock(TerminalIo.class);
-        app = new Application(mockIo);
-    }
+        io = new TestIo();
+        app = new Application(io);
+        mockCore = mock(TmcCore.class);
+        app.setTmcCore(mockCore);
 
-    @After
-    public void tearDown() {
-        // Unwanted behaviour? Will delete the real settings file atm.
-        new SettingsIo().delete();
+        app = Mockito.spy(app);
+        when(app.getTmcCore()).thenReturn(mockCore);
+
+        PowerMockito.mockStatic(SettingsIo.class);
+        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
     }
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        String[] args = {"login", "-s", serverAddress, "-u", username, "-p", password};
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
+        String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
-        verify(mockIo).println(eq("Login succesful."));
+        assertThat(io.out(), containsString("Login succesful."));
     }
 
     @Test
     public void catches401IfCorrectServerAndWrongUsername() {
-        String[] args = {"login", "-s", serverAddress, "-u", "foo", "-p", password};
+        Callable<List<Course>> callable401 = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                throw new Exception(new FailedHttpResponseException(401, new BasicHttpEntity()));
+            }
+        };
+        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable401);
+        String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
         app.run(args);
-        verify(mockIo).println(eq("Incorrect username or password."));
+        assertThat(io.out(), containsString("Incorrect username or password."));
     }
-    
+
     @Test
-    public void loginAsksUsernameFromUser() {
-        String[] args = {"login", "-s", serverAddress, "-p", password};
-        when(mockIo.readLine("username: ")).thenReturn(username);
+    public void loginAsksUsernameFromUserIfNotGiven() {
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        String[] args = {"login", "-s", SERVER, "-p", PASSWORD};
+        io.addLinePrompt(USERNAME);
         app.run(args);
-        verify(mockIo).readLine(eq("username: "));
+        assertTrue(io.allPromptsUsed());
     }
-    
+
     @Test
-    public void loginAsksPasswordFromUser() {
-        String[] args = {"login", "-s", serverAddress, "-u", username};
-        when(mockIo.readPassword("password: ")).thenReturn(password);
+    public void loginAsksPasswordFromUserIfNotGiven() {
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        String[] args = {"login", "-s", SERVER, "-u", USERNAME};
+        io.addPasswordPrompt(PASSWORD);
         app.run(args);
-        verify(mockIo).readPassword(eq("password: "));
+        assertTrue(io.allPromptsUsed());
     }
-    
-    @Test
-    public void loginGetsRightServerAddressIfNotGiven() {
-        String[] args = {"login", "-u", username, "-p", password};
-        app.run(args);
-        verify(mockIo).println(eq("Login succesful."));
+
+    private static Callable<List<Course>> successfulCallable() {
+        return new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                return new ArrayList<>();
+            }
+        };
     }
 }
