@@ -1,30 +1,43 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import org.mockito.Mockito;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class DownloadExercisesCommandTest {
 
     Application app;
     TestIo testIo;
+    TmcCore mockCore;
+    Io mockIo;
 
     @Before
     public void setUp() {
         testIo = new TestIo();
         app = new Application(testIo);
-        app.createTmcCore(new Settings(true));
+        //app.createTmcCore(new Settings(true));
+        mockCore = mock(TmcCore.class);
+        app.setTmcCore(mockCore);
     }
 
     @Test
@@ -35,14 +48,71 @@ public class DownloadExercisesCommandTest {
     }
 
     @Test
-    public void downloadWorks() throws IOException {
-        String course = "cert-test";
-        String[] args = {"download", course};
-        app.run(args);
+    public void worksRightIfCourseIsNotFound() throws IOException {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                return new ArrayList<>();
+            }
+        };
 
-        assertTrue(Files.exists(Paths.get(System.getProperty("user.dir")).resolve(course)));
-        try {
-            FileUtils.deleteDirectory(new File(course));
-        } catch (Exception e) { }
+        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
+        String[] args = {"download", "foo"};
+        app.run(args);
+        assertTrue(testIo.out().contains("Course doesn't exist"));
+
+//        verify(mockIo).println(Mockito.contains("No courses found on this server"));
+//        String course = "cert-test";
+//        String[] args = {"download", course};
+//        app.run(args);
+//
+//        assertTrue(Files.exists(Paths.get(System.getProperty("user.dir")).resolve(course)));
+//        try {
+//            FileUtils.deleteDirectory(new File(course));
+//        } catch (Exception e) { }
+    }
+
+    @Test
+    public void worksRightIfCourseIsFound() throws IOException {
+        Callable<List<Course>> callableList = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                ArrayList<Course> tmp = new ArrayList<>();
+                tmp.add(new Course("course1"));
+                tmp.add(new Course("course2"));
+                return tmp;
+            }
+        };
+        
+        Callable<Course> callableCourse = new Callable<Course>() {
+            @Override
+            public Course call() throws Exception {
+                Course course = new Course("course1");
+                List<Exercise> lst = new ArrayList<>();
+                lst.add(new Exercise("exercise"));
+                course.setExercises(lst);
+                return course;
+            }
+        };
+        
+        Callable<List<Exercise>> callableExercise = new Callable<List<Exercise>>() {
+            @Override
+            public List<Exercise> call() throws Exception {
+                ArrayList<Exercise> tmp = new ArrayList<>();
+                tmp.add(new Exercise("exerciseName"));
+                return tmp;
+            }
+        };
+        
+        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callableList);
+        when(mockCore.getCourseDetails((ProgressObserver) anyObject(),
+                (Course) anyObject())).thenReturn(callableCourse);
+        when(mockCore.downloadOrUpdateExercises((ProgressObserver) anyObject(),
+                (List<Exercise>) anyObject())).thenReturn(callableExercise);
+        
+        String[] args = {"download", "course1"};
+        app.run(args);
+        //assertTrue(testIo.out().contains(""));
+
     }
 }

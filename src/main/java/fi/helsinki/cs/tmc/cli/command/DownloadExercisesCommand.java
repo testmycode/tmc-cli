@@ -27,21 +27,18 @@ public class DownloadExercisesCommand implements CommandInterface {
 
     @Override
     public void run(String[] args, Io io) {
-        Course course;
-        TmcCore core;
-
         if (args.length == 0) {
             io.println("You must give course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
         }
 
-        core = this.app.getTmcCore();
+        TmcCore core = this.app.getTmcCore();
         if (core == null) {
             return;
         }
-        WorkDir dirUtil = new WorkDir();
-        course = TmcUtil.findCourse(core, args[0]);
+        
+        Course course = TmcUtil.findCourse(core, args[0]);
         if (course == null) {
             io.println("Course doesn't exist.");
             return;
