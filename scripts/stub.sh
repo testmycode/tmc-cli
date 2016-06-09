@@ -41,7 +41,7 @@ if [ ! -f $AUTOCOMPLETE ]; then
 	. $AUTOCOMPLETE
 fi
 
-if [ "$1" == "!internal-update" ]; then
+if [ "$1" == "++internal-update" ]; then
 	if [ ! -f tmc.new ]; then
 		echo "Could not find the updated file."
 		exit 127
