@@ -53,9 +53,9 @@ public class RunTestsCommand implements CommandInterface {
             return;
         }
 
-        WorkDir dirUtil = new WorkDir();
-        String courseName = getCourseName(dirUtil);
-        List<String> exerciseNames = dirUtil.getExerciseNames(exercisesFromArgs);
+        WorkDir workDir = app.getWorkDir();
+        String courseName = getCourseName(workDir);
+        List<String> exerciseNames = workDir.getExerciseNames(exercisesFromArgs);
         
         if (exerciseNames.isEmpty()) {
             io.println("You have to be in the exercise root directory to"
