@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.updater;
 
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.tmcstuff.ExternalsUtil;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -39,7 +40,7 @@ public class TmcCliUpdater {
 
     /**
      * Checks if there's a newer tmc-cli version released on Github and asks if
-     * the user wants to download it. todo: split it up
+     * the user wants to download it. TODO: split it up
      */
     public void run() {
         JsonObject release = toJsonObject(fetchLatestReleaseJson());
@@ -77,6 +78,7 @@ public class TmcCliUpdater {
         io.println("Downloading...");
         fetchTmcCliBinary(dlUrl, destination);
 
+        io.println("Running " + destination.getAbsolutePath());
         runNewTmcCliBinary(destination.getAbsolutePath());
     }
 
@@ -111,14 +113,7 @@ public class TmcCliUpdater {
      * Finish the update by running downloaded binary.
      */
     protected void runNewTmcCliBinary(String pathToNewBinary) {
-        try {
-            // Run the auto-update at the launch script
-            Runtime.getRuntime().exec(pathToNewBinary + " ?internal-update");
-        } catch (IOException ex) {
-            io.println("Failed to run the tmc-cli at " + pathToNewBinary);
-            io.println("Run it with ?internal-update argument or contact the help desk");
-            logger.error("Failed to run the new tmc", ex);
-        }
+        ExternalsUtil.runUpdater(io, pathToNewBinary);
     }
 
     /**
