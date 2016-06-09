@@ -190,6 +190,10 @@ public class Application {
         return this.tmcCore;
     }
 
+    public void setSettings(Settings settings) {
+        this.settings = settings;
+    }
+
     public static void main(String[] args) {
         Io io = new TerminalIo();
         ShutdownHandler shutdownHandler = new ShutdownHandler(io);
