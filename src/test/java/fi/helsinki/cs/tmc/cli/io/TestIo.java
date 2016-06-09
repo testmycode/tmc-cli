@@ -23,6 +23,11 @@ public class TestIo extends Io {
         passwordPrompts.add(prompt);
     }
 
+    public void clearPrompts() {
+        linePrompts.clear();
+        passwordPrompts.clear();
+    }
+
     public String getPrint() {
         return printedText.toString();
     }
