@@ -147,10 +147,10 @@ public class ExternalsUtil {
                 logger.info("Waiting for " + program + " to finish executing");
                 proc.waitFor();
             }
+            return proc.exitValue() == 0;
         } catch (Exception e) {
             logger.error("Exception when running external program " + program + " " + arg, e);
             return false;
         }
-        return true;
     }
 }
