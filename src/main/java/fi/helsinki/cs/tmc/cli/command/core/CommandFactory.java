@@ -21,9 +21,10 @@ public class CommandFactory {
     private static final Map<String, Class<Command>> commands = new HashMap<>();
 
     public CommandFactory() {
+        /* force load the CommandList so that it's static initialization block is executed
+           this is used instead of import so that the ide's won't cry about the nonexistent class
+         */
         try {
-            /* force load the CommandList so that it's static initialization block is executed */
-            /* this is used instead of import so that the ide's won't cry about the nonexistent class */
             Class.forName("fi.helsinki.cs.tmc.cli.command.core.CommandList");
         } catch (ClassNotFoundException ex) {
             System.out.println("Fail " + ex);
