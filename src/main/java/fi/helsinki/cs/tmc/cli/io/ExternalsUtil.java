@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.tmcstuff;
+package fi.helsinki.cs.tmc.cli.io;
 
 import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -147,10 +147,10 @@ public class ExternalsUtil {
                 logger.info("Waiting for " + program + " to finish executing");
                 proc.waitFor();
             }
+            return proc.exitValue() == 0;
         } catch (Exception e) {
             logger.error("Exception when running external program " + program + " " + arg, e);
             return false;
         }
-        return true;
     }
 }
