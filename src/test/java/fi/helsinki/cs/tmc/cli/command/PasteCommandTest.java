@@ -42,19 +42,22 @@ import java.util.concurrent.Callable;
 public class PasteCommandTest {
 
     Application app;
+    Application appFail;
     TestIo testIo;
     TmcCore mockCore;
+    TmcCore mockCoreFail;
     ArrayList<String> exerciseNames;
     Exercise exercise;
     Callable mockCallable;
     Callable mockCallableFail;
+    WorkDir workDir;
 
     @Before
     public void setup() {
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
         testIo = new TestIo();
 
-        WorkDir workDir = Mockito.spy(new WorkDir(tempDir, null));
+        workDir = Mockito.spy(new WorkDir(tempDir, null));
         when(workDir.getCourseDirectory())
                 .thenReturn(tempDir.resolve("paste-test"));
 
@@ -78,11 +81,20 @@ public class PasteCommandTest {
         when(mockCore.pasteWithComment(
                 any(ProgressObserver.class), any(Exercise.class), anyString()))
                 .thenReturn(mockCallable);
+        mockCoreFail = mock(TmcCore.class);
+        when(mockCore.pasteWithComment(
+                any(ProgressObserver.class), any(Exercise.class), anyString()))
+                .thenReturn(mockCallableFail);
 
         app = new Application(testIo, workDir);
 
         app = Mockito.spy(app);
         app.setTmcCore(mockCore);
+
+        appFail = new Application(testIo, workDir);
+
+        appFail = Mockito.spy(app);
+        appFail.setTmcCore(mockCoreFail);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
         when(mockCourseInfo.getExercise(anyString())).thenReturn(exercise);
@@ -104,7 +116,7 @@ public class PasteCommandTest {
     @Test
     public void pasteRunsRightWithoutArguments() {
         app.run(new String[] {"paste"});
-        verifyStatic();
+        verifyStatic(Mockito.times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         try {
@@ -171,5 +183,44 @@ public class PasteCommandTest {
                 testIo.out().contains("Paste sent for exercise paste-exercise"));
         assertTrue("Prints the paste URI",
                 testIo.out().contains("https://tmc.test.url/"));
+    }
+
+    @Test
+    public void handlesExceptionWhenCallableFails() {
+        appFail.run(new String[] {"paste"});
+        verifyStatic(Mockito.times(1));
+        ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
+
+        verify(mockCoreFail).pasteWithComment(
+                any(TmcCliProgressObserver.class), eq(exercise), eq(""));
+
+        try {
+            verify(mockCallable).call();
+        } catch (Exception e) {
+            // Ignore this stupid block, Mockito thinks there could be an exception thrown here
+        }
+
+        assertTrue("Prints to IO failing to connect",
+                testIo.out().contains("Failed to connect to server"));
+    }
+
+    @Test
+    public void failsWithNoExercise() {
+        Mockito.when(workDir.getExerciseNames(any(String[].class))).thenReturn(
+                new ArrayList<String>());
+        Mockito.when(workDir.getExerciseNames(null)).thenReturn(new ArrayList<String>());
+        app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
+
+        verify(mockCore, Mockito.never()).pasteWithComment(
+                any(TmcCliProgressObserver.class), any(Exercise.class), anyString());
+
+        try {
+            verify(mockCallable, Mockito.never()).call();
+        } catch (Exception e) {
+            // Ignore this stupid block, Mockito thinks there could be an exception thrown here
+        }
+
+        assertTrue("Prints to IO when no exercise is found",
+                testIo.out().contains("No exercise specified"));
     }
 }
