@@ -1,0 +1,162 @@
+{
+   "username":"testuser",
+   "serverAddress":"https://tmc.example.com",
+   "course":{
+      "id":40,
+      "name":"2016-aalto-c",
+      "exercises":[
+         {
+            "id":4837,
+            "name":"Module_1-02_intro",
+            "locked":false,
+            "deadline_description":"2016-08-31 23:59:59 +0300",
+            "deadline":"2016-08-31T23:59:59.999+03:00",
+            "checksum":"07b219c9dc2c1c9841cda42d21205532",
+            "zip_url":"https://tmc.example.com/exercises/4837.zip",
+            "return_url":"https://tmc.example.com/exercises/4837/submissions.json",
+            "returnable":true,
+            "requires_review":false,
+            "attempted":true,
+            "completed":false,
+            "reviewed":false,
+            "all_review_points_given":true,
+            "runtime_params":[
+
+            ],
+            "code_review_requests_enabled":true,
+            "run_tests_locally_action_enabled":true,
+            "exercise_submissions_url":"https://tmc.example.com/exercises/4837.json?api_version\u003d7",
+            "courseName":"2016-aalto-c"
+         },
+         {
+            "id":4838,
+            "name":"Module_1-04_func",
+            "locked":false,
+            "deadline_description":"2016-08-31 23:59:59 +0300",
+            "deadline":"2016-08-31T23:59:59.999+03:00",
+            "checksum":"055f099cf81e622e09e82f7f2a954b03",
+            "zip_url":"https://tmc.example.com/exercises/4838.zip",
+            "return_url":"https://tmc.example.com/exercises/4838/submissions.json",
+            "returnable":true,
+            "requires_review":false,
+            "attempted":false,
+            "completed":false,
+            "reviewed":false,
+            "all_review_points_given":true,
+            "runtime_params":[
+
+            ],
+            "code_review_requests_enabled":true,
+            "run_tests_locally_action_enabled":true,
+            "exercise_submissions_url":"https://tmc.example.com/exercises/4838.json?api_version\u003d7",
+            "courseName":"2016-aalto-c"
+         },
+         {
+            "id":4839,
+            "name":"Module_1-05_calc",
+            "locked":false,
+            "deadline_description":"2016-08-31 23:59:59 +0300",
+            "deadline":"2016-08-31T23:59:59.999+03:00",
+            "checksum":"9058b9113eea17dc873f0e03ec50ff3a",
+            "zip_url":"https://tmc.example.com/exercises/4839.zip",
+            "return_url":"https://tmc.example.com/exercises/4839/submissions.json",
+            "returnable":true,
+            "requires_review":false,
+            "attempted":false,
+            "completed":false,
+            "reviewed":false,
+            "all_review_points_given":true,
+            "runtime_params":[
+
+            ],
+            "code_review_requests_enabled":true,
+            "run_tests_locally_action_enabled":true,
+            "exercise_submissions_url":"https://tmc.example.com/exercises/4839.json?api_version\u003d7",
+            "courseName":"2016-aalto-c"
+         },
+         {
+            "id":4840,
+            "name":"Module_1-07_geometry",
+            "locked":false,
+            "deadline_description":"2016-08-31 23:59:59 +0300",
+            "deadline":"2016-08-31T23:59:59.999+03:00",
+            "checksum":"724c5ab4004f7fd16bb2b9eb00113924",
+            "zip_url":"https://tmc.example.com/exercises/4840.zip",
+            "return_url":"https://tmc.example.com/exercises/4840/submissions.json",
+            "returnable":true,
+            "requires_review":false,
+            "attempted":false,
+            "completed":false,
+            "reviewed":false,
+            "all_review_points_given":true,
+            "runtime_params":[
+
+            ],
+            "code_review_requests_enabled":true,
+            "run_tests_locally_action_enabled":true,
+            "exercise_submissions_url":"https://tmc.example.com/exercises/4840.json?api_version\u003d7",
+            "courseName":"2016-aalto-c"
+         },
+         {
+            "id":4841,
+            "name":"Module_1-08_characters",
+            "locked":false,
+            "deadline_description":"2016-08-31 23:59:59 +0300",
+            "deadline":"2016-08-31T23:59:59.999+03:00",
+            "checksum":"790e64d20f3bc7e00d6f5e16421bd45e",
+            "zip_url":"https://tmc.example.com/exercises/4841.zip",
+            "return_url":"https://tmc.example.com/exercises/4841/submissions.json",
+            "returnable":true,
+            "requires_review":false,
+            "attempted":false,
+            "completed":false,
+            "reviewed":false,
+            "all_review_points_given":true,
+            "runtime_params":[
+
+            ],
+            "code_review_requests_enabled":true,
+            "run_tests_locally_action_enabled":true,
+            "exercise_submissions_url":"https://tmc.example.com/exercises/4841.json?api_version\u003d7",
+            "courseName":"2016-aalto-c"
+         },
+         {
+            "id":4842,
+            "name":"Module_1-09_ships",
+            "locked":false,
+            "deadline_description":"2016-08-31 23:59:59 +0300",
+            "deadline":"2016-08-31T23:59:59.999+03:00",
+            "checksum":"f16eaa1deacb90da55d2f6dc9a67c72e",
+            "zip_url":"https://tmc.example.com/exercises/4842.zip",
+            "return_url":"https://tmc.example.com/exercises/4842/submissions.json",
+            "returnable":true,
+            "requires_review":false,
+            "attempted":false,
+            "completed":false,
+            "reviewed":false,
+            "all_review_points_given":true,
+            "runtime_params":[
+
+            ],
+            "code_review_requests_enabled":true,
+            "run_tests_locally_action_enabled":true,
+            "exercise_submissions_url":"https://tmc.example.com/exercises/4842.json?api_version\u003d7",
+            "courseName":"2016-aalto-c"
+         }
+      ],
+      "details_url":"https://tmc.example.com/courses/40.json",
+      "unlock_url":"https://tmc.example.com/courses/40/unlock.json",
+      "comet_url":"https://tmc.mooc.fi:8443/comet",
+      "spyware_urls":[
+         "http://mooc.spyware.testmycode.net/"
+      ],
+      "reviews_url":"https://tmc.example.com/courses/40/reviews.json",
+      "unlockables":[
+
+      ],
+      "exercisesLoaded":true
+   },
+   "properties":{
+
+   }
+}
