@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -147,5 +149,30 @@ public class TmcUtilTest {
             }
             assertTrue(found);
         }
+    }
+
+    @Test
+    public void submitExercise() {
+        String name = "right-course";
+        Course course = new Course(name);
+        course.setExercises(Arrays.asList(new Exercise("first"), new Exercise("second")));
+        course.setExercisesLoaded(true);
+        final SubmissionResult expectedResult = new SubmissionResult();
+
+        doAnswer(new Answer<Callable<SubmissionResult>>() {
+            @Override
+            public Callable<SubmissionResult> answer(InvocationOnMock invocation) throws Throwable {
+                //final Exercise exersice = (Exercise)invocation.getArguments()[1];
+                return new Callable<SubmissionResult>() {
+                    @Override
+                    public SubmissionResult call() throws Exception {
+                        return expectedResult;
+                    }
+                };
+            }
+        }).when(mockCore).submit(any(ProgressObserver.class), any(Exercise.class));
+        SubmissionResult result = TmcUtil.submitExercise(app.getTmcCore(), course, "first");
+        //TODO check the result
+        assertEquals(expectedResult, result);
     }
 }
