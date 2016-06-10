@@ -7,11 +7,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
@@ -36,16 +36,16 @@ public class TmcCliUpdaterTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        latestJson = readResource("latest.json");
+        latestJson = readResource("test-jsons/latest.json");
         assertNotNull(latestJson);
 
-        apiLimitExeededJson = readResource("api_rate_limit_exeeded.json");
+        apiLimitExeededJson = readResource("test-jsons/api_rate_limit_exeeded.json");
         assertNotNull(apiLimitExeededJson);
 
-        malformedJson = readResource("malformed.json");
+        malformedJson = readResource("test-jsons/malformed.json");
         assertNotNull(malformedJson);
 
-        changedJson = readResource("changed.json");
+        changedJson = readResource("test-jsons/changed.json");
         assertNotNull(changedJson);
     }
 
@@ -66,7 +66,8 @@ public class TmcCliUpdaterTest {
     @Test
     public void doNothingIfReleaseEqualsCurrentVersion() {
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.1", false));
-        when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
+        doReturn(latestJson).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
         updater.run();
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
         assertTrue(io.out().isEmpty());
@@ -75,7 +76,8 @@ public class TmcCliUpdaterTest {
     @Test
     public void doNothingIfFetchingReleaseJsonFails() {
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
-        when(updater.fetchLatestReleaseJson()).thenReturn(null);
+        doReturn(null).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(null);
         updater.run();
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
         assertTrue(io.out().isEmpty());
@@ -84,7 +86,8 @@ public class TmcCliUpdaterTest {
     @Test
     public void doNothingIfFetchedJsonIsApiRateLimitExceeded() {
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
-        when(updater.fetchLatestReleaseJson()).thenReturn(apiLimitExeededJson);
+        doReturn(apiLimitExeededJson).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(apiLimitExeededJson);
         updater.run();
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
         assertTrue(io.out().isEmpty());
@@ -94,7 +97,8 @@ public class TmcCliUpdaterTest {
     public void doNothingIfUserDoesntWantToUpdate() {
         io.addLinePrompt("n");
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
-        when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
+        doReturn(latestJson).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
         updater.run();
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
@@ -104,7 +108,8 @@ public class TmcCliUpdaterTest {
     public void downloadsAndRunsNewBinaryIfOk() {
         io.addLinePrompt("yes");
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
-        when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
+        doReturn(latestJson).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
         doNothing().when(updater).fetchTmcCliBinary(any(String.class), any(File.class));
         doNothing().when(updater).runNewTmcCliBinary(any(String.class));
         updater.run();
@@ -118,7 +123,8 @@ public class TmcCliUpdaterTest {
     @Test
     public void newReleaseShowsDownloadLinkOnWindows() {
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", true));
-        when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
+        doReturn(latestJson).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
         updater.run();
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
         assertThat(io.out(), containsString("Download: https://"));
@@ -128,7 +134,8 @@ public class TmcCliUpdaterTest {
     @Test
     public void doNothingIfJsonIsMalformed() {
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
-        when(updater.fetchLatestReleaseJson()).thenReturn(malformedJson);
+        doReturn(malformedJson).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(malformedJson);
         updater.run();
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
         assertTrue(io.out().isEmpty());
@@ -137,7 +144,8 @@ public class TmcCliUpdaterTest {
     @Test
     public void abortIfJsonDoesNotContainNecessaryInfo() {
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
-        when(updater.fetchLatestReleaseJson()).thenReturn(changedJson);
+        doReturn(changedJson).when(updater).fetchLatestReleaseJson();
+        //when(updater.fetchLatestReleaseJson()).thenReturn(changedJson);
         updater.run();
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
         assertTrue(io.out().isEmpty());
