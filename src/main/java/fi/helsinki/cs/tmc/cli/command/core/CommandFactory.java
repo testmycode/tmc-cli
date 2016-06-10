@@ -31,7 +31,7 @@ public class CommandFactory {
             throw new RuntimeException("Command must have Command annotation");
         }
         Command command = (Command) annotation;
-        if (!CommandInterface.class.isAssignableFrom(commandClass)) {
+        if (!AbstractCommand.class.isAssignableFrom(commandClass)) {
             throw new RuntimeException("Command must implement CommandInterface");
         }
         this.commands.put(command.name(), klass);
@@ -42,7 +42,7 @@ public class CommandFactory {
         this.commands.put(name, klass);
     }
 
-    public CommandInterface createCommand(Application app, String name) {
+    public AbstractCommand createCommand(Application app, String name) {
         Class commandClass = commands.get(name);
         Constructor<?> cons;
         if (commandClass == null) {
@@ -61,7 +61,7 @@ public class CommandFactory {
             return null;
         }
         try {
-            return (CommandInterface)cons.newInstance(app);
+            return (AbstractCommand)cons.newInstance(app);
         } catch (InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException ex) {
             throw new RuntimeException("getCommand failed", ex);

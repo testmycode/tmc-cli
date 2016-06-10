@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(name = "paste", desc = "Submit exercise to pastebin")
-public class PasteCommand implements CommandInterface {
+public class PasteCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
     private final Options options;
 

@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.command.CommandList;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
@@ -78,7 +78,7 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        CommandInterface command = commandFactory.createCommand(this, name);
+        AbstractCommand command = commandFactory.createCommand(this, name);
         if (command == null) {
             io.println("Command " + name + " doesn't exist.");
             return false;
