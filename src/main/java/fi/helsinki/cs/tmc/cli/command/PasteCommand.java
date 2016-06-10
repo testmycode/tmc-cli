@@ -74,10 +74,6 @@ public class PasteCommand implements CommandInterface {
             } else {
                 message = line.getOptionValue("m");
             }
-            if (message == null || message.isEmpty()) {
-                io.println("Paste message empty, aborting");
-                return;
-            }
         } else {
             message = "";
         }
