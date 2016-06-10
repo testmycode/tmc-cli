@@ -228,6 +228,10 @@ public class Application {
         return this.workDir;
     }
 
+    public void setWorkdir(WorkDir workDir) {
+        this.workDir = workDir;
+    }
+
     public void removeProperty(String prop) {
         HashMap<String, String> props = getProperties();
         props.remove(prop);
