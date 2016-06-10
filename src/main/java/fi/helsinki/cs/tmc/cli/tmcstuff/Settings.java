@@ -75,8 +75,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public String clientName() {
-        //return "tmc-cli";
-        return "";
+        return "tmc_cli";
     }
 
     @Override
