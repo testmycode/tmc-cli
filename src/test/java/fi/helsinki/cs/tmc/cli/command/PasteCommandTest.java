@@ -57,7 +57,7 @@ public class PasteCommandTest {
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
         testIo = new TestIo();
 
-        workDir = Mockito.spy(new WorkDir(tempDir, null));
+        workDir = Mockito.spy(new WorkDir(tempDir));
         when(workDir.getCourseDirectory())
                 .thenReturn(tempDir.resolve("paste-test"));
 
