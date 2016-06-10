@@ -71,7 +71,7 @@ public class PasteCommandTest {
             when(mockCallable.call()).thenReturn(URI.create("https://tmc.test.url/"));
             when(mockCallableFail.call()).thenThrow(new Exception());
         } catch (Exception e) {
-            // Ignore this stupid block, Mockito thinks there's could be an exception thrown here
+            // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
         mockCore = mock(TmcCore.class);
@@ -110,7 +110,7 @@ public class PasteCommandTest {
         try {
             verify(mockCallable).call();
         } catch (Exception e) {
-            // Ignore this stupid block, Mockito thinks there's could be an exception thrown here
+            // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
         assertTrue("Prints to IO when successful",
@@ -132,7 +132,7 @@ public class PasteCommandTest {
         try {
             verify(mockCallable).call();
         } catch (Exception e) {
-            // Ignore this stupid block, Mockito thinks there's could be an exception thrown here
+            // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
         assertTrue("Prints to IO when successful",
@@ -147,7 +147,7 @@ public class PasteCommandTest {
         verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
-        assertTrue("Prints to IO when aborting",
+        assertTrue("Prints to IO when failing to parse",
                 testIo.out().contains("Unable to parse arguments"));
     }
 
@@ -164,7 +164,7 @@ public class PasteCommandTest {
         try {
             verify(mockCallable).call();
         } catch (Exception e) {
-            // Ignore this stupid block, Mockito thinks there's could be an exception thrown here
+            // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
         assertTrue("Prints to IO when successful",
