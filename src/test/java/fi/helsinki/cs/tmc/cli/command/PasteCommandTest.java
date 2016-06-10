@@ -82,7 +82,7 @@ public class PasteCommandTest {
                 any(ProgressObserver.class), any(Exercise.class), anyString()))
                 .thenReturn(mockCallable);
         mockCoreFail = mock(TmcCore.class);
-        when(mockCore.pasteWithComment(
+        when(mockCoreFail.pasteWithComment(
                 any(ProgressObserver.class), any(Exercise.class), anyString()))
                 .thenReturn(mockCallableFail);
 
@@ -93,7 +93,7 @@ public class PasteCommandTest {
 
         appFail = new Application(testIo, workDir);
 
-        appFail = Mockito.spy(app);
+        appFail = Mockito.spy(appFail);
         appFail.setTmcCore(mockCoreFail);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
@@ -192,16 +192,16 @@ public class PasteCommandTest {
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verify(mockCoreFail).pasteWithComment(
-                any(TmcCliProgressObserver.class), eq(exercise), eq(""));
+                any(TmcCliProgressObserver.class), eq(exercise), anyString());
 
         try {
-            verify(mockCallable).call();
+            verify(mockCallableFail).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
         assertTrue("Prints to IO failing to connect",
-                testIo.out().contains("Failed to connect to server"));
+                testIo.out().contains("Unable to connect to server"));
     }
 
     @Test
