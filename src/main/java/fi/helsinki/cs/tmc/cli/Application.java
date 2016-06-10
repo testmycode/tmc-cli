@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli;
 
-import fi.helsinki.cs.tmc.cli.command.CommandList;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -53,7 +52,6 @@ public class Application {
         this.parser = new GnuParser();
         this.options = new Options();
         this.commandFactory = new CommandFactory();
-        new CommandList().run(this.commandFactory);
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
