@@ -8,7 +8,6 @@ import com.google.common.base.Optional;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Locale;
 
 public class Settings implements TmcSettings {
@@ -16,15 +15,16 @@ public class Settings implements TmcSettings {
     private String serverAddress;
     private String username;
     private String password;
+    private Path workingDirectory;
 
     public Settings(String serverAddress, String username, String password) {
         this.serverAddress = serverAddress;
         this.username = username;
         this.password = password;
     }
-
+    
     public Settings() {
-
+        this(false);
     }
 
     // TODO: get rid of this shit (use mockito)
@@ -93,11 +93,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public Path getTmcProjectDirectory() {
-        Path path = new WorkDir().getCourseDirectory();
-        if (path == null) {
-            return Paths.get(System.getProperty("user.dir"));
-        }
-        return path.getParent();
+        return workingDirectory;
     }
 
     @Override
@@ -122,5 +118,8 @@ public class Settings implements TmcSettings {
     @Override
     public void setConfigRoot(Path path) {
     }
-
+    
+    public void setTmcProjectDirectory(Path dir) {
+        this.workingDirectory = dir;
+    }
 }
