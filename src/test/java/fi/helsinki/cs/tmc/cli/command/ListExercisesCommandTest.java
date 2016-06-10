@@ -72,8 +72,8 @@ public class ListExercisesCommandTest {
             @Override
             public List<Course> call() throws Exception {
                 List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exercise"),
-                        new Exercise("cool-exercise"));
+                        new Exercise("hello-exerciseNames"),
+                        new Exercise("cool-exerciseNames"));
 
                 Course course = new Course("test-course123");
                 course.setExercises(list);
@@ -85,7 +85,7 @@ public class ListExercisesCommandTest {
 
         String[] args = {"list-exercises", "test-course123"};
         app.run(args);
-        assertThat(io.out(), containsString("hello-exercise"));
+        assertThat(io.out(), containsString("hello-exerciseNames"));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class ListExercisesCommandTest {
         Callable<List<Course>> callable = new Callable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
-                return Arrays.asList(new Course("hello-exercise"));
+                return Arrays.asList(new Course("hello-exerciseNames"));
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
