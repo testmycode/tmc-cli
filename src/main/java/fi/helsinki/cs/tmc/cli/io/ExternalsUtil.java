@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.tmcstuff;
+package fi.helsinki.cs.tmc.cli.io;
 
 import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
 import fi.helsinki.cs.tmc.cli.io.Io;
