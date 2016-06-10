@@ -36,16 +36,16 @@ public class TmcCliUpdaterTest {
 
     @BeforeClass
     public static void setUpClass() throws IOException {
-        latestJson = readResource("latest.json");
+        latestJson = readResource("test-jsons/latest.json");
         assertNotNull(latestJson);
 
-        apiLimitExeededJson = readResource("api_rate_limit_exeeded.json");
+        apiLimitExeededJson = readResource("test-jsons/api_rate_limit_exeeded.json");
         assertNotNull(apiLimitExeededJson);
 
-        malformedJson = readResource("malformed.json");
+        malformedJson = readResource("test-jsons/malformed.json");
         assertNotNull(malformedJson);
 
-        changedJson = readResource("changed.json");
+        changedJson = readResource("test-jsons/changed.json");
         assertNotNull(changedJson);
     }
 
