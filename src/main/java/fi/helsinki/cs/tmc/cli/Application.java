@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
@@ -148,6 +150,12 @@ public class Application {
         this.settings = settings;
         this.tmcCore = new TmcCore(settings, tmcLangs);
         /*XXX should we somehow check if the authentication is successful here */
+        Path path = getWorkDir().getCourseDirectory();
+        if (path == null) {
+            settings.setTmcProjectDirectory(Paths.get(System.getProperty("user.dir")));
+            return;
+        }
+        settings.setTmcProjectDirectory(path.getParent());
     }
 
     public CommandFactory getCommandFactory() {

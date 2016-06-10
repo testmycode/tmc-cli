@@ -3,23 +3,27 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
+import org.apache.commons.io.FileUtils;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.mockito.Mockito;
-
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -30,14 +34,24 @@ public class DownloadExercisesCommandTest {
     TestIo testIo;
     TmcCore mockCore;
     Io mockIo;
+    Path tempDir;
 
     @Before
     public void setUp() {
+        
+        tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
+        WorkDir workDir = new WorkDir(tempDir);
         testIo = new TestIo();
-        app = new Application(testIo);
-        //app.createTmcCore(new Settings(true));
+        app = new Application(testIo, workDir);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
+    }
+    
+    @After
+    public void tearDown() {
+        try {
+            FileUtils.deleteDirectory(tempDir.toFile());
+        } catch (Exception e) { }
     }
 
     @Test
@@ -60,16 +74,6 @@ public class DownloadExercisesCommandTest {
         String[] args = {"download", "foo"};
         app.run(args);
         assertTrue(testIo.out().contains("Course doesn't exist"));
-
-//        verify(mockIo).println(Mockito.contains("No courses found on this server"));
-//        String course = "cert-test";
-//        String[] args = {"download", course};
-//        app.run(args);
-//
-//        assertTrue(Files.exists(Paths.get(System.getProperty("user.dir")).resolve(course)));
-//        try {
-//            FileUtils.deleteDirectory(new File(course));
-//        } catch (Exception e) { }
     }
 
     @Test
@@ -104,6 +108,10 @@ public class DownloadExercisesCommandTest {
             }
         };
         
+        Settings settings = new Settings("server", "user", "password");
+        settings.setTmcProjectDirectory(tempDir);
+        app.setSettings(settings);
+        
         when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callableList);
         when(mockCore.getCourseDetails((ProgressObserver) anyObject(),
                 (Course) anyObject())).thenReturn(callableCourse);
@@ -112,7 +120,6 @@ public class DownloadExercisesCommandTest {
         
         String[] args = {"download", "course1"};
         app.run(args);
-        //assertTrue(testIo.out().contains(""));
-
+        assertTrue(testIo.out().contains("exerciseName"));
     }
 }

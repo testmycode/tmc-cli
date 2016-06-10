@@ -7,13 +7,11 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Command(name = "download", desc = "Download exercises for a specific course")
@@ -47,7 +45,7 @@ public class DownloadExercisesCommand implements CommandInterface {
         List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course);
         io.println(exercises.toString());
 
-        Path configFile = Paths.get(System.getProperty("user.dir"))
+        Path configFile = app.getWorkDir().getWorkingDirectory()
                 .resolve(args[0])
                 .resolve(CourseInfoIo.COURSE_CONFIG);
         CourseInfo info = app.createCourseInfo(course);
