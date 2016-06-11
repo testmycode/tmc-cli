@@ -76,4 +76,16 @@ public class SubmitCommandTest {
         app.run(new String[]{"submit"});
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
     }
+
+    @Test
+    public void canSubmitFromCourseDirIfExerciseNameIsGiven() {
+        Course course = new Course(COURSE_NAME);
+        SubmissionResult result = new SubmissionResult();
+        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(course);
+        when(TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME)).thenReturn(result);
+
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit", EXERCISE1_NAME});
+        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+    }
 }
