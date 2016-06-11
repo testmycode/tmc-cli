@@ -82,4 +82,19 @@ public class SubmitCommandTest {
         app.run(new String[]{"submit", EXERCISE1_NAME});
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
     }
+
+    @Test
+    public void canSubmitMultipleExercisesIfNamesAreGiven() {
+        Course course = new Course(COURSE_NAME);
+        SubmissionResult result = new SubmissionResult();
+        SubmissionResult result2 = new SubmissionResult();
+        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(course);
+        when(TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME)).thenReturn(result);
+        when(TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME)).thenReturn(result2);
+
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit", EXERCISE1_NAME, EXERCISE2_NAME});
+        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+        assertThat(io.out(), containsString("Submitting: " + EXERCISE2_NAME));
+    }
 }
