@@ -1,10 +1,13 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
@@ -40,6 +43,10 @@ public class SubmitCommandTest {
     TestIo io;
     TmcCore mockCore;
 
+    Course course;
+    SubmissionResult result;
+    SubmissionResult result2;
+
     @BeforeClass
     public static void setUpClass() {
         pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
@@ -57,9 +64,9 @@ public class SubmitCommandTest {
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
 
-        Course course = new Course(COURSE_NAME);
-        SubmissionResult result = new SubmissionResult();
-        SubmissionResult result2 = new SubmissionResult();
+        course = new Course(COURSE_NAME);
+        result = new SubmissionResult();
+        result2 = new SubmissionResult();
 
         PowerMockito.mockStatic(TmcUtil.class);
         when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(course);
@@ -72,6 +79,9 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+
+        verifyStatic(times(1));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
     }
 
     @Test
@@ -79,6 +89,9 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", EXERCISE1_NAME});
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+
+        verifyStatic(times(1));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
     }
 
     @Test
@@ -87,5 +100,29 @@ public class SubmitCommandTest {
         app.run(new String[]{"submit", EXERCISE1_NAME, EXERCISE2_NAME});
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
         assertThat(io.out(), containsString("Submitting: " + EXERCISE2_NAME));
+
+        verifyStatic(times(1));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+
+        verifyStatic(times(1));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME);
+    }
+
+    @Test
+    public void doesNotSubmitExtraExercisesFromExerciseRoot() {
+        app.setWorkdir(new WorkDir(pathToDummyExercise));
+        app.run(new String[]{"submit"});
+        assertEquals(1, countSubstring("Submitting: ", io.out()));
+    }
+
+    @Test
+    public void doesNotSubmitExtraExercisesFromCourseDir() {
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit", EXERCISE1_NAME});
+        assertEquals(1, countSubstring("Submitting: ", io.out()));
+    }
+
+    private static int countSubstring(String subStr, String str) {
+        return (str.length() - str.replace(subStr, "").length()) / subStr.length();
     }
 }
