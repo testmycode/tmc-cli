@@ -137,6 +137,16 @@ public class SubmitCommandTest {
         assertEquals(1, countSubstring("Submitting: ", io.out()));
     }
 
+    @Test
+    public void abortIfInvalidCmdLineArgumentIsGiven() {
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit", EXERCISE1_NAME, "-foo"});
+        assertThat(io.out(), containsString("Invalid command line argument"));
+
+        verifyStatic(times(0));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+    }
+
     private static int countSubstring(String subStr, String str) {
         return (str.length() - str.replace(subStr, "").length()) / subStr.length();
     }
