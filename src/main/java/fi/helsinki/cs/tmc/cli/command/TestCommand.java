@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import org.apache.commons.cli.CommandLine;
@@ -14,7 +14,7 @@ import org.apache.commons.cli.ParseException;
  * Class is a test command class.
  */
 @Command(name = "easter-egg", desc = "This is an easter egg test command.")
-public class TestCommand implements CommandInterface {
+public class TestCommand extends AbstractCommand {
     private Options options;
     private GnuParser parser;
 

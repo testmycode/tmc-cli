@@ -1,8 +1,7 @@
 package fi.helsinki.cs.tmc.cli;
 
-import fi.helsinki.cs.tmc.cli.command.CommandList;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
@@ -40,7 +39,7 @@ import java.util.Properties;
  */
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
-    private CommandFactory commands;
+    private CommandFactory commandFactory;
     private TmcCore tmcCore;
     private Settings settings;
     private Io io;
@@ -52,8 +51,7 @@ public class Application {
     public Application(Io io) {
         this.parser = new GnuParser();
         this.options = new Options();
-        this.commands = new CommandFactory();
-        new CommandList().run(this.commands);
+        this.commandFactory = new CommandFactory();
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
@@ -78,7 +76,7 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        CommandInterface command = commands.createCommand(this, name);
+        AbstractCommand command = commandFactory.createCommand(this, name);
         if (command == null) {
             io.println("Command " + name + " doesn't exist.");
             return false;
@@ -159,7 +157,7 @@ public class Application {
     }
 
     public CommandFactory getCommandFactory() {
-        return this.commands;
+        return this.commandFactory;
     }
     
     // Method is used to help testing
