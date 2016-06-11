@@ -61,7 +61,7 @@ public class SubmitCommand implements CommandInterface {
 
         Path courseDir = dirUtil.getCourseDirectory();
         if (courseDir == null) {
-            System.out.println("Not a course directory");
+            io.println("Not a course directory");
             return;
         }
 
