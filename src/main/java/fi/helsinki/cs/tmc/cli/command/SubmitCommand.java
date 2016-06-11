@@ -57,7 +57,7 @@ public class SubmitCommand implements CommandInterface {
             return;
         }
 
-        WorkDir dirUtil = new WorkDir();
+        WorkDir dirUtil = this.app.getWorkDir();
 
         Path courseDir = dirUtil.getCourseDirectory();
         if (courseDir == null) {
