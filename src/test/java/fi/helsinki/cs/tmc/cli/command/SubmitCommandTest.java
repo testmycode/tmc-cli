@@ -19,6 +19,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -38,6 +39,7 @@ public class SubmitCommandTest {
 
     static Path pathToDummyCourse;
     static Path pathToDummyExercise;
+    static Path pathToDummyExerciseSrc;
     static Path pathToNonCourseDir;
 
     Application app;
@@ -56,6 +58,9 @@ public class SubmitCommandTest {
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
         assertNotNull(pathToDummyExercise);
+
+        pathToDummyExerciseSrc = pathToDummyExercise.resolve("src");
+        assertNotNull(pathToDummyExerciseSrc);
 
         pathToNonCourseDir = pathToDummyCourse.getParent();
         assertNotNull(pathToNonCourseDir);
@@ -158,6 +163,17 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("Not a course directory"));
 
         verifyStatic(times(0));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+    }
+
+    @Test
+    @Ignore("WIP: Submitting from subdirs doesn't work yet. Unignore once done")
+    public void canSubmitFromExerciseSubdirs() {
+        app.setWorkdir(new WorkDir(pathToDummyExerciseSrc));
+        app.run(new String[]{"submit"});
+
+        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+        verifyStatic(times(1));
         TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
     }
 
