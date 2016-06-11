@@ -1,9 +1,9 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Command(name = "help", desc = "List every command")
-public class HelpCommand implements CommandInterface {
+public class HelpCommand extends AbstractCommand {
     private final int longestName = 14; // Length of the longest command name
     private final Application app;
     private final CommandFactory commands;
