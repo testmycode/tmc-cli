@@ -109,6 +109,21 @@ public class SubmitCommandTest {
     }
 
     @Test
+    public void submitsAllExercisesFromCourseDirIfNoNameIsGiven() {
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit"});
+        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+        assertThat(io.out(), containsString("Submitting: " + EXERCISE2_NAME));
+        assertEquals(2, countSubstring("Submitting: ", io.out()));
+
+        verifyStatic(times(1));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+
+        verifyStatic(times(1));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME);
+    }
+
+    @Test
     public void doesNotSubmitExtraExercisesFromExerciseRoot() {
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});
