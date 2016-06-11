@@ -38,6 +38,7 @@ public class SubmitCommandTest {
 
     static Path pathToDummyCourse;
     static Path pathToDummyExercise;
+    static Path pathToNonCourseDir;
 
     Application app;
     TestIo io;
@@ -55,6 +56,9 @@ public class SubmitCommandTest {
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
         assertNotNull(pathToDummyExercise);
+
+        pathToNonCourseDir = pathToDummyCourse.getParent();
+        assertNotNull(pathToNonCourseDir);
     }
 
     @Before
@@ -142,6 +146,16 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", EXERCISE1_NAME, "-foo"});
         assertThat(io.out(), containsString("Invalid command line argument"));
+
+        verifyStatic(times(0));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+    }
+
+    @Test
+    public void abortGracefullyIfNotInCourseDir() {
+        app.setWorkdir(new WorkDir(pathToNonCourseDir));
+        app.run(new String[]{"submit"});
+        assertThat(io.out(), containsString("Not a course directory"));
 
         verifyStatic(times(0));
         TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
