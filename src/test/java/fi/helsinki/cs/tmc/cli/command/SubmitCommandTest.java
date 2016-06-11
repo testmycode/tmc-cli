@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,11 +57,6 @@ public class SubmitCommandTest {
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
         PowerMockito.mockStatic(TmcUtil.class);
-    }
-
-    @Test
-    public void stub() {
-        assertTrue(true);
     }
 
     @Test
