@@ -157,6 +157,14 @@ public class SubmitCommandTest {
     }
 
     @Test
+    public void abortIfInvalidExerciseNameIsGivenAsArgument() {
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit", "foo"});
+        assertThat(io.out(), containsString("Could not find exercise 'foo'"));
+        assertEquals(0, countSubstring("Submitting: ", io.out()));
+    }
+
+    @Test
     public void abortGracefullyIfNotInCourseDir() {
         app.setWorkdir(new WorkDir(pathToNonCourseDir));
         app.run(new String[]{"submit"});
