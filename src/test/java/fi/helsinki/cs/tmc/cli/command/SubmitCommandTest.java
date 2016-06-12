@@ -181,10 +181,26 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", EXERCISE1_NAME});
 
-        assertThat(io.out(), containsString("Could not fetch course info from server."));
-        assertEquals(0, countSubstring("Submitting: ", io.out()));;
+        assertThat(io.out(),
+                containsString("Could not fetch course info from server."));
+        assertEquals(0, countSubstring("Submitting: ", io.out()));
 
         verifyStatic(times(0));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+    }
+
+    @Test
+    public void showFailMsgIfSubmissionFailsInCore() {
+        when(TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME))
+                .thenReturn(null);
+
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit", EXERCISE1_NAME});
+
+        assertEquals(1, countSubstring("Submitting: ", io.out()));
+        assertEquals(1, countSubstring("Submission failed.", io.out()));
+
+        verifyStatic(times(1));
         TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
     }
 
