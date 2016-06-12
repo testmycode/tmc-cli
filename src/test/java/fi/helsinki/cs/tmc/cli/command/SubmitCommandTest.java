@@ -175,6 +175,20 @@ public class SubmitCommandTest {
     }
 
     @Test
+    public void abortGracefullyIfCannotFetchCourceInfoFromServer() {
+        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(null);
+
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        app.run(new String[]{"submit", EXERCISE1_NAME});
+
+        assertThat(io.out(), containsString("Could not fetch course info from server."));
+        assertEquals(0, countSubstring("Submitting: ", io.out()));;
+
+        verifyStatic(times(0));
+        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+    }
+
+    @Test
     @Ignore("WIP: Submitting from subdirs doesn't work yet. Unignore once done")
     public void canSubmitFromExerciseSubdirs() {
         app.setWorkdir(new WorkDir(pathToDummyExerciseSrc));
