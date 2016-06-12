@@ -68,6 +68,10 @@ public class SubmitCommand implements CommandInterface {
         CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
         String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
+        if (course == null) {
+            io.println("Could not fetch course info from server.");
+            return;
+        }
 
         List<String> exercises = dirUtil.getExerciseNames(exerciseNames);
 
@@ -90,7 +94,11 @@ public class SubmitCommand implements CommandInterface {
         for (String exerciseName : exercises) {
             io.println(Color.colorString("Submitting: " + exerciseName, Color.ANSI_YELLOW));
             SubmissionResult result = TmcUtil.submitExercise(core, course, exerciseName);
-            resultPrinter.printSubmissionResult(result);
+            if (result == null) {
+                io.println("Submission failed.");
+            } else {
+                resultPrinter.printSubmissionResult(result);
+            }
             io.println("");
         }
     }
