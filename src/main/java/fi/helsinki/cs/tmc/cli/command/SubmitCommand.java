@@ -70,6 +70,15 @@ public class SubmitCommand implements CommandInterface {
         Course course = TmcUtil.findCourse(core, courseName);
 
         List<String> exercises = dirUtil.getExerciseNames(exerciseNames);
+
+        // Abort if user gave invalid exercise name as argument.
+        for (String exerciseName : exerciseNames) {
+            if (!exercises.contains(exerciseName)) {
+                io.println("Could not find exercise '" + exerciseName + "'");
+                return;
+            }
+        }
+
         if (exercises.isEmpty()) {
             io.println("You have to be in the exercise root directory to submit."
                     + " (This is a known problem.)");
