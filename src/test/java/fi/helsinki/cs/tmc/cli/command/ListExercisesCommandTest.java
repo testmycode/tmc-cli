@@ -1,10 +1,13 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -40,7 +43,7 @@ public class ListExercisesCommandTest {
         doAnswer(new Answer<Callable<Course>>() {
             @Override
             public Callable<Course> answer(InvocationOnMock invocation) throws Throwable {
-                final Course course = (Course)invocation.getArguments()[1];
+                final Course course = (Course) invocation.getArguments()[1];
                 return new Callable<Course>() {
                     @Override
                     public Course call() throws Exception {
@@ -49,6 +52,16 @@ public class ListExercisesCommandTest {
                 };
             }
         }).when(mockCore).getCourseDetails(any(ProgressObserver.class), any(Course.class));
+    }
+
+    @Test
+    public void failIfCoreIsNull() {
+        app = spy(app);
+        doReturn(null).when(app).getTmcCore();
+
+        String[] args = {"list-exercises", "foo"};
+        app.run(args);
+        assertFalse(io.getPrint().contains("Course doesn't exist"));
     }
 
     @Test

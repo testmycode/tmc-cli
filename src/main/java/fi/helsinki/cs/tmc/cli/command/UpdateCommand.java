@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -16,7 +16,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import java.util.List;
 
 @Command(name = "update", desc = "Update exercises")
-public class UpdateCommand implements CommandInterface {
+public class UpdateCommand extends AbstractCommand {
 
     private Application app;
 
@@ -39,14 +39,14 @@ public class UpdateCommand implements CommandInterface {
             return;
         }
 
-        WorkDir dirUtil = new WorkDir();
+        WorkDir workDir = app.getWorkDir();
 
-        if (dirUtil.getCourseDirectory() == null) {
+        if (workDir.getCourseDirectory() == null) {
             io.println("Not a course directory");
             return;
         }
 
-        CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
+        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
         Course course = info.getCourse();
         List<Exercise> exercises;
 

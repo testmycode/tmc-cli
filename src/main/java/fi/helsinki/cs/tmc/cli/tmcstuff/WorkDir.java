@@ -24,6 +24,11 @@ public class WorkDir {
         this.directories = new ArrayList<>();
     }
 
+    public WorkDir(Path path) {
+        this();
+        this.workdir = path;
+    }
+
     /**
      * Returns the root directory of the course containing the config file.
      */

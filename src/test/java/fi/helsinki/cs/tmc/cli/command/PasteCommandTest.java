@@ -1,22 +1,25 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
-
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -36,9 +39,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ExternalsUtil.class,CourseInfoIo.class})
+@PrepareForTest({ExternalsUtil.class, CourseInfoIo.class})
 public class PasteCommandTest {
 
     Application app;
@@ -48,9 +50,15 @@ public class PasteCommandTest {
     TmcCore mockCoreFail;
     ArrayList<String> exerciseNames;
     Exercise exercise;
-    Callable mockCallable;
-    Callable mockCallableFail;
+    Callable<URI> mockCallable;
+    Callable<URI> mockCallableFail;
     WorkDir workDir;
+
+    /* ugly utility method to suppress warnings */
+    @SuppressWarnings("unchecked")
+    private <T> Callable<T> mockCallable() {
+        return mock(Callable.class);
+    }
 
     @Before
     public void setup() {
@@ -65,8 +73,8 @@ public class PasteCommandTest {
         when(workDir.getExerciseNames()).thenReturn(exerciseNames);
         when(workDir.addPath()).thenReturn(true);
 
-        mockCallable = mock(Callable.class);
-        mockCallableFail = mock(Callable.class);
+        mockCallable = mockCallable();
+        mockCallableFail = mockCallable();
         try {
             when(mockCallable.call()).thenReturn(URI.create("https://tmc.test.url/"));
             when(mockCallableFail.call()).thenThrow(new Exception());
@@ -112,13 +120,23 @@ public class PasteCommandTest {
     }
 
     @Test
+    public void failIfCoreIsNull() {
+        Application application = spy(new Application(testIo, workDir));
+        doReturn(null).when(application).getTmcCore();
+
+        String[] args = {"paste"};
+        application.run(args);
+        assertFalse(testIo.getPrint().contains("No exercise specified"));
+    }
+
+    @Test
     public void pasteRunsRightWithoutArguments() {
         app.run(new String[] {"paste", "paste-exercise"});
-        verifyStatic(Mockito.times(1));
+        PowerMockito.verifyStatic(times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         try {
-            verify(mockCallable).call();
+            Mockito.verify(mockCallable).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
@@ -133,15 +151,15 @@ public class PasteCommandTest {
     public void pasteRunsRightWithMessageSwitchWithMessage() {
         app.run(new String[] {"paste", "-m", "This is a message given as an argument",
                 "paste-exercise"});
-        verifyStatic(Mockito.never());
+        PowerMockito.verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
-        verify(mockCore).pasteWithComment(
+        Mockito.verify(mockCore).pasteWithComment(
                 any(TmcCliProgressObserver.class), eq(exercise),
                 eq("This is a message given as an argument"));
-        
+
         try {
-            verify(mockCallable).call();
+            Mockito.verify(mockCallable).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
@@ -154,8 +172,8 @@ public class PasteCommandTest {
 
     @Test
     public void pasteFailsWithMessageSwitchWithoutMessage() {
-        app.run(new String[] {"paste", "-m"});
-        verifyStatic(Mockito.never());
+        app.run(new String[]{"paste", "-m"});
+        PowerMockito.verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         assertTrue("Prints to IO when failing to parse",
@@ -165,15 +183,15 @@ public class PasteCommandTest {
     @Test
     public void pasteRunsRightWithNoMessageSwitch() {
         app.run(new String[] {"paste", "-n", "paste-exercise"});
-        verifyStatic(Mockito.never());
+        PowerMockito.verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
-        verify(mockCore).pasteWithComment(
+        Mockito.verify(mockCore).pasteWithComment(
                 any(TmcCliProgressObserver.class), eq(exercise),
                 eq(""));
 
         try {
-            verify(mockCallable).call();
+            Mockito.verify(mockCallable).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
@@ -190,11 +208,11 @@ public class PasteCommandTest {
         verifyStatic(Mockito.times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
-        verify(mockCoreFail).pasteWithComment(
+        Mockito.verify(mockCoreFail).pasteWithComment(
                 any(TmcCliProgressObserver.class), eq(exercise), anyString());
 
         try {
-            verify(mockCallableFail).call();
+            Mockito.verify(mockCallableFail).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }

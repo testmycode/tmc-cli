@@ -15,7 +15,8 @@ public class Settings implements TmcSettings {
     private String serverAddress;
     private String username;
     private String password;
-    private Path workingDirectory;
+
+    private transient Path workingDirectory;
 
     public Settings(String serverAddress, String username, String password) {
         this.serverAddress = serverAddress;

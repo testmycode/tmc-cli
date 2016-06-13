@@ -1,8 +1,12 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -37,7 +41,6 @@ public class DownloadExercisesCommandTest {
 
     @Before
     public void setUp() {
-        
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
         WorkDir workDir = new WorkDir();
         workDir.setWorkdir(tempDir);
@@ -52,6 +55,16 @@ public class DownloadExercisesCommandTest {
         try {
             FileUtils.deleteDirectory(tempDir.toFile());
         } catch (Exception e) { }
+    }
+    
+    @Test
+    public void failIfCoreIsNull() {
+        app = spy(app);
+        doReturn(null).when(app).getTmcCore();
+
+        String[] args = {"download", "foo"};
+        app.run(args);
+        assertFalse(testIo.getPrint().contains("Course doesn't exist"));
     }
 
     @Test
@@ -70,7 +83,7 @@ public class DownloadExercisesCommandTest {
             }
         };
 
-        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"download", "foo"};
         app.run(args);
         assertTrue(testIo.out().contains("Course doesn't exist"));
@@ -112,11 +125,11 @@ public class DownloadExercisesCommandTest {
         settings.setTmcProjectDirectory(tempDir);
         app.setSettings(settings);
         
-        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callableList);
-        when(mockCore.getCourseDetails((ProgressObserver) anyObject(),
-                (Course) anyObject())).thenReturn(callableCourse);
-        when(mockCore.downloadOrUpdateExercises((ProgressObserver) anyObject(),
-                (List<Exercise>) anyObject())).thenReturn(callableExercise);
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
+        when(mockCore.getCourseDetails(any(ProgressObserver.class),
+                any(Course.class))).thenReturn(callableCourse);
+        when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class),
+                anyListOf(Exercise.class))).thenReturn(callableExercise);
         
         String[] args = {"download", "course1"};
         app.run(args);

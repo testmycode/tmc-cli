@@ -18,10 +18,17 @@ import java.util.Set;
 public class CommandFactory {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
-    private final Map<String, Class<Command>> commands;
+    private static final Map<String, Class<Command>> commands = new HashMap<>();
 
     public CommandFactory() {
-        commands = new HashMap<>();
+        /* force load the CommandList so that it's static initialization block is executed
+           this is used instead of import so that the ide's won't cry about the nonexistent class
+         */
+        try {
+            Class.forName("fi.helsinki.cs.tmc.cli.command.core.CommandList");
+        } catch (ClassNotFoundException ex) {
+            System.out.println("Fail " + ex);
+        }
     }
 
     public void addCommand(Class commandClass) {
@@ -31,19 +38,19 @@ public class CommandFactory {
             throw new RuntimeException("Command must have Command annotation");
         }
         Command command = (Command) annotation;
-        if (!CommandInterface.class.isAssignableFrom(commandClass)) {
+        if (!AbstractCommand.class.isAssignableFrom(commandClass)) {
             throw new RuntimeException("Command must implement CommandInterface");
         }
-        this.commands.put(command.name(), klass);
+        CommandFactory.commands.put(command.name(), klass);
     }
 
-    public void addCommand(String name, Class commandClass) {
+    public static void addCommand(String name, Class commandClass) {
         Class<Command> klass = commandClass;
-        this.commands.put(name, klass);
+        CommandFactory.commands.put(name, klass);
     }
 
-    public CommandInterface createCommand(Application app, String name) {
-        Class commandClass = commands.get(name);
+    public AbstractCommand createCommand(Application app, String name) {
+        Class commandClass = CommandFactory.commands.get(name);
         Constructor<?> cons;
         if (commandClass == null) {
             return null;
@@ -61,7 +68,7 @@ public class CommandFactory {
             return null;
         }
         try {
-            return (CommandInterface)cons.newInstance(app);
+            return (AbstractCommand)cons.newInstance(app);
         } catch (InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException ex) {
             throw new RuntimeException("getCommand failed", ex);
@@ -75,6 +82,6 @@ public class CommandFactory {
     }
 
     public Set<Class<Command>> getCommands() {
-        return new HashSet<>(this.commands.values());
+        return new HashSet<>(CommandFactory.commands.values());
     }
 }
