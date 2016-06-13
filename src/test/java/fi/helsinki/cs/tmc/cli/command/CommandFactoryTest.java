@@ -50,9 +50,6 @@ public class CommandFactoryTest {
 
     @Command(name = "good", desc = "test")
     public static class GoodCommand extends AbstractCommand {
-        public GoodCommand(Application app) {
-            System.out.println("hello");
-        }
 
         @Override
         public void getOptions(Options options) {
@@ -73,9 +70,6 @@ public class CommandFactoryTest {
     }
 
     public static class BadCommand extends AbstractCommand {
-        public BadCommand(Application app) {
-            System.out.println("hello");
-        }
 
         @Override
         public void getOptions(Options options) {
@@ -97,9 +91,6 @@ public class CommandFactoryTest {
     }
 
     public static class ReallyBadCommand {
-        public ReallyBadCommand(Application app) {
-            System.out.println("hello");
-        }
     }
 
     @Test(expected = RuntimeException.class)

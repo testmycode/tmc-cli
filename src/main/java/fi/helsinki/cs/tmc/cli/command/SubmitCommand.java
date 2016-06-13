@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -29,14 +28,9 @@ public class SubmitCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
 
-    private Application app;
     private Io io;
     private boolean showAll;
     private boolean showDetails;
-
-    public SubmitCommand(Application app) {
-        this.app = app;
-    }
 
     @Override
     public void getOptions(Options options) {

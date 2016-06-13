@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -13,10 +12,6 @@ import org.apache.commons.cli.Options;
  */
 @Command(name = "easter-egg", desc = "This is an easter egg test command.")
 public class TestCommand extends AbstractCommand {
-
-    public TestCommand(Application app) {
-    }
-
     @Override
     public void getOptions(Options options) {
         options.addOption("a", false, "testikomento");

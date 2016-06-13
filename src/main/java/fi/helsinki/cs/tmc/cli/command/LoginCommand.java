@@ -25,11 +25,6 @@ public class LoginCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
     private Io io;
-    private Application app;
-
-    public LoginCommand(Application app) {
-        this.app = app;
-    }
 
     @Override
     public void getOptions(Options options) {

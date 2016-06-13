@@ -21,12 +21,6 @@ import java.util.List;
 @Command(name = "update", desc = "Update exercises")
 public class UpdateCommand extends AbstractCommand {
 
-    private Application app;
-
-    public UpdateCommand(Application app) {
-        this.app = app;
-    }
-
     @Override
     public void getOptions(Options options) {
     }

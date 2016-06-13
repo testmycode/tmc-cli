@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command.core;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.LoginCommand;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
@@ -13,6 +14,12 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
+
+    protected Application app;
+
+    protected void setApplication(Application app) {
+        this.app = app;
+    }
 
     /**
      * Method runs the command.

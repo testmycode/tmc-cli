@@ -16,13 +16,7 @@ import java.util.List;
 @Command(name = "help", desc = "List every command")
 public class HelpCommand extends AbstractCommand {
     private final int longestName = 14; // Length of the longest command name
-    private final Application app;
-    private final CommandFactory commands;
-
-    public HelpCommand(Application app) {
-        this.app = app;
-        this.commands = app.getCommandFactory();
-    }
+    private CommandFactory commands;
 
     @Override
     public void getOptions(Options options) {
@@ -30,6 +24,8 @@ public class HelpCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
+        this.commands = app.getCommandFactory();
+
         io.println("Usage: tmc [args] COMMAND [command-args]\n");
         io.println("TMC commands:");
         

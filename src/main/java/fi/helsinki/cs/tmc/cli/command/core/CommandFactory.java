@@ -5,8 +5,6 @@ import fi.helsinki.cs.tmc.cli.Application;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,6 +12,7 @@ import java.util.Set;
 
 /**
  * Class used for creating new instances of commands.
+ * TODO make this class completely static.
  */
 public class CommandFactory {
 
@@ -70,26 +69,14 @@ public class CommandFactory {
      */
     public AbstractCommand createCommand(Application app, String name) {
         Class commandClass = CommandFactory.commands.get(name);
-        Constructor<?> cons;
         if (commandClass == null) {
             return null;
         }
         try {
-            //NOTE: if you create the command as inner class then
-            //      you HAVE TO make it static class.
-            Class<?> klass = commandClass;
-            cons = klass.getConstructor(Application.class);
-        } catch (NoSuchMethodException ex) {
-            throw new RuntimeException("Every command MUST have constructor "
-                    + "that takes Application object as it's only argument.", ex);
-        } catch (SecurityException ex) {
-            logger.error("getCommand failed.", ex);
-            return null;
-        }
-        try {
-            return (AbstractCommand)cons.newInstance(app);
-        } catch (InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException ex) {
+            AbstractCommand command = (AbstractCommand)commandClass.newInstance();
+            command.setApplication(app);
+            return command;
+        } catch (InstantiationException | IllegalAccessException ex) {
             throw new RuntimeException("getCommand failed", ex);
         }
     }

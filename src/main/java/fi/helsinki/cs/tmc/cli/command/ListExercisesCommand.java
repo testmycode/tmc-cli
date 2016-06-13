@@ -20,12 +20,7 @@ import java.util.List;
 
 @Command(name = "list-exercises", desc = "List the exercises for a specific course")
 public class ListExercisesCommand extends AbstractCommand {
-    private Application app;
     private Io io;
-
-    public ListExercisesCommand(Application app) {
-        this.app = app;
-    }
 
     @Override
     public void getOptions(Options options) {

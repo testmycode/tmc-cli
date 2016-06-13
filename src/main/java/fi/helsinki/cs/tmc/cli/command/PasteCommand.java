@@ -25,12 +25,7 @@ import java.util.concurrent.Callable;
 public class PasteCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
 
-    private Application app;
     private Io io;
-
-    public PasteCommand(Application app) {
-        this.app = app;
-    }
 
     @Override
     public void getOptions(Options options) {

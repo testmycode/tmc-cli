@@ -23,11 +23,6 @@ import java.util.List;
 @Command(name = "list-courses", desc = "List the available courses")
 public class ListCoursesCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
-    private Application app;
-
-    public ListCoursesCommand(Application app) {
-        this.app = app;
-    }
 
     @Override
     public void getOptions(Options options) {

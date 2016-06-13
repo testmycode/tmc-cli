@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -19,12 +18,6 @@ import java.util.List;
 
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
-
-    private Application app;
-
-    public DownloadExercisesCommand(Application app) {
-        this.app = app;
-    }
 
     @Override
     public void getOptions(Options options) {
