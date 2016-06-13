@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import static org.mockito.Matchers.anyObject;
@@ -52,6 +53,19 @@ public class RunTestsCommandTest {
                 return result;
             }
         };
+    }
+    
+    @Test
+    public void failIfCoreIsNull() {
+        app.setTmcCore(null);
+        String pathToDummycourse = RunTestsCommandTest.class.getClassLoader()
+                .getResource("dummy-courses/2016-aalto-c").getPath();
+
+        workDir = new WorkDir(Paths.get(pathToDummycourse));
+        app.setWorkdir(workDir);
+        String[] args = {"run-tests"};
+        app.run(args);
+        assertFalse(io.getPrint().contains("Testing:"));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -34,7 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
-
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ExternalsUtil.class,CourseInfoIo.class})
@@ -112,6 +112,15 @@ public class PasteCommandTest {
                 .thenReturn(true);
     }
 
+    @Test
+    public void failIfCoreIsNull() {
+        app = new Application(testIo);
+        app.setTmcCore(null);
+        String[] args = {"paste"};
+        app.run(args);
+        assertFalse(testIo.getPrint().contains("No exercise specified"));
+    }
+    
     @Test
     public void pasteRunsRightWithoutArguments() {
         app.run(new String[] {"paste"});

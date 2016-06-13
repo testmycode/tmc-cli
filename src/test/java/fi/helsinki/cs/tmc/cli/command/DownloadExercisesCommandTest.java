@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
@@ -38,7 +39,6 @@ public class DownloadExercisesCommandTest {
 
     @Before
     public void setUp() {
-        
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
         WorkDir workDir = new WorkDir(tempDir);
         testIo = new TestIo();
@@ -52,6 +52,14 @@ public class DownloadExercisesCommandTest {
         try {
             FileUtils.deleteDirectory(tempDir.toFile());
         } catch (Exception e) { }
+    }
+    
+    @Test
+    public void failIfCoreIsNull() {
+        app.setTmcCore(null);
+        String[] args = {"download", "foo"};
+        app.run(args);
+        assertFalse(testIo.getPrint().contains("Course doesn't exist"));
     }
 
     @Test
