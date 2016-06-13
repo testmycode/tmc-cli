@@ -48,16 +48,23 @@ public class RunTestsCommand implements CommandInterface {
     public void run(String[] args, Io io) {
         this.io = io;
 
-        String[] exercisesFromArgs = parseArgs(args);
+        List<String> exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
         WorkDir workDir = app.getWorkDir();
+        for (String exercise : exercisesFromArgs) {
+            if (!workDir.addPath(exercise)) {
+                io.println("Error: " + exercise + " is not a valid exercise.");
+                return;
+            }
+        }
         String courseName = getCourseName(workDir);
-        List<String> exerciseNames = workDir.getExerciseNames(exercisesFromArgs);
+        List<String> exerciseNames = workDir.getExerciseNames();
         
         if (exerciseNames.isEmpty()) {
+            // This should be fixed
             io.println("You have to be in the exercise root directory to"
                     + " run tests. (This is a known problem.)");
             return;
@@ -99,7 +106,7 @@ public class RunTestsCommand implements CommandInterface {
         return null;
     }
 
-    private String[] parseArgs(String[] args) {
+    private List<String> parseArgs(String[] args) {
         GnuParser parser = new GnuParser();
         CommandLine line;
         try {
@@ -111,6 +118,6 @@ public class RunTestsCommand implements CommandInterface {
         }
         this.showPassed = line.hasOption("a");
         this.showDetails = line.hasOption("d");
-        return line.getArgs();
+        return line.getArgList();
     }
 }

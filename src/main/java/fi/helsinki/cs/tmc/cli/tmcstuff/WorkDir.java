@@ -25,11 +25,30 @@ public class WorkDir {
     }
 
     /**
+     * Returns the root directory of the course containing the config file.
+     */
+    public Path getCourseDirectory() {
+        if (this.courseDirectory != null) {
+            return this.courseDirectory;
+        } else {
+            return findCourseDir(this.workdir);
+        }
+    }
+
+    /**
      * If one of the directories is in a course directory,
      * return the appropriate course config file (.tmc.json)
      */
     public Path getConfigFile() {
-        return configFile;
+        if (this.configFile != null) {
+            return this.configFile;
+        } else {
+            Path path = findCourseDir(this.workdir);
+            if (path == null) {
+                return null;
+            }
+            return path.resolve(CourseInfoIo.COURSE_CONFIG);
+        }
     }
 
     /**
@@ -37,16 +56,24 @@ public class WorkDir {
      * @return: return names of exercises as List
      */
     public List<String> getExerciseNames() {
-        List<String> allExerciseNames = CourseInfoIo.load(this.configFile).getExerciseNames();
-
+        if (this.directories.isEmpty()) {
+            if (!addPath()) {
+                return new ArrayList<>();
+            }
+        }
+        CourseInfo courseinfo = CourseInfoIo.load(getConfigFile());
+        if (courseinfo == null) {
+            return new ArrayList<>();
+        }
+        List<String> allExerciseNames = courseinfo.getExerciseNames();
         List<String> exerciseNames = new ArrayList<>();
-        for (Path dir : directories) {
-            if (dir.equals(this.courseDirectory)) {
 
+        for (Path dir : directories) {
+            if (dir.equals(getCourseDirectory())) {
                 return allExerciseNames;
             }
             // convert path to a string relative to the course dir
-            String exDir = this.courseDirectory.relativize(dir)
+            String exDir = getCourseDirectory().relativize(dir)
                     .toString().replace(File.separator, "-");
             for (String exercise : allExerciseNames) {
                 if (exercise.startsWith(exDir)) {
@@ -107,17 +134,9 @@ public class WorkDir {
     }
 
     /**
-     * Returns the root directory of the course containing the config file.
-     */
-    public Path getCourseDirectory() {
-        return this.courseDirectory;
-    }
-
-    /**
-     * This can be used for operations which onlyuse a single path.
+     * This can be used for operations which only use a single path.
      * If only one path has been added, return that. If no paths are added,
      * return the current working directory.
-     * @return
      */
     public Path getWorkingDirectory() {
         if (this.directoryCount() == 1) {
@@ -126,6 +145,10 @@ public class WorkDir {
             return workdir;
         }
         return null;
+    }
+
+    public List<Path> getDirectories() {
+        return new ArrayList<Path>(this.directories);
     }
 
     /**
@@ -156,9 +179,14 @@ public class WorkDir {
         return false;
     }
 
+    public boolean addPath(String path) {
+        return addPath(Paths.get(path));
+    }
+
     /**
      * Same as addPath(Path path), but adds the current working directory.
      * Note that workdir should ONLY be overridden in tests
+     * Actually this is kind of useless. Remove if it remains unused.
      */
     public boolean addPath() {
         return addPath(workdir);
@@ -168,12 +196,12 @@ public class WorkDir {
         return this.directories.size();
     }
 
-    private Path findCourseDir(Path workdir) {
-        while (workdir != null && Files.exists(workdir)) {
-            if (Files.exists(workdir.resolve(CourseInfoIo.COURSE_CONFIG))) {
-                return workdir;
+    private Path findCourseDir(Path dir) {
+        while (dir != null && Files.exists(dir)) {
+            if (Files.exists(dir.resolve(CourseInfoIo.COURSE_CONFIG))) {
+                return dir;
             }
-            workdir = workdir.getParent();
+            dir = dir.getParent();
         }
         return null;
     }

@@ -47,33 +47,41 @@ public class SubmitCommand implements CommandInterface {
     public void run(String[] args, Io io) {
         this.io = io;
         TmcCore core;
-        WorkDir dirUtil;
+        WorkDir workDir;
 
-        String[] exerciseNames = parseArgs(args);
+        List<String> exerciseNames = parseArgs(args);
 
         if (exerciseNames == null) {
             return;
         }
-        dirUtil = new WorkDir();
+        workDir = this.app.getWorkDir();
         core = this.app.getTmcCore();
         if (core == null) {
             return;
         }
-        Path courseDir = dirUtil.getCourseDirectory();
+        for (String exercise : exerciseNames) {
+            if (!workDir.addPath(exercise)) {
+                io.println("Error: " + exercise + " is not a valid exercise.");
+                return;
+            }
+        }
+
+        Path courseDir = workDir.getCourseDirectory();
 
         if (courseDir == null) {
-            System.out.println("Not a course directory");
+            io.println("Not a course directory");
             return;
         }
 
-        CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
+        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
         String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
 
         List<String> exercises;
-        exercises = dirUtil.getExerciseNames(exerciseNames);
+        exercises = workDir.getExerciseNames();
         
         if (exercises.isEmpty()) {
+            // This should be fixed now
             io.println("You have to be in the exercise root directory to submit."
                     + " (This is a known problem.)");
             return;
@@ -90,7 +98,7 @@ public class SubmitCommand implements CommandInterface {
         }
     }
 
-    private String[] parseArgs(String[] args) {
+    private List<String> parseArgs(String[] args) {
         GnuParser parser = new GnuParser();
         CommandLine line;
         try {
@@ -102,6 +110,6 @@ public class SubmitCommand implements CommandInterface {
         }
         this.showAll = line.hasOption("a");
         this.showDetails = line.hasOption("d");
-        return line.getArgs();
+        return line.getArgList();
     }
 }

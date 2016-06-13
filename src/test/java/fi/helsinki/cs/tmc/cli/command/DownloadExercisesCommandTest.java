@@ -33,14 +33,14 @@ public class DownloadExercisesCommandTest {
     Application app;
     TestIo testIo;
     TmcCore mockCore;
-    Io mockIo;
     Path tempDir;
 
     @Before
     public void setUp() {
         
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
-        WorkDir workDir = new WorkDir(tempDir);
+        WorkDir workDir = new WorkDir();
+        workDir.setWorkdir(tempDir);
         testIo = new TestIo();
         app = new Application(testIo, workDir);
         mockCore = mock(TmcCore.class);

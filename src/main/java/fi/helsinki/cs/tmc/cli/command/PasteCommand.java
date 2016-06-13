@@ -67,17 +67,16 @@ public class PasteCommand implements CommandInterface {
             if (!workdir.addPath()) {
                 // if addPath() returns false, we're not in a course directory
                 io.println(
-                        "No exercise specified. Please use this command in an exercise directory or "
-                        + "pass the name of the exercise as an argument.");
+                        "No exercise specified. Please use this command in an exercise directory "
+                        + "or pass the name of the exercise as an argument.");
                 return;
             }
-        } if (argsList.size() > 1) {
+        } else if (argsList.size() > 1) {
             io.println(
                     "Error: Too many arguments. Pass the name of the exercise you wish to send to "
                             + "the pastebin as the only argument.");
             return;
         }
-
 
         String message;
         if (!line.hasOption("n")) {
@@ -97,7 +96,14 @@ public class PasteCommand implements CommandInterface {
             message = "";
         }
 
-        String exerciseName = exerciseNames.get(0);
+        List<String> exercisenames = workdir.getExerciseNames();
+        if (exercisenames.size() != 0) {
+            io.println(
+                    "Error: Matched too many exercises.");
+            return;
+        }
+
+        String exerciseName = exercisenames.get(0);
         CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(

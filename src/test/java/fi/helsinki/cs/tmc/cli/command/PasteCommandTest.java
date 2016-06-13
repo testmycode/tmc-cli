@@ -57,7 +57,8 @@ public class PasteCommandTest {
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
         testIo = new TestIo();
 
-        workDir = Mockito.spy(new WorkDir(tempDir));
+        workDir = Mockito.spy(new WorkDir());
+        workDir.setWorkdir(tempDir);
         when(workDir.getCourseDirectory())
                 .thenReturn(tempDir.resolve("paste-test"));
 
@@ -65,8 +66,7 @@ public class PasteCommandTest {
         exerciseNames.add("paste-exerciseNames");
         exercise = new Exercise("paste-exerciseNames");
 
-        Mockito.when(workDir.getExerciseNames(any(String[].class))).thenReturn(exerciseNames);
-        Mockito.when(workDir.getExerciseNames(null)).thenReturn(exerciseNames);
+        Mockito.when(workDir.getExerciseNames()).thenReturn(exerciseNames);
 
         mockCallable = mock(Callable.class);
         mockCallableFail = mock(Callable.class);
@@ -206,9 +206,7 @@ public class PasteCommandTest {
 
     @Test
     public void failsWithNoExercise() {
-        Mockito.when(workDir.getExerciseNames(any(String[].class))).thenReturn(
-                new ArrayList<String>());
-        Mockito.when(workDir.getExerciseNames(null)).thenReturn(new ArrayList<String>());
+        Mockito.when(workDir.getExerciseNames()).thenReturn(new ArrayList<String>());
         app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
 
         verify(mockCore, Mockito.never()).pasteWithComment(
