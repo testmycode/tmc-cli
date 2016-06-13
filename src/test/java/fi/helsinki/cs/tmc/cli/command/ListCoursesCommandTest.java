@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.when;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
@@ -24,6 +26,7 @@ public class ListCoursesCommandTest {
 
     Application app;
     Io mockIo;
+    TestIo testIo;
     TmcCore mockCore;
 
     @Before
@@ -32,6 +35,16 @@ public class ListCoursesCommandTest {
         app = new Application(mockIo);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
+    }
+    
+    @Test
+    public void failIfCoreIsNull() {
+        testIo = new TestIo();
+        app = new Application(testIo);
+        app.setTmcCore(null);
+        String[] args = {"list-courses", "foo"};
+        app.run(args);
+        assertFalse(testIo.getPrint().contains("Course doesn't exist"));
     }
     
     @Test

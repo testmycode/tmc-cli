@@ -41,14 +41,14 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        WorkDir dirUtil = new WorkDir();
+        WorkDir workDir = app.getWorkDir();
 
-        if (dirUtil.getCourseDirectory() == null) {
+        if (workDir.getCourseDirectory() == null) {
             io.println("Not a course directory");
             return;
         }
 
-        CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
+        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
         Course course = info.getCourse();
         List<Exercise> exercises;
 
