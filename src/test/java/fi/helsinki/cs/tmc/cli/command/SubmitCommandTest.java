@@ -51,9 +51,9 @@ public class SubmitCommandTest {
     SubmissionResult result2;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
         pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/" + COURSE_NAME).getPath());
+                .getResource("dummy-courses/" + COURSE_NAME).toURI());
         assertNotNull(pathToDummyCourse);
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
