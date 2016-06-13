@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Class creates a map for commands.
+ * Class used for creating new instances of commands.
  */
 public class CommandFactory {
 
@@ -31,6 +31,23 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Put a command to the command list.
+     * This method is used for generating the commands list from the annotations.
+     *
+     * @param name the name visible to the user
+     * @param commandClass the class of the command objects
+     */
+    public static void addCommand(String name, Class commandClass) {
+        Class<Command> klass = commandClass;
+        CommandFactory.commands.put(name, klass);
+    }
+
+    /**
+     * Merge this method implementation with the above version.
+     *
+     * @param commandClass
+     */
     public void addCommand(Class commandClass) {
         Class<Command> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
@@ -44,11 +61,13 @@ public class CommandFactory {
         CommandFactory.commands.put(command.name(), klass);
     }
 
-    public static void addCommand(String name, Class commandClass) {
-        Class<Command> klass = commandClass;
-        CommandFactory.commands.put(name, klass);
-    }
-
+    /**
+     * Create new instance of the command.
+     *
+     * @param app Application that is given to the commands
+     * @param name Name of the command
+     * @return A new command instance
+     */
     public AbstractCommand createCommand(Application app, String name) {
         Class commandClass = CommandFactory.commands.get(name);
         Constructor<?> cons;
@@ -75,12 +94,25 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Get the annotation of the command class.
+     * This is only used in help command.
+     *
+     * @param commandClass
+     * @return the command annotation object
+     */
     public Command getCommand(Class<Command> commandClass) {
         Class<?> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
         return (Command)annotation;
     }
 
+    /**
+     * Get list of all commands.
+     * This is used for creating help listing.
+     *
+     * @return set of commands.
+     */
     public Set<Class<Command>> getCommands() {
         return new HashSet<>(CommandFactory.commands.values());
     }
