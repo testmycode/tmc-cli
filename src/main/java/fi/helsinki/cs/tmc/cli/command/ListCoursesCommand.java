@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -8,6 +7,9 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +22,17 @@ import java.util.List;
 @Command(name = "list-courses", desc = "List the available courses")
 public class ListCoursesCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
-    private Application app;
 
-    public ListCoursesCommand(Application app) {
-        this.app = app;
+    @Override
+    public void getOptions(Options options) {
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
         List<Course> courses;
         TmcCore core;
 
-        core = this.app.getTmcCore();
+        core = getApp().getTmcCore();
         if (core == null) {
             return;
         }

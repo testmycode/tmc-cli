@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
+/*TODO test the command line options */
 public class RunTestsCommandTest {
     private Application app;
     private TestIo io;
