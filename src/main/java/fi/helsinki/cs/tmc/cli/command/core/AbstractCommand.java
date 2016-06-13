@@ -15,10 +15,14 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
 
-    protected Application app;
+    private Application app;
 
     protected void setApplication(Application app) {
         this.app = app;
+    }
+
+    protected Application getApp() {
+        return this.app;
     }
 
     /**

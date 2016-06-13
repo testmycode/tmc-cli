@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -33,7 +32,7 @@ public class ListCoursesCommand extends AbstractCommand {
         List<Course> courses;
         TmcCore core;
 
-        core = this.app.getTmcCore();
+        core = getApp().getTmcCore();
         if (core == null) {
             return;
         }

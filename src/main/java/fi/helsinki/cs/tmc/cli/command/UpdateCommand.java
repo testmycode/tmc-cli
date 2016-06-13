@@ -36,7 +36,7 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        core = this.app.getTmcCore();
+        core = getApp().getTmcCore();
         if (core == null) {
             return;
         }

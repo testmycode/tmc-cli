@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -32,7 +33,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
-        TmcCore core = this.app.getTmcCore();
+        Application app = getApp();
+        TmcCore core = app.getTmcCore();
         if (core == null) {
             return;
         }

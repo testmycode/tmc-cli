@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -46,6 +47,7 @@ public class RunTestsCommand extends AbstractCommand {
             return;
         }
 
+        Application app = getApp();
         WorkDir workDir = app.getWorkDir();
         String courseName = getCourseName(workDir);
         List<String> exerciseNames = workDir.getExerciseNames(exercisesFromArgs);

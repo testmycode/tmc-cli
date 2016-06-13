@@ -86,8 +86,9 @@ public class LoginCommand extends AbstractCommand {
      * @return True if user exist
      */
     private boolean loginPossible(Settings settings) {
+        Application app = getApp();
         app.createTmcCore(settings);
-        TmcCore core = this.app.getTmcCore();
+        TmcCore core = app.getTmcCore();
         Callable<List<Course>> callable = core.listCourses(
                 new TmcCliProgressObserver());
 

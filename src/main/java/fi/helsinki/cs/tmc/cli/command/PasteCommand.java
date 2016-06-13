@@ -37,7 +37,8 @@ public class PasteCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
-        TmcCore core = this.app.getTmcCore();
+        Application app = getApp();
+        TmcCore core = app.getTmcCore();
         if (core == null) {
             return;
         }

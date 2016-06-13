@@ -24,6 +24,7 @@ public class HelpCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
+        Application app = getApp();
         this.commands = app.getCommandFactory();
 
         io.println("Usage: tmc [args] COMMAND [command-args]\n");

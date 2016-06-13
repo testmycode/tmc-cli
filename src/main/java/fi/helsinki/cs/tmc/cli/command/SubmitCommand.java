@@ -50,7 +50,7 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
         dirUtil = new WorkDir();
-        core = this.app.getTmcCore();
+        core = getApp().getTmcCore();
         if (core == null) {
             return;
         }

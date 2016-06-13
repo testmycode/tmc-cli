@@ -56,7 +56,7 @@ public class ListExercisesCommand extends AbstractCommand {
             courseName = stringArgs[0];
         }
 
-        core = this.app.getTmcCore();
+        core = getApp().getTmcCore();
         if (core == null) {
             return;
         }
