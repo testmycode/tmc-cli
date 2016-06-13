@@ -44,4 +44,11 @@ public class AbstractCommandTest {
         emptyCommand.execute(args, io);
         assertTrue(io.out().contains("--help"));
     }
+
+    @Test
+    public void failWhenInvalidOption() {
+        String[] args = {"-a34t3"};
+        emptyCommand.execute(args, io);
+        assertTrue(io.out().contains("Invalid command"));
+    }
 }
