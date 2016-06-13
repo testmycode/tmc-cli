@@ -6,7 +6,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
@@ -37,7 +39,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ExternalsUtil.class,CourseInfoIo.class})
+@PrepareForTest({ExternalsUtil.class, CourseInfoIo.class})
 public class PasteCommandTest {
 
     Application app;
@@ -120,16 +122,17 @@ public class PasteCommandTest {
 
     @Test
     public void failIfCoreIsNull() {
-        app = new Application(testIo);
-        app.setTmcCore(null);
+        Application application = spy(new Application(testIo, workDir));
+        doReturn(null).when(application).getTmcCore();
+
         String[] args = {"paste"};
-        app.run(args);
+        application.run(args);
         assertFalse(testIo.getPrint().contains("No exercise specified"));
     }
-    
+
     @Test
     public void pasteRunsRightWithoutArguments() {
-        app.run(new String[] {"paste"});
+        app.run(new String[]{"paste"});
         verifyStatic(Mockito.times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
@@ -147,14 +150,14 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithMessageSwitchWithMessage() {
-        app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
+        app.run(new String[]{"paste", "-m", "This is a message given as an argument"});
         verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verify(mockCore).pasteWithComment(
                 any(TmcCliProgressObserver.class), eq(exercise),
                 eq("This is a message given as an argument"));
-        
+
         try {
             verify(mockCallable).call();
         } catch (Exception e) {
@@ -169,7 +172,7 @@ public class PasteCommandTest {
 
     @Test
     public void pasteFailsWithMessageSwitchWithoutMessage() {
-        app.run(new String[] {"paste", "-m"});
+        app.run(new String[]{"paste", "-m"});
         verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
@@ -179,7 +182,7 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithNoMessageSwitch() {
-        app.run(new String[] {"paste", "-n"});
+        app.run(new String[]{"paste", "-n"});
         verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
@@ -201,7 +204,7 @@ public class PasteCommandTest {
 
     @Test
     public void handlesExceptionWhenCallableFails() {
-        appFail.run(new String[] {"paste"});
+        appFail.run(new String[]{"paste"});
         verifyStatic(Mockito.times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
@@ -223,7 +226,7 @@ public class PasteCommandTest {
         Mockito.when(workDir.getExerciseNames(any(String[].class))).thenReturn(
                 new ArrayList<String>());
         Mockito.when(workDir.getExerciseNames(null)).thenReturn(new ArrayList<String>());
-        app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
+        app.run(new String[]{"paste", "-m", "This is a message given as an argument"});
 
         verify(mockCore, Mockito.never()).pasteWithComment(
                 any(TmcCliProgressObserver.class), any(Exercise.class), anyString());
