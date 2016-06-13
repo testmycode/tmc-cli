@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -28,44 +27,46 @@ import java.util.List;
 public class SubmitCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
-    private final Options options;
 
-    private Application app;
     private Io io;
     private boolean showAll;
     private boolean showDetails;
 
-    public SubmitCommand(Application app) {
-        this.app = app;
-        this.options = new Options();
-
+    @Override
+    public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all test results");
         options.addOption("d", "details", false, "Show detailed error message");
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
         this.io = io;
 
-        String[] exerciseNames = parseArgs(args);
+        List<String> exerciseNames = parseArgs(args);
         if (exerciseNames == null) {
             return;
         }
-
-        TmcCore core = this.app.getTmcCore();
+        TmcCore core = getApp().getTmcCore();
         if (core == null) {
             return;
         }
 
-        WorkDir dirUtil = this.app.getWorkDir();
+        WorkDir workDir = getApp().getWorkDir();
 
-        Path courseDir = dirUtil.getCourseDirectory();
+        Path courseDir = workDir.getCourseDirectory();
+
+        for (String exercise : exerciseNames) {
+            if (!workDir.addPath(exercise)) {
+                io.println("Error: '" + exercise + "' is not a valid exercise.");
+                return;
+            }
+        }
         if (courseDir == null) {
             io.println("Not a course directory");
             return;
         }
 
-        CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
+        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
         String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
         if (course == null) {
@@ -73,17 +74,18 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        List<String> exercises = dirUtil.getExerciseNames(exerciseNames);
+        List<String> exercises = workDir.getExerciseNames();
 
         // Abort if user gave invalid exercise name as argument.
-        for (String exerciseName : exerciseNames) {
-            if (!exercises.contains(exerciseName)) {
-                io.println("Could not find exercise '" + exerciseName + "'");
-                return;
-            }
-        }
+//        for (String exerciseName : exerciseNames) {
+//            if (!exercises.contains(exerciseName)) {
+//                io.println("Could not find exercise '" + exerciseName + "'");
+//                return;
+//            }
+//        }
 
         if (exercises.isEmpty()) {
+            // This should be fixed now
             io.println("You have to be in the exercise root directory to submit."
                     + " (This is a known problem.)");
             return;
@@ -103,17 +105,9 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
-    private String[] parseArgs(String[] args) {
-        CommandLine line;
-        try {
-            line = new GnuParser().parse(this.options, args);
-        } catch (ParseException e) {
-            io.println("Invalid command line arguments.");
-            io.println(e.getMessage());
-            return null;
-        }
-        this.showAll = line.hasOption("a");
-        this.showDetails = line.hasOption("d");
-        return line.getArgs();
+    private List<String> parseArgs(CommandLine args) {
+        this.showAll = args.hasOption("a");
+        this.showDetails = args.hasOption("d");
+        return args.getArgList();
     }
 }

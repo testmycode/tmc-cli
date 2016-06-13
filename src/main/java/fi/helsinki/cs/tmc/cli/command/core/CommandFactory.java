@@ -5,15 +5,14 @@ import fi.helsinki.cs.tmc.cli.Application;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Class creates a map for commands.
+ * Class used for creating new instances of commands.
+ * TODO make this class completely static.
  */
 public class CommandFactory {
 
@@ -31,6 +30,23 @@ public class CommandFactory {
         }
     }
 
+    /**
+     * Put a command to the command list.
+     * This method is used for generating the commands list from the annotations.
+     *
+     * @param name the name visible to the user
+     * @param commandClass the class of the command objects
+     */
+    public static void addCommand(String name, Class commandClass) {
+        Class<Command> klass = commandClass;
+        CommandFactory.commands.put(name, klass);
+    }
+
+    /**
+     * Merge this method implementation with the above version.
+     *
+     * @param commandClass The class of the command
+     */
     public void addCommand(Class commandClass) {
         Class<Command> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
@@ -44,43 +60,46 @@ public class CommandFactory {
         CommandFactory.commands.put(command.name(), klass);
     }
 
-    public static void addCommand(String name, Class commandClass) {
-        Class<Command> klass = commandClass;
-        CommandFactory.commands.put(name, klass);
-    }
-
+    /**
+     * Create new instance of the command.
+     *
+     * @param app Application that is given to the commands
+     * @param name Name of the command
+     * @return A new command instance
+     */
     public AbstractCommand createCommand(Application app, String name) {
         Class commandClass = CommandFactory.commands.get(name);
-        Constructor<?> cons;
         if (commandClass == null) {
             return null;
         }
         try {
-            //NOTE: if you create the command as inner class then
-            //      you HAVE TO make it static class.
-            Class<?> klass = commandClass;
-            cons = klass.getConstructor(Application.class);
-        } catch (NoSuchMethodException ex) {
-            throw new RuntimeException("Every command MUST have constructor "
-                    + "that takes Application object as it's only argument.", ex);
-        } catch (SecurityException ex) {
-            logger.error("getCommand failed.", ex);
-            return null;
-        }
-        try {
-            return (AbstractCommand)cons.newInstance(app);
-        } catch (InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException ex) {
+            AbstractCommand command = (AbstractCommand)commandClass.newInstance();
+            command.setApplication(app);
+            return command;
+        } catch (InstantiationException | IllegalAccessException ex) {
             throw new RuntimeException("getCommand failed", ex);
         }
     }
 
-    public Command getCommand(Class<Command> commandClass) {
+    /**
+     * Get the annotation of the command class.
+     * This is only used in help command.
+     *
+     * @param commandClass The class of the command
+     * @return The command annotation object
+     */
+    public static Command getCommand(Class<Command> commandClass) {
         Class<?> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
         return (Command)annotation;
     }
 
+    /**
+     * Get list of all commands.
+     * This is used for creating help listing.
+     *
+     * @return Set of commands.
+     */
     public Set<Class<Command>> getCommands() {
         return new HashSet<>(CommandFactory.commands.values());
     }

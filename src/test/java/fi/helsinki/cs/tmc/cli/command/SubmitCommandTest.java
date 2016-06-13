@@ -160,7 +160,7 @@ public class SubmitCommandTest {
     public void abortIfInvalidExerciseNameIsGivenAsArgument() {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", "foo"});
-        assertThat(io.out(), containsString("Could not find exercise 'foo'"));
+        assertThat(io.out(), containsString("Error: 'foo' is not a valid exercise."));
         assertEquals(0, countSubstring("Submitting: ", io.out()));
     }
 
@@ -205,7 +205,6 @@ public class SubmitCommandTest {
     }
 
     @Test
-    @Ignore("WIP: Submitting from subdirs doesn't work yet. Unignore once done")
     public void canSubmitFromExerciseSubdirs() {
         app.setWorkdir(new WorkDir(pathToDummyExerciseSrc));
         app.run(new String[]{"submit"});

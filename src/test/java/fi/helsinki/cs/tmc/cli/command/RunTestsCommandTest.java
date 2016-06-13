@@ -33,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
+/*TODO test the command line options */
 public class RunTestsCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -93,7 +94,7 @@ public class RunTestsCommandTest {
 
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
-        String[] args = {"run-tests"};
+        String[] args = {"test"};
         app.run(args);
         assertFalse(io.getPrint().contains("Testing:"));
     }
@@ -102,7 +103,7 @@ public class RunTestsCommandTest {
     public void givesAnErrorMessageIfNotInCourseDirectory() {
         workDir = new WorkDir(Paths.get(System.getProperty("java.io.tmpdir")));
         app.setWorkdir(workDir);
-        String[] args = {"run-tests"};
+        String[] args = {"test"};
         app.run(args);
         assertTrue(io.getPrint().contains("You have to be in the exercise root"));
     }
@@ -115,7 +116,7 @@ public class RunTestsCommandTest {
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
 
-        String[] args = {"run-tests"};
+        String[] args = {"test"};
         app.run(args);
         assertTrue(io.getPrint().contains("Testing: " + EXERCISE1_NAME));
         assertTrue(io.getPrint().contains("Testing: " + EXERCISE2_NAME));
@@ -129,7 +130,7 @@ public class RunTestsCommandTest {
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
 
-        String[] args = {"run-tests", EXERCISE1_NAME};
+        String[] args = {"test", EXERCISE1_NAME};
         app.run(args);
         assertTrue(io.getPrint().contains("Testing: " + EXERCISE1_NAME));
     }

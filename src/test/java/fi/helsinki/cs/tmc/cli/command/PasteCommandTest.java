@@ -9,6 +9,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
@@ -61,19 +62,16 @@ public class PasteCommandTest {
 
     @Before
     public void setup() {
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
+        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("paste-test");
         testIo = new TestIo();
 
-        workDir = Mockito.spy(new WorkDir(tempDir, null));
-        when(workDir.getCourseDirectory())
-                .thenReturn(tempDir.resolve("paste-test"));
-
+        workDir = mock(WorkDir.class);
+        when(workDir.getCourseDirectory()).thenReturn(tempDir);
+        when(workDir.getConfigFile()).thenReturn((tempDir.resolve(CourseInfoIo.COURSE_CONFIG)));
         exerciseNames = new ArrayList<>();
-        exerciseNames.add("paste-exerciseNames");
-        exercise = new Exercise("paste-exerciseNames");
-
-        Mockito.when(workDir.getExerciseNames(any(String[].class))).thenReturn(exerciseNames);
-        Mockito.when(workDir.getExerciseNames(null)).thenReturn(exerciseNames);
+        exerciseNames.add("paste-exercise");
+        when(workDir.getExerciseNames()).thenReturn(exerciseNames);
+        when(workDir.addPath()).thenReturn(true);
 
         mockCallable = mockCallable();
         mockCallableFail = mockCallable();
@@ -104,7 +102,8 @@ public class PasteCommandTest {
         appFail.setTmcCore(mockCoreFail);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
-        when(mockCourseInfo.getExercise(anyString())).thenReturn(exercise);
+        exercise = new Exercise("paste-exercise");
+        when(mockCourseInfo.getExercise("paste-exercise")).thenReturn(exercise);
 
         PowerMockito.mockStatic(ExternalsUtil.class);
         when(ExternalsUtil
@@ -132,12 +131,12 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithoutArguments() {
-        app.run(new String[]{"paste"});
-        verifyStatic(Mockito.times(1));
+        app.run(new String[] {"paste", "paste-exercise"});
+        PowerMockito.verifyStatic(times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         try {
-            verify(mockCallable).call();
+            Mockito.verify(mockCallable).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
@@ -150,16 +149,17 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithMessageSwitchWithMessage() {
-        app.run(new String[]{"paste", "-m", "This is a message given as an argument"});
-        verifyStatic(Mockito.never());
+        app.run(new String[] {"paste", "-m", "This is a message given as an argument",
+                "paste-exercise"});
+        PowerMockito.verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
-        verify(mockCore).pasteWithComment(
+        Mockito.verify(mockCore).pasteWithComment(
                 any(TmcCliProgressObserver.class), eq(exercise),
                 eq("This is a message given as an argument"));
 
         try {
-            verify(mockCallable).call();
+            Mockito.verify(mockCallable).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
@@ -173,25 +173,25 @@ public class PasteCommandTest {
     @Test
     public void pasteFailsWithMessageSwitchWithoutMessage() {
         app.run(new String[]{"paste", "-m"});
-        verifyStatic(Mockito.never());
+        PowerMockito.verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         assertTrue("Prints to IO when failing to parse",
-                testIo.out().contains("Unable to parse arguments"));
+                testIo.out().contains("Invalid"));
     }
 
     @Test
     public void pasteRunsRightWithNoMessageSwitch() {
-        app.run(new String[]{"paste", "-n"});
-        verifyStatic(Mockito.never());
+        app.run(new String[] {"paste", "-n", "paste-exercise"});
+        PowerMockito.verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
-        verify(mockCore).pasteWithComment(
+        Mockito.verify(mockCore).pasteWithComment(
                 any(TmcCliProgressObserver.class), eq(exercise),
                 eq(""));
 
         try {
-            verify(mockCallable).call();
+            Mockito.verify(mockCallable).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
@@ -204,15 +204,15 @@ public class PasteCommandTest {
 
     @Test
     public void handlesExceptionWhenCallableFails() {
-        appFail.run(new String[]{"paste"});
+        appFail.run(new String[] {"paste", "paste-exercise"});
         verifyStatic(Mockito.times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
-        verify(mockCoreFail).pasteWithComment(
+        Mockito.verify(mockCoreFail).pasteWithComment(
                 any(TmcCliProgressObserver.class), eq(exercise), anyString());
 
         try {
-            verify(mockCallableFail).call();
+            Mockito.verify(mockCallableFail).call();
         } catch (Exception e) {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
@@ -223,10 +223,10 @@ public class PasteCommandTest {
 
     @Test
     public void failsWithNoExercise() {
-        Mockito.when(workDir.getExerciseNames(any(String[].class))).thenReturn(
-                new ArrayList<String>());
-        Mockito.when(workDir.getExerciseNames(null)).thenReturn(new ArrayList<String>());
-        app.run(new String[]{"paste", "-m", "This is a message given as an argument"});
+        Mockito.when(workDir.getExerciseNames()).thenReturn(new ArrayList<String>());
+        Mockito.when(workDir.addPath()).thenReturn(false);
+        Mockito.when(workDir.addPath(anyString())).thenReturn(false);
+        app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
 
         verify(mockCore, Mockito.never()).pasteWithComment(
                 any(TmcCliProgressObserver.class), any(Exercise.class), anyString());
