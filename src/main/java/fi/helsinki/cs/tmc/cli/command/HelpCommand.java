@@ -15,7 +15,7 @@ import java.util.List;
 
 @Command(name = "help", desc = "List every command")
 public class HelpCommand extends AbstractCommand {
-    private final int longestName = 14; // Length of the longest command name
+    private final int longestName = 9; // Length of the longest command name
     private CommandFactory commands;
 
     @Override

@@ -42,7 +42,7 @@ public class SubmitCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         this.io = io;
 
-        String[] exerciseNames = parseArgs(args);
+        List<String> exerciseNames = parseArgs(args);
         if (exerciseNames == null) {
             return;
         }
@@ -51,15 +51,22 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        WorkDir dirUtil = getApp().getWorkDir();
+        WorkDir workDir = getApp().getWorkDir();
 
-        Path courseDir = dirUtil.getCourseDirectory();
+        Path courseDir = workDir.getCourseDirectory();
+
+        for (String exercise : exerciseNames) {
+            if (!workDir.addPath(exercise)) {
+                io.println("Error: '" + exercise + "' is not a valid exercise.");
+                return;
+            }
+        }
         if (courseDir == null) {
             io.println("Not a course directory");
             return;
         }
 
-        CourseInfo info = CourseInfoIo.load(dirUtil.getConfigFile());
+        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
         String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
         if (course == null) {
@@ -67,17 +74,18 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        List<String> exercises = dirUtil.getExerciseNames(exerciseNames);
+        List<String> exercises = workDir.getExerciseNames();
 
         // Abort if user gave invalid exercise name as argument.
-        for (String exerciseName : exerciseNames) {
-            if (!exercises.contains(exerciseName)) {
-                io.println("Could not find exercise '" + exerciseName + "'");
-                return;
-            }
-        }
+//        for (String exerciseName : exerciseNames) {
+//            if (!exercises.contains(exerciseName)) {
+//                io.println("Could not find exercise '" + exerciseName + "'");
+//                return;
+//            }
+//        }
 
         if (exercises.isEmpty()) {
+            // This should be fixed now
             io.println("You have to be in the exercise root directory to submit."
                     + " (This is a known problem.)");
             return;
@@ -97,9 +105,9 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
-    private String[] parseArgs(CommandLine args) {
+    private List<String> parseArgs(CommandLine args) {
         this.showAll = args.hasOption("a");
         this.showDetails = args.hasOption("d");
-        return args.getArgs();
+        return args.getArgList();
     }
 }

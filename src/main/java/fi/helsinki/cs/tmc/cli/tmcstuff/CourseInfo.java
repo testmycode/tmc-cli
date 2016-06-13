@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,6 +43,14 @@ public class CourseInfo {
 
     public List<Exercise> getExercises() {
         return this.course.getExercises();
+    }
+
+    public List<String> getExerciseNames() {
+        List<String> names = new ArrayList<>();
+        for (Exercise ex : this.course.getExercises()) {
+            names.add(ex.getName());
+        }
+        return names;
     }
 
     public Exercise getExercise(String name) {

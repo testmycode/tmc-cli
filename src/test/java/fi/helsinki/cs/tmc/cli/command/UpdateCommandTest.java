@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -18,19 +19,32 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 public class UpdateCommandTest {
+
+    private static final String COURSE_NAME = "2016-aalto-c";
+
+    static Path pathToDummyCourse;
+
     private Application app;
     private TestIo io;
     private TmcCore mockCore;
     private WorkDir workDir;
 
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
+                .getResource("dummy-courses/" + COURSE_NAME).toURI());
+        assertNotNull(pathToDummyCourse);
+    }
 
     @Before
     public void setUp() {
@@ -79,10 +93,7 @@ public class UpdateCommandTest {
         when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
                 .thenReturn(callableExercise);
 
-        String pathToDummycourse = UpdateCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/2016-aalto-c").getPath();
-
-        workDir = new WorkDir(Paths.get(pathToDummycourse));
+        workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
 
         String[] args = {"update"};
@@ -105,10 +116,7 @@ public class UpdateCommandTest {
         when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
                 .thenReturn(callableExercise);
 
-        String pathToDummycourse = UpdateCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/2016-aalto-c").getPath();
-
-        workDir = new WorkDir(Paths.get(pathToDummycourse));
+        workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
 
         String[] args = {"update"};

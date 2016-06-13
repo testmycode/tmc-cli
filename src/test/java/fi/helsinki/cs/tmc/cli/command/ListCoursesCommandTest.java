@@ -42,7 +42,7 @@ public class ListCoursesCommandTest {
         testIo = new TestIo();
         app = new Application(testIo);
         app.setTmcCore(null);
-        String[] args = {"list-courses", "foo"};
+        String[] args = {"courses", "foo"};
         app.run(args);
         assertFalse(testIo.getPrint().contains("Course doesn't exist"));
     }
@@ -57,7 +57,7 @@ public class ListCoursesCommandTest {
         };
         
         when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
-        String[] args = {"list-courses"};
+        String[] args = {"courses"};
         app.run(args);
         verify(mockIo).println(Mockito.contains("No courses found on this server"));
     }
@@ -75,7 +75,7 @@ public class ListCoursesCommandTest {
         };
         
         when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
-        String[] args = {"list-courses"};
+        String[] args = {"courses"};
         app.run(args);
         verify(mockIo).println(Mockito.contains("Found 2 courses"));
     }

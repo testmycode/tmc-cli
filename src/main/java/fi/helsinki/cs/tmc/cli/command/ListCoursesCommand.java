@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Command for listing all available courses to user.
  */
-@Command(name = "list-courses", desc = "List the available courses")
+@Command(name = "courses", desc = "List the available courses")
 public class ListCoursesCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
 
