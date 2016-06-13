@@ -14,50 +14,52 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.List;
 
-@Command(name = "run-tests", desc = "Run local exercise tests")
+@Command(name = "test", desc = "Run local exercise tests")
 public class RunTestsCommand extends AbstractCommand {
 
     private static final Logger logger
             = LoggerFactory.getLogger(RunTestsCommand.class);
 
-    private final Application app;
-    private final Options options;
-
     private Io io;
     private boolean showPassed;
     private boolean showDetails;
 
-    public RunTestsCommand(Application app) {
-        this.app = app;
-        this.options = new Options();
-
+    @Override
+    public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all test results");
         options.addOption("d", "details", false, "Show detailed error message");
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
         this.io = io;
 
-        String[] exercisesFromArgs = parseArgs(args);
+        List<String> exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
+        Application app = getApp();
         WorkDir workDir = app.getWorkDir();
+        for (String exercise : exercisesFromArgs) {
+            if (!workDir.addPath(exercise)) {
+                io.println("Error: " + exercise + " is not a valid exercise.");
+                return;
+            }
+        }
         String courseName = getCourseName(workDir);
-        List<String> exerciseNames = workDir.getExerciseNames(exercisesFromArgs);
+        List<String> exerciseNames = workDir.getExerciseNames();
         
         if (exerciseNames.isEmpty()) {
+            // This should be fixed
             io.println("You have to be in the exercise root directory to"
                     + " run tests. (This is a known problem.)");
             return;
@@ -99,18 +101,9 @@ public class RunTestsCommand extends AbstractCommand {
         return null;
     }
 
-    private String[] parseArgs(String[] args) {
-        GnuParser parser = new GnuParser();
-        CommandLine line;
-        try {
-            line = parser.parse(options, args);
-        } catch (ParseException e) {
-            io.println("Invalid command line arguments.");
-            io.println(e.getMessage());
-            return null;
-        }
-        this.showPassed = line.hasOption("a");
-        this.showDetails = line.hasOption("d");
-        return line.getArgs();
+    private List<String> parseArgs(CommandLine args) {
+        this.showPassed = args.hasOption("a");
+        this.showDetails = args.hasOption("d");
+        return args.getArgList();
     }
 }
