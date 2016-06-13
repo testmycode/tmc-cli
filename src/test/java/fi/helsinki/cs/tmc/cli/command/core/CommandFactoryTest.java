@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.cli.command.core;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
