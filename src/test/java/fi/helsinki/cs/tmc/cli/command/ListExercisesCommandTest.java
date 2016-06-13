@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
@@ -49,6 +50,14 @@ public class ListExercisesCommandTest {
                 };
             }
         }).when(mockCore).getCourseDetails(any(ProgressObserver.class), any(Course.class));
+    }
+    
+    @Test
+    public void failIfCoreIsNull() {
+        app.setTmcCore(null);
+        String[] args = {"list-exercises", "foo"};
+        app.run(args);
+        assertFalse(io.getPrint().contains("Course doesn't exist"));
     }
 
     @Test

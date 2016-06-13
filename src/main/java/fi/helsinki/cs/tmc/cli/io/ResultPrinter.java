@@ -43,6 +43,10 @@ public class ResultPrinter {
     }
 
     public void printSubmissionResult(SubmissionResult result) {
+        if (result == null) {
+            return;
+        }
+
         printTestResults(result.getTestCases());
 
         if (result.getStatus() == SubmissionResult.Status.ERROR) {
