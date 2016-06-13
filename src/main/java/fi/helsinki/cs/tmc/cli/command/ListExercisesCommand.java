@@ -89,19 +89,19 @@ public class ListExercisesCommand extends AbstractCommand {
             // no need to check if deadline has passed if the exercise has been submitted
             if (exercise.isAllReviewPointsGiven()) {
                 sb.append(Color.colorString(
-                        "COMPLETED: ", Color.ANSI_GREEN) + exercise.getName() + "\n");
+                        "Completed: ", Color.ANSI_GREEN) + exercise.getName() + "\n");
             } else if (exercise.hasDeadlinePassed()) {
                 sb.append(Color.colorString(
-                        "DEADLINE PASSED: ", Color.ANSI_PURPLE) + exercise.getName() + "\n");
+                        "Deadline passed: ", Color.ANSI_PURPLE) + exercise.getName() + "\n");
             } else if (exercise.isCompleted()) {
                 sb.append(Color.colorString(
-                        "NOT YET SUBMITTED: ", Color.ANSI_BLUE) + exercise.getName() + "\n");
+                        "Not yet submitted: ", Color.ANSI_BLUE) + exercise.getName() + "\n");
             } else if (exercise.isAttempted()) {
                 sb.append(Color.colorString(
-                        "ATTEMPTED: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
+                        "Attempted: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
             } else {
                 sb.append(Color.colorString(
-                        "NOT COMPLETED: ", Color.ANSI_RED) + exercise.getName() + "\n");
+                        "Not completed: ", Color.ANSI_RED) + exercise.getName() + "\n");
             }
         }
         if (pager) {
