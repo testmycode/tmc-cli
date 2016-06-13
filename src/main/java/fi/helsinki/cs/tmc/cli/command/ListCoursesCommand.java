@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
@@ -18,7 +18,7 @@ import java.util.List;
  * Command for listing all available courses to user.
  */
 @Command(name = "list-courses", desc = "List the available courses")
-public class ListCoursesCommand implements CommandInterface {
+public class ListCoursesCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
     private Application app;
 

@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
@@ -16,7 +16,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import java.util.List;
 
 @Command(name = "list-exercises", desc = "List the exercises for a specific course")
-public class ListExercisesCommand implements CommandInterface {
+public class ListExercisesCommand extends AbstractCommand {
     private Application app;
     private Io io;
 

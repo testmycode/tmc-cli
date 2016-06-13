@@ -47,9 +47,15 @@ public class PasteCommandTest {
     TmcCore mockCoreFail;
     ArrayList<String> exerciseNames;
     Exercise exercise;
-    Callable mockCallable;
-    Callable mockCallableFail;
+    Callable<URI> mockCallable;
+    Callable<URI> mockCallableFail;
     WorkDir workDir;
+
+    /* ugly utility method to suppress warnings */
+    @SuppressWarnings("unchecked")
+    private <T> Callable<T> mockCallable() {
+        return mock(Callable.class);
+    }
 
     @Before
     public void setup() {
@@ -67,8 +73,8 @@ public class PasteCommandTest {
         Mockito.when(workDir.getExerciseNames(any(String[].class))).thenReturn(exerciseNames);
         Mockito.when(workDir.getExerciseNames(null)).thenReturn(exerciseNames);
 
-        mockCallable = mock(Callable.class);
-        mockCallableFail = mock(Callable.class);
+        mockCallable = mockCallable();
+        mockCallableFail = mockCallable();
         try {
             when(mockCallable.call()).thenReturn(URI.create("https://tmc.test.url/"));
             when(mockCallableFail.call()).thenThrow(new Exception());
