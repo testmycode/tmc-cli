@@ -4,7 +4,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -57,7 +59,9 @@ public class DownloadExercisesCommandTest {
     
     @Test
     public void failIfCoreIsNull() {
-        app.setTmcCore(null);
+        app = spy(app);
+        doReturn(null).when(app).getTmcCore();
+
         String[] args = {"download", "foo"};
         app.run(args);
         assertFalse(testIo.getPrint().contains("Course doesn't exist"));
