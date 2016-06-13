@@ -82,7 +82,7 @@ public class Application {
             return false;
         }
 
-        command.run(args, io);
+        command.execute(args, io);
         return true;
     }
 

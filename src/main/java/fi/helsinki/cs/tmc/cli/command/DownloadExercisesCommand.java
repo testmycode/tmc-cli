@@ -11,6 +11,9 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -24,8 +27,13 @@ public class DownloadExercisesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(String[] args, Io io) {
-        if (args.length == 0) {
+    public void getOptions(Options options) {
+    }
+
+    @Override
+    public void run(CommandLine args, Io io) {
+        String[] stringArgs = args.getArgs();
+        if (stringArgs.length == 0) {
             io.println("You must give course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
@@ -36,7 +44,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
         
-        Course course = TmcUtil.findCourse(core, args[0]);
+        Course course = TmcUtil.findCourse(core, stringArgs[0]);
         if (course == null) {
             io.println("Course doesn't exist.");
             return;
@@ -46,7 +54,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         io.println(exercises.toString());
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
-                .resolve(args[0])
+                .resolve(stringArgs[0])
                 .resolve(CourseInfoIo.COURSE_CONFIG);
         CourseInfo info = app.createCourseInfo(course);
         info.setExercises(exercises);

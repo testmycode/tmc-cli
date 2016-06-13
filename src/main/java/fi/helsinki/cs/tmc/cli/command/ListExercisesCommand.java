@@ -13,6 +13,9 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import java.util.List;
 
 @Command(name = "list-exercises", desc = "List the exercises for a specific course")
@@ -25,14 +28,20 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void getOptions(Options options) {
+    }
+
+    @Override
+    public void run(CommandLine args, Io io) {
         TmcCore core;
         this.io = io;
         String courseName;
 
+        String[] stringArgs = args.getArgs();
+
         // If no args given, check if the current directory is a course directory and set courseName as the name of that course.
         // Else, print out a help message.
-        if (args.length == 0) {
+        if (stringArgs.length == 0) {
             WorkDir dirUtil = new WorkDir();
 
             if (dirUtil.getConfigFile() != null) {
@@ -40,6 +49,7 @@ public class ListExercisesCommand extends AbstractCommand {
                 courseName = courseinfo.getCourseName();
 
             } else  {
+                //TODO replace this with help message.
                 this.io.println("USAGE: tmc list-exercises COURSE");
                 this.io.println("No course specified. Either run the command "
                         + "inside a course directory or enter\n"
@@ -48,7 +58,7 @@ public class ListExercisesCommand extends AbstractCommand {
             }
 
         } else {
-            courseName = args[0];
+            courseName = stringArgs[0];
         }
 
         core = this.app.getTmcCore();

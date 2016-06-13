@@ -165,7 +165,7 @@ public class PasteCommandTest {
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         assertTrue("Prints to IO when failing to parse",
-                testIo.out().contains("Unable to parse arguments"));
+                testIo.out().contains("Invalid"));
     }
 
     @Test

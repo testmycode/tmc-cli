@@ -13,6 +13,9 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import java.util.List;
 
 @Command(name = "update", desc = "Update exercises")
@@ -25,11 +28,16 @@ public class UpdateCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void getOptions(Options options) {
+    }
 
+    @Override
+    public void run(CommandLine args, Io io) {
+        String[] stringArgs = args.getArgs();
         TmcCore core;
 
-        if (args.length > 0) {
+        //TODO: Do this in all commands
+        if (stringArgs.length > 0) {
             io.println("Use in the course directory");
             return;
         }

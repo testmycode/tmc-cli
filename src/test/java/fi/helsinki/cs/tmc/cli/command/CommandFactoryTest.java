@@ -11,6 +11,9 @@ import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,7 +55,12 @@ public class CommandFactoryTest {
         }
 
         @Override
-        public void run(String[] args, Io io) {
+        public void getOptions(Options options) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void run(CommandLine args, Io io) {
             throw new UnsupportedOperationException();
         }
     }
@@ -70,7 +78,12 @@ public class CommandFactoryTest {
         }
 
         @Override
-        public void run(String[] args, Io io) {
+        public void getOptions(Options options) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void run(CommandLine args, Io io) {
             throw new UnsupportedOperationException();
         }
     }

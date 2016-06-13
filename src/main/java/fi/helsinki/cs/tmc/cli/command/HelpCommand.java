@@ -6,6 +6,9 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +25,11 @@ public class HelpCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void getOptions(Options options) {
+    }
+
+    @Override
+    public void run(CommandLine args, Io io) {
         io.println("Usage: tmc [args] COMMAND [command-args]\n");
         io.println("TMC commands:");
         

@@ -9,6 +9,9 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,11 @@ public class ListCoursesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void getOptions(Options options) {
+    }
+
+    @Override
+    public void run(CommandLine args, Io io) {
         List<Course> courses;
         TmcCore core;
 

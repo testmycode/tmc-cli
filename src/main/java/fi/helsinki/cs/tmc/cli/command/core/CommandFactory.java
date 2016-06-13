@@ -46,7 +46,7 @@ public class CommandFactory {
     /**
      * Merge this method implementation with the above version.
      *
-     * @param commandClass
+     * @param commandClass The class of the command
      */
     public void addCommand(Class commandClass) {
         Class<Command> klass = commandClass;
@@ -98,8 +98,8 @@ public class CommandFactory {
      * Get the annotation of the command class.
      * This is only used in help command.
      *
-     * @param commandClass
-     * @return the command annotation object
+     * @param commandClass The class of the command
+     * @return The command annotation object
      */
     public Command getCommand(Class<Command> commandClass) {
         Class<?> klass = commandClass;
@@ -111,7 +111,7 @@ public class CommandFactory {
      * Get list of all commands.
      * This is used for creating help listing.
      *
-     * @return set of commands.
+     * @return Set of commands.
      */
     public Set<Class<Command>> getCommands() {
         return new HashSet<>(CommandFactory.commands.values());

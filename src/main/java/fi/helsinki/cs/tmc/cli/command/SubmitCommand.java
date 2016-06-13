@@ -28,7 +28,6 @@ import java.util.List;
 public class SubmitCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
-    private final Options options;
 
     private Application app;
     private Io io;
@@ -37,14 +36,16 @@ public class SubmitCommand extends AbstractCommand {
 
     public SubmitCommand(Application app) {
         this.app = app;
-        this.options = new Options();
+    }
 
+    @Override
+    public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all test results");
         options.addOption("d", "details", false, "Show detailed error message");
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
         this.io = io;
         TmcCore core;
         WorkDir dirUtil;
@@ -90,18 +91,9 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
-    private String[] parseArgs(String[] args) {
-        GnuParser parser = new GnuParser();
-        CommandLine line;
-        try {
-            line = parser.parse(options, args);
-        } catch (ParseException e) {
-            io.println("Invalid command line arguments.");
-            io.println(e.getMessage());
-            return null;
-        }
-        this.showAll = line.hasOption("a");
-        this.showDetails = line.hasOption("d");
-        return line.getArgs();
+    private String[] parseArgs(CommandLine args) {
+        this.showAll = args.hasOption("a");
+        this.showDetails = args.hasOption("d");
+        return args.getArgs();
     }
 }

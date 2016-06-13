@@ -12,9 +12,8 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,39 +25,30 @@ public class LoginCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
     private Io io;
-    private final Options options;
     private Application app;
 
     public LoginCommand(Application app) {
         this.app = app;
-        this.options = new Options();
+    }
+
+    @Override
+    public void getOptions(Options options) {
         options.addOption("u", "user", true, "TMC username");
         options.addOption("p", "password", true, "Password for the user");
         options.addOption("s", "server", true, "Address for TMC server");
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
         this.io = io;
-        CommandLine line = parseData(args);
-        String username = getUsername(line);
-        String password = getPassword(line);
-        String serverAddress = getServerAddress(line);
+        String username = getUsername(args);
+        String password = getPassword(args);
+        String serverAddress = getServerAddress(args);
 
         Settings settings = new Settings(serverAddress, username, password);
         if (loginPossible(settings) && saveLoginSettings(settings)) {
             io.println("Login succesful.");
         }
-    }
-
-    private CommandLine parseData(String[] args) {
-        GnuParser parser = new GnuParser();
-        try {
-            return parser.parse(options, args);
-        } catch (ParseException e) {
-            logger.warn("Unable to parse username or password.", e);
-        }
-        return null;
     }
 
     private String getUsername(CommandLine line) {
