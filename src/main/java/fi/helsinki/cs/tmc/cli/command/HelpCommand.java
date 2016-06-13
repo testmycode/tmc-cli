@@ -43,7 +43,7 @@ public class HelpCommand extends AbstractCommand {
     private List<String> getCommandStrings() {
         List<String> strings = new ArrayList<>();
         for (Class<Command> commandClass : this.commands.getCommands()) {
-            Command command = commands.getCommand(commandClass);
+            Command command = CommandFactory.getCommand(commandClass);
             if ((Class)commandClass == (Class)TestCommand.class) {
                 continue;
             }

@@ -88,7 +88,7 @@ public class CommandFactory {
      * @param commandClass The class of the command
      * @return The command annotation object
      */
-    public Command getCommand(Class<Command> commandClass) {
+    public static Command getCommand(Class<Command> commandClass) {
         Class<?> klass = commandClass;
         Annotation annotation = klass.getAnnotation(Command.class);
         return (Command)annotation;

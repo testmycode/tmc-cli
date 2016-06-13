@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
@@ -39,7 +40,7 @@ public abstract class AbstractCommand {
         Options options;
 
         options = new Options();
-        options.addOption("h", "help", true, "Get this help message.");
+        options.addOption("h", "help", false, "Get this help message.");
         getOptions(options);
 
         return options;
@@ -48,17 +49,22 @@ public abstract class AbstractCommand {
     public void execute(String[] stringArgs, Io io) {
         GnuParser parser = new GnuParser();
         CommandLine args;
+        Options options = getOptions();
 
         try {
-            args = parser.parse(getOptions(), stringArgs);
+            args = parser.parse(options, stringArgs);
         } catch (ParseException e) {
             logger.warn("Invalid command line arguments.", e);
             io.println("Invalid command line arguments.");
+            io.println(e.getMessage());
             return;
         }
 
         if (args.hasOption("h")) {
-            io.println("TODO: Print help message");
+            HelpFormatter formatter = new HelpFormatter();
+            Class<Command> klass = (Class<Command>)(Class)this.getClass();
+            Command command = CommandFactory.getCommand(klass);
+            formatter.printHelp("tmc " + command.name(), options);
             return;
         }
 
