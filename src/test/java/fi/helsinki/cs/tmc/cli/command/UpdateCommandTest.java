@@ -1,8 +1,11 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -35,6 +38,16 @@ public class UpdateCommandTest {
         app = new Application(io);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
+    }
+
+    @Test
+    public void failIfCoreIsNull() {
+        app = spy(app);
+        doReturn(null).when(app).getTmcCore();
+
+        String[] args = {"update"};
+        app.run(args);
+        assertFalse(io.getPrint().contains("Not a course directory"));
     }
 
     @Test
