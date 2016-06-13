@@ -90,15 +90,15 @@ public class ListExercisesCommand extends AbstractCommand {
             if (exercise.isAllReviewPointsGiven()) {
                 sb.append(Color.colorString(
                         "Completed: ", Color.ANSI_GREEN) + exercise.getName() + "\n");
+            } else if (exercise.isCompleted()) {
+                sb.append(Color.colorString(
+                        "Requires review: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
             } else if (exercise.hasDeadlinePassed()) {
                 sb.append(Color.colorString(
                         "Deadline passed: ", Color.ANSI_PURPLE) + exercise.getName() + "\n");
-            } else if (exercise.isCompleted()) {
-                sb.append(Color.colorString(
-                        "Not yet submitted: ", Color.ANSI_BLUE) + exercise.getName() + "\n");
             } else if (exercise.isAttempted()) {
                 sb.append(Color.colorString(
-                        "Attempted: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
+                        "Attempted: ", Color.ANSI_BLUE) + exercise.getName() + "\n");
             } else {
                 sb.append(Color.colorString(
                         "Not completed: ", Color.ANSI_RED) + exercise.getName() + "\n");
