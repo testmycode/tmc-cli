@@ -64,7 +64,7 @@ public class RunTestsCommandTest {
 
         workDir = new WorkDir(Paths.get(pathToDummycourse));
         app.setWorkdir(workDir);
-        String[] args = {"run-tests"};
+        String[] args = {"test"};
         app.run(args);
         assertFalse(io.getPrint().contains("Testing:"));
     }
@@ -73,7 +73,7 @@ public class RunTestsCommandTest {
     public void givesAnErrorMessageIfNotInCourseDirectory() {
         workDir = new WorkDir(Paths.get(System.getProperty("java.io.tmpdir")));
         app.setWorkdir(workDir);
-        String[] args = {"run-tests"};
+        String[] args = {"test"};
         app.run(args);
         assertTrue(io.getPrint().contains("You have to be in the exercise root"));
     }
@@ -89,7 +89,7 @@ public class RunTestsCommandTest {
         workDir = new WorkDir(Paths.get(pathToDummycourse));
         app.setWorkdir(workDir);
 
-        String[] args = {"run-tests"};
+        String[] args = {"test"};
         app.run(args);
         assertTrue(io.getPrint().contains("Testing: Module_1-04_func"));
     }
@@ -105,7 +105,7 @@ public class RunTestsCommandTest {
         workDir = new WorkDir(Paths.get(pathToDummycourse));
         app.setWorkdir(workDir);
 
-        String[] args = {"run-tests", "Module_1-02_intro"};
+        String[] args = {"test", "Module_1-02_intro"};
         app.run(args);
         assertTrue(io.getPrint().contains("Testing: Module_1-02_intro"));
     }

@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -42,11 +43,21 @@ public class PasteCommand extends AbstractCommand {
         if (core == null) {
             return;
         }
-        List<String> exerciseNames = app.getWorkDir().getExerciseNames(args.getArgs());
-        if (exerciseNames == null || exerciseNames.size() != 1) {
+        WorkDir workdir = app.getWorkDir();
+        List<String> argsList = args.getArgList();
+        if (argsList.isEmpty()) {
+            // adds the current working directory
+            if (!workdir.addPath()) {
+                // if addPath() returns false, we're not in a course directory
+                io.println(
+                        "No exercise specified. Please use this command in an exercise directory "
+                        + "or pass the name of the exercise as an argument.");
+                return;
+            }
+        } else if (argsList.size() > 1) {
             io.println(
-                    "No exercise specified. Please use this command from an exercise directory or "
-                    + "pass the name of the exercise as an argument.");
+                    "Error: Too many arguments. Pass the name of the exercise you wish to send to "
+                            + "the pastebin as the only argument.");
             return;
         }
 
@@ -68,7 +79,14 @@ public class PasteCommand extends AbstractCommand {
             message = "";
         }
 
-        String exerciseName = exerciseNames.get(0);
+        List<String> exercisenames = workdir.getExerciseNames();
+        if (exercisenames.size() != 1) {
+            io.println(
+                    "Error: Matched too many exercises.");
+            return;
+        }
+
+        String exerciseName = exercisenames.get(0);
         CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(

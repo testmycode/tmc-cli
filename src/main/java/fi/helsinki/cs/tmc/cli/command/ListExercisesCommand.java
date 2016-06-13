@@ -18,7 +18,7 @@ import org.apache.commons.cli.Options;
 
 import java.util.List;
 
-@Command(name = "list-exercises", desc = "List the exercises for a specific course")
+@Command(name = "exercises", desc = "List the exercises for a specific course")
 public class ListExercisesCommand extends AbstractCommand {
     private Io io;
 
