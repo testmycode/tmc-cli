@@ -86,7 +86,7 @@ public class Application {
         return true;
     }
 
-    private boolean parseArgs(String[] args) {
+    private boolean parseArgs(String commandName, String[] args) {
         CommandLine line;
         try {
             line = this.parser.parse(this.options, args);
@@ -97,7 +97,12 @@ public class Application {
         }
 
         if (line.hasOption("h")) {
-            runCommand("help", new String[0]);
+            String[] helpArgs = {"-h"};
+            if (commandName.equals("help")) {
+                runCommand(commandName, new String[0]);
+                return false;
+            }
+            runCommand(commandName, helpArgs);
             return false;
         }
         if (line.hasOption("v")) {
@@ -134,7 +139,7 @@ public class Application {
             commandArgs = new String[0];
         }
 
-        if (!parseArgs(tmcArgs)) {
+        if (!parseArgs(commandName, tmcArgs)) {
             return;
         }
 
