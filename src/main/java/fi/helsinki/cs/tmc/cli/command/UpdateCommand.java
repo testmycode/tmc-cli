@@ -41,7 +41,7 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        WorkDir workDir = app.getWorkDir();
+        WorkDir workDir = getApp().getWorkDir();
 
         if (workDir.getCourseDirectory() == null) {
             io.println("Not a course directory");
