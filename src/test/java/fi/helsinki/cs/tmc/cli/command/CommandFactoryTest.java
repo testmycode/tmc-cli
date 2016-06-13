@@ -3,12 +3,11 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.contains;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
-import fi.helsinki.cs.tmc.cli.command.core.CommandInterface;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
@@ -47,7 +46,7 @@ public class CommandFactoryTest {
     }
 
     @Command(name = "good", desc = "test")
-    public static class GoodCommand implements CommandInterface {
+    public static class GoodCommand extends AbstractCommand {
         public GoodCommand(Application app) {
             System.out.println("hello");
         }
@@ -65,7 +64,7 @@ public class CommandFactoryTest {
         assertNotNull(factory.createCommand(app, "good"));
     }
 
-    public static class BadCommand implements CommandInterface {
+    public static class BadCommand extends AbstractCommand {
         public BadCommand(Application app) {
             System.out.println("hello");
         }
