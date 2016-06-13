@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -28,36 +27,31 @@ import java.util.List;
 public class SubmitCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
-    private final Options options;
 
-    private Application app;
     private Io io;
     private boolean showAll;
     private boolean showDetails;
 
-    public SubmitCommand(Application app) {
-        this.app = app;
-        this.options = new Options();
-
+    @Override
+    public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all test results");
         options.addOption("d", "details", false, "Show detailed error message");
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
         this.io = io;
 
         List<String> exerciseNames = parseArgs(args);
         if (exerciseNames == null) {
             return;
         }
-
-        TmcCore core = this.app.getTmcCore();
+        TmcCore core = getApp().getTmcCore();
         if (core == null) {
             return;
         }
 
-        WorkDir workDir = this.app.getWorkDir();
+        WorkDir workDir = getApp().getWorkDir();
 
         Path courseDir = workDir.getCourseDirectory();
 
@@ -111,18 +105,9 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
-    private List<String> parseArgs(String[] args) {
-        GnuParser parser = new GnuParser();
-        CommandLine line;
-        try {
-            line = new GnuParser().parse(this.options, args);
-        } catch (ParseException e) {
-            io.println("Invalid command line arguments.");
-            io.println(e.getMessage());
-            return null;
-        }
-        this.showAll = line.hasOption("a");
-        this.showDetails = line.hasOption("d");
-        return line.getArgList();
+    private List<String> parseArgs(CommandLine args) {
+        this.showAll = args.hasOption("a");
+        this.showDetails = args.hasOption("d");
+        return args.getArgList();
     }
 }
