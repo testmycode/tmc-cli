@@ -6,6 +6,9 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,16 +16,17 @@ import java.util.List;
 @Command(name = "help", desc = "List every command")
 public class HelpCommand extends AbstractCommand {
     private final int longestName = 14; // Length of the longest command name
-    private final Application app;
-    private final CommandFactory commands;
+    private CommandFactory commands;
 
-    public HelpCommand(Application app) {
-        this.app = app;
-        this.commands = app.getCommandFactory();
+    @Override
+    public void getOptions(Options options) {
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
+        Application app = getApp();
+        this.commands = app.getCommandFactory();
+
         io.println("Usage: tmc [args] COMMAND [command-args]\n");
         io.println("TMC commands:");
         
@@ -39,7 +43,7 @@ public class HelpCommand extends AbstractCommand {
     private List<String> getCommandStrings() {
         List<String> strings = new ArrayList<>();
         for (Class<Command> commandClass : this.commands.getCommands()) {
-            Command command = commands.getCommand(commandClass);
+            Command command = CommandFactory.getCommand(commandClass);
             if ((Class)commandClass == (Class)TestCommand.class) {
                 continue;
             }

@@ -12,9 +12,8 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,34 +24,25 @@ import java.util.concurrent.Callable;
 @Command(name = "paste", desc = "Submit exercise to pastebin")
 public class PasteCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
-    private final Options options;
 
-    private Application app;
     private Io io;
 
-    public PasteCommand(Application app) {
-        this.app = app;
-        this.options = new Options();
-        this.options.addOption("n", "no-message", false, "Don't send a message with your paste");
-        this.options.addOption("m", "message", true, "Add a message to your paste as a parameter");
-        this.options.addOption("o", "open", false, "Open the link to your paste in a web browser");
+    @Override
+    public void getOptions(Options options) {
+        options.addOption("n", "no-message", false, "Don't send a message with your paste");
+        options.addOption("m", "message", true, "Add a message to your paste as a parameter");
+        options.addOption("o", "open", false, "Open the link to your paste in a web browser");
     }
 
     @Override
-    public void run(String[] args, Io io) {
+    public void run(CommandLine args, Io io) {
         this.io = io;
-        CommandLine line;
-        try {
-            line = parseData(args);
-        } catch (ParseException e) {
-            io.println("Unable to parse arguments: " + e.getMessage());
-            return;
-        }
-        TmcCore core = this.app.getTmcCore();
+        Application app = getApp();
+        TmcCore core = app.getTmcCore();
         if (core == null) {
             return;
         }
-        List<String> exerciseNames = app.getWorkDir().getExerciseNames(line.getArgs());
+        List<String> exerciseNames = app.getWorkDir().getExerciseNames(args.getArgs());
         if (exerciseNames == null || exerciseNames.size() != 1) {
             io.println(
                     "No exercise specified. Please use this command from an exercise directory or "
@@ -61,8 +51,8 @@ public class PasteCommand extends AbstractCommand {
         }
 
         String message;
-        if (!line.hasOption("n")) {
-            if (!line.hasOption("m")) {
+        if (!args.hasOption("n")) {
+            if (!args.hasOption("m")) {
                 message = ExternalsUtil.getUserEditedMessage(
                         "\n"
                                 + "#   Write a message for your paste in this file and save it.\n"
@@ -72,7 +62,7 @@ public class PasteCommand extends AbstractCommand {
                         "tmc_paste_message.txt",
                         true);
             } else {
-                message = line.getOptionValue("m");
+                message = args.getOptionValue("m");
             }
         } else {
             message = "";
@@ -84,6 +74,7 @@ public class PasteCommand extends AbstractCommand {
         Callable<URI> callable = core.pasteWithComment(
                 new TmcCliProgressObserver(), exercise, message);
         URI uri;
+
         try {
             uri = callable.call();
         } catch (Exception e) {
@@ -92,17 +83,11 @@ public class PasteCommand extends AbstractCommand {
             e.printStackTrace();
             return;
         }
+
         io.println("Paste sent for exercise " + exercise.getName());
         io.println(uri.toString());
-        if (line.hasOption("o")) {
+        if (args.hasOption("o")) {
             ExternalsUtil.openInBrowser(uri);
         }
     }
-
-    private CommandLine parseData(String[] args) throws ParseException {
-        GnuParser parser = new GnuParser();
-        return parser.parse(options, args);
-    }
-
-
 }
