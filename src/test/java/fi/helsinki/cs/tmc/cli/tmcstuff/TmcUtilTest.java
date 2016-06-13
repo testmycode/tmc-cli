@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -111,12 +111,14 @@ public class TmcUtilTest {
                 final List<Exercise> exersices = (List<Exercise>)invocation.getArguments()[1];
                 return new Callable<List<Exercise>>() {
                     @Override
+                    @SuppressWarnings("unchecked")
                     public List<Exercise> call() throws Exception {
                         return exersices;
                     }
                 };
             }
-        }).when(mockCore).downloadOrUpdateExercises(any(ProgressObserver.class), any(List.class));
+        }).when(mockCore)
+                .downloadOrUpdateExercises(any(ProgressObserver.class), anyListOf(Exercise.class));
         List<Exercise> list = TmcUtil.downloadAllExercises(app.getTmcCore(), course);
         for (Exercise exercise : list) {
             assertNotNull(TmcUtil.findExercise(course, exercise.getName()));
@@ -133,12 +135,14 @@ public class TmcUtilTest {
                 final List<Exercise> exersices = (List<Exercise>)invocation.getArguments()[1];
                 return new Callable<List<Exercise>>() {
                     @Override
+                    @SuppressWarnings("unchecked")
                     public List<Exercise> call() throws Exception {
                         return exersices;
                     }
                 };
             }
-        }).when(mockCore).downloadOrUpdateExercises(any(ProgressObserver.class), any(List.class));
+        }).when(mockCore)
+                .downloadOrUpdateExercises(any(ProgressObserver.class), anyListOf(Exercise.class));
         List<Exercise> downloadList = TmcUtil.downloadExercises(app.getTmcCore(), list);
         for (Exercise exercise : downloadList) {
             boolean found = false;

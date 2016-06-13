@@ -42,13 +42,13 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
 
     private void generateSourceFile(Map<String, String> map) throws IOException {
         JavaFileObject jfo = processingEnv.getFiler().createSourceFile(
-                PACKAGE_NAME + "." + CLASS_NAME);
+                PACKAGE_NAME + ".core." + CLASS_NAME);
 
         try (Writer writer = jfo.openWriter()) {
             BufferedWriter bwriter = new BufferedWriter(writer);
             bwriter.append("package ");
             bwriter.append(PACKAGE_NAME);
-            bwriter.append(";\n\n");
+            bwriter.append(".core;\n\n");
             bwriter.append("//CHECKSTYLE:OFF\n");
             bwriter.append("import " + PACKAGE_NAME + ".core.CommandFactory;\n\n");
             for (Entry<String, String> entry : map.entrySet()) {
@@ -56,14 +56,14 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             }
             bwriter.append("//CHECKSTYLE:ON\n");
             bwriter.append("\npublic class " + CLASS_NAME + " {\n");
-            bwriter.append(TAB + "public void run(CommandFactory factory) {\n");
+            bwriter.append(TAB + "static {\n");
             for (Entry<String, String> entry : map.entrySet()) {
                 String[] parts = entry.getValue().split("\\.");
                 if (parts.length == 0) {
                     continue;
                 }
                 String className = parts[parts.length - 1];
-                bwriter.append(TAB + TAB + "factory.addCommand(\""
+                bwriter.append(TAB + TAB + "CommandFactory.addCommand(\""
                         + entry.getKey() + "\", "
                         + className + ".class);\n");
             }
