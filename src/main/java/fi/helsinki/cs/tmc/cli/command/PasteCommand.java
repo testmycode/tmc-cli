@@ -70,7 +70,7 @@ public class PasteCommand extends AbstractCommand {
                                 + "#   If you don't want to send a message with your paste, "
                                 + "use the '-n' switch.\n"
                                 + "#   Lines beginning with # are comments and will be ignored.",
-                        "tmc_paste_message.txt",
+                        "tmc-paste-message",
                         true);
             } else {
                 message = args.getOptionValue("m");
