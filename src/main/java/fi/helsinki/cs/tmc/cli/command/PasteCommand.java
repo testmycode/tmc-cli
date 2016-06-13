@@ -97,7 +97,7 @@ public class PasteCommand implements CommandInterface {
         }
 
         List<String> exercisenames = workdir.getExerciseNames();
-        if (exercisenames.size() != 0) {
+        if (exercisenames.size() != 1) {
             io.println(
                     "Error: Matched too many exercises.");
             return;

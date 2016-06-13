@@ -147,8 +147,8 @@ public class WorkDirTest {
         workDir.addPath(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"));
         assertEquals(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 workDir.getCourseDirectory());
-        junit.framework.Assert.assertEquals(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
-                workDir.getWorkingDirectory());
+        junit.framework.Assert.assertEquals(Paths.get(System.getProperty("java.io.tmpdir"))
+                .resolve("dirUtilTest"), workDir.getWorkingDirectory());
     }
 
     @Test
