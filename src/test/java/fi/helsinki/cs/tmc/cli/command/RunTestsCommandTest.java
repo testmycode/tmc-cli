@@ -90,7 +90,7 @@ public class RunTestsCommandTest {
 
         String[] args = {"run-tests"};
         app.run(args);
-        assertTrue(io.getPrint().contains("Testing: Module_1-08_characters"));
+        assertTrue(io.getPrint().contains("Testing: Module_1-04_func"));
     }
 
     @Test
