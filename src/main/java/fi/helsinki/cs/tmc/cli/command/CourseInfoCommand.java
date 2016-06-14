@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -11,16 +10,12 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
 @Command(name = "info", desc = "Show course info for a specific course")
 public class CourseInfoCommand extends AbstractCommand {
-    //private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
     private Course course;
     private Io io;
 
@@ -63,96 +58,72 @@ public class CourseInfoCommand extends AbstractCommand {
     private void printCourseShort() {
         io.println("Course name: " + course.getName());
         io.println("Number of available exercises: " + course.getExercises().size());
+        io.println("Number of completed exercises: " + completedExercises());
+        io.println("Number of locked exercises: " + course.getUnlockables().size());
     }
     
     private void printCourseDetails() {
+        io.println("Unlockables:" + course.getUnlockables().toString());
         io.println("Course id: " + course.getId());
         io.println("Details URL: " + course.getDetailsUrl());
         io.println("Reviews URL: " + course.getReviewsUrl());
         io.println("Statistics URLs:" + course.getSpywareUrls().toString());
         io.println("UnlockUrl: " + course.getUnlockUrl());
         io.println("CometUrl: " + course.getCometUrl());
-        //io.println("Exercises loaded: " + course.isExercisesLoaded());
-        io.println("Unlockables:" + course.getUnlockables().toString());
     }
-    
-//    private String getSpywareUrls() {
-//        List<URI> urls = course.getSpywareUrls();
-//        if (urls == null || urls.isEmpty()) {
-//            return " -";
-//        }
-//        
-//        StringBuilder temp = new StringBuilder();
-//        for (URI url : urls) {
-//            temp.append(" " + url);
-//        }
-//        return temp.toString();
-//    }
-    
-//    private String getUnlockables() {
-//        List<String> unlockables = course.getUnlockables();
-//        if (unlockables == null || unlockables.isEmpty()) {
-//            return " -";
-//        }
-//        
-//        StringBuilder temp = new StringBuilder();
-//        for (String unlockable : unlockables) {
-//            temp.append(" " + unlockable);
-//        }
-//        return temp.toString();
-//    }
     
     private void printExercises(boolean showAll) {
         List<Exercise> exercises = course.getExercises();
         if (exercises == null || exercises.isEmpty()) {
-            io.println("List of exercises: -");
+            io.println("Exercises: -");
             return;
         }
-        if (showAll) {
-            printExerciseDetails(exercises);
-        } else {
-            printExerciseNames(exercises);
+
+        io.println("Exercises: ");
+        for (Exercise exercise : exercises) {
+            if (showAll) {
+                printExercise(exercise);
+            } else {
+                io.println("    " + exercise.getName());
+            }
         }
     }
     
-    private void printExerciseNames(List<Exercise> exercises) {
-        io.print("List of exercises: ");
-        for (Exercise exercise : exercises) {
-            io.print(exercise.getName() + " ");
+    private int completedExercises() {
+        int completed = 0;
+        for (Exercise exercise : course.getExercises()) {
+            if (exercise.isCompleted()) {
+                completed++;
+            }
         }
-        io.println("");
-    }
-    
-    private void printExerciseDetails(List<Exercise> exercises) {
-        io.println("Info on course exercises:");
-        for (Exercise exercise : exercises) {
-            printExercise(exercise);
-        }
-        
-//        io.print(", " + exercise.getDeadline());
-//        io.print(", " + exercise.getReturnUrl());
+        return completed;
     }
     
     private void printExercise(Exercise exercise) {
-        io.println("Exercise name: " + exercise.getName());
-        io.println("Exercise id: " + exercise.getId());
-        io.println("Is locked: " + exercise.isLocked());
-        io.println("Deadline description: " + exercise.getDeadlineDescription());
-        io.println("Deadline: " + exercise.getDeadline());
-        io.println("Deadline date: " + exercise.getDeadlineDate());
-        io.println("Checksum: " + exercise.getChecksum());
-        io.println("Return URL: " + exercise.getReturnUrl());
-        io.println("Zip URL: " + exercise.getZipUrl());
-        io.println("Is returnable: " + exercise.isReturnable());
-        io.println("Review required: " + exercise.isRequiresReview());
-        io.println("Is attempted: " + exercise.isAttempted());
-        io.println("Is completed: " + exercise.isCompleted());
-        io.println("Is reviewed: " + exercise.isReviewed());
-        io.println("Is all review points given: " + exercise.isAllReviewPointsGiven());
-        io.println("Memory limit: " + exercise.getMemoryLimit());
-        io.println("Runtime parameters: " + Arrays.toString(exercise.getRuntimeParams()));
-        io.println("Is code review request enabled: " + exercise.isCodeReviewRequestsEnabled());
-        
+        io.println("    Exercise name: " + exercise.getName());
+        io.println("    Exercise id: " + exercise.getId());
+        io.println("    Is locked: " + exercise.isLocked());
+        io.println("    Deadline description: " + exercise.getDeadlineDescription());
+        io.println("    Deadline: " + exercise.getDeadline());
+        io.println("    Deadline date: " + exercise.getDeadlineDate());
+        io.println("    Deadline passed: " + exercise.hasDeadlinePassed());
+        io.println("    Is returnable: " + exercise.isReturnable());
+        io.println("    Review required: " + exercise.requiresReview());
+        io.println("    Is attempted: " + exercise.isAttempted());
+        io.println("    Is completed: " + exercise.isCompleted());
+        io.println("    Is reviewed: " + exercise.isReviewed());
+        io.println("    Is all review points given: " + exercise.isAllReviewPointsGiven());
+        io.println("    Memory limit: " + exercise.getMemoryLimit());
+        io.println("    Runtime parameters: " + Arrays.toString(exercise.getRuntimeParams()));
+        io.println("    Is code review request enabled: " + exercise.isCodeReviewRequestsEnabled());
+        io.println("    Are local tests enabled: " + exercise.isRunTestsLocallyActionEnabled());
+        io.println("    Return URL: " + exercise.getReturnUrl());
+        io.println("    Zip URL: " + exercise.getZipUrl());
+        io.println("    Exercise submission URL: " + exercise.getExerciseSubmissionsUrl());
+        io.println("    Download URL: " + exercise.getDownloadUrl());
+        io.println("    Solution download URL: " + exercise.getSolutionDownloadUrl());
+        io.println("    Checksum: " + exercise.getChecksum());
+        io.println("");
     }
     
 }
