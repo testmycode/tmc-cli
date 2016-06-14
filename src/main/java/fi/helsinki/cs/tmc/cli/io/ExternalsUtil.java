@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
-import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
 
 import org.slf4j.Logger;
@@ -34,17 +34,9 @@ public class ExternalsUtil {
      */
     public static String getUserEditedMessage(
             String template, String filename, boolean escapeComments) {
-
-        Path tempFile = Paths.get(System.getProperty("java.io.tmpdir"))
-                .resolve(filename);
-        try {
-            // Write the template to file
-            PrintWriter writer = new PrintWriter(tempFile.toFile());
-            writer.print(template);
-            writer.close();
-        } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
-            logger.error("Couldn't write to file", e);
+        Path tempFile = Paths.get(System.getProperty("java.io.tmpdir")).resolve("tmc-cli")
+                .resolve(filename + "-" + System.currentTimeMillis() + ".txt");
+        if (!writeToFile(tempFile, template)) {
             return null;
         }
         String editor = System.getenv("EDITOR");
@@ -55,15 +47,10 @@ public class ExternalsUtil {
                 editor = "nano";
             }
         }
-        List<String> messageLines;
         // User writes to file
         execExternal(editor, tempFile.toString(), true);
-        try {
-            // Read from file
-            messageLines = Files.readAllLines(tempFile, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
-            logger.error("Couldn't open file in editor", e);
+        List<String> messageLines = readFromFileAsList(tempFile);
+        if (messageLines == null) {
             return null;
         }
         StringBuilder sb = new StringBuilder();
@@ -74,6 +61,21 @@ public class ExternalsUtil {
             }
         }
         return sb.toString().trim();
+    }
+
+    /**
+     * Show a string in a pager for the user, with colour.
+     * Write output to a file and open it in pager
+     * Assume colour has already been stripped on Windows.
+     * @param string String to be shown to the user
+     */
+    public static void showStringInPager(String string, String filename) {
+        Path tempFile = Paths.get(System.getProperty("java.io.tmpdir")).resolve("tmc-cli")
+                .resolve(filename + "-" + System.currentTimeMillis() + ".txt");
+        if (!writeToFile(tempFile, string)) {
+            return;
+        }
+        showFileInPager(tempFile);
     }
 
     /**
@@ -88,7 +90,7 @@ public class ExternalsUtil {
             if (System.getProperty("os.name").toLowerCase().contains("windows")) {
                 pager = "more";
             } else {
-                pager = "less";
+                pager = "less -R";
             }
         }
         execExternal(pager, file.toString(), true);
@@ -131,15 +133,18 @@ public class ExternalsUtil {
     }
 
     private static boolean execExternal(String program, String arg, boolean wait) {
+        return execExternal(program + " \'" + arg + "\'", wait);
+    }
+
+    private static boolean execExternal(String program, boolean wait) {
         Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
-        logger.info("Launching external program " + program + " with arg " + arg);
+        logger.info("Launching external program " + program);
         String[] exec;
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            exec = new String[]{program + " \'" + arg + "\'"};
+        if (Application.isWindows()) {
+            exec = new String[]{program};
         } else {
             exec = new String[]{
-                    "sh", "-c", program + " \'" + arg + "\'"
-                    + " </dev/tty >/dev/tty"};
+                    "sh", "-c", program + " </dev/tty >/dev/tty"};
         }
         try {
             Process proc = Runtime.getRuntime().exec(exec);
@@ -149,8 +154,54 @@ public class ExternalsUtil {
             }
             return proc.exitValue() == 0;
         } catch (Exception e) {
-            logger.error("Exception when running external program " + program + " " + arg, e);
+            logger.error("Exception when running external program " + program, e);
             return false;
         }
+    }
+
+    /**
+     * Write something to a file. Warning: clobbers existing files.
+     * @param path: Path to the file, use a path in temp
+     * @param string: Text to write to the file
+     * @return: Whether or not writing was successful
+     */
+    private static boolean writeToFile(Path path, String string) {
+        try {
+            if (path.getParent() != null && !Files.exists(path.getParent())) {
+                Files.createDirectories(path.getParent());
+            }
+            PrintWriter writer = new PrintWriter(path.toFile());
+            writer.print(string);
+            writer.close();
+        } catch (Exception e) {
+            Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
+            logger.error("Couldn't write to file", e);
+            return false;
+        }
+        return true;
+    }
+
+    private static String readFromFileAsString(Path path) {
+        String message;
+        try {
+            message = new String(Files.readAllBytes(path));
+        } catch (Exception e) {
+            Logger logger = LoggerFactory.getLogger(ExternalsUtil.class);
+            logger.error("Couldn't read file as bytes", e);
+            return null;
+        }
+        return message;
+    }
+
+    private static List<String> readFromFileAsList(Path path) {
+        List<String> messageLines;
+        try {
+            messageLines = Files.readAllLines(path, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
+            logger.error("Couldn't read file as array", e);
+            return null;
+        }
+        return messageLines;
     }
 }

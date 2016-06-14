@@ -3,6 +3,8 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
@@ -24,6 +26,7 @@ public class ListExercisesCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {
+        options.addOption("n", "no-pager", false, "don't use a pager to list the exercises");
     }
 
     @Override
@@ -37,10 +40,11 @@ public class ListExercisesCommand extends AbstractCommand {
         // If no args given, check if the current directory is a course directory and set courseName as the name of that course.
         // Else, print out a help message.
         if (stringArgs.length == 0) {
-            WorkDir dirUtil = new WorkDir();
+            WorkDir workDir = getApp().getWorkDir();
+            workDir.addPath();
 
-            if (dirUtil.getConfigFile() != null) {
-                CourseInfo courseinfo = CourseInfoIo.load(dirUtil.getConfigFile());
+            if (workDir.getConfigFile() != null) {
+                CourseInfo courseinfo = CourseInfoIo.load(workDir.getConfigFile());
                 courseName = courseinfo.getCourseName();
 
             } else  {
@@ -60,27 +64,50 @@ public class ListExercisesCommand extends AbstractCommand {
         if (core == null) {
             return;
         }
-        printExercises(core, courseName);
+        printExercises(core, courseName, !args.hasOption("n"));
     }
 
     // This one can be moved to TmcUtil maybe?
-    private void printExercises(TmcCore core, String name) {
+    private void printExercises(TmcCore core, String name, Boolean pager) {
         List<Exercise> exercises;
         Course course;
 
         course = TmcUtil.findCourse(core, name);
         if (course == null) {
-            this.io.println("Course doesn't exist.");
+            this.io.println("Course '" + name + "' doesn't exist.");
             return;
         }
 
         exercises = course.getExercises();
         if (exercises.isEmpty()) {
-            this.io.println("Course doesn't have any exercises.");
+            this.io.println("Course '" + name + "' doesn't have any exercises.");
         }
 
+        StringBuilder sb = new StringBuilder();
         for (Exercise exercise : exercises) {
-            this.io.println(exercise.getName());
+            // Check the exercise status in order of flag importance, for example there's
+            // no need to check if deadline has passed if the exercise has been submitted
+            if (exercise.isAllReviewPointsGiven()) {
+                sb.append(Color.colorString(
+                        "Completed: ", Color.ANSI_GREEN) + exercise.getName() + "\n");
+            } else if (exercise.isCompleted()) {
+                sb.append(Color.colorString(
+                        "Requires review: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
+            } else if (exercise.hasDeadlinePassed()) {
+                sb.append(Color.colorString(
+                        "Deadline passed: ", Color.ANSI_PURPLE) + exercise.getName() + "\n");
+            } else if (exercise.isAttempted()) {
+                sb.append(Color.colorString(
+                        "Attempted: ", Color.ANSI_BLUE) + exercise.getName() + "\n");
+            } else {
+                sb.append(Color.colorString(
+                        "Not completed: ", Color.ANSI_RED) + exercise.getName() + "\n");
+            }
+        }
+        if (pager) {
+            ExternalsUtil.showStringInPager(sb.toString(), "exercise-list");
+        } else {
+            io.print(sb.toString());
         }
     }
 }

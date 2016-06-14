@@ -59,9 +59,9 @@ public class ListExercisesCommandTest {
         app = spy(app);
         doReturn(null).when(app).getTmcCore();
 
-        String[] args = {"exercises", "foo"};
+        String[] args = {"exercises", "-n", "foo"};
         app.run(args);
-        assertFalse(io.getPrint().contains("Course doesn't exist"));
+        assertFalse(io.getPrint().contains("Course 'foo' doesn't exist"));
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ListExercisesCommandTest {
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
 
-        String[] args = {"exercises", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123"};
         app.run(args);
         assertThat(io.out(), containsString("have any exercises"));
     }
@@ -96,7 +96,7 @@ public class ListExercisesCommandTest {
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
 
-        String[] args = {"exercises", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123"};
         app.run(args);
         assertThat(io.out(), containsString("hello-exerciseNames"));
     }
@@ -104,7 +104,7 @@ public class ListExercisesCommandTest {
     @Test
     public void emptyArgsGivesAnErrorMessage() {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(null);
-        String[] args = {"exercises"};
+        String[] args = {"exercises", "-n"};
         app.run(args);
         assertThat(io.out(), containsString("No course specified"));
     }
@@ -119,8 +119,8 @@ public class ListExercisesCommandTest {
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
 
-        String[] args = {"exercises", "abc"};
+        String[] args = {"exercises", "-n", "abc"};
         app.run(args);
-        assertThat(io.out(), containsString("Course doesn't exist"));
+        assertThat(io.out(), containsString("Course 'abc' doesn't exist"));
     }
 }
