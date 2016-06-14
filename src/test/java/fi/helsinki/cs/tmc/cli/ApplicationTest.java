@@ -11,32 +11,39 @@ import org.junit.Test;
 public class ApplicationTest {
 
     private Application app;
-    private TestIo testIo;
+    private TestIo io;
 
     @Before
     public void setUp() {
-        testIo = new TestIo();
-        app = new Application(testIo);
+        io = new TestIo();
+        app = new Application(io);
     }
 
     @Test
     public void versionWorksWithRightParameter() {
         String[] args = {"-v"};
         app.run(args);
-        assertTrue(testIo.getPrint().contains("TMC-CLI version"));
+        assertTrue(io.out().contains("TMC-CLI version"));
     }
-    
+
+    @Test
+    public void failWhenInvalidOption() {
+        String[] args = {"-a34t3"};
+        app.run(args);
+        assertTrue(io.out().contains("Invalid command"));
+    }
+
     @Test
     public void helpWorksWithRightParameter() {
         String[] args = {"-h"};
         app.run(args);
-        assertTrue(testIo.getPrint().contains("Usage: tmc"));
+        assertTrue(io.out().contains("Usage: tmc"));
     }
 
     @Test
     public void runCommandWorksWithWrongParameter() {
         String[] args = {"foo"};
         app.run(args);
-        assertTrue(testIo.getPrint().contains("Command foo doesn't exist"));
+        assertTrue(io.out().contains("Command foo doesn't exist"));
     }
 }

@@ -13,6 +13,8 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintWriter;
+
 public abstract class AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
 
@@ -64,7 +66,11 @@ public abstract class AbstractCommand {
             HelpFormatter formatter = new HelpFormatter();
             Class<Command> klass = (Class<Command>)(Class)this.getClass();
             Command command = CommandFactory.getCommand(klass);
-            formatter.printHelp("tmc " + command.name(), options);
+
+            String usage = "tmc " + command.name();
+            String header = "\n" + command.desc() + "\nOptions:";
+            String footer = "\nCopyright(C) 2016 TestMyCode\nSome rights reserved.";
+            formatter.printHelp(new PrintWriter(io), 80, usage, header, options, 2, 0, footer);
             return;
         }
 
