@@ -16,17 +16,18 @@ public class TmcCliProgressObserver extends ProgressObserver {
 
     private int pips;
     private int maxline;
-    private String color;
+    private Color.AnsiColor color;
+    private String lastMessage;
 
     public TmcCliProgressObserver() {
         this(new TerminalIo());
     }
 
     public TmcCliProgressObserver(Io io) {
-        this(io, Color.ANSI_BLUE);
+        this(io, Color.AnsiColor.ANSI_BLUE);
     }
 
-    public TmcCliProgressObserver(Io io, String color) {
+    public TmcCliProgressObserver(Io io, Color.AnsiColor color) {
         this.io = io;
         String colEnv = System.getenv("COLUMNS");
         if (colEnv != null) {
@@ -38,7 +39,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
         } else {
             this.maxline = 69;
         }
-        this.pips = (this.maxline - 6) / 3;
+        this.pips = (this.maxline / 3) - 6;
         this.color = color;
     }
 

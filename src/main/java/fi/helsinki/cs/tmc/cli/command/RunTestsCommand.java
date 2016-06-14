@@ -76,7 +76,7 @@ public class RunTestsCommand extends AbstractCommand {
 
         try {
             for (String name : exerciseNames) {
-                io.println(Color.colorString("Testing: " + name, Color.ANSI_YELLOW));
+                io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
                 //name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 

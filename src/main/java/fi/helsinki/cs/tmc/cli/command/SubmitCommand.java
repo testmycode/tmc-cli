@@ -94,7 +94,8 @@ public class SubmitCommand extends AbstractCommand {
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
 
         for (String exerciseName : exercises) {
-            io.println(Color.colorString("Submitting: " + exerciseName, Color.ANSI_YELLOW));
+            io.println(Color.colorString("Submitting: " + exerciseName,
+                    Color.AnsiColor.ANSI_YELLOW));
             SubmissionResult result = TmcUtil.submitExercise(core, course, exerciseName);
             if (result == null) {
                 io.println("Submission failed.");
