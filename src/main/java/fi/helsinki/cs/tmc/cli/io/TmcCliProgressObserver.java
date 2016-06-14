@@ -109,7 +109,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     }
 
     private String progressBar(double progress) {
-        int pipsDone = ((this.pips * (int) progress)) / 100;
+        int pipsDone = (int) (this.pips * progress);
         StringBuilder sb = new StringBuilder(this.pips);
         for (int i = 0; i < pipsDone; i++) {
             sb.append(PIPCHAR);
@@ -123,7 +123,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     }
 
     private String percentage(double progress) {
-        int percent = (int) progress;
+        int percent = (int) (progress * 100);
         String percentage;
         if (percent < 10) {
             percentage = "  ";
