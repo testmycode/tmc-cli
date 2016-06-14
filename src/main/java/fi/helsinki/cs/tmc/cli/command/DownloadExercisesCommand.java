@@ -38,7 +38,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         if (core == null) {
             return;
         }
-        
+
         Course course = TmcUtil.findCourse(core, stringArgs[0]);
         if (course == null) {
             io.println("Course doesn't exist.");
@@ -46,6 +46,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course);
+        io.println("");
         io.println(exercises.toString());
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
