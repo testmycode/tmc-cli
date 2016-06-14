@@ -87,12 +87,14 @@ public class ListExercisesCommand extends AbstractCommand {
         for (Exercise exercise : exercises) {
             // Check the exercise status in order of flag importance, for example there's
             // no need to check if deadline has passed if the exercise has been submitted
-            if (exercise.isAllReviewPointsGiven()) {
-                sb.append(Color.colorString(
-                        "Completed: ", Color.ANSI_GREEN) + exercise.getName() + "\n");
-            } else if (exercise.isCompleted()) {
-                sb.append(Color.colorString(
-                        "Requires review: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
+            if (exercise.isCompleted()) {
+                if (exercise.requiresReview() && !exercise.isReviewed()) {
+                    sb.append(Color.colorString(
+                            "Requires review: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
+                } else {
+                    sb.append(Color.colorString(
+                            "Completed: ", Color.ANSI_GREEN) + exercise.getName() + "\n");
+                }
             } else if (exercise.hasDeadlinePassed()) {
                 sb.append(Color.colorString(
                         "Deadline passed: ", Color.ANSI_PURPLE) + exercise.getName() + "\n");

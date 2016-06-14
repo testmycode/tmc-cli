@@ -67,7 +67,7 @@ public class TmcUtil {
                     .call();
         } catch (Exception e) {
             logger.warn("Failed to download exercises", e);
-            return null;
+            return new ArrayList<>();
         }
     }
 
