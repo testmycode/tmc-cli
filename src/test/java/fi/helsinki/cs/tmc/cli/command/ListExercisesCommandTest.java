@@ -24,6 +24,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -122,5 +123,140 @@ public class ListExercisesCommandTest {
         String[] args = {"exercises", "-n", "abc"};
         app.run(args);
         assertThat(io.out(), containsString("Course 'abc' doesn't exist"));
+    }
+
+    @Test
+    public void exerciseIsCompletedButRequiresReview() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                List<Exercise> list = Arrays.asList(
+                        new Exercise("hello-exerciseNames"),
+                        new Exercise("cool-exerciseNames"));
+                list.get(1).setRequiresReview(true);
+                list.get(1).setReviewed(false);
+                list.get(1).setCompleted(true);
+
+                Course course = new Course("test-course123");
+                course.setExercises(list);
+
+                return Arrays.asList(course);
+            }
+        };
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        String[] args = {"exercises", "-n", "test-course123"};
+        app.run(args);
+        assertThat(io.out(), containsString("Requires review"));
+    }
+
+    @Test
+    public void exerciseIsCompletedAndReviewed() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                List<Exercise> list = Arrays.asList(
+                        new Exercise("hello-exerciseNames"),
+                        new Exercise("cool-exerciseNames"));
+                list.get(1).setRequiresReview(true);
+                list.get(1).setReviewed(true);
+                list.get(1).setCompleted(true);
+
+                Course course = new Course("test-course123");
+                course.setExercises(list);
+
+                return Arrays.asList(course);
+            }
+        };
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        String[] args = {"exercises", "-n", "test-course123"};
+        app.run(args);
+        assertThat(io.out(), containsString("Completed"));
+    }
+
+    @Test
+    public void exerciseIsCompleted() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                List<Exercise> list = Arrays.asList(
+                        new Exercise("hello-exerciseNames"),
+                        new Exercise("cool-exerciseNames"));
+                list.get(1).setRequiresReview(false);
+                list.get(1).setCompleted(true);
+
+                Course course = new Course("test-course123");
+                course.setExercises(list);
+
+                return Arrays.asList(course);
+            }
+        };
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        String[] args = {"exercises", "-n", "test-course123"};
+        app.run(args);
+        assertThat(io.out(), containsString("Completed"));
+    }
+
+    @Test
+    public void exerciseIsNotCompleted() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                List<Exercise> list = Arrays.asList(
+                        new Exercise("hello-exerciseNames"),
+                        new Exercise("cool-exerciseNames"));
+
+                Course course = new Course("test-course123");
+                course.setExercises(list);
+
+                return Arrays.asList(course);
+            }
+        };
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        String[] args = {"exercises", "-n", "test-course123"};
+        app.run(args);
+        assertThat(io.out(), containsString("Not completed"));
+    }
+
+    @Test
+    public void exerciseHasBeenAttempted() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                List<Exercise> list = Arrays.asList(
+                        new Exercise("hello-exerciseNames"),
+                        new Exercise("cool-exerciseNames"));
+                list.get(1).setAttempted(true);
+
+                Course course = new Course("test-course123");
+                course.setExercises(list);
+
+                return Arrays.asList(course);
+            }
+        };
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        String[] args = {"exercises", "-n", "test-course123"};
+        app.run(args);
+        assertThat(io.out(), containsString("Attempted"));
+    }
+
+    @Test
+    public void exerciseDeadLinePassed() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                List<Exercise> list = Arrays.asList(
+                        new Exercise("hello-exerciseNames"),
+                        new Exercise("cool-exerciseNames"));
+                list.get(1).setDeadline("2014-09-10T14:00:00.000+03:00");
+                Course course = new Course("test-course123");
+                course.setExercises(list);
+
+                return Arrays.asList(course);
+            }
+        };
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        String[] args = {"exercises", "-n", "test-course123"};
+        app.run(args);
+        assertThat(io.out(), containsString("Deadline passed"));
     }
 }
