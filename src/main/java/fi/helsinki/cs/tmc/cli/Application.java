@@ -97,12 +97,11 @@ public class Application {
         }
 
         if (line.hasOption("h")) {
-            String[] helpArgs = {"-h"};
             if (commandName.equals("help")) {
                 runCommand(commandName, new String[0]);
                 return false;
             }
-            runCommand(commandName, helpArgs);
+            runCommand(commandName, new String[]{"-h"});
             return false;
         }
         if (line.hasOption("v")) {

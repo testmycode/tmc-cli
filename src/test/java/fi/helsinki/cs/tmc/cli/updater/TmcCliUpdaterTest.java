@@ -42,7 +42,7 @@ public class TmcCliUpdaterTest {
         apiLimitExeededJson = readResource("test-jsons/api_rate_limit_exeeded.json");
         assertNotNull(apiLimitExeededJson);
 
-        malformedJson = readResource("test-jsons/malformed.json");
+        malformedJson = latestJson.substring(latestJson.indexOf('{') + 1);
         assertNotNull(malformedJson);
 
         changedJson = readResource("test-jsons/changed.json");

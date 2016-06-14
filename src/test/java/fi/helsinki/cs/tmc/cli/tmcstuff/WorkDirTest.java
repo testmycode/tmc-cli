@@ -50,7 +50,7 @@ public class WorkDirTest {
         exercises.add(new Exercise("viikko1-teht1"));
         exercises.add(new Exercise("viikko2-teht2"));
         exercises.add(new Exercise("viikko2-subdir-teht3"));
-        CourseInfo info = new CourseInfo(new Settings(true), new Course("dirUtilTest"));
+        CourseInfo info = new CourseInfo(new Settings(), new Course("dirUtilTest"));
         info.setExercises(exercises);
         CourseInfoIo.save(info, tempDir.resolve(CourseInfoIo.COURSE_CONFIG));
     }
