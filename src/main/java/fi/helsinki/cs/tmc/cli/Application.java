@@ -44,6 +44,7 @@ public class Application {
     private Settings settings;
     private Io io;
     private WorkDir workDir;
+    private HashMap<String, String> properties;
 
     private Options options;
     private GnuParser parser;
@@ -56,6 +57,7 @@ public class Application {
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         this.io = io;
         this.workDir = new WorkDir();
+        this.properties = SettingsIo.loadProperties();
     }
 
     public Application(Io io, WorkDir workDir) {
@@ -242,46 +244,14 @@ public class Application {
         this.workDir = workDir;
     }
 
-    public void removeProperty(String prop) {
-        HashMap<String, String> props = getProperties();
-        props.remove(prop);
-        setProperties(props);
-    }
-
-    public void setProperty(String prop, String value) {
-        HashMap<String, String> props = getProperties();
-        if (value != null) {
-            props.put(prop, value);
-        } else {
-            props.remove(prop);
-        }
-        setProperties(props);
-    }
-
-    public void setProperty(String prop, int value) {
-        HashMap<String, String> props = getProperties();
-        props.put(prop, Integer.toString(value));
-        setProperties(props);
-    }
-
-    public String getPropertyString(String prop) {
-        HashMap<String, String> props = getProperties();
-        return props.get(prop);
-    }
-
-    public int getPropertyInt(String prop) throws NumberFormatException {
-        // If property is not set as integer or at all, throws exception
-        HashMap<String, String> props = getProperties();
-        return Integer.parseInt(props.get(prop));
-    }
-
-    private HashMap<String, String> getProperties() {
+    public HashMap<String, String> getProperties() {
         // Loads properties from the global configuration file in .config/tmc-cli/
-        return SettingsIo.loadProperties();
+        return (HashMap<String, String>) this.properties.clone();
     }
 
-    private Boolean setProperties(HashMap<String, String> properties) {
+    public Boolean setProperties(HashMap<String, String> properties) {
         // Saves properties to the global configuration file in .config/tmc-cli/
+        this.properties = properties;
         return SettingsIo.saveProperties(properties);
     }
 

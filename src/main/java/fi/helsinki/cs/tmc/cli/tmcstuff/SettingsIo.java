@@ -29,7 +29,12 @@ public class SettingsIo {
     // ACCOUNTS_CONFIG is the _global_ configuration file containing all
     // user login information including usernames, passwords (in plain text)
     // and servers. Is located under CONFIG_DIR
-    public static final String ACCOUNTS_CONFIG = "settings.json";
+    public static final String ACCOUNTS_CONFIG = "accounts.json";
+
+    // PROPERTIES_CONFIG is the _global_ configuration file containing
+    // tmc-cli's configuration and data, such as when to update when the client
+    //  was last updated. Is located under CONFIG_DIR
+    public static final String PROPERTIES_CONFIG = "properties.json";
 
     /**
      * Get the correct directory in which our config files go
@@ -58,8 +63,21 @@ public class SettingsIo {
         return configPath.resolve(CONFIG_DIR);
     }
 
-    private static Path getConfigFile(Path configRoot) {
+    private static Path getAccountsFile(Path configRoot) {
         Path file = configRoot.resolve(ACCOUNTS_CONFIG);
+        if (!Files.exists(configRoot)) {
+            try {
+                Files.createDirectories(configRoot).getParent();
+            } catch (Exception e) { }
+            try {
+                Files.createFile(configRoot);
+            } catch (Exception e) { }
+        }
+        return file;
+    }
+
+    private static Path getPropertiesFile(Path configRoot) {
+        Path file = configRoot.resolve(PROPERTIES_CONFIG);
         if (!Files.exists(configRoot)) {
             try {
                 Files.createDirectories(configRoot).getParent();
@@ -76,7 +94,7 @@ public class SettingsIo {
     }
 
     public static Boolean saveTo(Settings settings, Path configRoot) {
-        Path file = getConfigFile(configRoot);
+        Path file = getAccountsFile(configRoot);
         SettingsHolder holder;
         if (!Files.exists(file)) {
             holder = new SettingsHolder();
@@ -101,7 +119,7 @@ public class SettingsIo {
     }
 
     public static Settings loadFrom(String username, String server, Path configRoot) {
-        Path file = getConfigFile(configRoot);
+        Path file = getAccountsFile(configRoot);
         if (!Files.exists(file)) {
             return null;
         }
@@ -117,7 +135,7 @@ public class SettingsIo {
         try {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         } catch (IOException e) {
-            logger.error("Configuration file located, but failed to read from it", e);
+            logger.error("Accounts file located, but failed to read from it", e);
             return null;
         }
         return gson.fromJson(reader, SettingsHolder.class);
@@ -129,14 +147,38 @@ public class SettingsIo {
         try {
             Files.write(file, json);
         } catch (IOException e) {
-            logger.error("Could not write settings to configuration file", e);
+            logger.error("Could not write settings to accounts file", e);
+            return false;
+        }
+        return true;
+    }
+
+    private static HashMap<String, String> getPropertiesFromJson(Path file) {
+        Gson gson = new Gson();
+        Reader reader;
+        try {
+            reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            logger.error("Properties file located, but failed to read from it", e);
+            return null;
+        }
+        return gson.fromJson(reader, HashMap.class);
+    }
+
+    private static Boolean savePropertiesToJson(HashMap<String, String> properties, Path file) {
+        Gson gson = new Gson();
+        byte[] json = gson.toJson(properties).getBytes();
+        try {
+            Files.write(file, json);
+        } catch (IOException e) {
+            logger.error("Could not write properties to file", e);
             return false;
         }
         return true;
     }
 
     public static Boolean delete() {
-        Path file = getConfigFile(getDefaultConfigRoot());
+        Path file = getAccountsFile(getDefaultConfigRoot());
         try {
             Files.deleteIfExists(file);
         } catch (IOException e) {
@@ -147,15 +189,25 @@ public class SettingsIo {
     }
 
     public static HashMap<String, String> loadProperties() {
-        Path file = getConfigFile(getDefaultConfigRoot());
-        SettingsHolder holder = getHolderFromJson(file);
-        return holder.getProperties();
+        return loadPropertiesFrom(getDefaultConfigRoot());
+    }
+
+    public static HashMap<String, String> loadPropertiesFrom(Path path) {
+        Path file = getPropertiesFile(path);
+        HashMap<String, String> properties = getPropertiesFromJson(file);
+        if (properties != null) {
+            return properties;
+        } else {
+            return new HashMap<>();
+        }
     }
 
     public static Boolean saveProperties(HashMap<String, String> properties) {
-        Path file = getConfigFile(getDefaultConfigRoot());
-        SettingsHolder holder = getHolderFromJson(file);
-        holder.setProperties(properties);
-        return saveHolderToJson(holder, file);
+        return savePropertiesTo(properties, getDefaultConfigRoot());
+    }
+
+    public static Boolean savePropertiesTo(HashMap<String, String> properties, Path path) {
+        Path file = getPropertiesFile(path);
+        return savePropertiesToJson(properties, file);
     }
 }

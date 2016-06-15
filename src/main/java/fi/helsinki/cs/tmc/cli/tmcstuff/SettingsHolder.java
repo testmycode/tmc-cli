@@ -8,11 +8,9 @@ import java.util.HashMap;
  */
 public class SettingsHolder {
     private ArrayList<Settings> settingsArray;
-    private HashMap<String, String> properties;
 
     public SettingsHolder() {
         this.settingsArray = new ArrayList<>();
-        this.properties = new HashMap<>();
     }
 
     public Settings getSettings() {
@@ -72,14 +70,4 @@ public class SettingsHolder {
     public int settingsCount() {
         return this.settingsArray.size();
     }
-
-    public HashMap<String, String> getProperties() {
-        return this.properties;
-    }
-
-    public void setProperties(HashMap<String, String> properties) {
-        this.properties = properties;
-    }
-
-
 }
