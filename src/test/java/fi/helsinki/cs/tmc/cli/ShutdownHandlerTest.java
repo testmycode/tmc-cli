@@ -25,6 +25,6 @@ public class ShutdownHandlerTest {
     @Test
     public void printsAnsiResetAtRun() {
         shutdownHandler.run();
-        verify(mockIo).println(eq(Color.ANSI_RESET));
+        verify(mockIo).println(eq(Color.AnsiColor.ANSI_RESET.toString()));
     }
 }

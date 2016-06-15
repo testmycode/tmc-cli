@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 public class SettingsIoTest {
     private Settings settings;
@@ -133,5 +134,25 @@ public class SettingsIoTest {
         holder.getSettings("2", "1");
         Settings get = holder.getSettings();
         assertSame(wanted, get);
+    }
+
+    @Test
+    public void savingPropertiesWorks() {
+        HashMap<String, String> props = new HashMap<>();
+        props.put("lastupdated", "1970-01-01");
+        props.put("nextupdate", "2038-01-20");
+        SettingsIo.savePropertiesTo(props, tempDir);
+        assertTrue("Properties file exists",
+                Files.exists(tempDir.resolve(SettingsIo.PROPERTIES_CONFIG)));
+    }
+
+    @Test
+    public void loadingPropertiesWorks() {
+        HashMap<String, String> props = new HashMap<>();
+        props.put("lastupdated", "1970-01-01");
+        props.put("nextupdate", "2038-01-20");
+        SettingsIo.savePropertiesTo(props, tempDir);
+        HashMap<String, String> loadedProps = SettingsIo.loadPropertiesFrom(tempDir);
+        assertEquals(props, loadedProps);
     }
 }

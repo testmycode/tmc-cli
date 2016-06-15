@@ -9,9 +9,9 @@ import java.util.List;
 public class ResultPrinter {
 
     private static final String COMPILE_ERROR_MESSAGE
-            = Color.colorString("Failed to compile project", Color.ANSI_PURPLE);
-    private static final String FAIL = Color.colorString("Failed: ", Color.ANSI_RED);
-    private static final String PASS = Color.colorString("Passed: ", Color.ANSI_GREEN);
+            = Color.colorString("Failed to compile project", Color.AnsiColor.ANSI_PURPLE);
+    private static final String FAIL = Color.colorString("Failed: ", Color.AnsiColor.ANSI_RED);
+    private static final String PASS = Color.colorString("Passed: ", Color.AnsiColor.ANSI_GREEN);
     private static final String TAB = "        ";
     private static final char LF = '\n';
 
@@ -58,16 +58,16 @@ public class ResultPrinter {
         switch (result.getTestResultStatus()) {
             case NONE_FAILED:
                 msg = "All tests passed on server!";
-                msg = Color.colorString(msg, Color.ANSI_GREEN)
+                msg = Color.colorString(msg, Color.AnsiColor.ANSI_GREEN)
                         + "\nPoints permanently awarded: " + result.getPoints()
                         + "\nModel solution: " + result.getSolutionUrl();
                 break;
             case ALL_FAILED:
-                msg = Color.colorString("All tests failed on server.", Color.ANSI_RED)
+                msg = Color.colorString("All tests failed on server.", Color.AnsiColor.ANSI_RED)
                         + " Please review your answer";
                 break;
             case SOME_FAILED:
-                msg = Color.colorString("Some tests failed on server.", Color.ANSI_RED)
+                msg = Color.colorString("Some tests failed on server.", Color.AnsiColor.ANSI_RED)
                         + " Please review your answer";
                 break;
             default:
@@ -84,7 +84,7 @@ public class ResultPrinter {
         switch (result.status) {
             case PASSED:
                 msg = "All tests passed!";
-                msg = Color.colorString(msg, Color.ANSI_GREEN)
+                msg = Color.colorString(msg, Color.AnsiColor.ANSI_GREEN)
                         + " Submit to server with 'tmc submit'";
                 break;
             case TESTS_FAILED:

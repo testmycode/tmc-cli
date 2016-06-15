@@ -14,7 +14,7 @@ fi
 
 version=$("$java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
 if [ "$version" \< "1.7" ]; then
-    echo "You must have 1.7 installed."
+    echo "You must have at leasst Java 1.7 installed."
     exit 1
 fi
 
@@ -67,6 +67,7 @@ if [ "$1" == "++internal-update" ]; then
 	exit
 fi
 
+export COLUMNS=`tput cols`
 exec "$java" $java_args -jar $MYSELF "$@"
 
 exit 0 

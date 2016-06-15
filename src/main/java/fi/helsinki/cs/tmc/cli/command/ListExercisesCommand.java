@@ -90,20 +90,23 @@ public class ListExercisesCommand extends AbstractCommand {
             if (exercise.isCompleted()) {
                 if (exercise.requiresReview() && !exercise.isReviewed()) {
                     sb.append(Color.colorString(
-                            "Requires review: ", Color.ANSI_YELLOW) + exercise.getName() + "\n");
+                            "Requires review: ", Color.AnsiColor.ANSI_YELLOW)
+                            + exercise.getName() + "\n");
                 } else {
                     sb.append(Color.colorString(
-                            "Completed: ", Color.ANSI_GREEN) + exercise.getName() + "\n");
+                            "Completed: ", Color.AnsiColor.ANSI_GREEN) + exercise.getName()
+                            + "\n");
                 }
             } else if (exercise.hasDeadlinePassed()) {
                 sb.append(Color.colorString(
-                        "Deadline passed: ", Color.ANSI_PURPLE) + exercise.getName() + "\n");
+                        "Deadline passed: ", Color.AnsiColor.ANSI_PURPLE) + exercise.getName()
+                        + "\n");
             } else if (exercise.isAttempted()) {
                 sb.append(Color.colorString(
-                        "Attempted: ", Color.ANSI_BLUE) + exercise.getName() + "\n");
+                        "Attempted: ", Color.AnsiColor.ANSI_BLUE) + exercise.getName() + "\n");
             } else {
                 sb.append(Color.colorString(
-                        "Not completed: ", Color.ANSI_RED) + exercise.getName() + "\n");
+                        "Not completed: ", Color.AnsiColor.ANSI_RED) + exercise.getName() + "\n");
             }
         }
         if (pager) {
