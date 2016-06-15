@@ -25,7 +25,7 @@ public class TmcCliDualProgressObserver extends TmcCliProgressObserver {
         this.color1 = color1;
         this.color2 = color2;
         super.maxline = super.getMaxline();
-        this.pips1 = ((this.maxline / 3) * 2) - 11;
+        this.pips1 = ((this.maxline / 3) * 2) - 12;
         this.pips2 = this.maxline - this.pips1 - 17;
     }
 
@@ -45,7 +45,7 @@ public class TmcCliDualProgressObserver extends TmcCliProgressObserver {
         io.print("\r"
                 + stepsDoneString(stepsDone, stepsTotal)
                 + progressBar((double) stepsDone / stepsTotal, pips1, color1)
-                + percentage(progress)
+                + " " + percentage(progress)
                 + progressBar(progress, pips2, color2));
     }
 

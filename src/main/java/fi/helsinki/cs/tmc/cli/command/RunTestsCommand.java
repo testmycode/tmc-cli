@@ -61,8 +61,7 @@ public class RunTestsCommand extends AbstractCommand {
         List<String> exerciseNames = workDir.getExerciseNames();
 
         if (exerciseNames.isEmpty()) {
-            io.println("You have to be in a course directory to"
-                    + " run tests");
+            io.println("You have to be in a course directory to run tests");
             return;
         }
 
@@ -86,9 +85,9 @@ public class RunTestsCommand extends AbstractCommand {
                 //name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 
-                runResult = core.runTests(new TmcCliProgressObserver(), exercise).call();
+                runResult = core.runTests(progObs, exercise).call();
                 resultPrinter.printRunResult(runResult);
-                progObs.changeStepBy(1);
+                // progObs.changeStepBy(1);
             }
             io.println("");
 

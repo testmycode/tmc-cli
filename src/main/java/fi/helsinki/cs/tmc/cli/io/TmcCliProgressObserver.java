@@ -34,7 +34,8 @@ public class TmcCliProgressObserver extends ProgressObserver {
         this.color = color;
     }
 
-    protected int getMaxline() {
+    // Clearly this is not the best place for this function
+    public static int getMaxline() {
         String colEnv = System.getenv("COLUMNS");
         if (colEnv != null && !colEnv.equals("")) {
             // Determine the terminal width - this won't work on Windows
@@ -63,8 +64,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
             lastMessage = message;
             io.println("");
         }
-        this.io.print("\r" + this.percentage(progress)
-                + this.progressBar(progress, this.pips, this.color));
+        this.io.print("\r" + this.progressBar(progress, this.maxline, this.color));
     }
 
     protected void printMessage(String message) {
@@ -108,21 +108,36 @@ public class TmcCliProgressObserver extends ProgressObserver {
         io.print(sb);
     }
 
-    protected String progressBar(double progress, int pips, Color.AnsiColor color) {
-        int pipsDone = (int) (pips * progress);
-        StringBuilder sb = new StringBuilder(pips + 2);
-        for (int i = 0; i < pipsDone; i++) {
-            sb.append(PIPCHAR);
-        }
-        for (int i = 0; i < pips - pipsDone; i++) {
-            sb.append(EMPTYCHAR);
-        }
-        return BARLEFT
-                + Color.colorString(sb.toString(), color)
-                + BARRIGHT;
+    public static String progressBar(double progress, int length, Color.AnsiColor color) {
+        return progressBar(progress, length, color, color, BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
     }
 
-    protected String percentage(double progress) {
+    public static String progressBar(
+            double progress,
+            int length,
+            Color.AnsiColor color1,
+            Color.AnsiColor color2,
+            char barLeft,
+            char barRight,
+            char donePip,
+            char notDonePip) {
+        int pipsDone = (int) ((length - 6) * progress);
+        StringBuilder sbLeft = new StringBuilder(pipsDone);
+        StringBuilder sbRight = new StringBuilder((length - 6) - pipsDone);
+        for (int i = 0; i < pipsDone; i++) {
+            sbLeft.append(donePip);
+        }
+        for (int i = 0; i < (length - 6) - pipsDone; i++) {
+            sbRight.append(notDonePip);
+        }
+        return percentage(progress)
+                + barLeft
+                + Color.colorString(sbLeft.toString(), color1)
+                + Color.colorString(sbRight.toString(), color2)
+                + barRight;
+    }
+
+    protected static String percentage(double progress) {
         int percent = (int) (progress * 100);
         String percentage;
         if (percent < 10) {
@@ -134,5 +149,4 @@ public class TmcCliProgressObserver extends ProgressObserver {
         }
         return percentage + percent + "%";
     }
-    
 }
