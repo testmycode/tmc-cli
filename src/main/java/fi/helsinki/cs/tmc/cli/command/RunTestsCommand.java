@@ -89,8 +89,8 @@ public class RunTestsCommand extends AbstractCommand {
             }
 
         } catch (Exception ex) {
-            io.println("Failed to run tests. Please make sure you are in"
-                    + " course and exercise directory.");
+            io.println("Failed to run tests.\n"
+                    + ex.getMessage());
             logger.error("Failed to run tests.", ex);
         }
     }
