@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -35,7 +36,13 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         Application app = getApp();
         TmcCore core = app.getTmcCore();
+        WorkDir workDir = getApp().getWorkDir();
         if (core == null) {
+            return;
+        }
+
+        if (workDir.getConfigFile() != null) {
+            io.println("Can't download a course inside a course directory.");
             return;
         }
 
