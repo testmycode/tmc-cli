@@ -85,9 +85,7 @@ public class SubmitCommand extends AbstractCommand {
 //        }
 
         if (exercises.isEmpty()) {
-            // This should be fixed now
-            io.println("You have to be in the exercise root directory to submit."
-                    + " (This is a known problem.)");
+            io.println("You have to be in a course directory to submit.");
             return;
         }
 

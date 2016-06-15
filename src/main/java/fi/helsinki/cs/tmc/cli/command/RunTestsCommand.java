@@ -61,8 +61,8 @@ public class RunTestsCommand extends AbstractCommand {
 
         if (exerciseNames.isEmpty()) {
             // This should be fixed
-            io.println("You have to be in the exercise root directory to"
-                    + " run tests. (This is a known problem.)");
+            io.println("You have to be in a course directory to"
+                    + " run tests");
             return;
         }
 
