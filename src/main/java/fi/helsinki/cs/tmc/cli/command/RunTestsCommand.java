@@ -60,7 +60,6 @@ public class RunTestsCommand extends AbstractCommand {
         List<String> exerciseNames = workDir.getExerciseNames();
 
         if (exerciseNames.isEmpty()) {
-            // This should be fixed
             io.println("You have to be in a course directory to"
                     + " run tests");
             return;
