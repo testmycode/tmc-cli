@@ -53,7 +53,7 @@ public class UpdateCommand extends AbstractCommand {
         List<Exercise> exercises;
 
         try {
-            exercises = core.getExerciseUpdates(new TmcCliProgressObserver(), course).call();
+            exercises = core.getExerciseUpdates(new TmcCliProgressObserver(io), course).call();
         } catch (Exception e) {
             System.out.println(e);
             return;

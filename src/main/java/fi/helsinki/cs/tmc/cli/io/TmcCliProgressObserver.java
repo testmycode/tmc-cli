@@ -6,19 +6,17 @@ import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
  * Created by jclakkis on 27.5.2016.
  */
 public class TmcCliProgressObserver extends ProgressObserver {
-    private static final char PIPCHAR = '#';
-    private static final char EMPTYCHAR = ' ';
-    private static final char BARLEFT = '[';
-    private static final char BARRIGHT = ']';
-    private static final char MIDDLE_A = '-';
-    private static final char MIDDLE_B = ' ';
-    private final Io io;
+    protected static final char PIPCHAR = '#';
+    protected static final char EMPTYCHAR = ' ';
+    protected static final char BARLEFT = '[';
+    protected static final char BARRIGHT = ']';
 
+    protected Io io;
     private int pips;
-    private int maxline;
+    protected int maxline;
     private Color.AnsiColor color;
-    private String lastMessage;
-    private Boolean hasProgressBar;
+    protected String lastMessage;
+    protected Boolean hasProgressBar;
 
     public TmcCliProgressObserver() {
         this(new TerminalIo());
@@ -31,18 +29,22 @@ public class TmcCliProgressObserver extends ProgressObserver {
     public TmcCliProgressObserver(Io io, Color.AnsiColor color) {
         this.hasProgressBar = false;
         this.io = io;
+        this.maxline = getMaxline();
+        this.pips = this.maxline - 6;
+        this.color = color;
+    }
+
+    protected int getMaxline() {
         String colEnv = System.getenv("COLUMNS");
-        if (colEnv != null) {
+        if (colEnv != null && !colEnv.equals("")) {
             // Determine the terminal width - this won't work on Windows
             // Let's just hope our Windows users won't narrow their command prompt
             // We'll also enforce a minimum size of 20 columns
 
-            this.maxline = Math.max(Integer.parseInt(colEnv), 20);
+            return Math.max(Integer.parseInt(colEnv), 20);
         } else {
-            this.maxline = 70;
+            return 70;
         }
-        this.pips = this.maxline - 6;
-        this.color = color;
     }
 
     @Override
@@ -61,10 +63,11 @@ public class TmcCliProgressObserver extends ProgressObserver {
             lastMessage = message;
             io.println("");
         }
-        this.io.print("\r" + this.percentage(progress) + this.progressBar(progress));
+        this.io.print("\r" + this.percentage(progress)
+                + this.progressBar(progress, this.pips, this.color));
     }
 
-    private void printMessage(String message) {
+    protected void printMessage(String message) {
         message = shorten(message, maxline);
         io.print("\r" + message);
         flush(maxline - message.length());
@@ -76,14 +79,16 @@ public class TmcCliProgressObserver extends ProgressObserver {
 
     @Override
     public void end(long id) {
+        // Most likely not going to be used
         if (this.hasProgressBar) {
-            this.io.println("\r" + this.percentage(1.0) + this.progressBar(1.0));
+            this.io.println("\r" + this.percentage(1.0)
+                    + this.progressBar(1.0, this.pips, this.color));
         } else {
             this.io.println("");
         }
     }
 
-    private String shorten(String str, int length) {
+    protected String shorten(String str, int length) {
         if (str.length() <= length) {
             return str;
         } else {
@@ -91,28 +96,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
         }
     }
 
-    private String fillMiddle(int length) {
-        // Fill the space between the message and the progress bar with lines
-        if (length <= 0) {
-            return "";
-        } else if (length == 1) {
-            return " ";
-        } else if (length == 2) {
-            return "  ";
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(' ');
-        for (int i = length - 1; i > 0; i--) {
-            if (i % 2 == 0) {
-                sb.append(MIDDLE_A);
-            } else {
-                sb.append(MIDDLE_B);
-            }
-        }
-        return sb.toString();
-    }
-
-    private void flush(int length) {
+    protected void flush(int length) {
         // "Flush" the rest of the line if the next message is shorter than the last
         if (length == 0) {
             return;
@@ -124,21 +108,21 @@ public class TmcCliProgressObserver extends ProgressObserver {
         io.print(sb);
     }
 
-    private String progressBar(double progress) {
-        int pipsDone = (int) (this.pips * progress);
-        StringBuilder sb = new StringBuilder(this.pips);
+    protected String progressBar(double progress, int pips, Color.AnsiColor color) {
+        int pipsDone = (int) (pips * progress);
+        StringBuilder sb = new StringBuilder(pips + 2);
         for (int i = 0; i < pipsDone; i++) {
             sb.append(PIPCHAR);
         }
-        for (int i = 0; i < this.pips - pipsDone; i++) {
+        for (int i = 0; i < pips - pipsDone; i++) {
             sb.append(EMPTYCHAR);
         }
         return BARLEFT
-                + Color.colorString(sb.toString(), this.color)
+                + Color.colorString(sb.toString(), color)
                 + BARRIGHT;
     }
 
-    private String percentage(double progress) {
+    protected String percentage(double progress) {
         int percent = (int) (progress * 100);
         String percentage;
         if (percent < 10) {

@@ -103,7 +103,7 @@ public class ListExercisesCommand extends AbstractCommand {
                         + "\n");
             } else if (exercise.isAttempted()) {
                 sb.append(Color.colorString(
-                        "Attempted: ", Color.AnsiColor.ANSI_BLUE) + exercise.getName() + "\n");
+                        "Attempted: ", Color.AnsiColor.ANSI_YELLOW) + exercise.getName() + "\n");
             } else {
                 sb.append(Color.colorString(
                         "Not completed: ", Color.AnsiColor.ANSI_RED) + exercise.getName() + "\n");
