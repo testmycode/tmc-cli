@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -57,13 +58,16 @@ public class RunTestsCommand extends AbstractCommand {
         }
         String courseName = getCourseName(workDir);
         List<String> exerciseNames = workDir.getExerciseNames();
-        
+
         if (exerciseNames.isEmpty()) {
             // This should be fixed
             io.println("You have to be in the exercise root directory to"
                     + " run tests. (This is a known problem.)");
             return;
         }
+
+        // Local tests don't require login so make sure tmcCore is never null.
+        app.createTmcCore(new Settings());
 
         TmcCore core = app.getTmcCore();
         if (core == null) {
