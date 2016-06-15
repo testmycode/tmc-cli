@@ -18,7 +18,7 @@ public class ShutdownHandler extends Thread {
     public void run() {
         // Reset terminal color back to default in case we exit in the middle of
         // colored printing. Otherwise user is left with a colored terminal.
-        io.println(Color.ANSI_RESET);
+        io.println(Color.AnsiColor.ANSI_RESET.toString());
     }
 
 }
