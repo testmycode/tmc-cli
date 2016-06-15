@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -42,39 +43,40 @@ public class SubmitCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         this.io = io;
 
-        List<String> exerciseNames = parseArgs(args);
-        if (exerciseNames == null) {
+        List<String> exercisesFromArgs = parseArgs(args);
+        if (exercisesFromArgs == null) {
             return;
         }
+
         TmcCore core = getApp().getTmcCore();
         if (core == null) {
             return;
         }
 
-        WorkDir workDir = getApp().getWorkDir();
-
-        Path courseDir = workDir.getCourseDirectory();
-
-        for (String exercise : exerciseNames) {
+        Application app = getApp();
+        WorkDir workDir = app.getWorkDir();
+        for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
                 io.println("Error: '" + exercise + "' is not a valid exercise.");
                 return;
             }
         }
-        if (courseDir == null) {
-            io.println("Not a course directory");
+
+        List<String> exerciseNames = workDir.getExerciseNames();
+        if (exerciseNames.isEmpty()) {
+            io.println("You have to be in a course directory to"
+                    + " submit");
             return;
         }
 
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
         String courseName = info.getCourseName();
         Course course = TmcUtil.findCourse(core, courseName);
+
         if (course == null) {
             io.println("Could not fetch course info from server.");
             return;
         }
-
-        List<String> exercises = workDir.getExerciseNames();
 
         // Abort if user gave invalid exercise name as argument.
 //        for (String exerciseName : exerciseNames) {
@@ -86,7 +88,7 @@ public class SubmitCommand extends AbstractCommand {
 
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
 
-        for (String exerciseName : exercises) {
+        for (String exerciseName : exerciseNames) {
             io.println(Color.colorString("Submitting: " + exerciseName, Color.ANSI_YELLOW));
             SubmissionResult result = TmcUtil.submitExercise(core, course, exerciseName);
             if (result == null) {
