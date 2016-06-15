@@ -18,6 +18,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     private int maxline;
     private Color.AnsiColor color;
     private String lastMessage;
+    private Boolean hasProgressBar;
 
     public TmcCliProgressObserver() {
         this(new TerminalIo());
@@ -28,6 +29,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     }
 
     public TmcCliProgressObserver(Io io, Color.AnsiColor color) {
+        this.hasProgressBar = false;
         this.io = io;
         String colEnv = System.getenv("COLUMNS");
         if (colEnv != null) {
@@ -35,9 +37,9 @@ public class TmcCliProgressObserver extends ProgressObserver {
             // Let's just hope our Windows users won't narrow their command prompt
             // We'll also enforce a minimum size of 20 columns
 
-            this.maxline = Math.max(Integer.parseInt(colEnv) - 1, 20);
+            this.maxline = Math.max(Integer.parseInt(colEnv), 20);
         } else {
-            this.maxline = 69;
+            this.maxline = 70;
         }
         this.pips = this.maxline - 6;
         this.color = color;
@@ -53,6 +55,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
 
     @Override
     public void progress(long id, Double progress, String message) {
+        this.hasProgressBar = true;
         if (lastMessage == null || !lastMessage.equals(message)) {
             printMessage(message);
             lastMessage = message;
@@ -73,7 +76,11 @@ public class TmcCliProgressObserver extends ProgressObserver {
 
     @Override
     public void end(long id) {
-        this.io.println("");
+        if (this.hasProgressBar) {
+            this.io.println("\r" + this.percentage(1.0) + this.progressBar(1.0));
+        } else {
+            this.io.println("");
+        }
     }
 
     private String shorten(String str, int length) {
