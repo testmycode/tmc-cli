@@ -84,11 +84,6 @@ public class SubmitCommand extends AbstractCommand {
 //            }
 //        }
 
-        if (exercises.isEmpty()) {
-            io.println("You have to be in a course directory to submit.");
-            return;
-        }
-
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
 
         for (String exerciseName : exercises) {
