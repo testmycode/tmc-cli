@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public class TmcUtil {
+
     private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
 
     public static List<Course> listCourses(TmcCore core) {
@@ -90,6 +92,17 @@ public class TmcUtil {
                     exercise).call();
         } catch (Exception e) {
             logger.warn("Failed to submit the exercise", e);
+            return null;
+        }
+    }
+
+    public static GetUpdatableExercises.UpdateResult getUpdatableExercises(
+            TmcCore core, Course course) {
+        try {
+            return core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course)
+                    .call();
+        } catch (Exception e) {
+            System.out.println(e);
             return null;
         }
     }
