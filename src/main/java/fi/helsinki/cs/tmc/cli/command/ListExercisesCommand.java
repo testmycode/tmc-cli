@@ -26,7 +26,7 @@ public class ListExercisesCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {
-        options.addOption("n", "no-pager", false, "don't use a pager to list the exercises");
+        options.addOption("n", "no-pager", false, "Don't use a pager to list the exercises");
     }
 
     @Override
@@ -48,8 +48,6 @@ public class ListExercisesCommand extends AbstractCommand {
                 courseName = courseinfo.getCourseName();
 
             } else {
-                //TODO replace this with help message.
-                this.io.println("USAGE: tmc exercises COURSE");
                 this.io.println("No course specified. Either run the command "
                         + "inside a course directory or enter\n"
                         + "the course as a parameter.");
