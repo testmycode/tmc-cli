@@ -149,4 +149,14 @@ public class TmcCliProgressObserver extends ProgressObserver {
         }
         return percentage + percent + "%";
     }
+
+    public static String getPassedTestsBar(int passed, int total) {
+        return TmcCliProgressObserver.progressBar(
+                (double) passed / total,
+                TmcCliProgressObserver.getMaxline(),
+                Color.AnsiColor.ANSI_GREEN,
+                Color.AnsiColor.ANSI_RED,
+                '[', ']', '#', '-'
+        );
+    }
 }
