@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
@@ -87,6 +88,9 @@ public class SubmitCommand extends AbstractCommand {
 //        }
 
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
+        int passed = 0;
+        int total = 0;
+        Boolean isOnlyExercise = exerciseNames.size() == 1;
 
         for (String exerciseName : exerciseNames) {
             io.println(Color.colorString("Submitting: " + exerciseName,
@@ -95,9 +99,16 @@ public class SubmitCommand extends AbstractCommand {
             if (result == null) {
                 io.println("Submission failed.");
             } else {
-                resultPrinter.printSubmissionResult(result);
+                resultPrinter.printSubmissionResult(result, isOnlyExercise);
+                total += result.getTestCases().size();
+                passed += ResultPrinter.passedTests(result.getTestCases());
             }
+        }
+        if (total > 0 && !isOnlyExercise) {
+            // Print a progress bar showing how the ratio of passed exercises
             io.println("");
+            io.println("Total tests passed: " + passed + "/" + total);
+            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
         }
     }
 
@@ -106,4 +117,6 @@ public class SubmitCommand extends AbstractCommand {
         this.showDetails = args.hasOption("d");
         return args.getArgList();
     }
+
+
 }

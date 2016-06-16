@@ -88,7 +88,9 @@ public class TmcUtil {
         //String fixedName = exercise.getName().replace("-", File.separator);
         //exercise.setName(fixedName);
         try {
-            return core.submit(new TmcCliProgressObserver(),
+            // TODO: replace null-observer with a real observer
+            // once it shows up right in core/langs
+            return core.submit(ProgressObserver.NULL_OBSERVER,
                     exercise).call();
         } catch (Exception e) {
             logger.warn("Failed to submit the exercise", e);
