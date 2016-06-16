@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.logging.Level;
 
 public class TmcCliUpdater {
 
@@ -87,25 +88,34 @@ public class TmcCliUpdater {
         runNewTmcCliBinary(destination.getAbsolutePath());
     }
 
-    protected InputStream fetchHttpEntity(String url) {
+    protected byte[] fetchHttpEntity(String url) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(url);
         httpGet.addHeader("User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
 
-        InputStream stream = null;
+        HttpEntity entity;
+        byte[] content;
         try {
             CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
-            HttpEntity entity = httpResponse.getEntity();
-            if (entity != null) {
-                stream = entity.getContent();
+            entity = httpResponse.getEntity();
+            if (entity == null) {
+                logger.warn("Failed to get http request content.");
+                httpGet.releaseConnection();
+                return null;
             }
 
         } catch (IOException ex) {
             logger.warn("Failed to create http connection to github.", ex);
+            return null;
         }
-
+        try {
+            content = IOUtils.toByteArray(entity.getContent());
+        } catch (IOException ex) {
+            logger.warn("Failed to fetch data from github", ex);
+            content = null;
+        }
         httpGet.releaseConnection();
-        return stream;
+        return content;
     }
 
     /**
@@ -113,12 +123,12 @@ public class TmcCliUpdater {
      * tmc-cli release.
      */
     protected String fetchLatestReleaseJson() {
-        InputStream stream = fetchHttpEntity(LATEST_RELEASE_URL);
-        if (stream == null) {
+        byte[] content = fetchHttpEntity(LATEST_RELEASE_URL);
+        if (content == null) {
             return null;
         }
         try {
-            return IOUtils.toString(stream, "UTF-8");
+            return new String(content, "UTF-8");
         } catch (IOException ex) {
             logger.warn("Failed to fetch JSON data for the latest release", ex);
         }
@@ -130,13 +140,13 @@ public class TmcCliUpdater {
      * file.
      */
     protected void fetchTmcCliBinary(String downloadUrl, File destination) {
-        InputStream stream = fetchHttpEntity(downloadUrl);
-        if (stream == null) {
+        byte[] content = fetchHttpEntity(downloadUrl);
+        if (content == null) {
             io.println("Failed to download tmc-cli.");
             return;
         }
         try {
-            FileUtils.copyInputStreamToFile(stream, destination);
+            FileUtils.writeByteArrayToFile(destination, content);
         } catch (IOException ex) {
             io.println("Failed to write the new version into \'" + destination + "\'.");
         }
