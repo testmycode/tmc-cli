@@ -35,28 +35,28 @@ public class ResultPrinterTest {
 
     @Test
     public void printSubmissionResultWorksIfResultIsNull() {
-        printer.printSubmissionResult(null);
+        printer.printSubmissionResult(null, false);
         assertTrue(io.getPrint().isEmpty());
     }
 
     @Test
     public void printSubmissionResultWorksIfAllTestsPass() {
         when(mockSubResult.getTestResultStatus()).thenReturn(TestResultStatus.NONE_FAILED);
-        printer.printSubmissionResult(mockSubResult);
+        printer.printSubmissionResult(mockSubResult, false);
         assertTrue(io.getPrint().contains("All tests passed on server!"));
     }
 
     @Test
     public void printSubmissionResultWorksIfAllTestsFail() {
         when(mockSubResult.getTestResultStatus()).thenReturn(TestResultStatus.ALL_FAILED);
-        printer.printSubmissionResult(mockSubResult);
+        printer.printSubmissionResult(mockSubResult, false);
         assertTrue(io.getPrint().contains("All tests failed on server."));
     }
 
     @Test
     public void printSubmissionResultWorksIfSomeTestsFail() {
         when(mockSubResult.getTestResultStatus()).thenReturn(TestResultStatus.SOME_FAILED);
-        printer.printSubmissionResult(mockSubResult);
+        printer.printSubmissionResult(mockSubResult, false);
         assertTrue(io.getPrint().contains("Some tests failed on server."));
     }
 
