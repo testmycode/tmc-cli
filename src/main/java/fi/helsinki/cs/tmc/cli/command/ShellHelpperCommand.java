@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-@Command(name = "shell-helpper", desc = "Submit exercises")
+@Command(name = "shell-helpper", desc = "Used by autocomplete to extract internal values.")
 public class ShellHelpperCommand extends AbstractCommand {
 
     @Override
@@ -25,6 +25,8 @@ public class ShellHelpperCommand extends AbstractCommand {
                 Command command = CommandFactory.getCommand(commandClass);
                 io.println(command.name());
             }
+        } else {
+            io.println("This is only for internal usage.");
         }
     }
     
