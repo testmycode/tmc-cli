@@ -47,6 +47,9 @@ public class HelpCommand extends AbstractCommand {
             if ((Class)commandClass == (Class)TestCommand.class) {
                 continue;
             }
+            if ((Class)commandClass == (Class)ShellHelperCommand.class) {
+                continue;
+            }
             strings.add(createCommandString(command));
         }
         return strings;
@@ -54,7 +57,7 @@ public class HelpCommand extends AbstractCommand {
     
     private String createCommandString(Command command) {
         StringBuilder builder = new StringBuilder();
-        builder.append("  " + command.name());
+        builder.append("  ").append(command.name());
         for (int i = 0; i < longestName - command.name().length() + 2; i++) {
             builder.append(" ");
         }
