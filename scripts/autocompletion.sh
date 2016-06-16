@@ -3,6 +3,8 @@
 # SCRIPT_PATH will be filled by stub script
 alias tmc="$SCRIPT_PATH/tmc"
 
+tmcCommands=\$(tmc shell-helpper -c)
+
 _tmc_opts()
 {
   local cur
@@ -10,11 +12,11 @@ _tmc_opts()
   # By convention, it's named "cur" but this isn't strictly necessary.
 
   COMPREPLY=()
-  cur=\${COMP_WORDS[COMP_CWORD]}
+  cur="\${COMP_WORDS[COMP_CWORD]}"
 
   case "\$cur" in
     -*)
-      COMPREPLY=( \$( compgen -W "-v -h --version --help" -- \$cur ) )
+      COMPREPLY=( \$( compgen -W "-v -h --version --help" -- "\$cur" ) )
       return 0
       ;;
 #   xx) May add more cases here.
@@ -22,7 +24,7 @@ _tmc_opts()
 #   zz)
   esac
 
-  COMPREPLY=( \$( compgen -W "help download list-courses easter-egg list-exercises login" -- \$cur ) )
+  COMPREPLY=( \$( compgen -W "\$tmcCommands" -- "\$cur" ) )
   return 0
 }
 
