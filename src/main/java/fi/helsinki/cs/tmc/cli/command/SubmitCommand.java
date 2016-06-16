@@ -103,10 +103,10 @@ public class SubmitCommand extends AbstractCommand {
                 total += result.getTestCases().size();
                 passed += ResultPrinter.passedTests(result.getTestCases());
             }
-            io.println("");
         }
         if (total > 0 && !isOnlyExercise) {
             // Print a progress bar showing how the ratio of passed exercises
+            io.println("");
             io.println("Total tests passed: " + passed + "/" + total);
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
         }

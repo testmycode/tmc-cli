@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -76,20 +77,29 @@ public class RunTestsCommand extends AbstractCommand {
         ResultPrinter resultPrinter
                 = new ResultPrinter(io, this.showDetails, this.showPassed);
         RunResult runResult;
+        Boolean isOnlyExercise = exerciseNames.size() == 1;
 
         try {
-            TmcCliDualProgressObserver progObs = new TmcCliDualProgressObserver(
-                    this.io, exerciseNames.size());
+            int total = 0;
+            int passed = 0;
+            // TODO: use the proper progress observer once core/langs uses it correctly
             for (String name : exerciseNames) {
+
                 io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
                 //name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 
-                runResult = core.runTests(progObs, exercise).call();
-                resultPrinter.printRunResult(runResult);
-                // progObs.changeStepBy(1);
+                runResult = core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
+                resultPrinter.printRunResult(runResult, isOnlyExercise);
+                total += runResult.testResults.size();
+                passed += ResultPrinter.passedTests(runResult.testResults);
             }
-            io.println("");
+            if (total > 0 && !isOnlyExercise) {
+                // Print a progress bar showing how the ratio of passed exercises
+                io.println("");
+                io.println("Total tests passed: " + passed + "/" + total);
+                io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+            }
 
         } catch (Exception ex) {
             io.println("Failed to run tests.\n"
