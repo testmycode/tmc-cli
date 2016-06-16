@@ -90,7 +90,7 @@ public class LoginCommand extends AbstractCommand {
         app.createTmcCore(settings);
         TmcCore core = app.getTmcCore();
         Callable<List<Course>> callable = core.listCourses(
-                new TmcCliProgressObserver());
+                new TmcCliProgressObserver(io));
 
         try {
             callable.call();

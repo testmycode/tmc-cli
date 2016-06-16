@@ -90,7 +90,7 @@ public class PasteCommand extends AbstractCommand {
         CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(
-                new TmcCliProgressObserver(), exercise, message);
+                new TmcCliProgressObserver(io), exercise, message);
         URI uri;
 
         try {
