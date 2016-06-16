@@ -16,13 +16,10 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
 import java.util.List;
 
 @Command(name = "submit", desc = "Submit exercises")
@@ -79,14 +76,6 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        // Abort if user gave invalid exercise name as argument.
-//        for (String exerciseName : exerciseNames) {
-//            if (!exercises.contains(exerciseName)) {
-//                io.println("Could not find exercise '" + exerciseName + "'");
-//                return;
-//            }
-//        }
-
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
         int passed = 0;
         int total = 0;
@@ -117,6 +106,4 @@ public class SubmitCommand extends AbstractCommand {
         this.showDetails = args.hasOption("d");
         return args.getArgList();
     }
-
-
 }
