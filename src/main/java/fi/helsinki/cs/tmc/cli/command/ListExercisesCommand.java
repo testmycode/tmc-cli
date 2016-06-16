@@ -49,7 +49,7 @@ public class ListExercisesCommand extends AbstractCommand {
 
             } else {
                 //TODO replace this with help message.
-                this.io.println("USAGE: tmc list-exercises COURSE");
+                this.io.println("USAGE: tmc exercises COURSE");
                 this.io.println("No course specified. Either run the command "
                         + "inside a course directory or enter\n"
                         + "the course as a parameter.");

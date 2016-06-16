@@ -60,9 +60,8 @@ public class RunTestsCommand extends AbstractCommand {
         List<String> exerciseNames = workDir.getExerciseNames();
 
         if (exerciseNames.isEmpty()) {
-            // This should be fixed
-            io.println("You have to be in the exercise root directory to"
-                    + " run tests. (This is a known problem.)");
+            io.println("You have to be in a course directory to"
+                    + " run tests");
             return;
         }
 
@@ -90,8 +89,8 @@ public class RunTestsCommand extends AbstractCommand {
             }
 
         } catch (Exception ex) {
-            io.println("Failed to run tests. Please make sure you are in"
-                    + " course and exercise directory.");
+            io.println("Failed to run tests.\n"
+                    + ex.getMessage());
             logger.error("Failed to run tests.", ex);
         }
     }
