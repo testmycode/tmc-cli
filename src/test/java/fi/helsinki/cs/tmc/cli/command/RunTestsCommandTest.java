@@ -105,7 +105,7 @@ public class RunTestsCommandTest {
         app.setWorkdir(workDir);
         String[] args = {"test"};
         app.run(args);
-        assertTrue(io.getPrint().contains("You have to be in the exercise root"));
+        assertTrue(io.getPrint().contains("You have to be in a course directory"));
     }
 
     @Test
