@@ -160,4 +160,37 @@ public class UpdateCommandTest {
         verifyStatic(times(1));
         CourseInfoIo.save(any(CourseInfo.class), any(Path.class));
     }
+
+    @Test
+    public void updateIfExerciseHasBeenChanged() {
+        String changedExercise = EXERCISE1_NAME;
+        ArrayList<Exercise> changedExercises = new ArrayList<>();
+        changedExercises.add(new Exercise(changedExercise, COURSE_NAME));
+
+        mockUpdateResult = mock(UpdateResult.class);
+        when(mockUpdateResult.getNewExercises()).thenReturn(new ArrayList<Exercise>());
+        when(mockUpdateResult.getUpdatedExercises()).thenReturn(changedExercises);
+        when(TmcUtil.getUpdatableExercises(any(TmcCore.class), any(Course.class)))
+                .thenReturn(mockUpdateResult);
+
+        when(TmcUtil.downloadExercises(any(TmcCore.class), any(List.class)))
+                .thenReturn(changedExercises);
+
+        Course foundCourse = new Course(COURSE_NAME);
+        ArrayList<Exercise> allAvailableExercises = new ArrayList<>();
+        allAvailableExercises.add(new Exercise(EXERCISE1_NAME, COURSE_NAME));
+        allAvailableExercises.add(new Exercise(EXERCISE2_NAME, COURSE_NAME));
+        foundCourse.setExercises(allAvailableExercises);
+        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(foundCourse);
+
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        String[] args = {"update"};
+        app.run(args);
+
+        assertThat(io.out(), containsString("Modified exercises:"));
+        assertThat(io.out(), containsString(changedExercise));
+
+        verifyStatic(times(1));
+        CourseInfoIo.save(any(CourseInfo.class), any(Path.class));
+    }
 }
