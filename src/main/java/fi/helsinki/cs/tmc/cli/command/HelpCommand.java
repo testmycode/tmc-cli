@@ -47,7 +47,7 @@ public class HelpCommand extends AbstractCommand {
             if ((Class)commandClass == (Class)TestCommand.class) {
                 continue;
             }
-            if ((Class)commandClass == (Class)ShellHelpperCommand.class) {
+            if ((Class)commandClass == (Class)ShellHelperCommand.class) {
                 continue;
             }
             strings.add(createCommandString(command));

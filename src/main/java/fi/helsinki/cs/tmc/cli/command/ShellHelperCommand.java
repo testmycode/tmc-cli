@@ -8,8 +8,8 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-@Command(name = "shell-helpper", desc = "Used by autocomplete to extract internal values.")
-public class ShellHelpperCommand extends AbstractCommand {
+@Command(name = "shell-helper", desc = "Used by autocomplete to extract internal values.")
+public class ShellHelperCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {

@@ -3,7 +3,7 @@
 # SCRIPT_PATH will be filled by stub script
 alias tmc="$SCRIPT_PATH/tmc"
 
-tmcCommands=\$(tmc shell-helpper -c)
+tmcCommands=\$(tmc shell-helper -c)
 
 _tmc_opts()
 {
