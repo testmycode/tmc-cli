@@ -19,6 +19,8 @@ public class ResultPrinter {
 
     private boolean showDetails;
     private boolean showPassed;
+    private int passed;
+    private int total;
 
     public ResultPrinter(Io io, boolean showDetails, boolean showPassed) {
         this.io = io;
@@ -42,10 +44,13 @@ public class ResultPrinter {
         this.showPassed = showPassed;
     }
 
-    public void printSubmissionResult(SubmissionResult result) {
+    public void printSubmissionResult(SubmissionResult result, Boolean printProgressBar) {
         if (result == null) {
             return;
         }
+
+        this.total = result.getTestCases().size();
+        this.passed = passedTests(result.getTestCases());
 
         printTestResults(result.getTestCases());
 
@@ -54,6 +59,9 @@ public class ResultPrinter {
             io.println(result.getError());
         }
 
+        if (printProgressBar && this.total > 0) {
+            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+        }
         String msg = null;
         switch (result.getTestResultStatus()) {
             case NONE_FAILED:
@@ -75,10 +83,17 @@ public class ResultPrinter {
         if (msg != null) {
             io.println(msg);
         }
+        return;
     }
 
-    public void printRunResult(RunResult result) {
+    public void printRunResult(RunResult result, Boolean printProgressBar) {
         printTestResults(result.testResults);
+        this.total = result.testResults.size();
+        this.passed = passedTests(result.testResults);
+
+        if (printProgressBar && this.total > 0) {
+            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+        }
 
         String msg = null;
         switch (result.status) {
@@ -100,7 +115,7 @@ public class ResultPrinter {
         }
     }
 
-    private int passedTests(List<TestResult> testResults) {
+    public static int passedTests(List<TestResult> testResults) {
         int passed = 0;
         for (TestResult testResult : testResults) {
             if (testResult.isSuccessful()) {
@@ -118,9 +133,10 @@ public class ResultPrinter {
                 io.println(createPassMessage(testResult));
             }
         }
-        int passed = passedTests(testResults);
-        int total = testResults.size();
-        io.println("Test results: " + passed + "/" + total + " tests passed");
+        io.println("Test results: "
+                + passedTests(testResults) + "/"
+                + testResults.size() + " tests passed");
+
     }
 
     private String createFailMessage(TestResult testResult) {
