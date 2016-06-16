@@ -1,10 +1,14 @@
 #!/bin/bash
-MYSELF=`which "$0" 2>/dev/null`
-[ $? -gt 0 -a -f "$0" ] && MYSELF="./$0"
+
+#set -euo pipefail
+
+MYSELF=$(which "$0" 2>/dev/null)
+[ $? -gt 0 ] && [ -f "$0" ] && MYSELF="./$0"
 
 java=java
-if test -n "$JAVA_HOME"; then
-    java="$JAVA_HOME/bin/java"
+java_home=${JAVA_HOME-}
+if [ -n "$java_home" ]; then
+    java="$java_home/bin/java"
 fi
 
 if ! hash "$java" 2>/dev/null; then
@@ -14,7 +18,7 @@ fi
 
 version=$("$java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
 if [ "$version" \< "1.7" ]; then
-    echo "You must have at leasst Java 1.7 installed."
+    echo "You must have at least Java 1.7 installed."
     exit 1
 fi
 
@@ -24,24 +28,23 @@ AUTOCOMPLETE="$HOME/.tmc-autocomplete.sh"
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function tmc_update_autocomplete {
-	cat > $AUTOCOMPLETE <<- EOM
+	cat > "$AUTOCOMPLETE" <<- EOM
 TMC_AUTOCOMPLETE_SH
 EOM
-	chmod +x $AUTOCOMPLETE
+	chmod +x "$AUTOCOMPLETE"
 }
 
 function tmc_update {
 	tmc_update_autocomplete
 }
 
-if [ ! -f $AUTOCOMPLETE ]; then
+if [ ! -f "$AUTOCOMPLETE" ]; then
 	tmc_update_autocomplete
 
-	echo ". $AUTOCOMPLETE" >> ~/.bashrc
-	. $AUTOCOMPLETE
+	echo "source $AUTOCOMPLETE" >> ~/.bashrc
 fi
 
-if [ "$1" == "++internal-update" ]; then
+if [ "${1-}" == "++internal-update" ]; then
 	if [ ! -f tmc.new ]; then
 		echo "Could not find the updated file."
 		exit 127
@@ -67,7 +70,7 @@ if [ "$1" == "++internal-update" ]; then
 	exit
 fi
 
-export COLUMNS=`tput cols`
-exec "$java" $java_args -jar $MYSELF "$@"
+export COLUMNS=$(tput cols)
+exec "$java" -jar "$MYSELF" "$@"
 
 exit 0 
