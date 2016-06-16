@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -22,6 +21,7 @@ import java.util.List;
 
 @Command(name = "exercises", desc = "List the exercises for a specific course")
 public class ListExercisesCommand extends AbstractCommand {
+
     private Io io;
 
     @Override
@@ -47,7 +47,7 @@ public class ListExercisesCommand extends AbstractCommand {
                 CourseInfo courseinfo = CourseInfoIo.load(workDir.getConfigFile());
                 courseName = courseinfo.getCourseName();
 
-            } else  {
+            } else {
                 //TODO replace this with help message.
                 this.io.println("USAGE: tmc exercises COURSE");
                 this.io.println("No course specified. Either run the command "
@@ -67,7 +67,6 @@ public class ListExercisesCommand extends AbstractCommand {
         printExercises(core, courseName, !args.hasOption("n"));
     }
 
-    // This one can be moved to TmcUtil maybe?
     private void printExercises(TmcCore core, String name, Boolean pager) {
         List<Exercise> exercises;
         Course course;
@@ -83,36 +82,54 @@ public class ListExercisesCommand extends AbstractCommand {
             this.io.println("Course '" + name + "' doesn't have any exercises.");
         }
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("Course name: " + course.getName());
+        String prevDeadline = "";
+
         for (Exercise exercise : exercises) {
-            // Check the exercise status in order of flag importance, for example there's
-            // no need to check if deadline has passed if the exercise has been submitted
-            if (exercise.isCompleted()) {
-                if (exercise.requiresReview() && !exercise.isReviewed()) {
-                    sb.append(Color.colorString(
-                            "Requires review: ", Color.AnsiColor.ANSI_YELLOW)
-                            + exercise.getName() + "\n");
-                } else {
-                    sb.append(Color.colorString(
-                            "Completed: ", Color.AnsiColor.ANSI_GREEN) + exercise.getName()
-                            + "\n");
-                }
-            } else if (exercise.hasDeadlinePassed()) {
-                sb.append(Color.colorString(
-                        "Deadline passed: ", Color.AnsiColor.ANSI_PURPLE) + exercise.getName()
-                        + "\n");
-            } else if (exercise.isAttempted()) {
-                sb.append(Color.colorString(
-                        "Attempted: ", Color.AnsiColor.ANSI_BLUE) + exercise.getName() + "\n");
-            } else {
-                sb.append(Color.colorString(
-                        "Not completed: ", Color.AnsiColor.ANSI_RED) + exercise.getName() + "\n");
+            String deadline = getDeadline(exercise);
+            if (!deadline.equals(prevDeadline)) {
+                sb.append("\nDeadline: " + deadline + "\n");
             }
+            prevDeadline = deadline;
+            
+            sb.append(getExerciseStatus(exercise));
+
         }
         if (pager) {
             ExternalsUtil.showStringInPager(sb.toString(), "exercise-list");
         } else {
             io.print(sb.toString());
         }
+    }
+
+    private String getDeadline(Exercise exercise) {
+        String deadline = exercise.getDeadline();
+        if (deadline == null) {
+            return "not available";
+        }
+        deadline = deadline.substring(0, 19);
+        return deadline.replace("T", " at ");
+    }
+
+    private String getExerciseStatus(Exercise exercise) {
+        // Check the exercise status in order of flag importance, for example there's
+        // no need to check if deadline has passed if the exercise has been submitted
+        String status;
+        if (exercise.isCompleted()) {
+            if (exercise.requiresReview() && !exercise.isReviewed()) {
+                status = Color.colorString("  Requires review: ", Color.AnsiColor.ANSI_YELLOW);
+            } else {
+                status = Color.colorString("  Completed: ", Color.AnsiColor.ANSI_GREEN);
+            }
+        } else if (exercise.hasDeadlinePassed()) {
+            status = Color.colorString("  Deadline passed: ", Color.AnsiColor.ANSI_PURPLE);
+        } else if (exercise.isAttempted()) {
+            status = Color.colorString("  Attempted: ", Color.AnsiColor.ANSI_BLUE);
+        } else {
+            status = Color.colorString("  Not completed: ", Color.AnsiColor.ANSI_RED);
+        }
+        
+        status += exercise.getName() + "\n";
+        return status;
     }
 }

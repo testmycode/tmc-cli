@@ -110,7 +110,7 @@ public class ListExercisesCommandTest {
     }
 
     @Test
-    public void failIfCourseExists() {
+    public void failIfCourseDoesNotExist() {
         Callable<List<Course>> callable = new Callable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
