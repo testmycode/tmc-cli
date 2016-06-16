@@ -70,7 +70,7 @@ public abstract class AbstractCommand {
             String usage = "tmc " + command.name();
             String header = "\n" + command.desc() + "\nOptions:";
             String footer = "\nCopyright(C) 2016 TestMyCode\nSome rights reserved.";
-            formatter.printHelp(new PrintWriter(io), 80, usage, header, options, 2, 0, footer);
+            formatter.printHelp(new PrintWriter(io), 80, usage, header, options, 2, 2, footer);
             return;
         }
 
