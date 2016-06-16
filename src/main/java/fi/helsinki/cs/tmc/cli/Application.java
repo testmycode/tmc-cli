@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -39,12 +40,18 @@ import java.util.Properties;
  */
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    private static final String previousUpdateDateKey = "update-date";
+    private static final long defaultUpdateInterval = 60 * 60 * 1000;
+
     private CommandFactory commandFactory;
+    private HashMap<String, String> properties;
     private TmcCore tmcCore;
     private Settings settings;
-    private Io io;
     private WorkDir workDir;
-    private HashMap<String, String> properties;
+    private Io io;
+
+    private boolean inTest;
+    private ShutdownHandler shutdownHandler;
 
     private Options options;
     private GnuParser parser;
@@ -55,6 +62,15 @@ public class Application {
         this.commandFactory = new CommandFactory();
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
+
+        inTest = true;
+        if (io == null) {
+            inTest = false;
+            io = new TerminalIo();
+            shutdownHandler = new ShutdownHandler(io);
+            Runtime.getRuntime().addShutdownHook(shutdownHandler);
+        }
+
         this.io = io;
         this.workDir = new WorkDir();
         this.properties = SettingsIo.loadProperties();
@@ -119,12 +135,15 @@ public class Application {
     }
 
     public void run(String[] args) {
+        if (!inTest) {
+            versionCheck();
+        }
+
         String[] tmcArgs;
         String[] commandArgs;
         String commandName;
-        int commandIndex;
 
-        commandIndex = findCommand(args);
+        int commandIndex = findCommand(args);
 
         if (commandIndex != -1) {
             commandName = args[commandIndex];
@@ -132,7 +151,6 @@ public class Application {
             /* split the arguments to the tmc's and command's arguments */
             tmcArgs = Arrays.copyOfRange(args, 0, commandIndex);
             commandArgs = Arrays.copyOfRange(args, commandIndex + 1, args.length);
-
 
         } else {
             commandName = "help";
@@ -145,6 +163,10 @@ public class Application {
         }
 
         runCommand(commandName, commandArgs);
+
+        if (!inTest) {
+            Runtime.getRuntime().removeShutdownHook(shutdownHandler);
+        }
     }
 
     public void createTmcCore(Settings settings) {
@@ -207,15 +229,8 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        Io io = new TerminalIo();
-        ShutdownHandler shutdownHandler = new ShutdownHandler(io);
-        Runtime.getRuntime().addShutdownHook(shutdownHandler);
-
-        new TmcCliUpdater(io, getVersion(), isWindows()).run();
-
-        Application app = new Application(io);
+        Application app = new Application(null);
         app.run(args);
-        Runtime.getRuntime().removeShutdownHook(shutdownHandler);
     }
 
     public static String getVersion() {
@@ -262,5 +277,34 @@ public class Application {
 
     public CourseInfo createCourseInfo(Course course) {
         return new CourseInfo(settings, course);
+    }
+
+    private void versionCheck() {
+        String previousTimestamp = properties.get(previousUpdateDateKey);
+        Date previous = null;
+
+        if (previousTimestamp != null) {
+            long time;
+            try {
+                time = Long.parseLong(previousTimestamp);
+            } catch (NumberFormatException ex) {
+                io.println("The previous update date isn't number.");
+                logger.warn("The previous update date isn't number.", ex);
+                return;
+            }
+            previous = new Date(time);
+        }
+
+        Date now = new Date();
+        if (previous != null && previous.getTime() + defaultUpdateInterval > now.getTime()) {
+            return;
+        }
+
+        TmcCliUpdater update = new TmcCliUpdater(io, getVersion(), isWindows());
+        update.run();
+
+        long timestamp = now.getTime();
+        properties.put(previousUpdateDateKey, Long.toString(timestamp));
+        setProperties(properties);
     }
 }
