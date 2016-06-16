@@ -25,7 +25,7 @@ If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VER
 
 If you downloaded "tmc", navigate to the download directory on your terminal and make it executable with `chmod u+x ./tmc`.
 
-Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an alias to your .bashrc, enabling you to use tmc-cli by invoking the command "tmc". For the alias to come into effect, execute `. ~/.bashrc` or simply open a new terminal.
+Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an alias to your .bashrc, enabling you to use tmc-cli by invoking the command `tmc`. For the alias to come into effect, execute `. ~/.bashrc` or simply open a new terminal.
 
 To summarise:
 ```
@@ -39,27 +39,27 @@ If for some reason the alias was not added to your .bashrc or your shell of choi
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace `tmc` with this command. (note: you must have set Java on your system `%PATH%`. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
-Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`.
+Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`. You can also view all available options for commands by running them with the `--help` switch, for example `tmc courses --help`.
 
 ##Logging in
 
-Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or C:\\Users\\[USERNAME]\\tmc-cli\\ on Windows) - you will only have to log in once.
+Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or %LOCALAPPDATA% on Windows) - you will only have to log in once.
 ```
 ~ $ tmc login
 username: my-username
 password:
 Login successful.
 ```
-By default, tmc-cli connects to University of Helsinki MOOC server. To log in to another server, specify the server with the "-s" or "--server" switch:
+By default, tmc-cli connects to University of Helsinki MOOC server. To log in to another server, specify the server with the `-s` or `--server` switch:
 ```
 ~ $ tmc login -s [SERVER_ADDRESS]
 ```
 
 ##Listing courses
 
-Once you have logged in, you can list all the available courses on the server with `tmc list-courses`.
+Once you have logged in, you can list all the available courses on the server with `tmc courses`.
 ```
-~ $ tmc list-courses
+~ $ tmc courses
 java-programming-basics
 java-programming-advanced
 algorithms-101
@@ -78,17 +78,17 @@ Navigate to a suitable directory in which you wish to download your course(s). T
 Downloading: test-course
 [exercise1, exercise2, exercise3, exercise4]
 ~/tmc-courses $ cd test-course
-~/tmc-courses/test-course $ ls -a
-exercise1/ exercise2/ exercise3/ exercise4/ .tmc.json
+~/tmc-courses/test-course $ ls -pa
+exercise1/  exercise2/  exercise3/  exercise4/  .tmc.json
 ```
 Course-specific information is stored in .tmc.json. Do not manually edit or remove it unless you are completely done with the course - doing so will cause tmc to not function properly.
 
 ##Running tests
 
-After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc run-tests`. If you are in the course root directory, you can also give the names of the exercises as arguments: `tmc run-tests exercise1 exercise2`. Running `tmc run-tests` in the course root with no arguments will run tests on all exercises.
+After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc test`. If you are in the course root directory, you can also give the names of the exercises as arguments: `tmc test exercise1 exercise2`. Running `tmc test` in the course root with no arguments will run tests on all exercises.
 
 ```
-~/tmc-courses/test-course/exercise1 $ tmc run-tests
+~/tmc-courses/test-course/exercise1 $ tmc test
 Testing: exercise1
 Test results: 1/1 tests passed
 All tests passed! Submit to server with 'tmc submit'
@@ -106,6 +106,43 @@ All tests passed on server!
 Points permanently awarded: [exercise1]
 Model solution: https://link.to.model/solution
 ```
+
+##Updating the course
+
+As you complete exercises, more exercises may become available. To update the course and download new exercises, run `tmc update`.
+
+```
+~/tmc-courses/test-course $ tmc update
+New exercises downloaded: [exercise5, exercise6]
+```
+
+##Listing exercises
+
+If you want to see your current progress, you can view the status of all course exercises with `tmc exercises [course]`. By default, the exercise list is viewed in your system's pager, but you can print them directly to your terminal with the `-n` or `--no-pager` switch.
+
+```
+~/tmc-courses/test-course $ tmc exercises test-course -n
+Course name: test-course
+Deadline: 2038-20-01 at 18:00:00
+  Completed: exercise1
+  Completed: exercise2
+  Attempted: exercise3
+  Not completed: exercise4
+```
+
+##Sending exercises to pastebin
+
+If you're having trouble with an exercise or just want to have your code peer-reviewed, you can use `tmc paste` to send an exercise to the TMC server's pastebin. You'll be prompted to add a message, but it is optional.
+
+```
+~/tmc-courses/test-course/exercise1 $ tmc paste
+Zipping project
+Submitting project
+Paste sent for exercise exercise1
+Model solution: https://link.to.paste/bin
+```
+
+You cannot submit exercises that you have completed.
 
 ##Disclaimer
 
