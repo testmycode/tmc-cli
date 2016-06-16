@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+#set -euo pipefail
 
 MYSELF=$(which "$0" 2>/dev/null)
 [ $? -gt 0 ] && [ -f "$0" ] && MYSELF="./$0"
@@ -42,10 +42,9 @@ if [ ! -f "$AUTOCOMPLETE" ]; then
 	tmc_update_autocomplete
 
 	echo "source $AUTOCOMPLETE" >> ~/.bashrc
-	source $AUTOCOMPLETE
 fi
 
-if [ "$1" == "++internal-update" ]; then
+if [ "${1-}" == "++internal-update" ]; then
 	if [ ! -f tmc.new ]; then
 		echo "Could not find the updated file."
 		exit 127

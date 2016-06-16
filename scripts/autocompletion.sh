@@ -3,6 +3,8 @@
 # SCRIPT_PATH will be filled by stub script
 alias tmc="$SCRIPT_PATH/tmc"
 
+tmcCommands=\$(tmc shell-helpper -c)
+
 _tmc_opts()
 {
   local cur
@@ -22,7 +24,7 @@ _tmc_opts()
 #   zz)
   esac
 
-  COMPREPLY=( \$( compgen -W "help download list-courses easter-egg list-exercises login" -- "\$cur" ) )
+  COMPREPLY=( \$( compgen -W "\$tmcCommands" -- "\$cur" ) )
   return 0
 }
 
