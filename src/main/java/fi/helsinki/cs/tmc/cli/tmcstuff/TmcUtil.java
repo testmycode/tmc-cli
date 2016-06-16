@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises;
+import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
@@ -28,7 +28,7 @@ public class TmcUtil {
         } catch (Exception e) {
             TmcUtil.logger.warn("Failed to get courses to list the exercises", e);
         }
-        return new ArrayList<Course>();
+        return new ArrayList<>();
     }
 
     public static Course getDetails(TmcCore core, Course course) {
@@ -98,7 +98,7 @@ public class TmcUtil {
         }
     }
 
-    public static GetUpdatableExercises.UpdateResult getUpdatableExercises(
+    public static UpdateResult getUpdatableExercises(
             TmcCore core, Course course) {
         try {
             return core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course)
