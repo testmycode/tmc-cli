@@ -28,14 +28,6 @@ public abstract class AbstractCommand {
         return this.app;
     }
 
-    /**
-     * Method runs the command.
-     *
-     * @param args Command line arguments for this command.
-     * @param io The terminal IO object
-     */
-    public abstract void run(CommandLine args, Io io);
-
     public abstract void getOptions(Options options);
 
     private Options getOptions() {
@@ -47,6 +39,14 @@ public abstract class AbstractCommand {
 
         return options;
     }
+
+    /**
+     * Method runs the command.
+     *
+     * @param args Command line arguments for this command.
+     * @param io The terminal IO object
+     */
+    public abstract void run(CommandLine args, Io io);
 
     public void execute(String[] stringArgs, Io io) {
         GnuParser parser = new GnuParser();
