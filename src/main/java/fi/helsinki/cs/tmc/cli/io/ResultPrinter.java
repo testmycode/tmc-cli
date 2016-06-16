@@ -59,7 +59,7 @@ public class ResultPrinter {
             io.println(result.getError());
         }
 
-        if (printProgressBar) {
+        if (printProgressBar && this.total > 0) {
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
         }
         String msg = null;
@@ -94,8 +94,14 @@ public class ResultPrinter {
         return;
     }
 
-    public void printRunResult(RunResult result) {
+    public void printRunResult(RunResult result, Boolean printProgressBar) {
         printTestResults(result.testResults);
+        this.total = result.testResults.size();
+        this.passed = passedTests(result.testResults);
+
+        if (printProgressBar && this.total > 0) {
+            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+        }
 
         String msg = null;
         switch (result.status) {
@@ -136,7 +142,9 @@ public class ResultPrinter {
             }
         }
         // TmcCliProgressObserver progress = new TmcCliProgressObserver(io);
-        io.println("Test results: " + this.passed + "/" + this.total + " tests passed");
+        io.println("Test results: "
+                + passedTests(testResults) + "/"
+                + testResults.size() + " tests passed");
 
     }
 

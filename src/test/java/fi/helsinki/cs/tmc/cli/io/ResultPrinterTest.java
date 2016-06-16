@@ -64,7 +64,7 @@ public class ResultPrinterTest {
     public void printRunResultWorksIfTestsPass() {
         testResults = ImmutableList.of(new TestResult("test1", true, "Cool!"));
         runResult = new RunResult(Status.PASSED, testResults, logs);
-        printer.printRunResult(runResult);
+        printer.printRunResult(runResult, false);
         assertTrue(io.getPrint().contains("All tests passed!"));
     }
     
@@ -73,7 +73,7 @@ public class ResultPrinterTest {
         testResults = ImmutableList.of(new TestResult("test1", false, "Not good.",
                 "Try harder", true));
         runResult = new RunResult(Status.TESTS_FAILED, testResults, logs);
-        printer.printRunResult(runResult);
+        printer.printRunResult(runResult, false);
         assertTrue(io.getPrint().contains("Please review your answer before submitting"));
     }
     
@@ -84,7 +84,7 @@ public class ResultPrinterTest {
         testResults = ImmutableList.of(new TestResult("test1", false, points,
                 "Not good.", exceptions));
         runResult = new RunResult(Status.TESTS_FAILED, testResults, logs);
-        printer.printRunResult(runResult);
+        printer.printRunResult(runResult, false);
         assertTrue(io.getPrint().contains("Please review your answer before submitting"));
     }
     
@@ -92,7 +92,7 @@ public class ResultPrinterTest {
     public void printRunResultWorksIfCompilationFail() {
         testResults = ImmutableList.of();
         runResult = new RunResult(Status.COMPILE_FAILED, testResults, logs);
-        printer.printRunResult(runResult);
+        printer.printRunResult(runResult, false);
         assertTrue(io.getPrint().contains("Failed to compile project"));
     }
 
