@@ -94,9 +94,9 @@ public class RunTestsCommand extends AbstractCommand {
                 total += runResult.testResults.size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
             }
-            io.println("");
             if (total > 0 && !isOnlyExercise) {
                 // Print a progress bar showing how the ratio of passed exercises
+                io.println("");
                 io.println("Total tests passed: " + passed + "/" + total);
                 io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
             }
