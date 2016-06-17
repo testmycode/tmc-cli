@@ -26,6 +26,30 @@ public class TerminalIo extends Io {
     }
 
     @Override
+    public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
+        String yesNo;
+        String input;
+        if (defaultToYes) {
+            yesNo = " [Y/n] ";
+        } else {
+            yesNo = " [y/N] ";
+        }
+        System.out.print(prompt + yesNo);
+        try {
+            input = new Scanner(System.in).nextLine().toLowerCase();
+        } catch (Exception e) {
+            logger.warn("Line could not be read.", e);
+            return null;
+        }
+        if (input.equals("y")) {
+            return true;
+        } else if (input.equals("n")) {
+            return false;
+        }
+        return defaultToYes;
+    }
+
+    @Override
     public String readPassword(String prompt) {
         if (System.console() != null) {
             char[] pwd;

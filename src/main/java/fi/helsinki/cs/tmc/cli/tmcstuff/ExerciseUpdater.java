@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -86,8 +87,8 @@ public class ExerciseUpdater {
         return newExercisesAvailable() || updatedExercisesAvailable();
     }
 
-    public List<Exercise> downloadUpdates() {
-        return TmcUtil.downloadExercises(core, getNewAndUpdatedExercises());
+    public List<Exercise> downloadUpdates(TmcCliProgressObserver progobs) {
+        return TmcUtil.downloadExercises(core, getNewAndUpdatedExercises(), progobs);
     }
 
     public boolean updateCourseJson(CourseInfo info, Path configFile) {

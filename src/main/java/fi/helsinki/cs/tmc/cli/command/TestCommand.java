@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -43,7 +42,7 @@ public class TestCommand extends AbstractCommand {
             HashMap<String, String> props = getApp().getProperties();
             io.println(props.toString());
             props.put(args.getOptionValue("p"), "stupid");
-            getApp().setProperties(props);
+            getApp().saveProperties();
         } else {
             io.println("Let's run easter egg.");
         }

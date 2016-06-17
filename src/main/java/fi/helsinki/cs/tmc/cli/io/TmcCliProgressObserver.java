@@ -6,15 +6,16 @@ import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
  * Created by jclakkis on 27.5.2016.
  */
 public class TmcCliProgressObserver extends ProgressObserver {
-    protected static final char PIPCHAR = '#';
-    protected static final char EMPTYCHAR = ' ';
+    protected static final char PIPCHAR = '█';
+    protected static final char EMPTYCHAR = '░';
     protected static final char BARLEFT = '[';
     protected static final char BARRIGHT = ']';
 
     protected Io io;
     private int pips;
     protected int maxline;
-    private Color.AnsiColor color;
+    private Color.AnsiColor color1;
+    private Color.AnsiColor color2;
     protected String lastMessage;
     protected Boolean hasProgressBar;
 
@@ -23,15 +24,16 @@ public class TmcCliProgressObserver extends ProgressObserver {
     }
 
     public TmcCliProgressObserver(Io io) {
-        this(io, Color.AnsiColor.ANSI_CYAN);
+        this(io, Color.AnsiColor.ANSI_CYAN, Color.AnsiColor.ANSI_CYAN);
     }
 
-    public TmcCliProgressObserver(Io io, Color.AnsiColor color) {
+    public TmcCliProgressObserver(Io io, Color.AnsiColor color1, Color.AnsiColor color2) {
         this.hasProgressBar = false;
         this.io = io;
         this.maxline = getMaxline();
         this.pips = this.maxline - 6;
-        this.color = color;
+        this.color1 = color1;
+        this.color2 = color2;
     }
 
     // Clearly this is not the best place for this function
@@ -64,7 +66,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
             lastMessage = message;
             io.println("");
         }
-        this.io.print("\r" + this.progressBar(progress, this.maxline, this.color));
+        this.io.print("\r" + this.progressBar(progress, this.maxline, this.color1, this.color2));
     }
 
     protected void printMessage(String message) {
@@ -81,8 +83,11 @@ public class TmcCliProgressObserver extends ProgressObserver {
     public void end(long id) {
         // Most likely not going to be used
         if (this.hasProgressBar) {
-            this.io.println("\r" + this.percentage(1.0)
-                    + this.progressBar(1.0, this.pips, this.color));
+            this.io.print("\r");
+            flush(this.maxline);
+            this.io.print("\r");
+//            this.io.println("\r" + this.percentage(1.0)
+//                    + this.progressBar(1.0, this.pips, this.color1, this.color2));
         } else {
             this.io.println("");
         }
@@ -108,8 +113,15 @@ public class TmcCliProgressObserver extends ProgressObserver {
         io.print(sb);
     }
 
-    public static String progressBar(double progress, int length, Color.AnsiColor color) {
+    public static String progressBar(double progress, int length,
+                                     Color.AnsiColor color) {
         return progressBar(progress, length, color, color, BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
+    }
+
+    public static String progressBar(double progress, int length,
+            Color.AnsiColor color1, Color.AnsiColor color2) {
+        return progressBar(progress, length, color1, color2,
+                BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
     }
 
     public static String progressBar(
@@ -156,7 +168,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
                 TmcCliProgressObserver.getMaxline(),
                 Color.AnsiColor.ANSI_GREEN,
                 Color.AnsiColor.ANSI_RED,
-                '[', ']', '#', '-'
+                '[', ']', '█', '░'
         );
     }
 }

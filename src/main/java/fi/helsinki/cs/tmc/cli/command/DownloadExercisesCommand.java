@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
@@ -51,9 +52,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
             io.println("Course doesn't exist.");
             return;
         }
-
-        List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course);
-        io.println("");
+        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
+        List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course, progobs);
         io.println(exercises.toString());
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
