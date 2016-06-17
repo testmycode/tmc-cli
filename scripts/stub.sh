@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -euo pipefail
+set -euo pipefail
 
 MYSELF=$(which "$0" 2>/dev/null)
 [ $? -gt 0 ] && [ -f "$0" ] && MYSELF="./$0"

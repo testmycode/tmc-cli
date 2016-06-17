@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # SCRIPT_PATH will be filled by stub script
 alias tmc="$SCRIPT_PATH/tmc"
 
