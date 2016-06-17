@@ -3,7 +3,10 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -17,6 +20,7 @@ import java.util.List;
 @Command(name = "info", desc = "Show course info for a specific course")
 public class CourseInfoCommand extends AbstractCommand {
     private Course course;
+    private Exercise exercise;
     private Io io;
 
     @Override
@@ -31,14 +35,20 @@ public class CourseInfoCommand extends AbstractCommand {
         if (core == null) {
             return;
         }
-        
+
+        WorkDir workDir = getApp().getWorkDir();
         String[] stringArgs = args.getArgs();
-        if (stringArgs.length == 0) {
+        if (stringArgs.length == 0 && workDir.getConfigFile() == null) {
             io.println("You must give the course name as a parameter.");
             return;
         }
-        
-        course = TmcUtil.findCourse(core, stringArgs[0]);
+        if (workDir.getConfigFile() != null) {
+            CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
+            course = info.getCourse();
+        } else {
+            course = TmcUtil.findCourse(core, stringArgs[0]);
+        }
+
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
             return;
@@ -70,6 +80,10 @@ public class CourseInfoCommand extends AbstractCommand {
         io.println("Statistics URLs:" + course.getSpywareUrls().toString());
         io.println("UnlockUrl: " + course.getUnlockUrl());
         io.println("CometUrl: " + course.getCometUrl());
+    }
+
+    private void printExerciseInfo() {
+        io.println("Status: ");
     }
     
     private void printExercises(boolean showAll) {
