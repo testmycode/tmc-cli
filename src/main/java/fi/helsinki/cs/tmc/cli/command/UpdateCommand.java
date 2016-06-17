@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
@@ -73,7 +74,8 @@ public class UpdateCommand extends AbstractCommand {
         //exercises.addAll(deletedExercises); What if user has deleted exercise folder?
         newExercises.addAll(updatedExercises);
 
-        List<Exercise> downloadedExercises = TmcUtil.downloadExercises(core, newExercises);
+        List<Exercise> downloadedExercises = TmcUtil.downloadExercises(core, newExercises,
+                new TmcCliProgressObserver(io));
         if (downloadedExercises.isEmpty()) {
             io.println("Failed to download exercises");
             return;

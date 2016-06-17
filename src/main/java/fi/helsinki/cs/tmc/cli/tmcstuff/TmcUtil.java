@@ -64,22 +64,23 @@ public class TmcUtil {
         return null;
     }
 
-    public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises) {
+    public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises,
+                                                   ProgressObserver progobs) {
         try {
-            return core.downloadOrUpdateExercises(new TmcCliProgressObserver(), exercises)
-                    .call();
+            return core.downloadOrUpdateExercises(new TmcCliProgressObserver(), exercises).call();
         } catch (Exception e) {
             logger.warn("Failed to download exercises", e);
             return new ArrayList<>();
         }
     }
 
-    public static List<Exercise> downloadAllExercises(TmcCore core, Course course) {
+    public static List<Exercise> downloadAllExercises(TmcCore core, Course course,
+                                                      ProgressObserver progobs) {
         if (!course.isExercisesLoaded()) {
             course = getDetails(core, course);
         }
         List<Exercise> exercises = course.getExercises();
-        return downloadExercises(core, exercises);
+        return downloadExercises(core, exercises, progobs);
     }
 
     public static SubmissionResult submitExercise(TmcCore core, Course course, String name) {
@@ -89,7 +90,7 @@ public class TmcUtil {
         //exercise.setName(fixedName);
         try {
             // TODO: replace null-observer with a real observer
-            // once it shows up right in core/langs
+            // once it shows up correctly in core/langs
             return core.submit(ProgressObserver.NULL_OBSERVER,
                     exercise).call();
         } catch (Exception e) {

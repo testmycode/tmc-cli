@@ -261,12 +261,11 @@ public class Application {
 
     public HashMap<String, String> getProperties() {
         // Loads properties from the global configuration file in .config/tmc-cli/
-        return (HashMap<String, String>) this.properties.clone();
+        return this.properties;
     }
 
-    public Boolean setProperties(HashMap<String, String> properties) {
+    public Boolean saveProperties() {
         // Saves properties to the global configuration file in .config/tmc-cli/
-        this.properties = properties;
         return SettingsIo.saveProperties(properties);
     }
 
@@ -305,6 +304,6 @@ public class Application {
 
         long timestamp = now.getTime();
         properties.put(previousUpdateDateKey, Long.toString(timestamp));
-        setProperties(properties);
+        saveProperties();
     }
 }

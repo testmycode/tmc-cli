@@ -14,6 +14,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
@@ -124,7 +125,8 @@ public class UpdateCommandTest {
         assertThat(io.out(), containsString("All exercises are up-to-date"));
 
         verifyStatic(times(0));
-        TmcUtil.downloadExercises(any(TmcCore.class), any(List.class));
+        TmcUtil.downloadExercises(any(TmcCore.class), any(List.class),
+                any(TmcCliProgressObserver.class));
     }
 
     @Test
@@ -139,7 +141,8 @@ public class UpdateCommandTest {
         when(TmcUtil.getUpdatableExercises(any(TmcCore.class), any(Course.class)))
                 .thenReturn(mockUpdateResult);
 
-        when(TmcUtil.downloadExercises(any(TmcCore.class), any(List.class)))
+        when(TmcUtil.downloadExercises(any(TmcCore.class), any(List.class),
+                any(TmcCliProgressObserver.class)))
                 .thenReturn(newExercises);
 
         Course foundCourse = new Course(COURSE_NAME);
@@ -173,7 +176,8 @@ public class UpdateCommandTest {
         when(TmcUtil.getUpdatableExercises(any(TmcCore.class), any(Course.class)))
                 .thenReturn(mockUpdateResult);
 
-        when(TmcUtil.downloadExercises(any(TmcCore.class), any(List.class)))
+        when(TmcUtil.downloadExercises(any(TmcCore.class), any(List.class),
+                any(TmcCliProgressObserver.class)))
                 .thenReturn(changedExercises);
 
         Course foundCourse = new Course(COURSE_NAME);

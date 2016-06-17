@@ -31,7 +31,7 @@ public class RunTestsCommand extends AbstractCommand {
     private static final Logger logger
             = LoggerFactory.getLogger(RunTestsCommand.class);
 
-    private Io io;
+//    private Io io;
     private boolean showPassed;
     private boolean showDetails;
 
@@ -43,7 +43,7 @@ public class RunTestsCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
-        this.io = io;
+//        this.io = io;
 
         List<String> exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
@@ -89,13 +89,17 @@ public class RunTestsCommand extends AbstractCommand {
                 //name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 
-                runResult = core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
+                TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
+                runResult = core.runTests(progobs, exercise).call();
+                progobs.end(0);
+
                 resultPrinter.printRunResult(runResult, isOnlyExercise);
                 total += runResult.testResults.size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
             }
             if (total > 0 && !isOnlyExercise) {
                 // Print a progress bar showing how the ratio of passed exercises
+                // But only if more than one exercise was tested
                 io.println("");
                 io.println("Total tests passed: " + passed + "/" + total);
                 io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));

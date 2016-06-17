@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -108,18 +109,19 @@ public class TmcUtilTest {
         doAnswer(new Answer<Callable<List<Exercise>>>() {
             @Override
             public Callable<List<Exercise>> answer(InvocationOnMock invocation) throws Throwable {
-                final List<Exercise> exersices = (List<Exercise>)invocation.getArguments()[1];
+                final List<Exercise> exercises = (List<Exercise>)invocation.getArguments()[1];
                 return new Callable<List<Exercise>>() {
                     @Override
                     @SuppressWarnings("unchecked")
                     public List<Exercise> call() throws Exception {
-                        return exersices;
+                        return exercises;
                     }
                 };
             }
         }).when(mockCore)
                 .downloadOrUpdateExercises(any(ProgressObserver.class), anyListOf(Exercise.class));
-        List<Exercise> list = TmcUtil.downloadAllExercises(app.getTmcCore(), course);
+        List<Exercise> list = TmcUtil.downloadAllExercises(app.getTmcCore(), course,
+                new TmcCliProgressObserver(testio));
         for (Exercise exercise : list) {
             assertNotNull(TmcUtil.findExercise(course, exercise.getName()));
         }
@@ -132,18 +134,19 @@ public class TmcUtilTest {
         doAnswer(new Answer<Callable<List<Exercise>>>() {
             @Override
             public Callable<List<Exercise>> answer(InvocationOnMock invocation) throws Throwable {
-                final List<Exercise> exersices = (List<Exercise>)invocation.getArguments()[1];
+                final List<Exercise> exercises = (List<Exercise>)invocation.getArguments()[1];
                 return new Callable<List<Exercise>>() {
                     @Override
                     @SuppressWarnings("unchecked")
                     public List<Exercise> call() throws Exception {
-                        return exersices;
+                        return exercises;
                     }
                 };
             }
         }).when(mockCore)
                 .downloadOrUpdateExercises(any(ProgressObserver.class), anyListOf(Exercise.class));
-        List<Exercise> downloadList = TmcUtil.downloadExercises(app.getTmcCore(), list);
+        List<Exercise> downloadList = TmcUtil.downloadExercises(app.getTmcCore(), list,
+                new TmcCliProgressObserver(testio));
         for (Exercise exercise : downloadList) {
             boolean found = false;
             for (Exercise exercise2 : list) {
