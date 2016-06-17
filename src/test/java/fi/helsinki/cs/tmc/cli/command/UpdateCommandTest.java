@@ -1,48 +1,59 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises;
+import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({TmcUtil.class, CourseInfoIo.class})
 public class UpdateCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
+    private static final String EXERCISE1_NAME = "Module_1-02_intro";
+    private static final String EXERCISE2_NAME = "Module_1-04_func";
 
     static Path pathToDummyCourse;
-    static Path tempDir;
+    static Path pathToDummyExercise;
+    static Path pathToDummyExerciseSrc;
+    static Path pathToNonCourseDir;
 
-    private Application app;
-    private TestIo io;
-    private TmcCore mockCore;
-    private WorkDir workDir;
+    TestIo io;
+    Application app;
+    TmcCore mockCore;
+
+    UpdateResult mockUpdateResult;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -50,28 +61,31 @@ public class UpdateCommandTest {
                 .getResource("dummy-courses/" + COURSE_NAME).toURI());
         assertNotNull(pathToDummyCourse);
 
-        tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
-                .resolve("updateCommandTests");
-        assertNotNull(tempDir);
+        pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
+        assertNotNull(pathToDummyExercise);
+
+        pathToDummyExerciseSrc = pathToDummyExercise.resolve("src");
+        assertNotNull(pathToDummyExerciseSrc);
+
+        pathToNonCourseDir = pathToDummyCourse.getParent();
+        assertNotNull(pathToNonCourseDir);
     }
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         io = new TestIo();
         app = new Application(io);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
 
-        FileUtils.copyDirectory(pathToDummyCourse.toFile(), tempDir.toFile());
-    }
-
-    @After
-    public void tearDown() throws IOException {
-        FileUtils.deleteDirectory(tempDir.toFile());
+        PowerMockito.mockStatic(TmcUtil.class);
+        PowerMockito.mockStatic(CourseInfoIo.class);
+        when(CourseInfoIo.load(any(Path.class))).thenCallRealMethod();
     }
 
     @Test
     public void failIfCoreIsNull() {
+        app.setWorkdir(new WorkDir(pathToNonCourseDir));
         app = spy(app);
         doReturn(null).when(app).getTmcCore();
 
@@ -84,125 +98,99 @@ public class UpdateCommandTest {
     public void printsAnErrorMessageIfGivenCourseName() {
         String[] args = {"update", "course"};
         app.run(args);
-        assertTrue(io.getPrint().contains("Use in the course directory"));
+        assertThat(io.out(), containsString("Use in the course directory"));
     }
 
     @Test
     public void printsAnErrorMessageIfUsedOutsideCourseDirectory() {
-        workDir = new WorkDir(Paths.get(System.getProperty("java.io.tmpdir")));
-        app.setWorkdir(workDir);
+        app.setWorkdir(new WorkDir(pathToNonCourseDir));
         String[] args = {"update"};
         app.run(args);
-        assertTrue(io.getPrint().contains("Not a course directory"));
+        assertThat(io.out(), containsString("Not a course directory"));
     }
 
     @Test
     public void worksRightIfAllExercisesAreUpToDate() {
-//        Callable<List<Exercise>> callableExercise = new Callable<List<Exercise>>() {
-//            @Override
-//            public List<Exercise> call() throws Exception {
-//                ArrayList<Exercise> tmp = new ArrayList<>();
-//                return tmp;
-//            }
-//        };
-//
-//        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
-//                .thenReturn(callableExercise);
+        mockUpdateResult = mock(UpdateResult.class);
+        when(mockUpdateResult.getNewExercises()).thenReturn(new ArrayList<Exercise>());
+        when(mockUpdateResult.getUpdatedExercises()).thenReturn(new ArrayList<Exercise>());
+        when(TmcUtil.getUpdatableExercises(any(TmcCore.class), any(Course.class)))
+                .thenReturn(mockUpdateResult);
 
-        Callable<GetUpdatableExercises.UpdateResult> callableResult
-                = new Callable<GetUpdatableExercises.UpdateResult>() {
-
-                    @Override
-                    public GetUpdatableExercises.UpdateResult call() throws Exception {
-                        GetUpdatableExercises.UpdateResult result = mock(
-                                GetUpdatableExercises.UpdateResult.class);
-                        when(result.getNewExercises()).thenReturn(
-                                new ArrayList<Exercise>());
-                        when(result.getUpdatedExercises()).thenReturn(
-                                new ArrayList<Exercise>());
-                        return result;
-                    }
-                };
-
-        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
-                .thenReturn(callableResult);
-
-        workDir = new WorkDir(tempDir);
-        app.setWorkdir(workDir);
-
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"update"};
         app.run(args);
-        assertTrue(io.getPrint().contains("All exercises are up-to-date"));
+
+        assertThat(io.out(), containsString("All exercises are up-to-date"));
+
+        verifyStatic(times(0));
+        TmcUtil.downloadExercises(any(TmcCore.class), any(List.class));
     }
 
     @Test
-    @Ignore
-    public void worksRightIfUpdatesAvailable() {
-//        Callable<List<Exercise>> callableExercise = new Callable<List<Exercise>>() {
-//            @Override
-//            public List<Exercise> call() throws Exception {
-//                ArrayList<Exercise> tmp = new ArrayList<>();
-//                tmp.add(new Exercise("exercise1"));
-//                tmp.add(new Exercise("exercise2"));
-//                return tmp;
-//            }
-//        };
-//
-//        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
-//                .thenReturn(callableExercise);
+    public void updateIfNewExercisesAvailable() {
+        String newExerciseName = "new_exercise";
+        ArrayList<Exercise> newExercises = new ArrayList<>();
+        newExercises.add(new Exercise(newExerciseName, COURSE_NAME));
 
-        final List<Exercise> unlockedList = new ArrayList<>();
-        unlockedList.add(new Exercise("unlocked_exercise"));
+        mockUpdateResult = mock(UpdateResult.class);
+        when(mockUpdateResult.getNewExercises()).thenReturn(newExercises);
+        when(mockUpdateResult.getUpdatedExercises()).thenReturn(new ArrayList<Exercise>());
+        when(TmcUtil.getUpdatableExercises(any(TmcCore.class), any(Course.class)))
+                .thenReturn(mockUpdateResult);
 
-        final List<Exercise> changedList = new ArrayList<>();
-        unlockedList.add(new Exercise("Module_1-02_intro"));
+        when(TmcUtil.downloadExercises(any(TmcCore.class), any(List.class)))
+                .thenReturn(newExercises);
 
-        Callable<GetUpdatableExercises.UpdateResult> callableResult
-                = new Callable<GetUpdatableExercises.UpdateResult>() {
-                    @Override
-                    public GetUpdatableExercises.UpdateResult call() throws Exception {
-                        GetUpdatableExercises.UpdateResult result = mock(
-                                GetUpdatableExercises.UpdateResult.class);
-                        when(result.getNewExercises()).thenReturn(unlockedList);
-                        when(result.getUpdatedExercises()).thenReturn(changedList);
-                        return result;
-                    }
-                };
-        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
-                .thenReturn(callableResult);
+        Course foundCourse = new Course(COURSE_NAME);
+        ArrayList<Exercise> allAvailableExercises = new ArrayList<>();
+        allAvailableExercises.add(new Exercise(newExerciseName, COURSE_NAME));
+        allAvailableExercises.add(new Exercise(EXERCISE1_NAME, COURSE_NAME));
+        allAvailableExercises.add(new Exercise(EXERCISE2_NAME, COURSE_NAME));
+        foundCourse.setExercises(allAvailableExercises);
+        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(foundCourse);
 
-        Callable<List<Course>> callableCourseList = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                return new ArrayList<>();
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableCourseList);
-
-        Callable<Course> callableCourse = new Callable<Course>() {
-            @Override
-            public Course call() throws Exception {
-                Course course = new Course("2016-aalto-c");
-                List<Exercise> exercises = new ArrayList<>();
-                exercises.add(new Exercise("Module_1-02_intro"));
-                exercises.add(new Exercise("unlocked_course"));
-                course.setExercises(exercises);
-                return course;
-            }
-        };
-
-        when(mockCore.getCourseDetails(any(ProgressObserver.class), any(Course.class)))
-                .thenReturn(callableCourse);
-
-        workDir = new WorkDir(tempDir);
-        app.setWorkdir(workDir);
-
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"update"};
         app.run(args);
-        assertTrue(io.getPrint().contains("New exercises:"));
-        assertTrue(io.getPrint().contains("unlocked_exercise"));
 
-        //assertTrue(io.getPrint().contains("Modified exercises:"));
-        //assertTrue(io.getPrint().contains("Module_1-02_intro"));
+        assertThat(io.out(), containsString("New exercises:"));
+        assertThat(io.out(), containsString(newExerciseName));
+
+        verifyStatic(times(1));
+        CourseInfoIo.save(any(CourseInfo.class), any(Path.class));
+    }
+
+    @Test
+    public void updateIfExerciseHasBeenChanged() {
+        String changedExercise = EXERCISE1_NAME;
+        ArrayList<Exercise> changedExercises = new ArrayList<>();
+        changedExercises.add(new Exercise(changedExercise, COURSE_NAME));
+
+        mockUpdateResult = mock(UpdateResult.class);
+        when(mockUpdateResult.getNewExercises()).thenReturn(new ArrayList<Exercise>());
+        when(mockUpdateResult.getUpdatedExercises()).thenReturn(changedExercises);
+        when(TmcUtil.getUpdatableExercises(any(TmcCore.class), any(Course.class)))
+                .thenReturn(mockUpdateResult);
+
+        when(TmcUtil.downloadExercises(any(TmcCore.class), any(List.class)))
+                .thenReturn(changedExercises);
+
+        Course foundCourse = new Course(COURSE_NAME);
+        ArrayList<Exercise> allAvailableExercises = new ArrayList<>();
+        allAvailableExercises.add(new Exercise(EXERCISE1_NAME, COURSE_NAME));
+        allAvailableExercises.add(new Exercise(EXERCISE2_NAME, COURSE_NAME));
+        foundCourse.setExercises(allAvailableExercises);
+        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(foundCourse);
+
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        String[] args = {"update"};
+        app.run(args);
+
+        assertThat(io.out(), containsString("Modified exercises:"));
+        assertThat(io.out(), containsString(changedExercise));
+
+        verifyStatic(times(1));
+        CourseInfoIo.save(any(CourseInfo.class), any(Path.class));
     }
 }
