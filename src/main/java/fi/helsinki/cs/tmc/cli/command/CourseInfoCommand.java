@@ -42,20 +42,47 @@ public class CourseInfoCommand extends AbstractCommand {
             io.println("You must give the course name as a parameter.");
             return;
         }
+
+
         if (workDir.getConfigFile() != null) {
             CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
             course = info.getCourse();
-        } else {
-            course = TmcUtil.findCourse(core, stringArgs[0]);
+
+            //if in exercise directory, print info for that exercise.
+            // else if exercise or course name given as a parameter, check which one it is and print info for that
+            if (workDir.getExerciseNames().size() == 1 && stringArgs.length == 0) {
+                CourseInfo courseInfo = CourseInfoIo.load(workDir.getConfigFile());
+                exercise = TmcUtil.findExercise(courseInfo.getCourse(),
+                        workDir.getExerciseNames().get(0));
+                printExerciseInfo();
+                return;
+            } else if (stringArgs.length != 0) {
+                if (info.getExercise(stringArgs[0]) != null) {
+                    exercise = info.getExercise(stringArgs[0]);
+                    printExerciseInfo();
+                    return;
+                } else if (TmcUtil.findCourse(core, stringArgs[0]) != null) {
+                    course = TmcUtil.findCourse(core, stringArgs[0]);
+                    printCourse(args.hasOption("a"));
+                    return;
+                } else {
+                    System.out.println("Exercise doesn't exist.");
+                    return;
+                }
+            }
+            printCourse(args.hasOption("a"));
+            return;
         }
+
+        course = TmcUtil.findCourse(core, stringArgs[0]);
 
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
             return;
         }
-        
         printCourse(args.hasOption("a"));
     }
+
     
     private void printCourse(boolean showAll) {
         printCourseShort();
@@ -83,7 +110,9 @@ public class CourseInfoCommand extends AbstractCommand {
     }
 
     private void printExerciseInfo() {
-        io.println("Status: ");
+        io.println("Completed: " + exercise.isCompleted());
+        io.println("Attempted: " + exercise.isAttempted());
+        io.println("Deadline: " + exercise.getDeadline());
     }
     
     private void printExercises(boolean showAll) {
