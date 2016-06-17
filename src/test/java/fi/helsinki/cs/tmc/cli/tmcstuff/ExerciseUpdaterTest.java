@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
