@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+set -euo pipefail
 
 # find newest jar file
 jar_file=$(ls -t target/tmc-cli-*.jar | head -1)
