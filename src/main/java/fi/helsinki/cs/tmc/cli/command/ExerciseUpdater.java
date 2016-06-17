@@ -1,5 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -8,6 +11,7 @@ import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,5 +81,18 @@ public class ExerciseUpdater {
         updatedExercises = result.getUpdatedExercises();
 
         return newExercisesAvailable() || updatedExercisesAvailable();
+    }
+
+    public List<Exercise> downloadUpdates() {
+        return TmcUtil.downloadExercises(core, getNewAndUpdatedExercises());
+    }
+
+    public boolean updateCourseJson(CourseInfo info, Path configFile) {
+        Course newDetailsCourse = TmcUtil.findCourse(core, course.getName());
+        if (newDetailsCourse == null) {
+            return false;
+        }
+        info.setExercises(newDetailsCourse.getExercises());
+        return CourseInfoIo.save(info, configFile);
     }
 }
