@@ -2,8 +2,10 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -14,12 +16,14 @@ import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -28,6 +32,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(TmcUtil.class)
@@ -81,6 +88,15 @@ public class SubmitCommandTest {
         when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(course);
         when(TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME)).thenReturn(result);
         when(TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME)).thenReturn(result2);
+
+        Callable<UpdateResult> callable = new Callable<UpdateResult>() {
+            @Override
+            public UpdateResult call() throws Exception {
+                return null;
+            }
+        };
+        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
+                .thenReturn(callable);
     }
 
     @Test
@@ -212,6 +228,46 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
         verifyStatic(times(1));
         TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+    }
+
+    @Test
+    public void doesNotShowUpdateMessageIfNoUpdatesAvailable() {
+        app.setWorkdir(new WorkDir(pathToDummyExercise));
+        app.run(new String[]{"submit"});
+
+        assertFalse(io.out().contains("New exercises available!"));
+        assertFalse(io.out().contains("Some exercises have been modified on TMC server."));
+        assertFalse(io.out().contains("Use 'tmc update' to download them."));
+    }
+
+    @Test
+    public void showsMessageIfNewExercisesAreAvailable() {
+        Callable<UpdateResult> callableResult = new Callable<UpdateResult>() {
+            @Override
+            public UpdateResult call() throws Exception {
+                UpdateResult updateResult = mock(UpdateResult.class);
+
+                List<Exercise> newExercises = new ArrayList<>();
+                newExercises.add(new Exercise("new_exercise"));
+
+                List<Exercise> updatedExercises = new ArrayList<>();
+                updatedExercises.add(new Exercise("updated_exercise"));
+
+                when(updateResult.getNewExercises()).thenReturn(newExercises);
+                when(updateResult.getUpdatedExercises()).thenReturn(updatedExercises);
+                return updateResult;
+            }
+        };
+
+        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
+                .thenReturn(callableResult);
+
+        app.setWorkdir(new WorkDir(pathToDummyExercise));
+        app.run(new String[]{"submit"});
+
+        assertThat(io.out(), containsString("New exercises available!"));
+        assertThat(io.out(), containsString("Some exercises have been modified on TMC server."));
+        assertThat(io.out(), containsString("Use 'tmc update' to download them."));
     }
 
     private static int countSubstring(String subStr, String str) {

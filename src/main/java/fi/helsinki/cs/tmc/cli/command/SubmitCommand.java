@@ -99,6 +99,24 @@ public class SubmitCommand extends AbstractCommand {
             io.println("Total tests passed: " + passed + "/" + total);
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
         }
+        checkForExerciseUpdates(core, course);
+    }
+
+    public void checkForExerciseUpdates(TmcCore core, Course course) {
+        ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, course);
+        if (!exerciseUpdater.updatesAvailable()) {
+            return;
+        }
+
+        if (exerciseUpdater.newExercisesAvailable()) {
+            io.println("New exercises available!");
+        }
+
+        if (exerciseUpdater.updatedExercisesAvailable()) {
+            io.println("Some exercises have been modified on TMC server.");
+        }
+
+        io.println("Use 'tmc update' to download them.");
     }
 
     private List<String> parseArgs(CommandLine args) {
