@@ -235,9 +235,9 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});
 
-        assertFalse(io.out().contains("New exercises available!"));
-        assertFalse(io.out().contains("Some exercises have been modified on TMC server."));
-        assertFalse(io.out().contains("Use 'tmc update' to download them."));
+        assertFalse(io.out().contains("available"));
+        assertFalse(io.out().contains("been changed on TMC server"));
+        assertFalse(io.out().contains("Use 'tmc update' to download"));
     }
 
     @Test
@@ -265,9 +265,9 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});
 
-        assertThat(io.out(), containsString("New exercises available!"));
-        assertThat(io.out(), containsString("Some exercises have been modified on TMC server."));
-        assertThat(io.out(), containsString("Use 'tmc update' to download them."));
+        assertThat(io.out(), containsString("1 new exercise available"));
+        assertThat(io.out(), containsString("1 exercise has been changed on TMC server"));
+        assertThat(io.out(), containsString("Use 'tmc update' to download them"));
     }
 
     private static int countSubstring(String subStr, String str) {
