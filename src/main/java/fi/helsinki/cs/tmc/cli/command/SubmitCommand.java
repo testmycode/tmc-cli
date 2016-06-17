@@ -109,15 +109,22 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
+        int total = 0;
         String msg = "";
         if (exerciseUpdater.newExercisesAvailable()) {
-            msg += "New exercises available!\n";
+            int count = exerciseUpdater.getNewExercises().size();
+            String plural = count > 1 ? "s" : "";
+            msg += count + " new exercise" + plural + " available!\n";
+            total += count;
         }
 
         if (exerciseUpdater.updatedExercisesAvailable()) {
-            msg += "Some exercises have been modified on TMC server.\n";
+            int count = exerciseUpdater.getUpdatedExercises().size();
+            String plural = count > 1 ? "s have" : " has";
+            msg += count + " exercise" + plural + " been changed on TMC server.\n";
+            total += count;
         }
-        msg += "Use 'tmc update' to download them.";
+        msg += "Use 'tmc update' to download " + (total > 1 ? "them." : "it.");
 
         io.println("");
         io.println(Color.colorString(msg, Color.AnsiColor.ANSI_YELLOW));
