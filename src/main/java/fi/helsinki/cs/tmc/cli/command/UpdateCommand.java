@@ -6,16 +6,15 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
-import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
+import java.nio.file.Path;
 import java.util.List;
 
 @Command(name = "update", desc = "Update exercises")
@@ -52,42 +51,30 @@ public class UpdateCommand extends AbstractCommand {
         }
 
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
-        Course localCourse = info.getCourse();
+        updateExercises(core, info, workDir.getConfigFile());
+    }
 
-        UpdateResult result = TmcUtil.getUpdatableExercises(core, localCourse);
-        if (result == null) {
-            return;
-        }
-
-        List<Exercise> newExercises = result.getNewExercises();
-        List<Exercise> updatedExercises = result.getUpdatedExercises();
-
-        if (newExercises.isEmpty() && updatedExercises.isEmpty()) {
+    public void updateExercises(TmcCore core, CourseInfo info, Path configFile) {
+        ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, info.getCourse());
+        if (!exerciseUpdater.updatesAvailable()) {
             io.println("All exercises are up-to-date");
             return;
         }
 
-        printExercises(newExercises, "New exercises:");
-        printExercises(updatedExercises, "Modified exercises:");
+        printExercises(exerciseUpdater.getNewExercises(), "New exercises:");
+        printExercises(exerciseUpdater.getUpdatedExercises(), "Modified exercises:");
         io.println("");
 
-        //exercises.addAll(deletedExercises); What if user has deleted exercise folder?
-        newExercises.addAll(updatedExercises);
-
-        List<Exercise> downloadedExercises = TmcUtil.downloadExercises(core, newExercises,
+        List<Exercise> downloaded = exerciseUpdater.downloadUpdates(
                 new TmcCliProgressObserver(io));
-        if (downloadedExercises.isEmpty()) {
+        if (downloaded.isEmpty()) {
             io.println("Failed to download exercises");
             return;
         }
 
-        Course course = TmcUtil.findCourse(core, localCourse.getName());
-        if (course == null) {
+        if (!exerciseUpdater.updateCourseJson(info, configFile)) {
             io.println("Failed to update course info");
-            return;
         }
-        info.setExercises(course.getExercises());
-        CourseInfoIo.save(info, workDir.getConfigFile());
     }
 
     private void printExercises(List<Exercise> exercises, String message) {
