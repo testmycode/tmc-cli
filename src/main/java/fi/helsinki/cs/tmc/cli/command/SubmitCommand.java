@@ -108,15 +108,18 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
+        String msg = "";
         if (exerciseUpdater.newExercisesAvailable()) {
-            io.println("New exercises available!");
+            msg += "New exercises available!\n";
         }
 
         if (exerciseUpdater.updatedExercisesAvailable()) {
-            io.println("Some exercises have been modified on TMC server.");
+            msg += "Some exercises have been modified on TMC server.\n";
         }
+        msg += "Use 'tmc update' to download them.";
 
-        io.println("Use 'tmc update' to download them.");
+        io.println("");
+        io.println(Color.colorString(msg, Color.AnsiColor.ANSI_YELLOW));
     }
 
     private List<String> parseArgs(CommandLine args) {
