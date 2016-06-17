@@ -9,6 +9,7 @@ import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -16,13 +17,10 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
 import java.util.List;
 
 @Command(name = "submit", desc = "Submit exercises")
@@ -79,14 +77,6 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        // Abort if user gave invalid exercise name as argument.
-//        for (String exerciseName : exerciseNames) {
-//            if (!exercises.contains(exerciseName)) {
-//                io.println("Could not find exercise '" + exerciseName + "'");
-//                return;
-//            }
-//        }
-
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
         int passed = 0;
         int total = 0;
@@ -110,6 +100,27 @@ public class SubmitCommand extends AbstractCommand {
             io.println("Total tests passed: " + passed + "/" + total);
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
         }
+        checkForExerciseUpdates(core, course);
+    }
+
+    public void checkForExerciseUpdates(TmcCore core, Course course) {
+        ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, course);
+        if (!exerciseUpdater.updatesAvailable()) {
+            return;
+        }
+
+        String msg = "";
+        if (exerciseUpdater.newExercisesAvailable()) {
+            msg += "New exercises available!\n";
+        }
+
+        if (exerciseUpdater.updatedExercisesAvailable()) {
+            msg += "Some exercises have been modified on TMC server.\n";
+        }
+        msg += "Use 'tmc update' to download them.";
+
+        io.println("");
+        io.println(Color.colorString(msg, Color.AnsiColor.ANSI_YELLOW));
     }
 
     private List<String> parseArgs(CommandLine args) {
@@ -117,6 +128,4 @@ public class SubmitCommand extends AbstractCommand {
         this.showDetails = args.hasOption("d");
         return args.getArgList();
     }
-
-
 }
