@@ -44,7 +44,7 @@ public class ListCoursesCommandTest {
         app.setTmcCore(null);
         String[] args = {"courses", "foo"};
         app.run(args);
-        assertFalse(testIo.getPrint().contains("Course doesn't exist"));
+        assertFalse(testIo.out().contains("Course doesn't exist"));
     }
     
     @Test

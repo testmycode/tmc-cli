@@ -127,7 +127,7 @@ public class PasteCommandTest {
 
         String[] args = {"paste"};
         application.run(args);
-        assertFalse(testIo.getPrint().contains("No exercise specified"));
+        assertFalse(testIo.out().contains("No exercise specified"));
     }
 
     @Test
