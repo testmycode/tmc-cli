@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -90,9 +91,9 @@ public class RunTestsCommand extends AbstractCommand {
                 //name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 
-                TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
-                runResult = core.runTests(progobs, exercise).call();
-                progobs.end(0);
+                // TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
+                runResult = core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
+                // progobs.end(0);
 
                 resultPrinter.printRunResult(runResult, isOnlyExercise, color1, color2);
                 total += runResult.testResults.size();

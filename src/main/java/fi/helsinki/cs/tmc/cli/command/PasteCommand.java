@@ -5,12 +5,12 @@ import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -90,7 +90,7 @@ public class PasteCommand extends AbstractCommand {
         CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(
-                new TmcCliProgressObserver(io), exercise, message);
+                ProgressObserver.NULL_OBSERVER, exercise, message);
         URI uri;
 
         try {

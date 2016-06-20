@@ -101,11 +101,6 @@ public class TmcCliProgressObserver extends ProgressObserver {
     }
 
     public static String progressBar(double progress, int length,
-                                     Color.AnsiColor color) {
-        return progressBar(progress, length, color, color, BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
-    }
-
-    public static String progressBar(double progress, int length,
             Color.AnsiColor color1, Color.AnsiColor color2) {
         return progressBar(progress, length, color1, color2,
                 BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);

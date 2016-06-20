@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -52,7 +53,11 @@ public class DownloadExercisesCommand extends AbstractCommand {
             io.println("Course doesn't exist.");
             return;
         }
-        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
+
+        Color.AnsiColor color1 = app.getColor("progressbar-left");
+        Color.AnsiColor color2 = app.getColor("progressbar-right");
+        io.println(Color.colorString("foo", color1) + Color.colorString("bar", color2));
+        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
         List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course, progobs);
         io.println(exercises.toString());
 
