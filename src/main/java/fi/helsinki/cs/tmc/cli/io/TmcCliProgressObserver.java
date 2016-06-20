@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 /**
@@ -30,24 +31,10 @@ public class TmcCliProgressObserver extends ProgressObserver {
     public TmcCliProgressObserver(Io io, Color.AnsiColor color1, Color.AnsiColor color2) {
         this.hasProgressBar = false;
         this.io = io;
-        this.maxline = getMaxline();
+        this.maxline = Application.getTerminalWidth();
         this.pips = this.maxline - 6;
         this.color1 = color1;
         this.color2 = color2;
-    }
-
-    // Clearly this is not the best place for this function
-    public static int getMaxline() {
-        String colEnv = System.getenv("COLUMNS");
-        if (colEnv != null && !colEnv.equals("")) {
-            // Determine the terminal width - this won't work on Windows
-            // Let's just hope our Windows users won't narrow their command prompt
-            // We'll also enforce a minimum size of 20 columns
-
-            return Math.max(Integer.parseInt(colEnv), 20);
-        } else {
-            return 70;
-        }
     }
 
     @Override
@@ -165,7 +152,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     public static String getPassedTestsBar(int passed, int total) {
         return TmcCliProgressObserver.progressBar(
                 (double) passed / total,
-                TmcCliProgressObserver.getMaxline(),
+                Application.getTerminalWidth(),
                 Color.AnsiColor.ANSI_GREEN,
                 Color.AnsiColor.ANSI_RED,
                 '[', ']', '█', '░'
