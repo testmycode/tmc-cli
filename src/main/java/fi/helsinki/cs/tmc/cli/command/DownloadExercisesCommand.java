@@ -58,19 +58,12 @@ public class DownloadExercisesCommand extends AbstractCommand {
             io.println("Course doesn't exist.");
             return;
         }
-        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
 
-        List<Exercise> filtered;
-        if (args.hasOption("a")) {
-            filtered = course.getExercises();
-        } else {
-            filtered = new ArrayList<>();
-            for (Exercise exercise : course.getExercises()) {
-                if (!exercise.isCompleted()) {
-                    filtered.add(exercise);
-                }
-            }
-        } // todo: use downloadCompletedExercises() when implemented in core
+        List<Exercise> filtered = getFilteredExercises(course, args);
+        // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
+        //       submissions. Not yet implemented in tmc-core.
+
+        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
 
         List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
         io.println(exercises.toString());
@@ -81,5 +74,19 @@ public class DownloadExercisesCommand extends AbstractCommand {
         CourseInfo info = app.createCourseInfo(course);
         info.setExercises(exercises);
         CourseInfoIo.save(info, configFile);
+    }
+
+    protected List<Exercise> getFilteredExercises(Course course, CommandLine args) {
+        if (args.hasOption("a")) {
+            return course.getExercises();
+        }
+
+        List<Exercise> filtered = new ArrayList<>();
+        for (Exercise exercise : course.getExercises()) {
+            if (!exercise.isCompleted()) {
+                filtered.add(exercise);
+            }
+        }
+        return filtered;
     }
 }
