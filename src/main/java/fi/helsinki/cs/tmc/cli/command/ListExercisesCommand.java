@@ -27,72 +27,107 @@ public class ListExercisesCommand extends AbstractCommand {
     @Override
     public void getOptions(Options options) {
         options.addOption("n", "no-pager", false, "Don't use a pager to list the exercises");
+        options.addOption("i", false, "Get the list of exercises from the server");
     }
 
     @Override
     public void run(CommandLine args, Io io) {
-        TmcCore core;
         this.io = io;
         String courseName;
 
+        // Get course name
         String[] stringArgs = args.getArgs();
-
-        // If no args given, check if the current directory is a course directory and set courseName as the name of that course.
-        // Else, print out a help message.
         if (stringArgs.length == 0) {
-            WorkDir workDir = getApp().getWorkDir();
-            workDir.addPath();
-
-            if (workDir.getConfigFile() != null) {
-                CourseInfo courseinfo = CourseInfoIo.load(workDir.getConfigFile());
-                courseName = courseinfo.getCourseName();
-
-            } else {
-                this.io.println("No course specified. Either run the command "
-                        + "inside a course directory or enter\n"
-                        + "the course as a parameter.");
+            courseName = getCourseNameFromCurrentDirectory();
+            if (courseName == null) {
                 return;
             }
-
         } else {
             courseName = stringArgs[0];
         }
 
-        core = getApp().getTmcCore();
-        if (core == null) {
+        // Get course exercises
+        List<Exercise> exercises;
+        if (args.hasOption("i")) {
+            exercises = getExercisesFromServer(courseName);
+        } else {
+            exercises = getLocalExercises(courseName);
+        }
+        if (exercises == null) {
             return;
         }
-        printExercises(core, courseName, !args.hasOption("n"));
+
+        printExercises(courseName, exercises, !args.hasOption("n"));
     }
 
-    private void printExercises(TmcCore core, String name, Boolean pager) {
-        List<Exercise> exercises;
-        Course course;
+    private String getCourseNameFromCurrentDirectory() {
+        CourseInfo info = getCourseInfoFromCurrentDirectory();
+        if (info == null) {
+            this.io.println("No course specified. Either run the command in a course"
+                    + " directory or enter the course as a parameter.");
+            return null;
+        }
+        return info.getCourseName();
+    }
 
-        course = TmcUtil.findCourse(core, name);
+    private CourseInfo getCourseInfoFromCurrentDirectory() {
+        WorkDir workDir = getApp().getWorkDir();
+        workDir.addPath();
+        if (workDir.getConfigFile() != null) {
+            return CourseInfoIo.load(workDir.getConfigFile());
+        }
+        return null;
+    }
+
+    private List<Exercise> getExercisesFromServer(String courseName) {
+        TmcCore core = getApp().getTmcCore();
+        if (core == null) {
+            return null;
+        }
+
+        Course course = TmcUtil.findCourse(core, courseName);
         if (course == null) {
-            this.io.println("Course '" + name + "' doesn't exist.");
-            return;
+            this.io.println("Course '" + courseName + "' doesn't exist on the server.");
+            return null;
         }
 
-        exercises = course.getExercises();
+        List<Exercise> exercises = course.getExercises();
         if (exercises.isEmpty()) {
-            this.io.println("Course '" + name + "' doesn't have any exercises.");
+            this.io.println("Course '" + courseName + "' doesn't have any exercises.");
+            return null;
+        }
+        return exercises;
+    }
+
+    private List<Exercise> getLocalExercises(String courseName) {
+        CourseInfo info = getCourseInfoFromCurrentDirectory();
+        if (info == null || !info.getCourseName().equals(courseName)) {
+            this.io.println("You have to be in a course directory or use the -i option "
+                    + "to get the exercises from the server.");
+            return null;
         }
 
-        StringBuilder sb = new StringBuilder("Course name: " + course.getName());
+        List<Exercise> exercises = info.getExercises();
+        if (exercises == null || exercises.isEmpty()) {
+            this.io.println("Course '" + courseName + "' doesn't have any exercises.");
+            return null;
+        }
+        return exercises;
+    }
+
+    private void printExercises(String courseName, List<Exercise> exercises, Boolean pager) {
+        StringBuilder sb = new StringBuilder("Course name: " + courseName);
         String prevDeadline = "";
 
         for (Exercise exercise : exercises) {
             String deadline = getDeadline(exercise);
             if (!deadline.equals(prevDeadline)) {
                 sb.append("\nDeadline: " + deadline + "\n");
+                prevDeadline = deadline;
             }
-            prevDeadline = deadline;
-            
             sb.append(getExerciseStatus(exercise));
-
         }
+
         if (pager) {
             ExternalsUtil.showStringInPager(sb.toString(), "exercise-list");
         } else {
@@ -126,7 +161,7 @@ public class ListExercisesCommand extends AbstractCommand {
         } else {
             status = Color.colorString("  Not completed: ", Color.AnsiColor.ANSI_RED);
         }
-        
+
         status += exercise.getName() + "\n";
         return status;
     }

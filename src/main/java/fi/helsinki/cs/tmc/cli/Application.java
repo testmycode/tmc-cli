@@ -260,6 +260,19 @@ public class Application {
         return os.contains("windows");
     }
 
+    public static int getTerminalWidth() {
+        String colEnv = System.getenv("COLUMNS");
+        if (colEnv != null && !colEnv.equals("")) {
+            // Determine the terminal width - this won't work on Windows
+            // Let's just hope our Windows users won't narrow their command prompt
+            // We'll also enforce a minimum size of 20 columns
+
+            return Math.max(Integer.parseInt(colEnv), 20);
+        } else {
+            return 70;
+        }
+    }
+
     public CourseInfo createCourseInfo(Course course) {
         return new CourseInfo(settings, course);
     }
