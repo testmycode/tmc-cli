@@ -17,6 +17,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 @Command(name = "download", desc = "Download exercises for a specific course")
@@ -24,6 +25,11 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {
+        options.addOption("a", "all", false,
+                "Download all available exercises, including previously completed");
+
+        // Not implemented in tmc-core yet
+        //options.addOption("c", "completed", false, "Download previously completed exercises");
     }
 
     @Override
@@ -53,7 +59,20 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
         TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
-        List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course, progobs);
+
+        List<Exercise> filtered;
+        if (args.hasOption("a")) {
+            filtered = course.getExercises();
+        } else {
+            filtered = new ArrayList<>();
+            for (Exercise exercise : course.getExercises()) {
+                if (!exercise.isCompleted()) {
+                    filtered.add(exercise);
+                }
+            }
+        } // todo: use downloadCompletedExercises() when implemented in core
+
+        List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
         io.println(exercises.toString());
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
