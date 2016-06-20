@@ -63,14 +63,14 @@ public class DownloadExercisesCommandTest {
 
         String[] args = {"download", "foo"};
         app.run(args);
-        assertFalse(testIo.getPrint().contains("Course doesn't exist"));
+        assertFalse(testIo.out().contains("Course doesn't exist"));
     }
 
     @Test
     public void failIfCourseArgumentNotGiven() {
         String[] args = {"download"};
         app.run(args);
-        assertTrue(testIo.getPrint().contains("You must give"));
+        assertTrue(testIo.out().contains("You must give"));
     }
 
     @Test

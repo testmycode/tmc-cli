@@ -32,10 +32,6 @@ public class TestIo extends Io {
         passwordPrompts.clear();
     }
 
-    public String getPrint() {
-        return printedText.toString();
-    }
-
     public String out() {
         return printedText.toString();
     }

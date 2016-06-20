@@ -61,7 +61,7 @@ public class ListExercisesCommandTest {
 
         String[] args = {"exercises", "-n", "foo"};
         app.run(args);
-        assertFalse(io.getPrint().contains("Course 'foo' doesn't exist"));
+        assertFalse(io.out().contains("Course 'foo' doesn't exist"));
     }
 
     @Test

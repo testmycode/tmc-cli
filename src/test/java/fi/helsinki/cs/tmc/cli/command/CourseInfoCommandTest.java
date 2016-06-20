@@ -89,14 +89,14 @@ public class CourseInfoCommandTest {
 
         String[] args = {"info"};
         app.run(args);
-        assertFalse(io.getPrint().contains("You must give"));
+        assertFalse(io.out().contains("You must give"));
     }
 
     @Test
     public void showMessageIfCourseIsNotGiven() {
         String[] args = {"info"};
         app.run(args);
-        assertTrue(io.getPrint().contains("You must give the course name as a parameter"));
+        assertTrue(io.out().contains("You must give the course name as a parameter"));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class CourseInfoCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
         String[] args = {"info", "foo"};
         app.run(args);
-        assertTrue(io.getPrint().contains("The course foo doesn't exist on this server"));
+        assertTrue(io.out().contains("The course foo doesn't exist on this server"));
     }
 
     @Test
@@ -115,8 +115,8 @@ public class CourseInfoCommandTest {
 
         String[] args = {"info", "test-course123"};
         app.run(args);
-        assertTrue(io.getPrint().contains("Course name: test-course123"));
-        assertFalse(io.getPrint().contains("Statistics URLs"));
+        assertTrue(io.out().contains("Course name: test-course123"));
+        assertFalse(io.out().contains("Statistics URLs"));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class CourseInfoCommandTest {
 
         String[] args = {"info", "test-course123", "-a"};
         app.run(args);
-        assertTrue(io.getPrint().contains("Statistics URLs"));
+        assertTrue(io.out().contains("Statistics URLs"));
     }
 
     @Test
@@ -139,7 +139,7 @@ public class CourseInfoCommandTest {
 
         String[] args = {"info", "test-course123"};
         app.run(args);
-        assertTrue(io.getPrint().contains("Exercises: -"));
+        assertTrue(io.out().contains("Exercises: -"));
     }
 
     @Test
@@ -148,8 +148,8 @@ public class CourseInfoCommandTest {
         app.setWorkdir(workDir);
         String[] args = {"info"};
         app.run(args);
-        assertTrue(io.getPrint().contains(EXERCISE1_NAME));
-        assertTrue(io.getPrint().contains("Completed: "));
+        assertTrue(io.out().contains(EXERCISE1_NAME));
+        assertTrue(io.out().contains("Completed: "));
     }
 
     @Test
@@ -158,8 +158,8 @@ public class CourseInfoCommandTest {
         app.setWorkdir(workDir);
         String[] args = {"info", EXERCISE1_NAME};
         app.run(args);
-        assertTrue(io.getPrint().contains(EXERCISE1_NAME));
-        assertTrue(io.getPrint().contains("Completed: "));
+        assertTrue(io.out().contains(EXERCISE1_NAME));
+        assertTrue(io.out().contains("Completed: "));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class CourseInfoCommandTest {
         app.setWorkdir(workDir);
         String[] args = {"info"};
         app.run(args);
-        assertTrue(io.getPrint().contains(("2016-aalto-c")));
+        assertTrue(io.out().contains(("2016-aalto-c")));
     }
 
     @Test
@@ -191,7 +191,7 @@ public class CourseInfoCommandTest {
 
         String[] args = {"info", "test-course123"};
         app.run(args);
-        assertTrue(io.getPrint().contains("test-course123"));
+        assertTrue(io.out().contains("test-course123"));
     }
 
     @Test
@@ -205,6 +205,6 @@ public class CourseInfoCommandTest {
 
         String[] args = {"info", "notacourse"};
         app.run(args);
-        assertTrue(io.getPrint().contains("exercise"));
+        assertTrue(io.out().contains("exercise"));
     }
 }

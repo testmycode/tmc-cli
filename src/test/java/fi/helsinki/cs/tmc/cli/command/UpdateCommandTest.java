@@ -85,7 +85,7 @@ public class UpdateCommandTest {
 
         String[] args = {"update"};
         app.run(args);
-        assertFalse(io.getPrint().contains("Not a course directory"));
+        assertFalse(io.out().contains("Not a course directory"));
     }
 
     @Test
