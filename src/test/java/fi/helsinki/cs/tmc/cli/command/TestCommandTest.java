@@ -34,5 +34,4 @@ public class TestCommandTest {
         app.run(args);
         assertTrue(testIo.out().contains("Let's run easter egg with -a"));
     }
-
 }

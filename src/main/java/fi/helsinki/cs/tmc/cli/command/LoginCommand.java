@@ -42,7 +42,7 @@ public class LoginCommand extends AbstractCommand {
 
         Settings settings = new Settings(serverAddress, username, password);
         if (loginPossible(settings) && saveLoginSettings(settings)) {
-            io.println("Login succesful.");
+            io.println("Login successful.");
         }
     }
 

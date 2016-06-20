@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -45,11 +46,11 @@ public class ExerciseUpdater {
         return list;
     }
 
-    public void setNewExercises(List<Exercise> newExercises) {
+    protected void setNewExercises(List<Exercise> newExercises) {
         this.newExercises = newExercises;
     }
 
-    public void setUpdatedExercises(List<Exercise> updatedExercises) {
+    protected void setUpdatedExercises(List<Exercise> updatedExercises) {
         this.updatedExercises = updatedExercises;
     }
 
@@ -61,6 +62,12 @@ public class ExerciseUpdater {
         return !updatedExercises.isEmpty();
     }
 
+    /**
+     * Asks tmc-core if there are new or updated exercises available. Call this
+     * before other methods.
+     *
+     * @return true if there is something new to download, false if not.
+     */
     public boolean updatesAvailable() {
         UpdateResult result;
         try {
@@ -80,8 +87,8 @@ public class ExerciseUpdater {
         return newExercisesAvailable() || updatedExercisesAvailable();
     }
 
-    public List<Exercise> downloadUpdates() {
-        return TmcUtil.downloadExercises(core, getNewAndUpdatedExercises());
+    public List<Exercise> downloadUpdates(TmcCliProgressObserver progobs) {
+        return TmcUtil.downloadExercises(core, getNewAndUpdatedExercises(), progobs);
     }
 
     public boolean updateCourseJson(CourseInfo info, Path configFile) {

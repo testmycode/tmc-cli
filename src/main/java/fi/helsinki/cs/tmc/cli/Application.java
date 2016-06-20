@@ -261,18 +261,30 @@ public class Application {
 
     public HashMap<String, String> getProperties() {
         // Loads properties from the global configuration file in .config/tmc-cli/
-        return (HashMap<String, String>) this.properties.clone();
+        return this.properties;
     }
 
-    public Boolean setProperties(HashMap<String, String> properties) {
+    public Boolean saveProperties() {
         // Saves properties to the global configuration file in .config/tmc-cli/
-        this.properties = properties;
         return SettingsIo.saveProperties(properties);
     }
 
     public static boolean isWindows() {
         String os = System.getProperty("os.name").toLowerCase();
         return os.contains("windows");
+    }
+
+    public static int getTerminalWidth() {
+        String colEnv = System.getenv("COLUMNS");
+        if (colEnv != null && !colEnv.equals("")) {
+            // Determine the terminal width - this won't work on Windows
+            // Let's just hope our Windows users won't narrow their command prompt
+            // We'll also enforce a minimum size of 20 columns
+
+            return Math.max(Integer.parseInt(colEnv), 20);
+        } else {
+            return 70;
+        }
     }
 
     public CourseInfo createCourseInfo(Course course) {
@@ -305,6 +317,6 @@ public class Application {
 
         long timestamp = now.getTime();
         properties.put(previousUpdateDateKey, Long.toString(timestamp));
-        setProperties(properties);
+        saveProperties();
     }
 }

@@ -18,6 +18,8 @@ public abstract class Io extends Writer {
 
     public abstract String readLine(String prompt);
 
+    public abstract Boolean readConfirmation(String prompt, Boolean defaultToYes);
+
     public abstract String readPassword(String prompt);
 
     @Override

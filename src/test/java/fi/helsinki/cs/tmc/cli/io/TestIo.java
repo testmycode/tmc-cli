@@ -7,16 +7,19 @@ public class TestIo extends Io {
 
     private StringBuilder printedText;
     private LinkedList<String> linePrompts;
+    private LinkedList<Boolean> confirmationPrompts;
     private LinkedList<String> passwordPrompts;
 
     public TestIo() {
         printedText = new StringBuilder();
         linePrompts = new LinkedList<>();
         passwordPrompts = new LinkedList<>();
+        confirmationPrompts = new LinkedList<>();
     }
 
     public boolean allPromptsUsed() {
-        return linePrompts.isEmpty() && passwordPrompts.isEmpty();
+        return linePrompts.isEmpty() && passwordPrompts.isEmpty()
+                && confirmationPrompts.isEmpty();
     }
 
     public void addLinePrompt(String prompt) {
@@ -27,8 +30,13 @@ public class TestIo extends Io {
         passwordPrompts.add(prompt);
     }
 
+    public void addConfirmationPrompt(Boolean confirmation) {
+        confirmationPrompts.add(confirmation);
+    }
+
     public void clearPrompts() {
         linePrompts.clear();
+        confirmationPrompts.clear();
         passwordPrompts.clear();
     }
 
@@ -44,6 +52,11 @@ public class TestIo extends Io {
     @Override
     public String readLine(String prompt) {
         return linePrompts.pop();
+    }
+
+    @Override
+    public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
+        return confirmationPrompts.pop();
     }
 
     @Override

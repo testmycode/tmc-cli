@@ -1,20 +1,22 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 /**
  * Created by jclakkis on 27.5.2016.
  */
 public class TmcCliProgressObserver extends ProgressObserver {
-    protected static final char PIPCHAR = '#';
-    protected static final char EMPTYCHAR = ' ';
+    protected static final char PIPCHAR = '█';
+    protected static final char EMPTYCHAR = '░';
     protected static final char BARLEFT = '[';
     protected static final char BARRIGHT = ']';
 
     protected Io io;
     private int pips;
     protected int maxline;
-    private Color.AnsiColor color;
+    private Color.AnsiColor color1;
+    private Color.AnsiColor color2;
     protected String lastMessage;
     protected Boolean hasProgressBar;
 
@@ -23,29 +25,16 @@ public class TmcCliProgressObserver extends ProgressObserver {
     }
 
     public TmcCliProgressObserver(Io io) {
-        this(io, Color.AnsiColor.ANSI_CYAN);
+        this(io, Color.AnsiColor.ANSI_CYAN, Color.AnsiColor.ANSI_CYAN);
     }
 
-    public TmcCliProgressObserver(Io io, Color.AnsiColor color) {
+    public TmcCliProgressObserver(Io io, Color.AnsiColor color1, Color.AnsiColor color2) {
         this.hasProgressBar = false;
         this.io = io;
-        this.maxline = getMaxline();
+        this.maxline = Application.getTerminalWidth();
         this.pips = this.maxline - 6;
-        this.color = color;
-    }
-
-    // Clearly this is not the best place for this function
-    public static int getMaxline() {
-        String colEnv = System.getenv("COLUMNS");
-        if (colEnv != null && !colEnv.equals("")) {
-            // Determine the terminal width - this won't work on Windows
-            // Let's just hope our Windows users won't narrow their command prompt
-            // We'll also enforce a minimum size of 20 columns
-
-            return Math.max(Integer.parseInt(colEnv), 20);
-        } else {
-            return 70;
-        }
+        this.color1 = color1;
+        this.color2 = color2;
     }
 
     @Override
@@ -64,7 +53,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
             lastMessage = message;
             io.println("");
         }
-        this.io.print("\r" + this.progressBar(progress, this.maxline, this.color));
+        this.io.print("\r" + this.progressBar(progress, this.maxline, this.color1, this.color2));
     }
 
     protected void printMessage(String message) {
@@ -81,8 +70,11 @@ public class TmcCliProgressObserver extends ProgressObserver {
     public void end(long id) {
         // Most likely not going to be used
         if (this.hasProgressBar) {
-            this.io.println("\r" + this.percentage(1.0)
-                    + this.progressBar(1.0, this.pips, this.color));
+            this.io.print("\r");
+            flush(this.maxline);
+            this.io.print("\r");
+//            this.io.println("\r" + this.percentage(1.0)
+//                    + this.progressBar(1.0, this.pips, this.color1, this.color2));
         } else {
             this.io.println("");
         }
@@ -108,8 +100,15 @@ public class TmcCliProgressObserver extends ProgressObserver {
         io.print(sb);
     }
 
-    public static String progressBar(double progress, int length, Color.AnsiColor color) {
+    public static String progressBar(double progress, int length,
+                                     Color.AnsiColor color) {
         return progressBar(progress, length, color, color, BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
+    }
+
+    public static String progressBar(double progress, int length,
+            Color.AnsiColor color1, Color.AnsiColor color2) {
+        return progressBar(progress, length, color1, color2,
+                BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
     }
 
     public static String progressBar(
@@ -153,10 +152,10 @@ public class TmcCliProgressObserver extends ProgressObserver {
     public static String getPassedTestsBar(int passed, int total) {
         return TmcCliProgressObserver.progressBar(
                 (double) passed / total,
-                TmcCliProgressObserver.getMaxline(),
+                Application.getTerminalWidth(),
                 Color.AnsiColor.ANSI_GREEN,
                 Color.AnsiColor.ANSI_RED,
-                '[', ']', '#', '-'
+                '[', ']', '█', '░'
         );
     }
 }

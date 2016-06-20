@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
@@ -64,7 +65,8 @@ public class UpdateCommand extends AbstractCommand {
         printExercises(exerciseUpdater.getUpdatedExercises(), "Modified exercises:");
         io.println("");
 
-        List<Exercise> downloaded = exerciseUpdater.downloadUpdates();
+        List<Exercise> downloaded = exerciseUpdater.downloadUpdates(
+                new TmcCliProgressObserver(io));
         if (downloaded.isEmpty()) {
             io.println("Failed to download exercises");
             return;

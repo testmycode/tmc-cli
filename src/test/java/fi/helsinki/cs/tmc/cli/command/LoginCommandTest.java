@@ -63,7 +63,7 @@ public class LoginCommandTest {
         when(SettingsIo.save(any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
-        assertThat(io.out(), containsString("Login succesful."));
+        assertThat(io.out(), containsString("Login successful."));
     }
 
     @Test
