@@ -12,11 +12,13 @@ import org.apache.commons.cli.Options;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Command(name = "help", desc = "List every command")
 public class HelpCommand extends AbstractCommand {
-    private final int longestName = 9; // Length of the longest command name
-    private CommandFactory commands;
+    private int longestNameLength;
+    private CommandFactory commandFactory;
+    private Io io;
 
     @Override
     public void getOptions(Options options) {
@@ -25,43 +27,56 @@ public class HelpCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         Application app = getApp();
-        this.commands = app.getCommandFactory();
+        this.commandFactory = app.getCommandFactory();
+        this.io = io;
 
         io.println("Usage: tmc [args] COMMAND [command-args]\n");
         io.println("TMC commands:");
-        
+
         List<String> commandStrings = getCommandStrings();
         Collections.sort(commandStrings);
         for (String commandString : commandStrings) {
             io.println(commandString);
         }
-        
+
         io.println("");
         app.printHelp();
     }
-    
+
     private List<String> getCommandStrings() {
         List<String> strings = new ArrayList<>();
-        for (Class<Command> commandClass : this.commands.getCommands()) {
+        Set<Class<Command>> commands = this.commandFactory.getCommands();
+        commands.remove(getCommandClass(TestCommand.class));
+        commands.remove(getCommandClass(ShellHelperCommand.class));
+
+        longestNameLength = longestName(commands);
+        for (Class<Command> commandClass : commands) {
             Command command = CommandFactory.getCommand(commandClass);
-            if ((Class)commandClass == (Class)TestCommand.class) {
-                continue;
-            }
-            if ((Class)commandClass == (Class)ShellHelperCommand.class) {
-                continue;
-            }
             strings.add(createCommandString(command));
         }
         return strings;
     }
-    
+
+    private Class<Command> getCommandClass(Class klass) {
+        return (Class<Command>)klass;
+    }
+
     private String createCommandString(Command command) {
         StringBuilder builder = new StringBuilder();
         builder.append("  ").append(command.name());
-        for (int i = 0; i < longestName - command.name().length() + 2; i++) {
+        for (int i = 0; i < longestNameLength - command.name().length() + 1; i++) {
             builder.append(" ");
         }
         builder.append(command.desc());
         return builder.toString();
+    }
+
+    private int longestName(Set<Class<Command>> commandList) {
+        int longest = 0;
+        for (Class<Command> commandClass : commandList) {
+            Command command = CommandFactory.getCommand(commandClass);
+            longest = Math.max(longest, command.name().length());
+        }
+        return longest;
     }
 }
