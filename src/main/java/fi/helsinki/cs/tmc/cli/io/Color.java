@@ -1,8 +1,11 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import fi.helsinki.cs.tmc.cli.Application;
+
 public class Color {
 
     public enum AnsiColor {
+        ANSI_NONE(""),
         ANSI_RESET("\u001B[0m"),
         ANSI_BLACK("\u001B[30m"),
         ANSI_RED("\u001B[31m"),
@@ -25,7 +28,7 @@ public class Color {
     }
 
     public static String colorString(String string, AnsiColor color) {
-        if (!System.getProperty("os.name").toLowerCase().contains("windows")) {
+        if (!Application.isWindows() && color != AnsiColor.ANSI_NONE) {
             return color + string + AnsiColor.ANSI_RESET;
         } else {
             return string;

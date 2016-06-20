@@ -6,14 +6,12 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
-import fi.helsinki.cs.tmc.cli.io.TmcCliDualProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
