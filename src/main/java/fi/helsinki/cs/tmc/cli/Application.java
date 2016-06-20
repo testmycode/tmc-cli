@@ -2,15 +2,16 @@ package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
+import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
-
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
+
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
@@ -18,7 +19,6 @@ import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private static final String previousUpdateDateKey = "update-date";
     private static final long defaultUpdateInterval = 60 * 60 * 1000;
+    private static final String usage = "tmc [args] COMMAND [command-args]";
 
     private CommandFactory commandFactory;
     private HashMap<String, String> properties;
@@ -132,9 +134,8 @@ public class Application {
         return subArgs.toArray(new String[subArgs.size()]);
     }
 
-    public void printHelp() {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("tmc-cli", this.options);
+    public void printHelp(String description) {
+        HelpGenerator.run(io, usage, description, this.options);
     }
 
     public void run(String[] args) {

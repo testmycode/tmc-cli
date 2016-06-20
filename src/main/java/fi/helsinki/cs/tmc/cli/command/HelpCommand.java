@@ -30,24 +30,23 @@ public class HelpCommand extends AbstractCommand {
         this.commandFactory = app.getCommandFactory();
         this.io = io;
 
-        io.println("Usage: tmc [args] COMMAND [command-args]\n");
-        io.println("TMC commands:");
+        StringBuilder sb = new StringBuilder();
+        sb.append("TMC commands:\n");
 
         List<String> commandStrings = getCommandStrings();
         Collections.sort(commandStrings);
         for (String commandString : commandStrings) {
-            io.println(commandString);
+            sb.append(commandString).append("\n");
         }
 
-        io.println("");
-        app.printHelp();
+        app.printHelp(sb.toString());
     }
 
     private List<String> getCommandStrings() {
         List<String> strings = new ArrayList<>();
         Set<Class<Command>> commands = this.commandFactory.getCommands();
-        commands.remove(getCommandClass(TestCommand.class));
-        commands.remove(getCommandClass(ShellHelperCommand.class));
+        commands.remove(castToCommandClass(TestCommand.class));
+        commands.remove(castToCommandClass(ShellHelperCommand.class));
 
         longestNameLength = longestName(commands);
         for (Class<Command> commandClass : commands) {
@@ -57,7 +56,8 @@ public class HelpCommand extends AbstractCommand {
         return strings;
     }
 
-    private Class<Command> getCommandClass(Class klass) {
+    @SuppressWarnings("unchecked")
+    private Class<Command> castToCommandClass(Class klass) {
         return (Class<Command>)klass;
     }
 

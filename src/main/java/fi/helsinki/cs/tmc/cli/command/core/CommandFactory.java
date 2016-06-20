@@ -103,4 +103,9 @@ public class CommandFactory {
     public Set<Class<Command>> getCommands() {
         return new HashSet<>(CommandFactory.commands.values());
     }
+
+    @SuppressWarnings("unchecked")
+    public static Class<Command> castToCommandClass(Class command) {
+        return command;
+    }
 }
