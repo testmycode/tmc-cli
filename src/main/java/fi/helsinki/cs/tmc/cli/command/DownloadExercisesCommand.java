@@ -56,7 +56,6 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         Color.AnsiColor color1 = app.getColor("progressbar-left");
         Color.AnsiColor color2 = app.getColor("progressbar-right");
-        io.println(Color.colorString("foo", color1) + Color.colorString("bar", color2));
         TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
         List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course, progobs);
         io.println(exercises.toString());

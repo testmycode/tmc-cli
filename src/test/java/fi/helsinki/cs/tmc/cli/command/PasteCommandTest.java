@@ -72,6 +72,7 @@ public class PasteCommandTest {
         exerciseNames.add("paste-exercise");
         when(workDir.getExerciseNames()).thenReturn(exerciseNames);
         when(workDir.addPath()).thenReturn(true);
+        when(workDir.addPath(anyString())).thenReturn(true);
 
         mockCallable = mockCallable();
         mockCallableFail = mockCallable();
