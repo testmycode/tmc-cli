@@ -43,29 +43,32 @@ public class CourseInfoCommand extends AbstractCommand {
             return;
         }
 
+        // if in course directory
         if (workDir.getConfigFile() != null) {
             CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
             course = info.getCourse();
 
-            //if in exercise directory and no parameters given, print info for that exercise.
+            // if in exercise directory and no parameters given, print info for that exercise.
             // else if exercise or course name given as a parameter, check which one it is and print info for that
             if (workDir.getExerciseNames().size() == 1 && stringArgs.length == 0) {
-                CourseInfo courseInfo = CourseInfoIo.load(workDir.getConfigFile());
-                exercise = TmcUtil.findExercise(courseInfo.getCourse(),
-                        workDir.getExerciseNames().get(0));
+                String currentExercise = workDir.getExerciseNames().get(0);
+                exercise = info.getExercise(currentExercise);
                 printExerciseDetails();
                 return;
+
             } else if (stringArgs.length != 0) {
                 if (info.getExercise(stringArgs[0]) != null) {
                     exercise = info.getExercise(stringArgs[0]);
                     printExerciseDetails();
                     return;
-                } else if (TmcUtil.findCourse(core, stringArgs[0]) != null) {
-                    course = TmcUtil.findCourse(core, stringArgs[0]);
-                    printCourse(args.hasOption("a"));
-                    return;
+
                 } else {
-                    System.out.println("No such course or exercise.");
+                    course = TmcUtil.findCourse(core, stringArgs[0]);
+                    if (course != null) {
+                        printCourse(args.hasOption("a"));
+                    } else {
+                        System.out.println("No such course or exercise.");
+                    }
                     return;
                 }
             }
@@ -74,7 +77,6 @@ public class CourseInfoCommand extends AbstractCommand {
         }
 
         course = TmcUtil.findCourse(core, stringArgs[0]);
-
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
             return;
@@ -82,7 +84,6 @@ public class CourseInfoCommand extends AbstractCommand {
         printCourse(args.hasOption("a"));
     }
 
-    
     private void printCourse(boolean showAll) {
         printCourseShort();
         if (showAll) {
@@ -114,7 +115,7 @@ public class CourseInfoCommand extends AbstractCommand {
         io.println("Attempted: " + exercise.isAttempted());
         io.println("Deadline: " + exercise.getDeadline());
     }
-    
+
     private void printExercises(boolean showAll) {
         List<Exercise> exercises = course.getExercises();
         if (exercises == null || exercises.isEmpty()) {
