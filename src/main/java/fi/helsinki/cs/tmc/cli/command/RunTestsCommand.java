@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
@@ -59,6 +60,7 @@ public class RunTestsCommand extends AbstractCommand {
         }
         String courseName = getCourseName(workDir);
         List<String> exerciseNames = workDir.getExerciseNames();
+        List<Exercise> exercises = CourseInfoIo.load(workDir.getConfigFile()).getExercises();
 
         if (exerciseNames.isEmpty()) {
             io.println("You have to be in a course directory to run tests");
@@ -98,6 +100,7 @@ public class RunTestsCommand extends AbstractCommand {
                 resultPrinter.printRunResult(runResult, isOnlyExercise, color1, color2);
                 total += runResult.testResults.size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
+                if
             }
             if (total > 0 && !isOnlyExercise) {
                 // Print a progress bar showing how the ratio of passed exercises
