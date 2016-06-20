@@ -67,7 +67,7 @@ public class CourseInfoCommand extends AbstractCommand {
                     if (course != null) {
                         printCourse(args.hasOption("a"));
                     } else {
-                        System.out.println("No such course or exercise.");
+                        io.println("No such course or exercise.");
                     }
                     return;
                 }
