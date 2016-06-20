@@ -149,12 +149,12 @@ public class TmcCliProgressObserver extends ProgressObserver {
         return percentage + percent + "%";
     }
 
-    public static String getPassedTestsBar(int passed, int total) {
+    public static String getPassedTestsBar(int passed, int total,
+                                           Color.AnsiColor color1, Color.AnsiColor color2) {
         return TmcCliProgressObserver.progressBar(
                 (double) passed / total,
                 Application.getTerminalWidth(),
-                Color.AnsiColor.ANSI_GREEN,
-                Color.AnsiColor.ANSI_RED,
+                color1, color2,
                 '[', ']', '█', '░'
         );
     }

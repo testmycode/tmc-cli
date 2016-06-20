@@ -77,6 +77,9 @@ public class RunTestsCommand extends AbstractCommand {
         RunResult runResult;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
+        Color.AnsiColor color1 = app.getColor("passedtests-left");
+        Color.AnsiColor color2 = app.getColor("passedtests-right");
+
         try {
             int total = 0;
             int passed = 0;
@@ -91,7 +94,7 @@ public class RunTestsCommand extends AbstractCommand {
                 runResult = core.runTests(progobs, exercise).call();
                 progobs.end(0);
 
-                resultPrinter.printRunResult(runResult, isOnlyExercise);
+                resultPrinter.printRunResult(runResult, isOnlyExercise, color1, color2);
                 total += runResult.testResults.size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
             }
@@ -100,9 +103,9 @@ public class RunTestsCommand extends AbstractCommand {
                 // But only if more than one exercise was tested
                 io.println("");
                 io.println("Total tests passed: " + passed + "/" + total);
-                io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+                io.println(TmcCliProgressObserver.getPassedTestsBar(
+                        passed, total, color1, color2));
             }
-
         } catch (Exception ex) {
             io.println("Failed to run tests.\n"
                     + ex.getMessage());
