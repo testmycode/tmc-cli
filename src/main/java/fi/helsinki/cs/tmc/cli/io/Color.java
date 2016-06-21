@@ -34,4 +34,22 @@ public class Color {
             return string;
         }
     }
+
+    public static AnsiColor getColor(String color) {
+        if (color == null) {
+            return null;
+        }
+        switch (color) {
+            case "black":   return AnsiColor.ANSI_BLACK;
+            case "red":   return AnsiColor.ANSI_RED;
+            case "green":   return AnsiColor.ANSI_GREEN;
+            case "yellow":   return AnsiColor.ANSI_YELLOW;
+            case "blue":   return AnsiColor.ANSI_BLUE;
+            case "purple":   return AnsiColor.ANSI_PURPLE;
+            case "cyan":   return AnsiColor.ANSI_CYAN;
+            case "white":   return AnsiColor.ANSI_WHITE;
+            case "none":   return AnsiColor.ANSI_NONE;
+            default:    return null;
+        }
+    }
 }

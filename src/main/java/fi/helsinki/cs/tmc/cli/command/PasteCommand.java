@@ -5,12 +5,12 @@ import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -45,25 +45,35 @@ public class PasteCommand extends AbstractCommand {
         }
         WorkDir workdir = app.getWorkDir();
         List<String> argsList = args.getArgList();
+
+//        if (argsList.size() > 1) {
+//            io.println(
+//                    "Error: Too many arguments. Pass the name of the exercise you wish to send to "
+//                            + "the pastebin as the only argument.");
+//            return;
+//        }
+        Boolean valid;
         if (argsList.isEmpty()) {
-            // adds the current working directory
-            if (!workdir.addPath()) {
-                // if addPath() returns false, we're not in a course directory
-                io.println(
-                        "No exercise specified. Please use this command in an exercise directory "
-                        + "or pass the name of the exercise as an argument.");
-                return;
-            }
-        } else if (argsList.size() > 1) {
+            valid = workdir.addPath();
+        } else if (argsList.size() == 1) {
+            valid = workdir.addPath(argsList.get(0));
+        } else {
             io.println(
-                    "Error: Too many arguments. Pass the name of the exercise you wish to send to "
-                            + "the pastebin as the only argument.");
+                    "Error: Too many arguments. Expected 1, got " + argsList.size());
+            return;
+        }
+        if (!valid) {
+            io.println(
+                    "No exercise specified. Please use this command in an exercise directory "
+                    + "or pass the name of the exercise as an argument.");
             return;
         }
 
         String message;
         if (!args.hasOption("n")) {
-            if (!args.hasOption("m")) {
+            if (args.hasOption("m")) {
+                message = args.getOptionValue("m");
+            } else if (io.readConfirmation("Attach a message to your paste?", true)) {
                 message = ExternalsUtil.getUserEditedMessage(
                         "\n"
                                 + "#   Write a message for your paste in this file and save it.\n"
@@ -73,7 +83,7 @@ public class PasteCommand extends AbstractCommand {
                         "tmc-paste-message",
                         true);
             } else {
-                message = args.getOptionValue("m");
+                message = "";
             }
         } else {
             message = "";
@@ -90,7 +100,7 @@ public class PasteCommand extends AbstractCommand {
         CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
         Callable<URI> callable = core.pasteWithComment(
-                new TmcCliProgressObserver(io), exercise, message);
+                ProgressObserver.NULL_OBSERVER, exercise, message);
         URI uri;
 
         try {

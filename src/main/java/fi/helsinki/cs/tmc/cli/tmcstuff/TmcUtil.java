@@ -67,7 +67,7 @@ public class TmcUtil {
     public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises,
                                                    ProgressObserver progobs) {
         try {
-            return core.downloadOrUpdateExercises(new TmcCliProgressObserver(), exercises).call();
+            return core.downloadOrUpdateExercises(progobs, exercises).call();
         } catch (Exception e) {
             logger.warn("Failed to download exercises", e);
             return new ArrayList<>();
