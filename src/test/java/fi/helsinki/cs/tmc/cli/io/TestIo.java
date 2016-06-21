@@ -56,7 +56,11 @@ public class TestIo extends Io {
 
     @Override
     public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
-        return confirmationPrompts.pop();
+        if (confirmationPrompts.size() >= 1) {
+            return confirmationPrompts.pop();
+        } else {
+            return defaultToYes;
+        }
     }
 
     @Override

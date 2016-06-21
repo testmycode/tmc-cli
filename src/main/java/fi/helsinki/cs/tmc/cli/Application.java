@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -304,5 +305,20 @@ public class Application {
         long timestamp = now.getTime();
         properties.put(previousUpdateDateKey, Long.toString(timestamp));
         saveProperties();
+    }
+
+    public Color.AnsiColor getColor(String context) {
+        String propertyValue = this.properties.get(context);
+        Color.AnsiColor color = Color.getColor(propertyValue);
+        if (color == null) {
+            switch (context) {
+                case "progressbar-left":    return Color.AnsiColor.ANSI_CYAN;
+                case "progressbar-right":   return Color.AnsiColor.ANSI_CYAN;
+                case "passedtests-left":    return Color.AnsiColor.ANSI_GREEN;
+                case "passedtests-right":   return Color.AnsiColor.ANSI_RED;
+                default:    return Color.AnsiColor.ANSI_NONE;
+            }
+        }
+        return color;
     }
 }

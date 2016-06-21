@@ -2,9 +2,7 @@ package fi.helsinki.cs.tmc.cli.io;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -55,7 +53,8 @@ public class TmcCliProgressObserverTest {
 
     @Test
     public void testResultBarWorks() {
-        String string = TmcCliProgressObserver.getPassedTestsBar(1, 2);
+        String string = TmcCliProgressObserver.getPassedTestsBar(1, 2,
+                Color.AnsiColor.ANSI_NONE, Color.AnsiColor.ANSI_NONE);
         assertTrue("Prints the start of the progress bar", string.contains(
                 " 50%["));
         assertTrue("Prints the first part of the progress bar", string.contains(

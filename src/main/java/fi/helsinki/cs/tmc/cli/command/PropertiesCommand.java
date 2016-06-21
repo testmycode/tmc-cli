@@ -9,6 +9,8 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -89,7 +91,10 @@ public class PropertiesCommand extends AbstractCommand {
         sb.append("<VALUE>");
         io.println(sb.toString());
 
-        for (String key : props.keySet()) {
+        ArrayList<String> array = new ArrayList<>(props.keySet());
+        Collections.sort(array);
+
+        for (String key : array) {
             sb = new StringBuilder();
             sb.append(key + ":");
             for (int i = key.length() + 1; i < Math.max(longest + 1, 7); i++) {

@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -58,12 +59,13 @@ public class DownloadExercisesCommand extends AbstractCommand {
             io.println("Course doesn't exist.");
             return;
         }
-
         List<Exercise> filtered = getFilteredExercises(course, args);
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
-        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
+        Color.AnsiColor color1 = app.getColor("progressbar-left");
+        Color.AnsiColor color2 = app.getColor("progressbar-right");
+        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
 
         List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
         io.println(exercises.toString());

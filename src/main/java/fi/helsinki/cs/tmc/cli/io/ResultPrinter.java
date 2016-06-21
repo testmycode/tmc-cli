@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
@@ -44,7 +45,8 @@ public class ResultPrinter {
         this.showPassed = showPassed;
     }
 
-    public void printSubmissionResult(SubmissionResult result, Boolean printProgressBar) {
+    public void printSubmissionResult(SubmissionResult result, Boolean printProgressBar,
+                                      Color.AnsiColor color1, Color.AnsiColor color2) {
         if (result == null) {
             return;
         }
@@ -60,7 +62,7 @@ public class ResultPrinter {
         }
 
         if (printProgressBar && this.total > 0) {
-            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
         }
         String msg = null;
         switch (result.getTestResultStatus()) {
@@ -86,13 +88,14 @@ public class ResultPrinter {
         return;
     }
 
-    public void printRunResult(RunResult result, Boolean printProgressBar) {
+    public void printRunResult(RunResult result, Boolean printProgressBar,
+                               Color.AnsiColor color1, Color.AnsiColor color2) {
         printTestResults(result.testResults);
         this.total = result.testResults.size();
         this.passed = passedTests(result.testResults);
 
         if (printProgressBar && this.total > 0) {
-            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
         }
 
         String msg = null;
