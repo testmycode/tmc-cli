@@ -107,9 +107,7 @@ public class PropertiesCommand extends AbstractCommand {
 
     private int longestKey(HashMap<String, String> props) {
         int longest = 0;
-        Iterator iterator = props.keySet().iterator();
-        while (iterator.hasNext()) {
-            String key = (String) iterator.next();
+        for (String key : props.keySet()) {
             longest = Math.max(longest, key.length());
         }
         return longest;

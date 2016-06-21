@@ -30,7 +30,7 @@ public class ApplicationTest {
     public void failWhenInvalidOption() {
         String[] args = {"-a34t3"};
         app.run(args);
-        assertTrue(io.out().contains("Invalid command"));
+        assertTrue(io.out().contains("Unrecognized option"));
     }
 
     @Test
