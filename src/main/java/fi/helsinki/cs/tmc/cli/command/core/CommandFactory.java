@@ -38,7 +38,7 @@ public class CommandFactory {
      * @param commandClass the class of the command objects
      */
     public static void addCommand(String name, Class commandClass) {
-        Class<Command> klass = commandClass;
+        Class<Command> klass = castToCommandClass(commandClass);
         CommandFactory.commands.put(name, klass);
     }
 
@@ -48,7 +48,7 @@ public class CommandFactory {
      * @param commandClass The class of the command
      */
     public void addCommand(Class commandClass) {
-        Class<Command> klass = commandClass;
+        Class<Command> klass = castToCommandClass(commandClass);
         Annotation annotation = klass.getAnnotation(Command.class);
         if (annotation == null) {
             throw new RuntimeException("Command must have Command annotation");
