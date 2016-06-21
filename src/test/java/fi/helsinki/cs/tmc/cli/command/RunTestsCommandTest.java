@@ -92,8 +92,7 @@ public class RunTestsCommandTest {
         app = spy(app);
         doReturn(null).when(app).getTmcCore();
 
-        workDir = new WorkDir(pathToDummyCourse);
-        app.setWorkdir(workDir);
+        app.getWorkDir().setWorkdir(pathToDummyCourse);
         String[] args = {"test"};
         app.run(args);
         assertFalse(io.out().contains("Testing:"));

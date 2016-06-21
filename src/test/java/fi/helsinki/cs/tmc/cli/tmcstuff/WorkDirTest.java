@@ -202,7 +202,7 @@ public class WorkDirTest {
         assertTrue(exercises.contains("viikko2-subdir-teht3"));
         workDir = new WorkDir();
         workDir.setWorkdir(tempDir);
-        workDir.addPath("teht");
+        workDir.addPath("teht1");
         exercises = workDir.getExerciseNames();
         assertEquals(0, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));
@@ -220,7 +220,7 @@ public class WorkDirTest {
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
-        workDir.addPath("teht");
+        workDir.addPath("teht2");
         List<String> exercises = workDir.getExerciseNames();
         assertEquals(1, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));
@@ -238,7 +238,7 @@ public class WorkDirTest {
                 Paths.get(System.getProperty("java.io.tmpdir"))
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
-        workDir.addPath("teht");
+        workDir.addPath("teht3");
         List<String> exercises = workDir.getExerciseNames();
         assertEquals(1, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));

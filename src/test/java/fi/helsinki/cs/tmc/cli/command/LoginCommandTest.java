@@ -120,7 +120,7 @@ public class LoginCommandTest {
         when(mockCore.listCourses((ProgressObserver) anyObject()))
                 .thenReturn(successfulCallable());
         String[] args = {"login", "-s", SERVER, "-u", USERNAME};
-        io.addLinePrompt(PASSWORD);
+        io.addPasswordPrompt(PASSWORD);
         app.run(args);
         assertTrue(io.allPromptsUsed());
     }

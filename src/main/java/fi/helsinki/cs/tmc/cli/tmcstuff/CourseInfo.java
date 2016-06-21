@@ -16,6 +16,7 @@ public class CourseInfo {
     private String username;
     private String serverAddress;
     private Course course;
+    private List<String> localCompletedExercises;
     private HashMap<String, String> properties;
 
     public CourseInfo(TmcSettings settings, Course course) {
@@ -23,6 +24,7 @@ public class CourseInfo {
         this.serverAddress = settings.getServerAddress();
         this.course = course;
         this.properties = new HashMap<>();
+        this.localCompletedExercises = new ArrayList<String>();
     }
 
     public String getUsername() {
@@ -39,6 +41,16 @@ public class CourseInfo {
 
     public Course getCourse() {
         return this.course;
+    }
+
+    public List<String> getLocalCompletedExercises() {
+        // Check for null pointer in case of old .tmc.json files
+        // Remove this when we are sure nobody's using 0.5.1 anymore
+        if (this.localCompletedExercises != null) {
+            return this.localCompletedExercises;
+        } else {
+            return new ArrayList<String>();
+        }
     }
 
     public List<Exercise> getExercises() {

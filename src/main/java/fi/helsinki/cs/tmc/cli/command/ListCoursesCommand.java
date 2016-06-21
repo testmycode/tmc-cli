@@ -11,9 +11,6 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
 /**
@@ -21,7 +18,6 @@ import java.util.List;
  */
 @Command(name = "courses", desc = "List the available courses")
 public class ListCoursesCommand extends AbstractCommand {
-    private static final Logger logger = LoggerFactory.getLogger(ListCoursesCommand.class);
 
     @Override
     public void getOptions(Options options) {
@@ -29,14 +25,11 @@ public class ListCoursesCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
-        List<Course> courses;
-        TmcCore core;
-
-        core = getApp().getTmcCore();
+        TmcCore core = getApp().getTmcCore();
         if (core == null) {
             return;
         }
-        courses = TmcUtil.listCourses(core);
+        List<Course> courses = TmcUtil.listCourses(core);
         if (courses.isEmpty()) {
             io.println("No courses found on this server.");
             return;

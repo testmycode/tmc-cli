@@ -314,8 +314,8 @@ public class Application {
             switch (context) {
                 case "progressbar-left":    return Color.AnsiColor.ANSI_CYAN;
                 case "progressbar-right":   return Color.AnsiColor.ANSI_CYAN;
-                case "passedtests-left":    return Color.AnsiColor.ANSI_GREEN;
-                case "passedtests-right":   return Color.AnsiColor.ANSI_RED;
+                case "testresults-left":    return Color.AnsiColor.ANSI_GREEN;
+                case "testresults-right":   return Color.AnsiColor.ANSI_RED;
                 default:    return Color.AnsiColor.ANSI_NONE;
             }
         }

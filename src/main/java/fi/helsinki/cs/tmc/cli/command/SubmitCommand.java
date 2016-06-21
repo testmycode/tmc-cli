@@ -82,8 +82,8 @@ public class SubmitCommand extends AbstractCommand {
         int total = 0;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
-        Color.AnsiColor color1 = app.getColor("passedtests-left");
-        Color.AnsiColor color2 = app.getColor("passedtests-right");
+        Color.AnsiColor color1 = app.getColor("testresults-left");
+        Color.AnsiColor color2 = app.getColor("testresults-right");
 
         for (String exerciseName : exerciseNames) {
             io.println(Color.colorString("Submitting: " + exerciseName,

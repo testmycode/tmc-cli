@@ -56,11 +56,16 @@ public class WorkDir {
         }
     }
 
+    public List<String> getExerciseNames() {
+        return getExerciseNames(true, false, false);
+    }
+
     /**
      * Go through directories and return matching exercises.
      * @return: return names of exercises as List
      */
-    public List<String> getExerciseNames() {
+    public List<String> getExerciseNames(
+            Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
         if (this.directories.isEmpty()) {
             if (!addPath()) {
                 return new ArrayList<>();
@@ -70,72 +75,50 @@ public class WorkDir {
         if (courseinfo == null) {
             return new ArrayList<>();
         }
-        List<String> allExerciseNames = courseinfo.getExerciseNames();
+        List<Exercise> allExercises = courseinfo.getExercises();
         List<String> exerciseNames = new ArrayList<>();
+        List<String> locallyTested = courseinfo.getLocalCompletedExercises();
+
+        if (directories.contains(getCourseDirectory())) {
+            for (File file : getCourseDirectory().toFile().listFiles()) {
+                if (file.isDirectory()) {
+                    addPath(file.toPath());
+                }
+            }
+            directories.remove(getCourseDirectory());
+        }
 
         for (Path dir : directories) {
-            if (dir.equals(getCourseDirectory())) {
-                return allExerciseNames;
-            }
+
             // convert path to a string relative to the course dir
             String exDir = getCourseDirectory().relativize(dir)
-                    .toString().replace(File.separator, "-");
-            for (String exercise : allExerciseNames) {
-                if (exercise.startsWith(exDir)) {
-                    // if the exercise starts with this path, add it
-                    exerciseNames.add(exercise);
-                } else if (exDir.startsWith(exercise)) {
-                    // if the path contains the name of the exercise but is longer
-                    // eg, if we submit from the src/ directory, add it
-                    exerciseNames.add(exercise);
-                    // we can break here because we know this path won't match anything else
-                    break;
+                    .toString();
+            for (Exercise exercise : allExercises) {
+                if (filterExercise(exercise, exDir, locallyTested,
+                        exists, onlyTested, filterCompleted)
+                        && !exDir.isEmpty()) {
+                    exerciseNames.add(exercise.getName());
                 }
             }
         }
 
         return exerciseNames;
-//        if (this.configFile == null) {
-//            return new ArrayList<>();
-//        }
-//        CourseInfo info = CourseInfoIo.load(this.configFile);
-//        List<Exercise> exercises = info.getExercises();
-//        List<String> exerciseNames = new ArrayList<>();
-//        if (params == null || params.length == 0) {
-//            if (this.workingDirectory.equals(this.courseDirectory)) {
-//                // In course root dir and no params - return all exercises
-//                for (Exercise exercise : exercises) {
-//                    exerciseNames.add(exercise.getName());
-//                }
-//                return exerciseNames;
-//            }
-//            // If parametres are empty but we are in a subdirectory, create an array
-//            // with a single element and make that element the relative subdirectory
-//            params = new String[1];
-//            String param = this.courseDirectory
-//                    .relativize(this.workingDirectory).toString();
-//            params[0] = param.replace(File.separator, "-");
-//        } else {
-//            for (int i = 0; i < params.length; i++) {
-//                // Convert given parametres to either full exercise names
-//                // Or substrings, eg. if the user is in subdirectory called "viikko1"
-//                // and gives parametre "teht2", it will be converted to "viikko1-teht2"
-//                String param = this.courseDirectory
-//                        .relativize(this.workingDirectory.resolve(params[i])).toString();
-//                params[i] = param.replace(File.separator, "-");
-//            }
-//        }
-//        for (Exercise exercise : exercises) {
-//            for (String param : params) {
-//                // Match only exercises that begin with our parametres, so that
-//                // exercises with identical names in other subdirectories won't
-//                // be selected.
-//                if (exercise.getName().matches("^" + param + ".*")) {
-//                    exerciseNames.add(exercise.getName());
-//                }
-//            }
-//        }
-//        return exerciseNames;
+    }
+
+    private Boolean filterExercise(Exercise exercise, String exDir, List<String> tested,
+                                   Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
+        // if the exercise starts with this path, add it
+        if (exercise.getName().startsWith(exDir.replace(File.separator, "-"))
+                || exDir.replace(File.separator, "-").startsWith(exercise.getName())) {
+            if (!onlyTested || tested.contains(exercise.getName())) {
+                if (!filterCompleted || !exercise.isCompleted()) {
+                    if (!exists || Files.exists(courseDirectory.resolve(exDir))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
