@@ -33,31 +33,33 @@ public class ListExercisesCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
-        String courseName;
-
-        // Get course name
-        String[] stringArgs = args.getArgs();
-        if (stringArgs.length == 0) {
-            courseName = getCourseNameFromCurrentDirectory();
-            if (courseName == null) {
-                return;
-            }
-        } else {
-            courseName = stringArgs[0];
+        
+        String courseName = getCourseName(args);
+        if (courseName == null) {
+            return;
         }
 
-        // Get course exercises
-        List<Exercise> exercises;
-        if (args.hasOption("i")) {
-            exercises = getExercisesFromServer(courseName);
-        } else {
-            exercises = getLocalExercises(courseName);
-        }
+        List<Exercise> exercises = getExercises(args, courseName);
         if (exercises == null) {
             return;
         }
 
         printExercises(courseName, exercises, !args.hasOption("n"));
+    }
+    
+    private String getCourseName(CommandLine args) {
+        String[] stringArgs = args.getArgs();
+        if (stringArgs.length != 0) {
+            return stringArgs[0];
+        }
+        return getCourseNameFromCurrentDirectory();
+    }
+    
+    private List<Exercise> getExercises(CommandLine args, String courseName) {
+        if (args.hasOption("i")) {
+            return getExercisesFromServer(courseName);
+        }
+        return getLocalExercises(courseName);
     }
 
     private String getCourseNameFromCurrentDirectory() {
@@ -92,7 +94,7 @@ public class ListExercisesCommand extends AbstractCommand {
         }
 
         List<Exercise> exercises = course.getExercises();
-        if (exercises.isEmpty()) {
+        if (exercises == null || exercises.isEmpty()) {
             this.io.println("Course '" + courseName + "' doesn't have any exercises.");
             return null;
         }
@@ -116,6 +118,15 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     private void printExercises(String courseName, List<Exercise> exercises, Boolean pager) {
+        String str = getExercisesAsString(courseName, exercises);
+        if (pager) {
+            ExternalsUtil.showStringInPager(str, "exercise-list");
+        } else {
+            io.print(str);
+        }
+    }
+    
+    private String getExercisesAsString(String courseName, List<Exercise> exercises) {
         StringBuilder sb = new StringBuilder("Course name: " + courseName);
         String prevDeadline = "";
 
@@ -127,12 +138,7 @@ public class ListExercisesCommand extends AbstractCommand {
             }
             sb.append(getExerciseStatus(exercise));
         }
-
-        if (pager) {
-            ExternalsUtil.showStringInPager(sb.toString(), "exercise-list");
-        } else {
-            io.print(sb.toString());
-        }
+        return sb.toString();
     }
 
     private String getDeadline(Exercise exercise) {
