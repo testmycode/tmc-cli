@@ -125,7 +125,7 @@ public class SubmitCommand extends AbstractCommand {
         checkForExerciseUpdates(core, currentCourse);
     }
 
-    public void checkForExerciseUpdates(TmcCore core, Course course) {
+    protected void checkForExerciseUpdates(TmcCore core, Course course) {
         ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, course);
         if (!exerciseUpdater.updatesAvailable()) {
             return;
