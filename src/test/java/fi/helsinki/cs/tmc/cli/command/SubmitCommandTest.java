@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -13,6 +14,8 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -37,7 +40,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({TmcUtil.class, CourseInfoIo.class})
 public class SubmitCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -88,6 +91,7 @@ public class SubmitCommandTest {
         when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(course);
         when(TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME)).thenReturn(result);
         when(TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME)).thenReturn(result2);
+        when(TmcUtil.findExercise(anyList(), any(String.class))).thenCallRealMethod();
 
         Callable<UpdateResult> callable = new Callable<UpdateResult>() {
             @Override
@@ -97,6 +101,10 @@ public class SubmitCommandTest {
         };
         when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
                 .thenReturn(callable);
+
+        PowerMockito.mockStatic(CourseInfoIo.class);
+        when(CourseInfoIo.load(any(Path.class))).thenCallRealMethod();
+        when(CourseInfoIo.save(any(CourseInfo.class), any(Path.class))).thenReturn(true);
     }
 
     @Test

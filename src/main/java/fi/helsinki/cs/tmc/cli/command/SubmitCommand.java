@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -70,9 +71,8 @@ public class SubmitCommand extends AbstractCommand {
 
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
         String courseName = info.getCourseName();
-        Course course = TmcUtil.findCourse(core, courseName);
-
-        if (course == null) {
+        Course currentCourse = TmcUtil.findCourse(core, courseName);
+        if (currentCourse == null) {
             io.println("Could not fetch course info from server.");
             return;
         }
@@ -85,7 +85,7 @@ public class SubmitCommand extends AbstractCommand {
         for (String exerciseName : exerciseNames) {
             io.println(Color.colorString("Submitting: " + exerciseName,
                     Color.AnsiColor.ANSI_YELLOW));
-            SubmissionResult result = TmcUtil.submitExercise(core, course, exerciseName);
+            SubmissionResult result = TmcUtil.submitExercise(core, currentCourse, exerciseName);
             if (result == null) {
                 io.println("Submission failed.");
             } else {
@@ -100,7 +100,26 @@ public class SubmitCommand extends AbstractCommand {
             io.println("Total tests passed: " + passed + "/" + total);
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
         }
-        checkForExerciseUpdates(core, course);
+
+        Course updatedCourse = TmcUtil.findCourse(core, courseName);
+        List<Exercise> exercises = currentCourse.getExercises();
+
+        // replace old exercises with new ones
+        for (String exerciseName : exerciseNames) {
+            Exercise newExercise = TmcUtil.findExercise(updatedCourse, exerciseName);
+            int index = TmcUtil.findExercise(exercises, exerciseName);
+            if (index == -1) {
+                io.println("Exercise doesn't exist anymore in server.");
+                continue;
+            }
+
+            exercises.set(index, newExercise);
+        }
+
+        info.setExercises(exercises);
+        CourseInfoIo.save(info, workDir.getConfigFile());
+
+        checkForExerciseUpdates(core, currentCourse);
     }
 
     public void checkForExerciseUpdates(TmcCore core, Course course) {
