@@ -60,7 +60,6 @@ public class RunTestsCommand extends AbstractCommand {
         }
         String courseName = getCourseName(workDir);
         List<String> exerciseNames = workDir.getExerciseNames();
-        List<Exercise> exercises = CourseInfoIo.load(workDir.getConfigFile()).getExercises();
 
         if (exerciseNames.isEmpty()) {
             io.println("You have to be in a course directory to run tests");
@@ -100,7 +99,6 @@ public class RunTestsCommand extends AbstractCommand {
                 resultPrinter.printRunResult(runResult, isOnlyExercise, color1, color2);
                 total += runResult.testResults.size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
-                if
             }
             if (total > 0 && !isOnlyExercise) {
                 // Print a progress bar showing how the ratio of passed exercises
