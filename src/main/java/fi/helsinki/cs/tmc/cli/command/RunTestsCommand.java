@@ -79,8 +79,8 @@ public class RunTestsCommand extends AbstractCommand {
         RunResult runResult;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
-        Color.AnsiColor color1 = app.getColor("passedtests-left");
-        Color.AnsiColor color2 = app.getColor("passedtests-right");
+        Color.AnsiColor color1 = app.getColor("testresults-left");
+        Color.AnsiColor color2 = app.getColor("testresults-right");
 
         try {
             int total = 0;
