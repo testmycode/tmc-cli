@@ -44,7 +44,7 @@ public class PasteCommand extends AbstractCommand {
             return;
         }
         WorkDir workdir = app.getWorkDir();
-        List<String> argsList = args.getArgList();
+        String[] stringArgs = args.getArgs();
 
 //        if (argsList.size() > 1) {
 //            io.println(
@@ -53,13 +53,13 @@ public class PasteCommand extends AbstractCommand {
 //            return;
 //        }
         Boolean valid;
-        if (argsList.isEmpty()) {
+        if (stringArgs.length == 0) {
             valid = workdir.addPath();
-        } else if (argsList.size() == 1) {
-            valid = workdir.addPath(argsList.get(0));
+        } else if (stringArgs.length == 1) {
+            valid = workdir.addPath(stringArgs[0]);
         } else {
             io.println(
-                    "Error: Too many arguments. Expected 1, got " + argsList.size());
+                    "Error: Too many arguments. Expected 1, got " + stringArgs.length);
             return;
         }
         if (!valid) {

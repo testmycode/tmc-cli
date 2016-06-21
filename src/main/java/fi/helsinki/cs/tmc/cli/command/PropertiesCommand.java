@@ -31,20 +31,20 @@ public class PropertiesCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         this.io = io;
         Boolean unset = args.hasOption("u");
-        List<String> arguments = args.getArgList();
+        String[] arguments = args.getArgs();
         HashMap<String, String> props = getApp().getProperties();
-        if (arguments.isEmpty()) {
+        if (arguments.length == 0) {
             printAllProps(props);
             return;
         }
 
-        if (arguments.size() % 2 == 1 && !unset) {
+        if (arguments.length % 2 == 1 && !unset) {
             io.println("Invalid argument count. Usage: tmc prop KEY VALUE ...");
             return;
         }
 
         if (unset) {
-            if (arguments.size() > 1) {
+            if (arguments.length > 1) {
                 io.print("Unsetting property keys:");
                 for (String arg : arguments) {
                     io.print(" " + arg);
@@ -58,25 +58,23 @@ public class PropertiesCommand extends AbstractCommand {
                 io.println("Unset key " + key + ", was " + props.remove(key));
             }
             getApp().saveProperties();
-            return;
         } else {
-            if (arguments.size() > 2) {
+            if (arguments.length > 2) {
                 io.print("Setting property keys:");
-                for (int i = 0; i < arguments.size(); i = i + 2) {
-                    io.print(" " + arguments.get(i) + "=>" + arguments.get(i + 1));
+                for (int i = 0; i < arguments.length; i = i + 2) {
+                    io.print(" " + arguments[i] + "=>" + arguments[i + 1]);
                 }
                 io.println("");
                 if (!io.readConfirmation("Are you sure?", true)) {
                     return;
                 }
             }
-            for (int i = 0; i < arguments.size(); i = i + 2) {
-                String last = props.put(arguments.get(i), arguments.get(i + 1));
-                io.println("Set " + arguments.get(i) + "=>" + arguments.get(i + 1)
+            for (int i = 0; i < arguments.length; i = i + 2) {
+                String last = props.put(arguments[i], arguments[i + 1]);
+                io.println("Set " + arguments[i] + "=>" + arguments[i + 1]
                         + ", was " + last);
             }
             getApp().saveProperties();
-            return;
         }
     }
 
