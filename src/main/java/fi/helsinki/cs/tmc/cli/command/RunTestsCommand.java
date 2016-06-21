@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
@@ -78,8 +79,8 @@ public class RunTestsCommand extends AbstractCommand {
         RunResult runResult;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
-        Color.AnsiColor color1 = app.getColor("passedtests-left");
-        Color.AnsiColor color2 = app.getColor("passedtests-right");
+        Color.AnsiColor color1 = app.getColor("testresults-left");
+        Color.AnsiColor color2 = app.getColor("testresults-right");
 
         try {
             int total = 0;
