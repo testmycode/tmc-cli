@@ -3,15 +3,16 @@ package fi.helsinki.cs.tmc.cli;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
-
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
+
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
@@ -19,7 +20,6 @@ import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
@@ -29,9 +29,11 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -43,6 +45,7 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private static final String previousUpdateDateKey = "update-date";
     private static final long defaultUpdateInterval = 60 * 60 * 1000;
+    private static final String usage = "tmc [args] COMMAND [command-args]";
 
     private CommandFactory commandFactory;
     private HashMap<String, String> properties;
@@ -56,6 +59,7 @@ public class Application {
 
     private Options options;
     private GnuParser parser;
+    private String commandName;
 
     public Application(Io io) {
         this.parser = new GnuParser();
@@ -82,18 +86,6 @@ public class Application {
         this.workDir = workDir;
     }
 
-    /**
-     * Find first argument that isn't flag.
-     */
-    private int findCommand(String[] args) {
-        for (int i = 0; i < args.length; i++) {
-            if (!args[i].startsWith("-")) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private boolean runCommand(String name, String[] args) {
         AbstractCommand command = commandFactory.createCommand(this, name);
         if (command == null) {
@@ -105,34 +97,46 @@ public class Application {
         return true;
     }
 
-    private boolean parseArgs(String commandName, String[] args) {
+    private String[] parseArgs(String[] args) {
         CommandLine line;
         try {
-            line = this.parser.parse(this.options, args);
+            line = this.parser.parse(this.options, args, true);
         } catch (ParseException e) {
             io.println("Invalid command line arguments.");
             io.println(e.getMessage());
-            return false;
+            return null;
+        }
+
+        List<String> subArgs = new ArrayList<>(Arrays.asList(line.getArgs()));
+        if (subArgs.size() > 0) {
+            commandName = subArgs.remove(0);
+        } else {
+            commandName = "help";
+        }
+
+        if (commandName.startsWith("-")) {
+            io.println("Unrecognized option: " + commandName);
+            return null;
         }
 
         if (line.hasOption("h")) {
+            // don't run the help sub-command with -h switch
             if (commandName.equals("help")) {
-                runCommand(commandName, new String[0]);
-                return false;
+                runCommand("help", new String[0]);
+                return null;
             }
             runCommand(commandName, new String[]{"-h"});
-            return false;
+            return null;
         }
         if (line.hasOption("v")) {
             io.println("TMC-CLI version " + getVersion());
-            return false;
+            return null;
         }
-        return true;
+        return subArgs.toArray(new String[subArgs.size()]);
     }
 
-    public void printHelp() {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("tmc-cli", this.options);
+    public void printHelp(String description) {
+        HelpGenerator.run(io, usage, description, this.options);
     }
 
     public void run(String[] args) {
@@ -140,26 +144,8 @@ public class Application {
             versionCheck();
         }
 
-        String[] tmcArgs;
-        String[] commandArgs;
-        String commandName;
-
-        int commandIndex = findCommand(args);
-
-        if (commandIndex != -1) {
-            commandName = args[commandIndex];
-
-            /* split the arguments to the tmc's and command's arguments */
-            tmcArgs = Arrays.copyOfRange(args, 0, commandIndex);
-            commandArgs = Arrays.copyOfRange(args, commandIndex + 1, args.length);
-
-        } else {
-            commandName = "help";
-            tmcArgs = args;
-            commandArgs = new String[0];
-        }
-
-        if (!parseArgs(commandName, tmcArgs)) {
+        String[] commandArgs = parseArgs(args);
+        if (commandArgs == null) {
             return;
         }
 

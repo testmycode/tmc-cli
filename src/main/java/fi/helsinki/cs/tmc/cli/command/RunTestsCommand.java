@@ -44,7 +44,7 @@ public class RunTestsCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
 //        this.io = io;
 
-        List<String> exercisesFromArgs = parseArgs(args);
+        String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
@@ -123,9 +123,9 @@ public class RunTestsCommand extends AbstractCommand {
         return null;
     }
 
-    private List<String> parseArgs(CommandLine args) {
+    private String[] parseArgs(CommandLine args) {
         this.showPassed = args.hasOption("a");
         this.showDetails = args.hasOption("d");
-        return args.getArgList();
+        return args.getArgs();
     }
 }
