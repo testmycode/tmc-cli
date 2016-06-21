@@ -162,7 +162,9 @@ public class SettingsIo {
             logger.error("Properties file located, but failed to read from it", e);
             return null;
         }
-        return gson.fromJson(reader, HashMap.class);
+        @SuppressWarnings("unchecked")
+        HashMap<String, String> map = gson.fromJson(reader, HashMap.class);
+        return map;
     }
 
     private static Boolean savePropertiesToJson(HashMap<String, String> properties, Path file) {
