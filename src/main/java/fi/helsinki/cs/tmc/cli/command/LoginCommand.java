@@ -45,10 +45,12 @@ public class LoginCommand extends AbstractCommand {
             io.println("Login successful.");
         }
     }
-    
+
     private String getLoginInfo(CommandLine line, String option, String prompt) {
         String info = line.getOptionValue(option);
-        if (info == null) {
+        if (info == null && option.equals("p")) {
+            info = io.readPassword(prompt);
+        } else if (info == null) {
             info = io.readLine(prompt);
         }
         return info;
@@ -87,7 +89,7 @@ public class LoginCommand extends AbstractCommand {
                     return false;
                 }
             }
-            
+
             logger.error("Unable to connect to server", e);
             io.println("Unable to connect to server "
                     + settings.getServerAddress());
