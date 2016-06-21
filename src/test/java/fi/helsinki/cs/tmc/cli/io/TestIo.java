@@ -40,10 +40,6 @@ public class TestIo extends Io {
         passwordPrompts.clear();
     }
 
-    public String getPrint() {
-        return printedText.toString();
-    }
-
     public String out() {
         return printedText.toString();
     }
@@ -60,7 +56,11 @@ public class TestIo extends Io {
 
     @Override
     public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
-        return confirmationPrompts.pop();
+        if (confirmationPrompts.size() >= 1) {
+            return confirmationPrompts.pop();
+        } else {
+            return defaultToYes;
+        }
     }
 
     @Override

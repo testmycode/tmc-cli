@@ -3,7 +3,10 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -17,6 +20,7 @@ import java.util.List;
 @Command(name = "info", desc = "Show course info for a specific course")
 public class CourseInfoCommand extends AbstractCommand {
     private Course course;
+    private Exercise exercise;
     private Io io;
 
     @Override
@@ -31,22 +35,55 @@ public class CourseInfoCommand extends AbstractCommand {
         if (core == null) {
             return;
         }
-        
+
+        WorkDir workDir = getApp().getWorkDir();
         String[] stringArgs = args.getArgs();
-        if (stringArgs.length == 0) {
+        if (stringArgs.length == 0 && workDir.getConfigFile() == null) {
             io.println("You must give the course name as a parameter.");
             return;
         }
-        
+
+        // if in course directory
+        if (workDir.getConfigFile() != null) {
+            CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
+            course = info.getCourse();
+
+            // if in exercise directory and no parameters given, print info for that exercise.
+            // else if exercise or course name given as a parameter, check which one it is and print info for that
+            if (workDir.getExerciseNames().size() == 1 && stringArgs.length == 0) {
+                String currentExercise = workDir.getExerciseNames().get(0);
+                exercise = info.getExercise(currentExercise);
+                printExerciseDetails();
+                return;
+
+            } else if (stringArgs.length != 0) {
+                if (info.getExercise(stringArgs[0]) != null) {
+                    exercise = info.getExercise(stringArgs[0]);
+                    printExerciseDetails();
+                    return;
+
+                } else {
+                    course = TmcUtil.findCourse(core, stringArgs[0]);
+                    if (course != null) {
+                        printCourse(args.hasOption("a"));
+                    } else {
+                        io.println("No such course or exercise.");
+                    }
+                    return;
+                }
+            }
+            printCourse(args.hasOption("a"));
+            return;
+        }
+
         course = TmcUtil.findCourse(core, stringArgs[0]);
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
             return;
         }
-        
         printCourse(args.hasOption("a"));
     }
-    
+
     private void printCourse(boolean showAll) {
         printCourseShort();
         if (showAll) {
@@ -71,7 +108,14 @@ public class CourseInfoCommand extends AbstractCommand {
         io.println("UnlockUrl: " + course.getUnlockUrl());
         io.println("CometUrl: " + course.getCometUrl());
     }
-    
+
+    private void printExerciseDetails() {
+        io.println(exercise.getName());
+        io.println("Completed: " + exercise.isCompleted());
+        io.println("Attempted: " + exercise.isAttempted());
+        io.println("Deadline: " + exercise.getDeadline());
+    }
+
     private void printExercises(boolean showAll) {
         List<Exercise> exercises = course.getExercises();
         if (exercises == null || exercises.isEmpty()) {
@@ -125,5 +169,4 @@ public class CourseInfoCommand extends AbstractCommand {
         io.println("    Checksum: " + exercise.getChecksum());
         io.println("");
     }
-    
 }

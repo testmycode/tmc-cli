@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
@@ -12,27 +13,45 @@ import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 public class ListExercisesCommandTest {
+    
+    private static final String COURSE_NAME = "2016-aalto-c";
+    static Path pathToDummyCourse;
+    static Path pathToNonCourseDir;
 
     Application app;
     TestIo io;
     TmcCore mockCore;
 
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
+                .getResource("dummy-courses/" + COURSE_NAME).toURI());
+        assertNotNull(pathToDummyCourse);
+
+        pathToNonCourseDir = pathToDummyCourse.getParent();
+        assertNotNull(pathToNonCourseDir);
+    }
+    
     @Before
     public void setUp() {
         io = new TestIo();
@@ -59,9 +78,33 @@ public class ListExercisesCommandTest {
         app = spy(app);
         doReturn(null).when(app).getTmcCore();
 
-        String[] args = {"exercises", "-n", "foo"};
+        String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
-        assertFalse(io.getPrint().contains("Course 'foo' doesn't exist"));
+        assertFalse(io.out().contains("Course 'foo' doesn't exist"));
+    }
+
+    @Test
+    public void worksLocallyIfNotInCourseDirectoryAndCourseIsSpecified() {
+        app.setWorkdir(new WorkDir(pathToNonCourseDir));
+        String[] args = {"exercises", "fooCourse", "-n"};
+        app.run(args);
+        assertThat(io.out(), containsString("You have to be in a course directory or use the -i"));
+    }
+    
+    @Test
+    public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        String[] args = {"exercises", COURSE_NAME, "-n"};
+        app.run(args);
+        assertThat(io.out(), containsString("Deadline:"));
+    }
+    
+    @Test
+    public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
+        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        String[] args = {"exercises", "-n"};
+        app.run(args);
+        assertThat(io.out(), containsString("Deadline:"));
     }
 
     @Test
@@ -74,7 +117,7 @@ public class ListExercisesCommandTest {
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
 
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("have any exercises"));
     }
@@ -96,7 +139,7 @@ public class ListExercisesCommandTest {
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
 
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("hello-exerciseNames"));
     }
@@ -119,7 +162,7 @@ public class ListExercisesCommandTest {
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
 
-        String[] args = {"exercises", "-n", "abc"};
+        String[] args = {"exercises", "-n", "abc", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("Course 'abc' doesn't exist"));
     }
@@ -143,7 +186,7 @@ public class ListExercisesCommandTest {
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("Requires review"));
     }
@@ -167,7 +210,7 @@ public class ListExercisesCommandTest {
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("Completed"));
     }
@@ -190,7 +233,7 @@ public class ListExercisesCommandTest {
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("Completed"));
     }
@@ -211,7 +254,7 @@ public class ListExercisesCommandTest {
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("Not completed"));
     }
@@ -233,7 +276,7 @@ public class ListExercisesCommandTest {
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("Attempted"));
     }
@@ -254,7 +297,7 @@ public class ListExercisesCommandTest {
             }
         };
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123"};
+        String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
         assertThat(io.out(), containsString("Deadline passed"));
     }

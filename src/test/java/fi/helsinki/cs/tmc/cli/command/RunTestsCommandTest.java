@@ -96,7 +96,7 @@ public class RunTestsCommandTest {
         app.setWorkdir(workDir);
         String[] args = {"test"};
         app.run(args);
-        assertFalse(io.getPrint().contains("Testing:"));
+        assertFalse(io.out().contains("Testing:"));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class RunTestsCommandTest {
         app.setWorkdir(workDir);
         String[] args = {"test"};
         app.run(args);
-        assertTrue(io.getPrint().contains("You have to be in a course directory"));
+        assertTrue(io.out().contains("You have to be in a course directory"));
     }
 
     @Test
@@ -118,8 +118,8 @@ public class RunTestsCommandTest {
 
         String[] args = {"test"};
         app.run(args);
-        assertTrue(io.getPrint().contains("Testing: " + EXERCISE1_NAME));
-        assertTrue(io.getPrint().contains("Testing: " + EXERCISE2_NAME));
+        assertTrue(io.out().contains("Testing: " + EXERCISE1_NAME));
+        assertTrue(io.out().contains("Testing: " + EXERCISE2_NAME));
     }
 
     @Test
@@ -132,7 +132,7 @@ public class RunTestsCommandTest {
 
         String[] args = {"test", EXERCISE1_NAME};
         app.run(args);
-        assertTrue(io.getPrint().contains("Testing: " + EXERCISE1_NAME));
+        assertTrue(io.out().contains("Testing: " + EXERCISE1_NAME));
     }
 
 }

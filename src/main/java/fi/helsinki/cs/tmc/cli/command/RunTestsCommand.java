@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -43,7 +44,7 @@ public class RunTestsCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
 //        this.io = io;
 
-        List<String> exercisesFromArgs = parseArgs(args);
+        String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
@@ -77,6 +78,9 @@ public class RunTestsCommand extends AbstractCommand {
         RunResult runResult;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
+        Color.AnsiColor color1 = app.getColor("passedtests-left");
+        Color.AnsiColor color2 = app.getColor("passedtests-right");
+
         try {
             int total = 0;
             int passed = 0;
@@ -87,11 +91,11 @@ public class RunTestsCommand extends AbstractCommand {
                 //name = name.replace("-", File.separator);
                 Exercise exercise = new Exercise(name, courseName);
 
-                TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
-                runResult = core.runTests(progobs, exercise).call();
-                progobs.end(0);
+                // TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
+                runResult = core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
+                // progobs.end(0);
 
-                resultPrinter.printRunResult(runResult, isOnlyExercise);
+                resultPrinter.printRunResult(runResult, isOnlyExercise, color1, color2);
                 total += runResult.testResults.size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
             }
@@ -100,9 +104,9 @@ public class RunTestsCommand extends AbstractCommand {
                 // But only if more than one exercise was tested
                 io.println("");
                 io.println("Total tests passed: " + passed + "/" + total);
-                io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+                io.println(TmcCliProgressObserver.getPassedTestsBar(
+                        passed, total, color1, color2));
             }
-
         } catch (Exception ex) {
             io.println("Failed to run tests.\n"
                     + ex.getMessage());
@@ -119,9 +123,9 @@ public class RunTestsCommand extends AbstractCommand {
         return null;
     }
 
-    private List<String> parseArgs(CommandLine args) {
+    private String[] parseArgs(CommandLine args) {
         this.showPassed = args.hasOption("a");
         this.showDetails = args.hasOption("d");
-        return args.getArgList();
+        return args.getArgs();
     }
 }

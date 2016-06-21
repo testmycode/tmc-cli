@@ -36,39 +36,22 @@ public class LoginCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
-        String username = getUsername(args);
-        String password = getPassword(args);
-        String serverAddress = getServerAddress(args);
+        String username = getLoginInfo(args, "u", "username: ");
+        String password = getLoginInfo(args, "p", "password: ");
+        String serverAddress = getLoginInfo(args, "s", "server address: ");
 
         Settings settings = new Settings(serverAddress, username, password);
         if (loginPossible(settings) && saveLoginSettings(settings)) {
             io.println("Login successful.");
         }
     }
-
-    private String getUsername(CommandLine line) {
-        String username = line.getOptionValue("u");
-        if (username == null) {
-            username = io.readLine("username: ");
+    
+    private String getLoginInfo(CommandLine line, String option, String prompt) {
+        String info = line.getOptionValue(option);
+        if (info == null) {
+            info = io.readLine(prompt);
         }
-        return username;
-    }
-
-    private String getPassword(CommandLine line) {
-        String password = line.getOptionValue("p");
-        if (password == null) {
-            password = io.readPassword("password: ");
-        }
-        return password;
-    }
-
-    private String getServerAddress(CommandLine line) {
-        String serverAddress = line.getOptionValue("s");
-        if (serverAddress == null) {
-            // todo: don't hardcode the default value, get it from somewhere
-            serverAddress = "https://tmc.mooc.fi/mooc";
-        }
-        return serverAddress;
+        return info;
     }
 
     private boolean saveLoginSettings(Settings settings) {

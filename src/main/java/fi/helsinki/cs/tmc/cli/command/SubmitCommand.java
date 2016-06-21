@@ -43,7 +43,7 @@ public class SubmitCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         this.io = io;
 
-        List<String> exercisesFromArgs = parseArgs(args);
+        String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
@@ -82,6 +82,9 @@ public class SubmitCommand extends AbstractCommand {
         int total = 0;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
+        Color.AnsiColor color1 = app.getColor("passedtests-left");
+        Color.AnsiColor color2 = app.getColor("passedtests-right");
+
         for (String exerciseName : exerciseNames) {
             io.println(Color.colorString("Submitting: " + exerciseName,
                     Color.AnsiColor.ANSI_YELLOW));
@@ -89,7 +92,7 @@ public class SubmitCommand extends AbstractCommand {
             if (result == null) {
                 io.println("Submission failed.");
             } else {
-                resultPrinter.printSubmissionResult(result, isOnlyExercise);
+                resultPrinter.printSubmissionResult(result, isOnlyExercise, color1, color2);
                 total += result.getTestCases().size();
                 passed += ResultPrinter.passedTests(result.getTestCases());
             }
@@ -98,7 +101,7 @@ public class SubmitCommand extends AbstractCommand {
             // Print a progress bar showing how the ratio of passed exercises
             io.println("");
             io.println("Total tests passed: " + passed + "/" + total);
-            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total));
+            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
         }
 
         Course updatedCourse = TmcUtil.findCourse(core, courseName);
@@ -149,9 +152,9 @@ public class SubmitCommand extends AbstractCommand {
         io.println(Color.colorString(msg, Color.AnsiColor.ANSI_YELLOW));
     }
 
-    private List<String> parseArgs(CommandLine args) {
+    private String[] parseArgs(CommandLine args) {
         this.showAll = args.hasOption("a");
         this.showDetails = args.hasOption("d");
-        return args.getArgList();
+        return args.getArgs();
     }
 }

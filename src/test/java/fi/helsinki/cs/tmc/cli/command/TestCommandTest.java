@@ -25,13 +25,13 @@ public class TestCommandTest {
     public void runWorksRightWithoutOption() {
         String[] args = {"easter-egg"};
         app.run(args);
-        assertTrue(testIo.getPrint().contains("Let's run easter egg."));
+        assertTrue(testIo.out().contains("Let's run easter egg."));
     }
     
     @Test
     public void runWorksRightWithOption() {
         String[] args = {"easter-egg", "-a"};
         app.run(args);
-        assertTrue(testIo.getPrint().contains("Let's run easter egg with -a"));
+        assertTrue(testIo.out().contains("Let's run easter egg with -a"));
     }
 }

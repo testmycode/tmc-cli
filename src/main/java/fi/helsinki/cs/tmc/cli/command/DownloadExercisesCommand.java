@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -17,6 +18,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 @Command(name = "download", desc = "Download exercises for a specific course")
@@ -24,6 +26,11 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {
+        options.addOption("a", "all", false,
+                "Download all available exercises, including previously completed");
+
+        // Not implemented in tmc-core yet
+        //options.addOption("c", "completed", false, "Download previously completed exercises");
     }
 
     @Override
@@ -52,8 +59,15 @@ public class DownloadExercisesCommand extends AbstractCommand {
             io.println("Course doesn't exist.");
             return;
         }
-        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
-        List<Exercise> exercises = TmcUtil.downloadAllExercises(core, course, progobs);
+        List<Exercise> filtered = getFilteredExercises(course, args);
+        // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
+        //       submissions. Not yet implemented in tmc-core.
+
+        Color.AnsiColor color1 = app.getColor("progressbar-left");
+        Color.AnsiColor color2 = app.getColor("progressbar-right");
+        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
+
+        List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
         io.println(exercises.toString());
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
@@ -62,5 +76,19 @@ public class DownloadExercisesCommand extends AbstractCommand {
         CourseInfo info = app.createCourseInfo(course);
         info.setExercises(exercises);
         CourseInfoIo.save(info, configFile);
+    }
+
+    protected List<Exercise> getFilteredExercises(Course course, CommandLine args) {
+        if (args.hasOption("a")) {
+            return course.getExercises();
+        }
+
+        List<Exercise> filtered = new ArrayList<>();
+        for (Exercise exercise : course.getExercises()) {
+            if (!exercise.isCompleted()) {
+                filtered.add(exercise);
+            }
+        }
+        return filtered;
     }
 }

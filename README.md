@@ -48,11 +48,8 @@ Once installation is complete, you can log in using `tmc login`. This saves your
 ~ $ tmc login
 username: my-username
 password:
+server address:
 Login successful.
-```
-By default, tmc-cli connects to University of Helsinki MOOC server. To log in to another server, specify the server with the `-s` or `--server` switch:
-```
-~ $ tmc login -s [SERVER_ADDRESS]
 ```
 
 ##Listing courses
