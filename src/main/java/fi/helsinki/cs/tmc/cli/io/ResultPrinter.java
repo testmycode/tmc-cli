@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.io;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
+import fi.helsinki.cs.tmc.langs.domain.SpecialLogs;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
 import java.util.List;
@@ -56,9 +56,27 @@ public class ResultPrinter {
 
         printTestResults(result.getTestCases());
 
-        if (result.getStatus() == SubmissionResult.Status.ERROR) {
-            io.println("");
-            io.println(result.getError());
+        switch (result.getStatus()) {
+            case ERROR:
+                io.println("");
+                io.println(result.getError());
+                break;
+            case FAIL:
+                String valgrind = result.getValgrind();
+                if (valgrind != null && !valgrind.isEmpty()) {
+                    io.println(Color.colorString("Valgrind error:",
+                            Color.AnsiColor.ANSI_RED));
+                    io.println(valgrind);
+                    return;
+                }
+                break;
+            case PROCESSING:
+                io.println("PROCESSING");
+                break;
+            case OK:
+                //io.println("OK");
+                break;
+            default:
         }
 
         if (printProgressBar && this.total > 0) {
@@ -85,7 +103,6 @@ public class ResultPrinter {
         if (msg != null) {
             io.println(msg);
         }
-        return;
     }
 
     public void printRunResult(RunResult result, Boolean submitted, Boolean printProgressBar,
@@ -111,6 +128,12 @@ public class ResultPrinter {
                 break;
             case COMPILE_FAILED:
                 msg = ResultPrinter.COMPILE_ERROR_MESSAGE;
+                break;
+            case TESTRUN_INTERRUPTED:
+                msg = "Testrun interrupted";
+                break;
+            case GENERIC_ERROR:
+                msg = new String(result.logs.get(SpecialLogs.GENERIC_ERROR_MESSAGE));
                 break;
             default:
         }
