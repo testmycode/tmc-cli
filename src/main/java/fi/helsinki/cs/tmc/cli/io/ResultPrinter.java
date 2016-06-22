@@ -64,7 +64,7 @@ public class ResultPrinter {
             case FAIL:
                 String valgrind = result.getValgrind();
                 if (valgrind != null && !valgrind.isEmpty()) {
-                    io.println(Color.colorString("Failed due to errors in valgrind log:",
+                    io.println(Color.colorString("Valgrind error:",
                             Color.AnsiColor.ANSI_RED));
                     io.println(valgrind);
                     return;
