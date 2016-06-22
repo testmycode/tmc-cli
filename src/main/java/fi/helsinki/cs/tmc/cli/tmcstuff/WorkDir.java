@@ -127,12 +127,11 @@ public class WorkDir {
      * return the current working directory.
      */
     public Path getWorkingDirectory() {
-        if (this.directoryCount() == 1) {
-            return this.directories.get(0);
-        } else if (this.directoryCount() == 0) {
+        if (this.courseDirectory != null) {
+            return this.courseDirectory;
+        } else {
             return workdir;
         }
-        return null;
     }
 
     public List<Path> getDirectories() {

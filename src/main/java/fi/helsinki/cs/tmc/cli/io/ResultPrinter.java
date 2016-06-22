@@ -105,7 +105,7 @@ public class ResultPrinter {
         }
     }
 
-    public void printRunResult(RunResult result, Boolean printProgressBar,
+    public void printRunResult(RunResult result, Boolean submitted, Boolean printProgressBar,
                                Color.AnsiColor color1, Color.AnsiColor color2) {
         printTestResults(result.testResults);
         this.total = result.testResults.size();
@@ -118,9 +118,10 @@ public class ResultPrinter {
         String msg = null;
         switch (result.status) {
             case PASSED:
-                msg = "All tests passed!";
-                msg = Color.colorString(msg, Color.AnsiColor.ANSI_GREEN)
-                        + " Submit to server with 'tmc submit'";
+                msg = Color.colorString("All tests passed!", Color.AnsiColor.ANSI_GREEN);
+                if (!submitted) {
+                    msg += " Submit to server with 'tmc submit'";
+                }
                 break;
             case TESTS_FAILED:
                 msg = "Please review your answer before submitting";
