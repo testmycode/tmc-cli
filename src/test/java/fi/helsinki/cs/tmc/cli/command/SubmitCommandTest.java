@@ -6,7 +6,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -91,7 +90,6 @@ public class SubmitCommandTest {
         when(TmcUtil.findCourse(any(TmcCore.class), any(String.class))).thenReturn(course);
         when(TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class)))
                 .thenReturn(result).thenReturn(result2);
-        when(TmcUtil.findExercise(anyList(), any(String.class))).thenCallRealMethod();
 
         Callable<UpdateResult> callable = new Callable<UpdateResult>() {
             @Override

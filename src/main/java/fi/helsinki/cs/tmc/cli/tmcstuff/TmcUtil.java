@@ -63,15 +63,6 @@ public class TmcUtil {
         return null;
     }
 
-    public static int findExercise(List<Exercise> exercises, String name) {
-        for (int i = 0; i < exercises.size(); i++) {
-            if (exercises.get(i).getName().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises,
             ProgressObserver progobs) {
         try {
