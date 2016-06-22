@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -65,7 +64,7 @@ public class TmcUtil {
     }
 
     public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises,
-                                                   ProgressObserver progobs) {
+            ProgressObserver progobs) {
         try {
             return core.downloadOrUpdateExercises(progobs, exercises).call();
         } catch (Exception e) {
@@ -75,7 +74,7 @@ public class TmcUtil {
     }
 
     public static List<Exercise> downloadAllExercises(TmcCore core, Course course,
-                                                      ProgressObserver progobs) {
+            ProgressObserver progobs) {
         if (!course.isExercisesLoaded()) {
             course = getDetails(core, course);
         }
@@ -84,17 +83,15 @@ public class TmcUtil {
     }
 
     public static SubmissionResult submitExercise(TmcCore core, Course course, String name) {
-        // Exercise has directories separated with a - but core needs them to be separated with a / for submission
         Exercise exercise = TmcUtil.findExercise(course, name);
-        //String fixedName = exercise.getName().replace("-", File.separator);
-        //exercise.setName(fixedName);
+        return submitExercise(core, exercise);
+    }
+
+    public static SubmissionResult submitExercise(TmcCore core, Exercise exercise) {
         try {
-            // TODO: replace null-observer with a real observer
-            // once it shows up correctly in core/langs
-            return core.submit(ProgressObserver.NULL_OBSERVER,
-                    exercise).call();
-        } catch (Exception e) {
-            logger.warn("Failed to submit the exercise", e);
+            return core.submit(ProgressObserver.NULL_OBSERVER, exercise).call();
+        } catch (Exception ex) {
+            logger.warn("Failed to submit the exercise", ex);
             return null;
         }
     }
