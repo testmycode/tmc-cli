@@ -57,6 +57,20 @@ public class CourseInfo {
         return this.course.getExercises();
     }
 
+    /**
+     * Get a list of exercises by their names.
+     */
+    public List<Exercise> getExercises(List<String> exerciseNames) {
+        List<Exercise> exercises = new ArrayList<>();
+        for (String exerciseName : exerciseNames) {
+            Exercise exercise = getExercise(exerciseName);
+            if (exercise != null) {
+                exercises.add(exercise);
+            }
+        }
+        return exercises;
+    }
+
     public List<String> getExerciseNames() {
         List<String> names = new ArrayList<>();
         for (Exercise ex : this.course.getExercises()) {
@@ -72,20 +86,6 @@ public class CourseInfo {
             }
         }
         return null;
-    }
-
-    /**
-     * Get a list of exercises by their names.
-     */
-    public List<Exercise> getExercises(List<String> exerciseNames) {
-        List<Exercise> exercises = new ArrayList<>();
-        for (String exerciseName : exerciseNames) {
-            Exercise exercise = getExercise(exerciseName);
-            if (exercise != null) {
-                exercises.add(exercise);
-            }
-        }
-        return exercises;
     }
 
     public void setExercises(List<Exercise> exercises) {
