@@ -69,8 +69,7 @@ public class SubmitCommand extends AbstractCommand {
         }
 
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
-        String courseName = info.getCourseName();
-        Course course = TmcUtil.findCourse(core, courseName);
+        Course course = info.getCourse();
 
         if (course == null) {
             io.println("Could not fetch course info from server.");
