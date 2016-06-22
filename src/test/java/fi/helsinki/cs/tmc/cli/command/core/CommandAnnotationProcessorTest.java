@@ -1,0 +1,193 @@
+package fi.helsinki.cs.tmc.cli.command.core;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import fi.helsinki.cs.tmc.cli.io.Io;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
+import javax.tools.JavaFileObject;
+
+public class CommandAnnotationProcessorTest {
+    CommandAnnotationProcessor processor;
+    RoundEnvironment roundEnv;
+    StringWriter stringWriter;
+    Elements mockedElementUtils;
+
+    public CommandAnnotationProcessorTest() throws IOException {
+        final JavaFileObject fileObject = mock(JavaFileObject.class);
+        final Filer mockedFiler = mock(Filer.class);
+        when(mockedFiler.createSourceFile(anyString())).thenReturn(fileObject);
+        
+        stringWriter = new StringWriter();
+        when(fileObject.openWriter()).thenReturn(stringWriter);
+        roundEnv = mock(RoundEnvironment.class);
+
+        mockedElementUtils = mock(Elements.class);
+
+        ProcessingEnvironment processingEnv = new ProcessingEnvironment() {
+            @Override
+            public Map<String, String> getOptions() {
+                return new HashMap<String, String>();
+            }
+
+            @Override
+            public Messager getMessager() {
+                return null;
+            }
+
+            @Override
+            public Filer getFiler() {
+                return mockedFiler;
+            }
+
+            @Override
+            public Elements getElementUtils() {
+                return mockedElementUtils;
+            }
+
+            @Override
+            public Types getTypeUtils() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public SourceVersion getSourceVersion() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Locale getLocale() {
+                throw new UnsupportedOperationException();
+            }
+            
+        };
+        processor = new CommandAnnotationProcessor();
+        processor.init(processingEnv);
+    }
+
+    @Command(name = "commmand1", desc = "abc")
+    public static class CommandAnnotationExample1 extends AbstractCommand {
+        @Override
+        public void getOptions(Options options) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void run(CommandLine args, Io io) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    @Command(name = "commmand2", desc = "abc")
+    public static class CommandAnnotationExample2 extends AbstractCommand {
+        @Override
+        public void getOptions(Options options) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void run(CommandLine args, Io io) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    @Test
+    public void warnsAboutInvalidElementWithCommandAnnotation() {
+        final Element classElement = mock(Element.class);
+        when(classElement.getKind()).thenReturn(ElementKind.FIELD);
+        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
+                .thenReturn(new HashSet<Element>(Arrays.asList(classElement)));
+
+        Set annotations = new HashSet<Element>();
+        assertFalse(processor.process(annotations, roundEnv));
+    }
+
+    @Test
+    public void worksWithoutCommands() {
+        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
+                .thenReturn(new HashSet<>(Arrays.asList()));
+
+        Set annotations = new HashSet<>();
+        assertTrue(processor.process(annotations, roundEnv));
+        assertFalse(stringWriter.toString().contains(".class"));
+    }
+
+    @Test
+    public void worksWithOneCommands() {
+        final Element classElement = mock(TypeElement.class);
+        when(classElement.getKind()).thenReturn(ElementKind.CLASS);
+        Command annotation = CommandAnnotationExample1.class.getAnnotation(Command.class);
+        when(classElement.getAnnotation(Command.class)).thenReturn(annotation);
+        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
+                .thenReturn(new HashSet<>(Arrays.asList(classElement)));
+
+        Name mockedName = mock(Name.class);
+        when(mockedName.toString())
+                .thenReturn("abc.TestTest");
+        when(mockedElementUtils.getBinaryName((TypeElement) classElement))
+                .thenReturn(mockedName);
+
+        Set annotations = new HashSet<>();
+        assertTrue(processor.process(annotations, roundEnv));
+        assertTrue(stringWriter.toString().contains("TestTest.class"));
+    }
+
+    @Test
+    public void generateCorrectCodeWithTwoCommands() {
+        final Element classElement1 = mock(TypeElement.class);
+        final Element classElement2 = mock(TypeElement.class);
+        when(classElement1.getKind()).thenReturn(ElementKind.CLASS);
+        when(classElement2.getKind()).thenReturn(ElementKind.CLASS);
+        Command annotation = CommandAnnotationExample1.class.getAnnotation(Command.class);
+        when(classElement1.getAnnotation(Command.class)).thenReturn(annotation);
+        annotation = CommandAnnotationExample2.class.getAnnotation(Command.class);
+        when(classElement2.getAnnotation(Command.class)).thenReturn(annotation);
+
+        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
+                .thenReturn(new HashSet<>(Arrays.asList(classElement1, classElement2)));
+
+        Name mockedName1 = mock(Name.class);
+        when(mockedName1.toString())
+                .thenReturn("abc.TestTest1");
+        when(mockedElementUtils.getBinaryName((TypeElement) classElement1))
+                .thenReturn(mockedName1);
+
+        Name mockedName2 = mock(Name.class);
+        when(mockedName2.toString())
+                .thenReturn("abc.TestTest2");
+        when(mockedElementUtils.getBinaryName((TypeElement) classElement2))
+                .thenReturn(mockedName2);
+
+        Set annotations = new HashSet<>();
+        assertTrue(processor.process(annotations, roundEnv));
+        assertTrue(stringWriter.toString().contains("(\"commmand1\", TestTest1.class)"));
+        assertTrue(stringWriter.toString().contains("(\"commmand2\", TestTest2.class)"));
+    }
+}
