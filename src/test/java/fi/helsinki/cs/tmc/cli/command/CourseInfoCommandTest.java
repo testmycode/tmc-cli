@@ -149,7 +149,7 @@ public class CourseInfoCommandTest {
         String[] args = {"info"};
         app.run(args);
         assertTrue(io.out().contains(EXERCISE1_NAME));
-        assertTrue(io.out().contains("Completed: "));
+        assertTrue(io.out().contains("Exercise"));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class CourseInfoCommandTest {
         String[] args = {"info", EXERCISE1_NAME};
         app.run(args);
         assertTrue(io.out().contains(EXERCISE1_NAME));
-        assertTrue(io.out().contains("Completed: "));
+        assertTrue(io.out().contains("Exercise"));
     }
 
     @Test
@@ -206,5 +206,16 @@ public class CourseInfoCommandTest {
         String[] args = {"info", "notacourse"};
         app.run(args);
         assertTrue(io.out().contains("exercise"));
+    }
+
+    @Test
+    public void printsLongExerciseInfoWithOption() {
+        workDir = new WorkDir(pathToDummyExercise);
+        app.setWorkdir(workDir);
+        String[] args = {"info", "-a"};
+        app.run(args);
+
+        assertTrue(io.out().contains("Exercise name"));
+        assertTrue(io.out().contains("Is returnable"));
     }
 }
