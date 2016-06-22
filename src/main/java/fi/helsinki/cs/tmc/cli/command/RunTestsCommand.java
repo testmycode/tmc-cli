@@ -107,8 +107,13 @@ public class RunTestsCommand extends AbstractCommand {
                 passed += ResultPrinter.passedTests(runResult.testResults);
                 exercise.setAttempted(true);
                 if (runResult.status == PASSED && !exercise.isCompleted()) {
+                    // add exercise to locally tested exercises
                     if (!info.getLocalCompletedExercises().contains(exercise.getName())) {
                         info.getLocalCompletedExercises().add(exercise.getName());
+                    }
+                } else {
+                    if (info.getLocalCompletedExercises().contains(exercise.getName())) {
+                        info.getLocalCompletedExercises().remove(exercise.getName());
                     }
                 }
             }

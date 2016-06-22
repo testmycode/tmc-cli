@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -133,5 +132,4 @@ public class RunTestsCommandTest {
         app.run(args);
         assertTrue(io.out().contains("Testing: " + EXERCISE1_NAME));
     }
-
 }
