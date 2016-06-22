@@ -74,8 +74,53 @@ public class CourseInfo {
         return null;
     }
 
+    /**
+     * Get a list of exercises by their names.
+     */
+    public List<Exercise> getExercises(List<String> exerciseNames) {
+        List<Exercise> exercises = new ArrayList<>();
+        for (String exerciseName : exerciseNames) {
+            Exercise exercise = getExercise(exerciseName);
+            if (exercise != null) {
+                exercises.add(exercise);
+            }
+        }
+        return exercises;
+    }
+
     public void setExercises(List<Exercise> exercises) {
         this.course.setExercises(exercises);
+    }
+
+    /**
+     * Replaces an old identically named exercise with a new one. Adds if no old exercise is found.
+     */
+    public void replaceOldExercise(Exercise newExercise) {
+        List<Exercise> exercises = getExercises();
+        String exerciseName = newExercise.getName();
+
+        Exercise oldExercise = null;
+        for (Exercise exercise : exercises) {
+            if (exercise.getName().equals(exerciseName)) {
+                oldExercise = exercise;
+                break;
+            }
+        }
+
+        if (oldExercise == null) {
+            exercises.add(newExercise);
+        } else {
+            int index = exercises.indexOf(oldExercise);
+            exercises.set(index, newExercise);
+        }
+
+        setExercises(exercises);
+    }
+
+    public void replaceOldExercises(List<Exercise> newExercises) {
+        for (Exercise newExercise : newExercises) {
+            replaceOldExercise(newExercise);
+        }
     }
 
     public void removeProperty(String prop) {
