@@ -74,7 +74,11 @@ public class SubmitCommand extends AbstractCommand {
         }
 
         if (exerciseNames.isEmpty()) {
-            io.println("You have to be in a course directory to submit");
+            if (args.hasOption("c") && workDir.getCourseDirectory() != null) {
+                io.println("No locally tested exercises.");
+                return;
+            }
+            io.println("No exercises specified.");
             return;
         }
 
@@ -105,12 +109,12 @@ public class SubmitCommand extends AbstractCommand {
                 total += result.getTestCases().size();
                 passed += ResultPrinter.passedTests(result.getTestCases());
 
-                info.getExercise(exerciseName).setAttempted(true);
+                exercise.setAttempted(true);
                 if (result.getTestResultStatus() == NONE_FAILED) {
-                    if (info.getLocalCompletedExercises().contains(exerciseName)) {
-                        info.getLocalCompletedExercises().remove(exerciseName);
+                    if (info.getLocalCompletedExercises().contains(exercise.getName())) {
+                        info.getLocalCompletedExercises().remove(exercise.getName());
                     }
-                    info.getExercise(exerciseName).setCompleted(true);
+                    exercise.setCompleted(true);
                 }
             }
         }

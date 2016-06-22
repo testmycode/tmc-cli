@@ -184,7 +184,7 @@ public class SubmitCommandTest {
     public void abortGracefullyIfNotInCourseDir() {
         app.setWorkdir(new WorkDir(pathToNonCourseDir));
         app.run(new String[]{"submit"});
-        assertThat(io.out(), containsString("You have to be in a course directory"));
+        assertThat(io.out(), containsString("No exercises specified."));
 
         verifyStatic(times(0));
         TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
