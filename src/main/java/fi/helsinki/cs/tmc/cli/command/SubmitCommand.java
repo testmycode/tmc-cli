@@ -28,7 +28,7 @@ import java.util.List;
 @Command(name = "submit", desc = "Submit exercises")
 public class SubmitCommand extends AbstractCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(RunTestsCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
 
     private Io io;
     private boolean showAll;
@@ -38,6 +38,7 @@ public class SubmitCommand extends AbstractCommand {
     public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all test results");
         options.addOption("d", "details", false, "Show detailed error message");
+        options.addOption("c", "completed", false, "Only exercises that have passed all tests");
     }
 
     @Override
@@ -63,7 +64,13 @@ public class SubmitCommand extends AbstractCommand {
             }
         }
 
-        List<String> exerciseNames = workDir.getExerciseNames();
+        List<String> exerciseNames;
+        if (args.hasOption("c")) {
+            exerciseNames = workDir.getExerciseNames(true, true, false);
+        } else {
+            exerciseNames = workDir.getExerciseNames();
+        }
+
         if (exerciseNames.isEmpty()) {
             io.println("You have to be in a course directory to submit");
             return;
