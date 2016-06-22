@@ -16,6 +16,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -23,6 +24,7 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.util.List;
 
 @Command(name = "submit", desc = "Submit exercises")
@@ -77,11 +79,8 @@ public class SubmitCommand extends AbstractCommand {
         }
 
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
-        String courseName = info.getCourseName();
-        Course course = TmcUtil.findCourse(core, courseName);
-
-        if (course == null) {
-            io.println("Could not fetch course info from server.");
+        Course currentCourse = info.getCourse();
+        if (currentCourse == null) {
             return;
         }
 
@@ -93,10 +92,12 @@ public class SubmitCommand extends AbstractCommand {
         Color.AnsiColor color1 = app.getColor("testresults-left");
         Color.AnsiColor color2 = app.getColor("testresults-right");
 
-        for (String exerciseName : exerciseNames) {
-            io.println(Color.colorString("Submitting: " + exerciseName,
+        List<Exercise> submitExercises = info.getExercises(exerciseNames);
+
+        for (Exercise exercise : submitExercises) {
+            io.println(Color.colorString("Submitting: " + exercise.getName(),
                     Color.AnsiColor.ANSI_YELLOW));
-            SubmissionResult result = TmcUtil.submitExercise(core, course, exerciseName);
+            SubmissionResult result = TmcUtil.submitExercise(core, exercise);
             if (result == null) {
                 io.println("Submission failed.");
             } else {
@@ -120,10 +121,34 @@ public class SubmitCommand extends AbstractCommand {
             io.println("Total tests passed: " + passed + "/" + total);
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
         }
-        checkForExerciseUpdates(core, course);
+
+        updateCourseJson(core, submitExercises, info, workDir.getConfigFile());
+        checkForExerciseUpdates(core, currentCourse);
     }
 
-    public void checkForExerciseUpdates(TmcCore core, Course course) {
+    protected void updateCourseJson(TmcCore core, List<Exercise> submittedExercises,
+            CourseInfo courseInfo, Path courseInfoFile) {
+
+        Course updatedCourse = TmcUtil.findCourse(core, courseInfo.getCourseName());
+        if (updatedCourse == null) {
+            io.println("Failed to update .tmc.json file for course " + courseInfo.getCourseName());
+            return;
+        }
+
+        for (Exercise submitted : submittedExercises) {
+            Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
+            if (updatedEx == null) {
+                // Does this reaaally ever happen?
+                io.println("Failed to update .tmc.json file for exercise " + submitted.getName()
+                        + ". The exercise doesn't exist in server anymore.");
+                continue;
+            }
+            courseInfo.replaceOldExercise(updatedEx);
+        }
+        CourseInfoIo.save(courseInfo, courseInfoFile);
+    }
+
+    protected void checkForExerciseUpdates(TmcCore core, Course course) {
         ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, course);
         if (!exerciseUpdater.updatesAvailable()) {
             return;

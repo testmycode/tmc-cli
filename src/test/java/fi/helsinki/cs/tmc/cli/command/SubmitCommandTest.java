@@ -13,6 +13,8 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -37,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({TmcUtil.class, CourseInfoIo.class})
 public class SubmitCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -85,9 +87,9 @@ public class SubmitCommandTest {
         result2 = new SubmissionResult();
 
         PowerMockito.mockStatic(TmcUtil.class);
-        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(course);
-        when(TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME)).thenReturn(result);
-        when(TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME)).thenReturn(result2);
+        when(TmcUtil.findCourse(any(TmcCore.class), any(String.class))).thenReturn(course);
+        when(TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class)))
+                .thenReturn(result).thenReturn(result2);
 
         Callable<UpdateResult> callable = new Callable<UpdateResult>() {
             @Override
@@ -97,6 +99,10 @@ public class SubmitCommandTest {
         };
         when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
                 .thenReturn(callable);
+
+        PowerMockito.mockStatic(CourseInfoIo.class);
+        when(CourseInfoIo.load(any(Path.class))).thenCallRealMethod();
+        when(CourseInfoIo.save(any(CourseInfo.class), any(Path.class))).thenReturn(true);
     }
 
     @Test
@@ -106,7 +112,7 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
 
         verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test
@@ -116,7 +122,7 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
 
         verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test
@@ -126,11 +132,8 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
         assertThat(io.out(), containsString("Submitting: " + EXERCISE2_NAME));
 
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
-
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME);
+        verifyStatic(times(2));
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test
@@ -141,11 +144,8 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("Submitting: " + EXERCISE2_NAME));
         assertEquals(2, countSubstring("Submitting: ", io.out()));
 
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
-
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE2_NAME);
+        verifyStatic(times(2));
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test
@@ -169,7 +169,7 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("Invalid command line argument"));
 
         verifyStatic(times(0));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test
@@ -187,29 +187,12 @@ public class SubmitCommandTest {
         assertThat(io.out(), containsString("You have to be in a course directory"));
 
         verifyStatic(times(0));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
-    }
-
-    @Test
-    public void abortGracefullyIfCannotFetchCourceInfoFromServer() {
-        when(TmcUtil.findCourse(mockCore, COURSE_NAME)).thenReturn(null);
-
-        app.setWorkdir(new WorkDir(pathToDummyCourse));
-        app.run(new String[]{"submit", EXERCISE1_NAME});
-
-        assertThat(io.out(),
-                containsString("Could not fetch course info from server."));
-        assertEquals(0, countSubstring("Submitting: ", io.out()));
-
-        verifyStatic(times(0));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test
     public void showFailMsgIfSubmissionFailsInCore() {
-        when(TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME))
-                .thenReturn(null);
-
+        when(TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class))).thenReturn(null);
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", EXERCISE1_NAME});
 
@@ -217,7 +200,7 @@ public class SubmitCommandTest {
         assertEquals(1, countSubstring("Submission failed.", io.out()));
 
         verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test
@@ -227,7 +210,7 @@ public class SubmitCommandTest {
 
         assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
         verifyStatic(times(1));
-        TmcUtil.submitExercise(mockCore, course, EXERCISE1_NAME);
+        TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
 
     @Test

@@ -74,7 +74,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
                 .resolve(stringArgs[0])
                 .resolve(CourseInfoIo.COURSE_CONFIG);
         CourseInfo info = app.createCourseInfo(course);
-        info.setExercises(exercises);
+        info.setExercises(course.getExercises());
         CourseInfoIo.save(info, configFile);
     }
 
