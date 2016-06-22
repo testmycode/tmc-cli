@@ -36,10 +36,10 @@ public class LoginCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
+        String serverAddress = getLoginInfo(args, "s", "server address: ");
         String username = getLoginInfo(args, "u", "username: ");
         String password = getLoginInfo(args, "p", "password: ");
-        String serverAddress = getLoginInfo(args, "s", "server address: ");
-
+        
         Settings settings = new Settings(serverAddress, username, password);
         if (loginPossible(settings) && saveLoginSettings(settings)) {
             io.println("Login successful.");
