@@ -26,6 +26,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -65,6 +66,16 @@ public class LoginCommandTest {
         app.run(args);
         assertThat(io.out(), containsString("Login successful."));
     }
+    
+    @Test
+    public void userGetsErrorMessageIfLoginFails() {
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        when(SettingsIo.save(any(Settings.class))).thenReturn(false);
+        String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", "WrongPassword"};
+        app.run(args);
+        assertThat(io.out(), containsString("Login failed."));
+    }
 
     @Test
     public void catches401IfCorrectServerAndWrongUsername() {
@@ -78,6 +89,20 @@ public class LoginCommandTest {
         String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
         app.run(args);
         assertThat(io.out(), containsString("Incorrect username or password."));
+    }
+    
+    @Test
+    public void userGetsErrorMessageIfUnableToConnectToServer() {
+        Callable<List<Course>> callableEx = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                throw new ServerException("SomeException");
+            }
+        };
+        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callableEx);
+        String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
+        app.run(args);
+        assertThat(io.out(), containsString("Unable to connect to server"));
     }
 
     @Test
@@ -96,6 +121,16 @@ public class LoginCommandTest {
                 .thenReturn(successfulCallable());
         String[] args = {"login", "-s", SERVER, "-u", USERNAME};
         io.addPasswordPrompt(PASSWORD);
+        app.run(args);
+        assertTrue(io.allPromptsUsed());
+    }
+    
+    @Test
+    public void loginAsksServerFromUserIfNotGiven() {
+        when(mockCore.listCourses((ProgressObserver) anyObject()))
+                .thenReturn(successfulCallable());
+        String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
+        io.addLinePrompt(SERVER);
         app.run(args);
         assertTrue(io.allPromptsUsed());
     }

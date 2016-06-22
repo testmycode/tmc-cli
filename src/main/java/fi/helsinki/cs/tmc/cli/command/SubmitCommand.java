@@ -42,7 +42,7 @@ public class SubmitCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         this.io = io;
 
-        List<String> exercisesFromArgs = parseArgs(args);
+        String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
@@ -132,9 +132,9 @@ public class SubmitCommand extends AbstractCommand {
         io.println(Color.colorString(msg, Color.AnsiColor.ANSI_YELLOW));
     }
 
-    private List<String> parseArgs(CommandLine args) {
+    private String[] parseArgs(CommandLine args) {
         this.showAll = args.hasOption("a");
         this.showDetails = args.hasOption("d");
-        return args.getArgList();
+        return args.getArgs();
     }
 }

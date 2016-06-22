@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -105,7 +107,7 @@ public class Application {
             return null;
         }
 
-        List<String> subArgs = line.getArgList();
+        List<String> subArgs = new ArrayList<>(Arrays.asList(line.getArgs()));
         if (subArgs.size() > 0) {
             commandName = subArgs.remove(0);
         } else {
