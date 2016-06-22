@@ -1,7 +1,12 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_BLUE;
+import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_GREEN;
+import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_RED;
+
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
@@ -53,13 +58,13 @@ public class CourseInfoCommand extends AbstractCommand {
             if (workDir.getExerciseNames().size() == 1 && stringArgs.length == 0) {
                 String currentExercise = workDir.getExerciseNames().get(0);
                 exercise = info.getExercise(currentExercise);
-                printExerciseDetails();
+                printOneExercise(args.hasOption("a"));
                 return;
 
             } else if (stringArgs.length != 0) {
                 if (info.getExercise(stringArgs[0]) != null) {
                     exercise = info.getExercise(stringArgs[0]);
-                    printExerciseDetails();
+                    printOneExercise(args.hasOption("a"));
                     return;
 
                 } else {
@@ -109,11 +114,32 @@ public class CourseInfoCommand extends AbstractCommand {
         io.println("CometUrl: " + course.getCometUrl());
     }
 
-    private void printExerciseDetails() {
-        io.println(exercise.getName());
-        io.println("Completed: " + exercise.isCompleted());
-        io.println("Attempted: " + exercise.isAttempted());
-        io.println("Deadline: " + exercise.getDeadline());
+    private void printOneExercise(boolean showAll) {
+        if (showAll) {
+            printExercise(exercise);
+        } else {
+            printExerciseShort();
+        }
+    }
+
+    private void printExerciseShort() {
+        io.println("Exercise: " + exercise.getName());
+        io.println("Deadline: " + getDeadline(exercise));
+        io.println(formatString("completed", exercise.isCompleted()));
+        if (!exercise.isCompleted() && exercise.isAttempted()) {
+            io.println(Color.colorString("attempted", ANSI_BLUE));
+        }
+        if (exercise.requiresReview()) {
+            io.println(formatString("reviewed", exercise.isReviewed()));
+        }
+    }
+
+    private String formatString(String string, boolean color) {
+        if (color) {
+            return Color.colorString(string, ANSI_GREEN);
+        } else {
+            return Color.colorString("not " + string, ANSI_RED);
+        }
     }
 
     private void printExercises(boolean showAll) {
@@ -168,5 +194,14 @@ public class CourseInfoCommand extends AbstractCommand {
         io.println("    Solution download URL: " + exercise.getSolutionDownloadUrl());
         io.println("    Checksum: " + exercise.getChecksum());
         io.println("");
+    }
+
+    private String getDeadline(Exercise exercise) {
+        String deadline = exercise.getDeadline();
+        if (deadline == null) {
+            return "not available";
+        }
+        deadline = deadline.substring(0, 19);
+        return deadline.replace("T", " at ");
     }
 }
