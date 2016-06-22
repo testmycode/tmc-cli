@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class ExerciseUpdater {
@@ -88,7 +89,14 @@ public class ExerciseUpdater {
     }
 
     public List<Exercise> downloadUpdates(TmcCliProgressObserver progobs) {
-        return TmcUtil.downloadExercises(core, getNewAndUpdatedExercises(), progobs);
+        List<Exercise> newAndUpdated = getNewAndUpdatedExercises();
+        for (Iterator<Exercise> iterator = newAndUpdated.iterator(); iterator.hasNext();) {
+            Exercise next = iterator.next();
+            if (next.isCompleted()) {
+                iterator.remove();
+            }
+        }
+        return TmcUtil.downloadExercises(core, newAndUpdated, progobs);
     }
 
     public boolean updateCourseJson(CourseInfo info, Path configFile) {

@@ -81,7 +81,12 @@ public class UpdateCommand extends AbstractCommand {
         if (!exercises.isEmpty()) {
             io.println(message);
             for (Exercise exercise : exercises) {
-                io.println(" " + exercise.getName());
+                if (exercise.isCompleted()) {
+                    // already released and completed on another computer/folder
+                    io.println(" " + exercise.getName() + " (already completed)");
+                } else {
+                    io.println(" " + exercise.getName());
+                }
             }
         }
     }
