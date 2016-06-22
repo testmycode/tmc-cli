@@ -176,7 +176,7 @@ public class SubmitCommandTest {
     public void abortIfInvalidExerciseNameIsGivenAsArgument() {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", "foo"});
-        assertThat(io.out(), containsString("Error: 'foo' is not a valid exercise."));
+        assertThat(io.out(), containsString("Error: foo is not a valid exercise."));
         assertEquals(0, countSubstring("Submitting: ", io.out()));
     }
 

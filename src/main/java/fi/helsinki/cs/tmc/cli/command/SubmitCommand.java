@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus.NONE_FAILED;
+
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
@@ -26,7 +28,7 @@ import java.util.List;
 @Command(name = "submit", desc = "Submit exercises")
 public class SubmitCommand extends AbstractCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(RunTestsCommand.class);
 
     private Io io;
     private boolean showAll;
@@ -56,20 +58,20 @@ public class SubmitCommand extends AbstractCommand {
         WorkDir workDir = app.getWorkDir();
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
-                io.println("Error: '" + exercise + "' is not a valid exercise.");
+                io.println("Error: " + exercise + " is not a valid exercise.");
                 return;
             }
         }
 
         List<String> exerciseNames = workDir.getExerciseNames();
         if (exerciseNames.isEmpty()) {
-            io.println("You have to be in a course directory to"
-                    + " submit");
+            io.println("You have to be in a course directory to submit");
             return;
         }
 
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
-        Course course = info.getCourse();
+        String courseName = info.getCourseName();
+        Course course = TmcUtil.findCourse(core, courseName);
 
         if (course == null) {
             io.println("Could not fetch course info from server.");
@@ -94,8 +96,17 @@ public class SubmitCommand extends AbstractCommand {
                 resultPrinter.printSubmissionResult(result, isOnlyExercise, color1, color2);
                 total += result.getTestCases().size();
                 passed += ResultPrinter.passedTests(result.getTestCases());
+
+                info.getExercise(exerciseName).setAttempted(true);
+                if (result.getTestResultStatus() == NONE_FAILED) {
+                    if (info.getLocalCompletedExercises().contains(exerciseName)) {
+                        info.getLocalCompletedExercises().remove(exerciseName);
+                    }
+                    info.getExercise(exerciseName).setCompleted(true);
+                }
             }
         }
+        CourseInfoIo.save(info, workDir.getConfigFile());
         if (total > 0 && !isOnlyExercise) {
             // Print a progress bar showing how the ratio of passed exercises
             io.println("");
