@@ -17,7 +17,6 @@ import java.util.Set;
 @Command(name = "help", desc = "List every command")
 public class HelpCommand extends AbstractCommand {
     private int longestNameLength;
-    private CommandFactory commandFactory;
     private Io io;
 
     @Override
@@ -27,7 +26,6 @@ public class HelpCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         Application app = getApp();
-        this.commandFactory = app.getCommandFactory();
         this.io = io;
 
         StringBuilder sb = new StringBuilder();
@@ -44,7 +42,7 @@ public class HelpCommand extends AbstractCommand {
 
     private List<String> getCommandStrings() {
         List<String> strings = new ArrayList<>();
-        Set<Class<Command>> commands = this.commandFactory.getCommands();
+        Set<Class<Command>> commands = CommandFactory.getCommands();
         commands.remove(castToCommandClass(TestCommand.class));
         commands.remove(castToCommandClass(ShellHelperCommand.class));
 
