@@ -31,3 +31,6 @@ public class ExampleCommand extends AbstractCommand {
 
 ## Architecture
 ...
+
+## Debugging
+### Logging
