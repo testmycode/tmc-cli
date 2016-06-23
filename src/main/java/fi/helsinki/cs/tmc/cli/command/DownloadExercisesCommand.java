@@ -69,6 +69,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
         io.println(exercises.toString());
+        if (exercises.isEmpty()) {
+            io.println("You have already downloaded the exercises. Use option -a"
+                    + " if you want to download them again.");
+        }
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
                 .resolve(stringArgs[0])
