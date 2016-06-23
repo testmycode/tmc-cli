@@ -83,7 +83,7 @@ public class ResultPrinter {
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
         }
         String msg = null;
-        switch (result.getTestResultStatus()) {
+        switch (    result.getTestResultStatus()) {
             case NONE_FAILED:
                 msg = "All tests passed on server!";
                 msg = Color.colorString(msg, Color.AnsiColor.ANSI_GREEN)

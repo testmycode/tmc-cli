@@ -41,9 +41,11 @@ public class TerminalIo extends Io {
             logger.warn("Line could not be read.", e);
             return null;
         }
-        if (input.equals("y")) {
+        if (input.isEmpty()) {
+            return defaultToYes;
+        } else if (input.charAt(0) == 'y') {
             return true;
-        } else if (input.equals("n")) {
+        } else if (input.charAt(0) == 'n') {
             return false;
         }
         return defaultToYes;
