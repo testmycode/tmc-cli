@@ -47,7 +47,6 @@ public class Application {
     private static final long defaultUpdateInterval = 60 * 60 * 1000;
     private static final String usage = "tmc [args] COMMAND [command-args]";
 
-    private CommandFactory commandFactory;
     private HashMap<String, String> properties;
     private TmcCore tmcCore;
     private Settings settings;
@@ -64,7 +63,6 @@ public class Application {
     public Application(Io io) {
         this.parser = new GnuParser();
         this.options = new Options();
-        this.commandFactory = new CommandFactory();
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
 
@@ -87,7 +85,7 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        AbstractCommand command = commandFactory.createCommand(this, name);
+        AbstractCommand command = CommandFactory.createCommand(this, name);
         if (command == null) {
             io.println("Command " + name + " doesn't exist.");
             return false;
@@ -169,10 +167,6 @@ public class Application {
             return;
         }
         settings.setTmcProjectDirectory(path.getParent());
-    }
-
-    public CommandFactory getCommandFactory() {
-        return this.commandFactory;
     }
     
     // Method is used to help testing

@@ -19,7 +19,7 @@ public class CommandFactory {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
     private static final Map<String, Class<Command>> commands = new HashMap<>();
 
-    public CommandFactory() {
+    static {
         /* force load the CommandList so that it's static initialization block is executed
            this is used instead of import so that the ide's won't cry about the nonexistent class
          */
@@ -47,7 +47,7 @@ public class CommandFactory {
      *
      * @param commandClass The class of the command
      */
-    public void addCommand(Class commandClass) {
+    public static void addCommand(Class commandClass) {
         Class<Command> klass = castToCommandClass(commandClass);
         Annotation annotation = klass.getAnnotation(Command.class);
         if (annotation == null) {
@@ -67,7 +67,7 @@ public class CommandFactory {
      * @param name Name of the command
      * @return A new command instance
      */
-    public AbstractCommand createCommand(Application app, String name) {
+    public static AbstractCommand createCommand(Application app, String name) {
         Class commandClass = CommandFactory.commands.get(name);
         if (commandClass == null) {
             return null;
@@ -100,7 +100,7 @@ public class CommandFactory {
      *
      * @return Set of commands.
      */
-    public Set<Class<Command>> getCommands() {
+    public static Set<Class<Command>> getCommands() {
         return new HashSet<>(CommandFactory.commands.values());
     }
 
