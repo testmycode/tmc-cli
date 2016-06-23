@@ -87,57 +87,64 @@ public class CourseInfoCommandTest {
         app = spy(app);
         doReturn(null).when(app).getTmcCore();
 
-        String[] args = {"info"};
+        String[] args = {"info", "course", "-i"};
         app.run(args);
-        assertFalse(io.out().contains("You must give"));
+        assertFalse(io.out().contains("doesn't exist on this server."));
     }
 
     @Test
     public void showMessageIfCourseIsNotGiven() {
         String[] args = {"info"};
         app.run(args);
-        assertTrue(io.out().contains("You must give the course name as a parameter"));
+        assertTrue(io.out().contains("You have to be in a course directory"));
     }
 
     @Test
-    public void showMessageIfCourseDoesNotExist() {
+    public void showErrorMessageIfNoCourseGivenWithIOption() {
+        String[] args = {"info", "-i"};
+        app.run(args);
+        assertTrue(io.out().contains("You must give a course as a parameter."));
+    }
+
+    @Test
+    public void showMessageIfCourseDoesNotExistOnTheServer() {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
-        String[] args = {"info", "foo"};
+        String[] args = {"info", "foo", "-i"};
         app.run(args);
         assertTrue(io.out().contains("The course foo doesn't exist on this server"));
     }
 
     @Test
-    public void printCourseWithoutOption() {
+    public void printCourseWithOptionI() {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
         when(mockCore.getCourseDetails(any(ProgressObserver.class),
                 any(Course.class))).thenReturn(callableCourse);
 
-        String[] args = {"info", "test-course123"};
+        String[] args = {"info", "test-course123", "-i"};
         app.run(args);
         assertTrue(io.out().contains("Course name: test-course123"));
         assertFalse(io.out().contains("Statistics URLs"));
     }
 
     @Test
-    public void printCourseWithOption() {
+    public void printCourseWithOptionsIAndA() {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
         when(mockCore.getCourseDetails(any(ProgressObserver.class),
                 any(Course.class))).thenReturn(callableCourse);
 
-        String[] args = {"info", "test-course123", "-a"};
+        String[] args = {"info", "test-course123", "-a", "-i"};
         app.run(args);
         assertTrue(io.out().contains("Statistics URLs"));
     }
 
     @Test
-    public void printCourseWithNoExercises() {
+    public void printCourseWithNoExercisesFromTheServer() {
         course.setExercises(new ArrayList<Exercise>());
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
         when(mockCore.getCourseDetails(any(ProgressObserver.class),
                 any(Course.class))).thenReturn(callableCourse);
 
-        String[] args = {"info", "test-course123"};
+        String[] args = {"info", "test-course123", "-i"};
         app.run(args);
         assertTrue(io.out().contains("Exercises: -"));
     }
@@ -180,7 +187,7 @@ public class CourseInfoCommandTest {
     }
 
     @Test
-    public void printGivenCourseIfInCourseDirectoryAndGivenCourseName() {
+    public void printGivenCourseFromTheServerIfInCourseDirectoryAndGivenCourseName() {
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
 
@@ -189,13 +196,13 @@ public class CourseInfoCommandTest {
         when(mockCore.getCourseDetails(any(ProgressObserver.class),
                 any(Course.class))).thenReturn(callableCourse);
 
-        String[] args = {"info", "test-course123"};
+        String[] args = {"info", "test-course123", "-i"};
         app.run(args);
         assertTrue(io.out().contains("test-course123"));
     }
 
     @Test
-    public void printsErrorIfInCourseDirectoryAndGivenCourseNameThatDoesntExist() {
+    public void printsErrorIfInCourseDirectoryAndGivenCourseNameThatDoesntExistOnTheServer() {
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
 
@@ -203,9 +210,9 @@ public class CourseInfoCommandTest {
         when(mockCore.getCourseDetails(any(ProgressObserver.class),
                 any(Course.class))).thenReturn(callableCourse);
 
-        String[] args = {"info", "notacourse"};
+        String[] args = {"info", "notacourse", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("exercise"));
+        assertTrue(io.out().contains("doesn't exist on this server."));
     }
 
     @Test
