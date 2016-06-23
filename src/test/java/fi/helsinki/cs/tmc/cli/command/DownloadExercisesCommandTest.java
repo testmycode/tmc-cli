@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -160,7 +161,9 @@ public class DownloadExercisesCommandTest {
 
         String[] args = {"download", "course1"};
         app.run(args);
-        assertTrue(testIo.out().contains("exerciseName"));
+
+        File courseJson = tempDir.resolve("course1").resolve(".tmc.json").toFile();
+        assertTrue(courseJson.exists());
     }
     
     @Test
@@ -205,8 +208,7 @@ public class DownloadExercisesCommandTest {
 
         String[] args = {"download", "course1"};
         app.run(args);
-        assertTrue(testIo.out().contains("You have already downloaded the exercises."
-                + " Use option -a"));
+        assertTrue(testIo.out().contains("You may have already downloaded the exercises."));
     }
 
     @Test

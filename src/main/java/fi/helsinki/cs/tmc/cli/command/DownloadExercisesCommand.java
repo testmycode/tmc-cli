@@ -29,7 +29,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         options.addOption("a", "all", false,
                 "Download all available exercises, including previously completed");
 
-        // Not implemented in tmc-core yet
+        // Download old submissions. Not implemented in tmc-core yet
         //options.addOption("c", "completed", false, "Download previously completed exercises");
     }
 
@@ -70,8 +70,13 @@ public class DownloadExercisesCommand extends AbstractCommand {
         List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
         io.println(exercises.toString());
         if (exercises.isEmpty()) {
-            io.println("You have already downloaded the exercises. Use option -a"
+            io.println("Failed to download exercises OR");
+            io.println("You may have already downloaded the exercises. Use option -a"
                     + " if you want to download them again.");
+            return;
+        } else if (exercises.size() != filtered.size()) {
+            io.println(Color.colorString("Some exercises could not be downloaded",
+                    Color.AnsiColor.ANSI_RED));
         }
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
@@ -89,7 +94,9 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         List<Exercise> filtered = new ArrayList<>();
         for (Exercise exercise : course.getExercises()) {
-            if (!exercise.isCompleted()) {
+            // Teachers may get a list of locked exercises but core still refuses to
+            // download them. Filter locked exercises out.
+            if (!exercise.isCompleted() && !exercise.isLocked()) {
                 filtered.add(exercise);
             }
         }

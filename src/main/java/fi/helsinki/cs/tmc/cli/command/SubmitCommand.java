@@ -12,11 +12,13 @@ import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
+import fi.helsinki.cs.tmc.cli.tmcstuff.FeedbackHandler;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -24,7 +26,9 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 @Command(name = "submit", desc = "Submit exercises")
@@ -99,6 +103,10 @@ public class SubmitCommand extends AbstractCommand {
         Color.AnsiColor color2 = app.getColor("testresults-right");
 
         List<Exercise> submitExercises = info.getExercises(exerciseNames);
+        List<List<FeedbackQuestion>> feedbackLists
+                = new ArrayList<List<FeedbackQuestion>>();
+        List<String> exercisesWithFeedback = new ArrayList<String>();
+        List<URI> feedbackUris = new ArrayList<URI>();
 
         for (Exercise exercise : submitExercises) {
             io.println(Color.colorString("Submitting: " + exercise.getName(),
@@ -118,6 +126,12 @@ public class SubmitCommand extends AbstractCommand {
                     }
                     exercise.setCompleted(true);
                 }
+                List<FeedbackQuestion> feedback = result.getFeedbackQuestions();
+                if (feedback != null && feedback.size() > 0) {
+                    feedbackLists.add(feedback);
+                    exercisesWithFeedback.add(exercise.getName());
+                    feedbackUris.add(URI.create(result.getFeedbackAnswerUrl()));
+                }
             }
         }
         CourseInfoIo.save(info, workDir.getConfigFile());
@@ -128,8 +142,22 @@ public class SubmitCommand extends AbstractCommand {
             io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
         }
 
+        io.println("Updating " + CourseInfoIo.COURSE_CONFIG);
         updateCourseJson(core, submitExercises, info, workDir.getConfigFile());
         checkForExerciseUpdates(core, currentCourse);
+        for (int i = 0; i < exercisesWithFeedback.size(); i++) {
+            if (io.readConfirmation(
+                    "Send feedback for " + exercisesWithFeedback.get(i) + "?", true)) {
+                FeedbackHandler fbh = new FeedbackHandler(io);
+                Boolean success = fbh.sendFeedback(
+                        core, feedbackLists.get(i), feedbackUris.get(i));
+                if (success) {
+                    io.println("Feedback sent.");
+                } else {
+                    io.println("Failed to send feedback.");
+                }
+            }
+        }
     }
 
     protected void updateCourseJson(TmcCore core, List<Exercise> submittedExercises,
@@ -137,7 +165,7 @@ public class SubmitCommand extends AbstractCommand {
 
         Course updatedCourse = TmcUtil.findCourse(core, courseInfo.getCourseName());
         if (updatedCourse == null) {
-            io.println("Failed to update .tmc.json file for course " + courseInfo.getCourseName());
+            io.println("Failed to update config file for course " + courseInfo.getCourseName());
             return;
         }
 
@@ -145,7 +173,7 @@ public class SubmitCommand extends AbstractCommand {
             Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
             if (updatedEx == null) {
                 // Does this reaaally ever happen?
-                io.println("Failed to update .tmc.json file for exercise " + submitted.getName()
+                io.println("Failed to update config file for exercise " + submitted.getName()
                         + ". The exercise doesn't exist in server anymore.");
                 continue;
             }
