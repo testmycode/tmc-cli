@@ -30,31 +30,24 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
     private static final Logger logger = LoggerFactory.getLogger(CommandAnnotationProcessor.class);
 
     private static final String CLASS_NAME = "CommandList";
-    private static final String PACKAGE_NAME = "fi.helsinki.cs.tmc.cli.command";
+    private static final String PACKAGE_NAME = "fi.helsinki.cs.tmc.cli.command.core";
     private static final String TAB = "    ";
-
-    private ProcessingEnvironment processingEnv;
-
-    @Override
-    public void init(ProcessingEnvironment processingEnv) {
-        this.processingEnv = processingEnv;
-    }
 
     private void generateSourceFile(Map<String, String> map) throws IOException {
         JavaFileObject jfo = processingEnv.getFiler().createSourceFile(
-                PACKAGE_NAME + ".core." + CLASS_NAME);
+                PACKAGE_NAME + "." + CLASS_NAME);
 
         try (Writer writer = jfo.openWriter()) {
             BufferedWriter bwriter = new BufferedWriter(writer);
-            bwriter.append("package ");
-            bwriter.append(PACKAGE_NAME);
-            bwriter.append(".core;\n\n");
+            bwriter.append("package " + PACKAGE_NAME + ";\n\n");
+
+            // import the command classes
             bwriter.append("//CHECKSTYLE:OFF\n");
-            bwriter.append("import " + PACKAGE_NAME + ".core.CommandFactory;\n\n");
             for (Entry<String, String> entry : map.entrySet()) {
                 bwriter.append("import " + entry.getValue() + ";\n");
             }
             bwriter.append("//CHECKSTYLE:ON\n");
+
             bwriter.append("\npublic class " + CLASS_NAME + " {\n");
             bwriter.append(TAB + "static {\n");
             for (Entry<String, String> entry : map.entrySet()) {
@@ -62,6 +55,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
                 if (parts.length == 0) {
                     continue;
                 }
+                // print out the lines that add the commands to the command factory.
                 String className = parts[parts.length - 1];
                 bwriter.append(TAB + TAB + "CommandFactory.addCommand(\""
                         + entry.getKey() + "\", "
@@ -76,15 +70,15 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         Map<String, String> map = new HashMap<>();
-        Messager messager = processingEnv.getMessager();
 
         for (Element elem : roundEnv.getElementsAnnotatedWith(Command.class)) {
             if (elem.getKind() != ElementKind.CLASS) {
-                continue;
+                logger.warn("Element with command annotation is not class: " + elem.toString());
+                return false;
             }
             Command command = elem.getAnnotation(Command.class);
-            messager.printMessage(Diagnostic.Kind.NOTE, elem.toString());
-            messager.printMessage(Diagnostic.Kind.NOTE, elem.getClass().getCanonicalName());
+            logger.info("element with annotation: " + elem.toString());
+            logger.info("element name with annotation: " + elem.getClass().getCanonicalName());
 
             TypeElement classElement = (TypeElement) elem;
             map.put(command.name(), processingEnv.getElementUtils()
@@ -94,7 +88,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
         try {
             generateSourceFile(map);
         } catch (IOException ex) {
-            messager.printMessage(Diagnostic.Kind.NOTE, "Failed to create source file." + ex);
+            logger.warn("Failed to create source file." + ex);
         }
         return true;
     }

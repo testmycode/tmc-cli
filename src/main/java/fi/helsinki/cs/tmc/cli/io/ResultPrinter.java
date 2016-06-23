@@ -5,16 +5,16 @@ import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.SpecialLogs;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class ResultPrinter {
 
     private static final String COMPILE_ERROR_MESSAGE
             = Color.colorString("Failed to compile project", Color.AnsiColor.ANSI_PURPLE);
-    private static final String FAIL = Color.colorString("Failed: ", Color.AnsiColor.ANSI_RED);
-    private static final String PASS = Color.colorString("Passed: ", Color.AnsiColor.ANSI_GREEN);
-    private static final String TAB = "        ";
-    private static final char LF = '\n';
+    private static final String FAIL_MESSAGE = "Failed: ";
+    private static final String PASS_MESSAGE = "Passed: ";
+    private final String tab;
 
     private final Io io;
 
@@ -27,6 +27,8 @@ public class ResultPrinter {
         this.io = io;
         this.showDetails = showDetails;
         this.showPassed = showPassed;
+
+        this.tab = createPaddingString(PASS_MESSAGE.length());
     }
 
     public boolean isShowDetails() {
@@ -105,7 +107,7 @@ public class ResultPrinter {
         }
     }
 
-    public void printRunResult(RunResult result, Boolean printProgressBar,
+    public void printRunResult(RunResult result, Boolean submitted, Boolean printProgressBar,
                                Color.AnsiColor color1, Color.AnsiColor color2) {
         printTestResults(result.testResults);
         this.total = result.testResults.size();
@@ -118,9 +120,10 @@ public class ResultPrinter {
         String msg = null;
         switch (result.status) {
             case PASSED:
-                msg = "All tests passed!";
-                msg = Color.colorString(msg, Color.AnsiColor.ANSI_GREEN)
-                        + " Submit to server with 'tmc submit'";
+                msg = Color.colorString("All tests passed!", Color.AnsiColor.ANSI_GREEN);
+                if (!submitted) {
+                    msg += " Submit to server with 'tmc submit'";
+                }
                 break;
             case TESTS_FAILED:
                 msg = "Please review your answer before submitting";
@@ -154,9 +157,9 @@ public class ResultPrinter {
     private void printTestResults(List<TestResult> testResults) {
         for (TestResult testResult : testResults) {
             if (!testResult.isSuccessful()) {
-                io.println(createFailMessage(testResult));
+                printFailMessage(testResult);
             } else if (showPassed) {
-                io.println(createPassMessage(testResult));
+                printPassMessage(testResult);
             }
         }
         io.println("Test results: "
@@ -165,37 +168,45 @@ public class ResultPrinter {
 
     }
 
-    private String createFailMessage(TestResult testResult) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(FAIL).append(testResult.getName()).append(LF);
-        sb.append(TAB).append(testResult.getMessage()).append(LF);
+    private void printFailMessage(TestResult testResult) {
+        io.print(Color.colorString(FAIL_MESSAGE, Color.AnsiColor.ANSI_RED));
+        io.println(testResult.getName());
+        io.println(this.tab + testResult.getMessage());
 
         if (showDetails) {
-            String details = listToString(testResult.getDetailedMessage(), LF);
+            String details = listToString(testResult.getDetailedMessage());
             if (details != null) {
-                sb.append(LF).append("Detailed message:").append(LF).append(details);
+                io.println("\nDetailed message:");
+                io.println(details);
             }
-            String exception = listToString(testResult.getException(), LF);
+
+            String exception = listToString(testResult.getException());
             if (exception != null) {
-                sb.append(LF).append("Exception:").append(LF).append(exception);
+                io.println("\nException:");
+                io.println(exception);
             }
         }
-        return sb.toString();
     }
 
-    private String createPassMessage(TestResult testResult) {
-        return PASS + testResult.getName() + LF;
+    private void printPassMessage(TestResult testResult) {
+        io.print(Color.colorString(PASS_MESSAGE, Color.AnsiColor.ANSI_GREEN));
+        io.println(testResult.getName());
     }
 
-    private String listToString(List<String> strings, char separator) {
+    private String listToString(List<String> strings) {
         if (strings == null || strings.isEmpty()) {
             return null;
         }
         StringBuilder sb = new StringBuilder();
         for (String string : strings) {
-            sb.append(string).append(separator);
+            sb.append(string).append("\n");
         }
         return sb.toString();
     }
 
+    private String createPaddingString(int size) {
+        char[] charArray = new char[size];
+        Arrays.fill(charArray, ' ');
+        return new String(charArray);
+    }
 }

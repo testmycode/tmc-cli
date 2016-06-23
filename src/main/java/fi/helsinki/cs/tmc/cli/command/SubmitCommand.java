@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus.NONE_FAILED;
+
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
@@ -38,6 +40,8 @@ public class SubmitCommand extends AbstractCommand {
     public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all test results");
         options.addOption("d", "details", false, "Show detailed error message");
+        options.addOption("c", "completed", false,
+                "Filter out exercises that haven't been locally tested");
     }
 
     @Override
@@ -58,14 +62,25 @@ public class SubmitCommand extends AbstractCommand {
         WorkDir workDir = app.getWorkDir();
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
-                io.println("Error: '" + exercise + "' is not a valid exercise.");
+                io.println("Error: " + exercise + " is not a valid exercise.");
                 return;
             }
         }
 
-        List<String> exerciseNames = workDir.getExerciseNames();
+        List<String> exerciseNames;
+        if (args.hasOption("c")) {
+            workDir.addPath(workDir.getCourseDirectory());
+            exerciseNames = workDir.getExerciseNames(true, true, false);
+        } else {
+            exerciseNames = workDir.getExerciseNames();
+        }
+
         if (exerciseNames.isEmpty()) {
-            io.println("You have to be in a course directory to submit");
+            if (args.hasOption("c") && workDir.getCourseDirectory() != null) {
+                io.println("No locally tested exercises.");
+                return;
+            }
+            io.println("No exercises specified.");
             return;
         }
 
@@ -95,8 +110,17 @@ public class SubmitCommand extends AbstractCommand {
                 resultPrinter.printSubmissionResult(result, isOnlyExercise, color1, color2);
                 total += result.getTestCases().size();
                 passed += ResultPrinter.passedTests(result.getTestCases());
+
+                exercise.setAttempted(true);
+                if (result.getTestResultStatus() == NONE_FAILED) {
+                    if (info.getLocalCompletedExercises().contains(exercise.getName())) {
+                        info.getLocalCompletedExercises().remove(exercise.getName());
+                    }
+                    exercise.setCompleted(true);
+                }
             }
         }
+        CourseInfoIo.save(info, workDir.getConfigFile());
         if (total > 0 && !isOnlyExercise) {
             // Print a progress bar showing how the ratio of passed exercises
             io.println("");

@@ -46,9 +46,9 @@ Now that you've installed tmc-cli, you can view all available commands by runnin
 Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or %LOCALAPPDATA% on Windows) - you will only have to log in once.
 ```
 ~ $ tmc login
-username: my-username
-password:
 server address:
+username:
+password:
 Login successful.
 ```
 
