@@ -4,11 +4,9 @@ import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
-import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,9 +14,6 @@ import org.apache.commons.cli.Options;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.concurrent.Callable;
 
 @Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand extends AbstractCommand {
@@ -73,12 +68,9 @@ public class LoginCommand extends AbstractCommand {
     private boolean loginPossible(Settings settings) {
         Application app = getApp();
         app.createTmcCore(settings);
-        TmcCore core = app.getTmcCore();
-        Callable<List<Course>> callable = core.listCourses(
-                new TmcCliProgressObserver(io));
 
         try {
-            callable.call();
+            TmcUtil.tryToLogin(app.getTmcCore());
         } catch (Exception e) {
             Throwable cause = e.getCause();
             if (cause instanceof FailedHttpResponseException) {

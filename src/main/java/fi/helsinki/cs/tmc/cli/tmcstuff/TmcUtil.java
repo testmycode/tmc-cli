@@ -18,6 +18,13 @@ public class TmcUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
 
+    public static boolean tryToLogin(TmcCore core) throws Exception {
+        Callable<List<Course>> callable;
+        callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
+
+        return callable.call() != null;
+    }
+
     public static List<Course> listCourses(TmcCore core) {
         Callable<List<Course>> callable;
         callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
