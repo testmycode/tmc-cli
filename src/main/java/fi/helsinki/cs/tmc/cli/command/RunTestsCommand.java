@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static fi.helsinki.cs.tmc.langs.domain.RunResult.Status.PASSED;
+
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
@@ -7,6 +9,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
@@ -24,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.List;
+
 
 @Command(name = "test", desc = "Run local exercise tests")
 public class RunTestsCommand extends AbstractCommand {
@@ -58,13 +62,13 @@ public class RunTestsCommand extends AbstractCommand {
                 return;
             }
         }
-        String courseName = getCourseName(workDir);
         List<String> exerciseNames = workDir.getExerciseNames();
 
         if (exerciseNames.isEmpty()) {
             io.println("You have to be in a course directory to run tests");
             return;
         }
+        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
 
         // Local tests don't require login so make sure tmcCore is never null.
         app.createTmcCore(new Settings());
@@ -90,16 +94,30 @@ public class RunTestsCommand extends AbstractCommand {
 
                 io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
                 //name = name.replace("-", File.separator);
-                Exercise exercise = new Exercise(name, courseName);
+                Exercise exercise = info.getExercise(name);
+//                Exercise exercise = new Exercise(name, courseName);
 
                 // TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
                 runResult = core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
                 // progobs.end(0);
 
-                resultPrinter.printRunResult(runResult, isOnlyExercise, color1, color2);
+                resultPrinter.printRunResult(runResult, exercise.isCompleted(),
+                        isOnlyExercise, color1, color2);
                 total += runResult.testResults.size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
+                exercise.setAttempted(true);
+                if (runResult.status == PASSED && !exercise.isCompleted()) {
+                    // add exercise to locally tested exercises
+                    if (!info.getLocalCompletedExercises().contains(exercise.getName())) {
+                        info.getLocalCompletedExercises().add(exercise.getName());
+                    }
+                } else {
+                    if (info.getLocalCompletedExercises().contains(exercise.getName())) {
+                        info.getLocalCompletedExercises().remove(exercise.getName());
+                    }
+                }
             }
+            CourseInfoIo.save(info, workDir.getConfigFile());
             if (total > 0 && !isOnlyExercise) {
                 // Print a progress bar showing how the ratio of passed exercises
                 // But only if more than one exercise was tested
@@ -113,15 +131,6 @@ public class RunTestsCommand extends AbstractCommand {
                     + ex.getMessage());
             logger.error("Failed to run tests.", ex);
         }
-    }
-
-    private String getCourseName(WorkDir dirUtil) {
-        Path courseDir = dirUtil.getCourseDirectory();
-        try {
-            return courseDir.getName(courseDir.getNameCount() - 1).toString();
-        } catch (Exception e) {
-        }
-        return null;
     }
 
     private String[] parseArgs(CommandLine args) {

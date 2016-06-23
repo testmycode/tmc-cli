@@ -246,6 +246,10 @@ public class Application {
         this.workDir = workDir;
     }
 
+    public void setTmcProjectDirectory(Path path) {
+        this.settings.setTmcProjectDirectory(path);
+    }
+
     public HashMap<String, String> getProperties() {
         // Loads properties from the global configuration file in .config/tmc-cli/
         return this.properties;
