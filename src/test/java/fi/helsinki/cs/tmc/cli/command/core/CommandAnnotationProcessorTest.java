@@ -147,8 +147,8 @@ public class CommandAnnotationProcessorTest {
         when(classElement.getKind()).thenReturn(ElementKind.CLASS);
         Command annotation = CommandAnnotationExample1.class.getAnnotation(Command.class);
         doReturn(annotation).when(classElement).getAnnotation(Command.class);
-        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
-                .thenReturn(new HashSet<>(Arrays.asList(classElement)));
+        doReturn(new HashSet<>(Arrays.asList(classElement))).when(roundEnv)
+                .getElementsAnnotatedWith(any(Class.class));
 
         Name mockedName = mock(Name.class);
         when(mockedName.toString())
@@ -172,8 +172,8 @@ public class CommandAnnotationProcessorTest {
         annotation = CommandAnnotationExample2.class.getAnnotation(Command.class);
         doReturn(annotation).when(classElement2).getAnnotation(Command.class);
 
-        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
-                .thenReturn(new HashSet<>(Arrays.asList(classElement1, classElement2)));
+        doReturn(new HashSet<>(Arrays.asList(classElement1, classElement2))).when(roundEnv)
+                .getElementsAnnotatedWith(any(Class.class));
 
         Name mockedName1 = mock(Name.class);
         when(mockedName1.toString())
