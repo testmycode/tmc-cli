@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +16,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,19 +124,19 @@ public class CommandAnnotationProcessorTest {
     public void warnsAboutInvalidElementWithCommandAnnotation() {
         final Element classElement = mock(Element.class);
         when(classElement.getKind()).thenReturn(ElementKind.FIELD);
-        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
-                .thenReturn(new HashSet<Element>(Arrays.asList(classElement)));
+        doReturn(new HashSet<>(Arrays.asList(classElement))).when(roundEnv)
+                .getElementsAnnotatedWith(Command.class);
 
-        Set annotations = new HashSet<Element>();
+        Set<TypeElement> annotations = new HashSet<>();
         assertFalse(processor.process(annotations, roundEnv));
     }
 
     @Test
     public void worksWithoutCommands() {
-        when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
-                .thenReturn(new HashSet<>(Arrays.asList()));
+        doReturn(new HashSet<>(Arrays.asList())).when(roundEnv)
+                .getElementsAnnotatedWith((Class<Annotation>)any(Class.class));
 
-        Set annotations = new HashSet<>();
+        Set<TypeElement> annotations = new HashSet<>();
         assertTrue(processor.process(annotations, roundEnv));
         assertFalse(stringWriter.toString().contains(".class"));
     }
@@ -144,7 +146,7 @@ public class CommandAnnotationProcessorTest {
         final Element classElement = mock(TypeElement.class);
         when(classElement.getKind()).thenReturn(ElementKind.CLASS);
         Command annotation = CommandAnnotationExample1.class.getAnnotation(Command.class);
-        when(classElement.getAnnotation(Command.class)).thenReturn(annotation);
+        doReturn(annotation).when(classElement).getAnnotation(Command.class);
         when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
                 .thenReturn(new HashSet<>(Arrays.asList(classElement)));
 
@@ -154,7 +156,7 @@ public class CommandAnnotationProcessorTest {
         when(mockedElementUtils.getBinaryName((TypeElement) classElement))
                 .thenReturn(mockedName);
 
-        Set annotations = new HashSet<>();
+        Set<TypeElement> annotations = new HashSet<>();
         assertTrue(processor.process(annotations, roundEnv));
         assertTrue(stringWriter.toString().contains("TestTest.class"));
     }
@@ -166,9 +168,9 @@ public class CommandAnnotationProcessorTest {
         when(classElement1.getKind()).thenReturn(ElementKind.CLASS);
         when(classElement2.getKind()).thenReturn(ElementKind.CLASS);
         Command annotation = CommandAnnotationExample1.class.getAnnotation(Command.class);
-        when(classElement1.getAnnotation(Command.class)).thenReturn(annotation);
+        doReturn(annotation).when(classElement1).getAnnotation(Command.class);
         annotation = CommandAnnotationExample2.class.getAnnotation(Command.class);
-        when(classElement2.getAnnotation(Command.class)).thenReturn(annotation);
+        doReturn(annotation).when(classElement2).getAnnotation(Command.class);
 
         when(roundEnv.getElementsAnnotatedWith(any(Class.class)))
                 .thenReturn(new HashSet<>(Arrays.asList(classElement1, classElement2)));
@@ -185,7 +187,7 @@ public class CommandAnnotationProcessorTest {
         when(mockedElementUtils.getBinaryName((TypeElement) classElement2))
                 .thenReturn(mockedName2);
 
-        Set annotations = new HashSet<>();
+        Set<TypeElement> annotations = new HashSet<>();
         assertTrue(processor.process(annotations, roundEnv));
         assertTrue(stringWriter.toString().contains("(\"commmand1\", TestTest1.class)"));
         assertTrue(stringWriter.toString().contains("(\"commmand2\", TestTest2.class)"));
