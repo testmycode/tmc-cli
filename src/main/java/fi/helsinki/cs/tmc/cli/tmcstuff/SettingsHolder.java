@@ -1,13 +1,14 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * This is a class for storing all different login settings as a single array.
  */
 public class SettingsHolder {
-    private ArrayList<Settings> settingsArray;
+    private List<Settings> settingsArray;
 
     public SettingsHolder() {
         this.settingsArray = new ArrayList<>();
@@ -19,6 +20,10 @@ public class SettingsHolder {
             return this.settingsArray.get(0);
         }
         return null;
+    }
+
+    public List<Settings> getSettingsList() {
+        return Collections.unmodifiableList(this.settingsArray);
     }
 
     public Settings getSettings(String username, String server) {
@@ -64,7 +69,7 @@ public class SettingsHolder {
     }
 
     public void deleteAllSettings() {
-        this.settingsArray = new ArrayList<Settings>();
+        this.settingsArray = new ArrayList<>();
     }
 
     public int settingsCount() {

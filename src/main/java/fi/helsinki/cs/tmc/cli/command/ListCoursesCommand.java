@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import java.util.Iterator;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -18,6 +19,7 @@ import java.util.List;
  */
 @Command(name = "courses", desc = "List the available courses")
 public class ListCoursesCommand extends AbstractCommand {
+    Io io;
 
     @Override
     public void getOptions(Options options) {
@@ -29,6 +31,17 @@ public class ListCoursesCommand extends AbstractCommand {
         if (core == null) {
             return;
         }
+
+        Iterator<TmcCore> coreIterator = getApp().tmcCoreListIterator();
+        while (coreIterator.hasNext()) {
+            Object next = coreIterator.next();
+
+            printCourses(core);
+        }
+    }
+
+    private void printCourses(TmcCore core) {
+        io.println("Fetching info from X server.");
         List<Course> courses = TmcUtil.listCourses(core);
         if (courses.isEmpty()) {
             io.println("No courses found on this server.");
@@ -39,6 +52,5 @@ public class ListCoursesCommand extends AbstractCommand {
             io.println(course.getName());
         }
         io.println("Found " + courses.size() + " courses on this server.");
-        
     }
 }

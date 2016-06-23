@@ -19,12 +19,16 @@ public class Settings implements TmcSettings {
     private transient Path workingDirectory;
 
     public Settings(String serverAddress, String username, String password) {
-        this.serverAddress = serverAddress;
-        this.username = username;
-        this.password = password;
+        setUserInfo(serverAddress, username, password);
     }
     
     public Settings() {
+    }
+
+    public final void setUserInfo(String serverAddress, String username, String password) {
+        this.serverAddress = serverAddress;
+        this.username = username;
+        this.password = password;
     }
 
     @Override

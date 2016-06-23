@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -209,6 +210,36 @@ public class Application {
             createTmcCore(settings);
         }
         return this.tmcCore;
+    }
+
+    public Iterator<TmcCore> tmcCoreListIterator() {
+        final List<Settings> list = SettingsIo.getSettingsList();
+        TmcCore core = getTmcCore();
+
+        return new Iterator() {
+            private int index = 0;
+            @Override
+            public boolean hasNext() {
+                return index < list.size() - 1;
+            }
+
+            @Override
+            public TmcCore next() {
+                Settings newSettings = new Settings();
+                if(hasNext()) {
+                    settings.setUserInfo(newSettings.getServerAddress(),
+                            newSettings.getUsername(),
+                            newSettings.getPassword());
+                    index++;
+                }
+                return core;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
     }
 
     public void setSettings(Settings settings) {
