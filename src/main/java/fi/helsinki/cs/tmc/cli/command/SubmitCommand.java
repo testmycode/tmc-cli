@@ -137,7 +137,7 @@ public class SubmitCommand extends AbstractCommand {
 
         Course updatedCourse = TmcUtil.findCourse(core, courseInfo.getCourseName());
         if (updatedCourse == null) {
-            io.println("Failed to update .tmc.json file for course " + courseInfo.getCourseName());
+            io.println("Failed to update config file for course " + courseInfo.getCourseName());
             return;
         }
 
@@ -145,7 +145,7 @@ public class SubmitCommand extends AbstractCommand {
             Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
             if (updatedEx == null) {
                 // Does this reaaally ever happen?
-                io.println("Failed to update .tmc.json file for exercise " + submitted.getName()
+                io.println("Failed to update config file for exercise " + submitted.getName()
                         + ". The exercise doesn't exist in server anymore.");
                 continue;
             }

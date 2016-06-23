@@ -76,7 +76,7 @@ public class UpdateCommand extends AbstractCommand {
         }
 
         if (!exerciseUpdater.updateCourseJson(info, configFile)) {
-            io.println("Failed to update course info");
+            io.println("Failed to update course config file");
         }
     }
 
