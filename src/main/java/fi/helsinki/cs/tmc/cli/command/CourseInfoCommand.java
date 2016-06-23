@@ -26,67 +26,92 @@ import java.util.List;
 public class CourseInfoCommand extends AbstractCommand {
     private Course course;
     private Exercise exercise;
+    private CourseInfo info;
+    private WorkDir workDir;
     private Io io;
 
     @Override
     public void getOptions(Options options) {
-        options.addOption("a", false, "Show all info for a specific course");
+        options.addOption("a", false, "Show all information for a specific course");
+        options.addOption("i", false, "Get the information from the server");
     }
 
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
+        workDir = getApp().getWorkDir();
+
+        if (!args.hasOption("i")) {
+            printLocalCourseOrExercise(args);
+            return;
+        }
+
+        String[] stringArgs = args.getArgs();
+        if (stringArgs.length == 0) {
+            io.println("You must give a course as a parameter.");
+            return;
+        }
+
         TmcCore core = getApp().getTmcCore();
         if (core == null) {
             return;
         }
-
-        WorkDir workDir = getApp().getWorkDir();
-        String[] stringArgs = args.getArgs();
-        if (stringArgs.length == 0 && workDir.getConfigFile() == null) {
-            io.println("You must give the course name as a parameter.");
-            return;
-        }
-
-        // if in course directory
-        if (workDir.getConfigFile() != null) {
-            CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
-            course = info.getCourse();
-
-            // if in exercise directory and no parameters given, print info for that exercise.
-            // else if exercise or course name given as a parameter, check which one it is and print info for that
-            if (workDir.getExerciseNames().size() == 1 && stringArgs.length == 0) {
-                String currentExercise = workDir.getExerciseNames().get(0);
-                exercise = info.getExercise(currentExercise);
-                printOneExercise(args.hasOption("a"));
-                return;
-
-            } else if (stringArgs.length != 0) {
-                if (info.getExercise(stringArgs[0]) != null) {
-                    exercise = info.getExercise(stringArgs[0]);
-                    printOneExercise(args.hasOption("a"));
-                    return;
-
-                } else {
-                    course = TmcUtil.findCourse(core, stringArgs[0]);
-                    if (course != null) {
-                        printCourse(args.hasOption("a"));
-                    } else {
-                        io.println("No such course or exercise.");
-                    }
-                    return;
-                }
-            }
-            printCourse(args.hasOption("a"));
-            return;
-        }
-
         course = TmcUtil.findCourse(core, stringArgs[0]);
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
             return;
         }
         printCourse(args.hasOption("a"));
+    }
+
+    private void printLocalCourseOrExercise(CommandLine args) {
+        if (workDir.getConfigFile() != null) {
+            info = CourseInfoIo.load(workDir.getConfigFile());
+            course = info.getCourse();
+            printCourseOrExercise(args);
+        } else {
+            this.io.println("You have to be in a course directory"
+                    + " or use the -i option with the course name "
+                    + "to get the information from the server.");
+        }
+    }
+
+    private void printCourseOrExercise(CommandLine args) {
+        String[] stringArgs = args.getArgs();
+
+        // if in exercise directory and no parameters given, print info for that exercise.
+        if (workDir.getExerciseNames().size() == 1 && stringArgs.length == 0) {
+            String currentExercise = workDir.getExerciseNames().get(0);
+            exercise = info.getExercise(currentExercise);
+            printOneExercise(args.hasOption("a"));
+            return;
+        }
+
+        if (stringArgs.length != 0) {
+            printCourseOrExerciseFromParameters(args);
+            return;
+        }
+        printCourse(args.hasOption("a"));
+    }
+
+    private void printCourseOrExerciseFromParameters(CommandLine args) {
+        String[] stringArgs = args.getArgs();
+        // if parameter is given, check if it is an exercise or a course. If neither, print an error message.
+        if (info.getExercise(stringArgs[0]) != null) {
+            exercise = info.getExercise(stringArgs[0]);
+            printOneExercise(args.hasOption("a"));
+            return;
+
+        }
+        course = info.getCourse();
+        if (course != null && course.getName().equals(stringArgs[0])) {
+            printCourse(args.hasOption("a"));
+        } else {
+            this.io.println("Wrong course directory."
+                    + " Navigate to the correct course directory or"
+                    + " use the -i option with the course name"
+                    + " to get the information from the server.");
+        }
     }
 
     private void printCourse(boolean showAll) {
