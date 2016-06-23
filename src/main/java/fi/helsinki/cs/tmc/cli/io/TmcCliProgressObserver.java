@@ -3,9 +3,6 @@ package fi.helsinki.cs.tmc.cli.io;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
-/**
- * Created by jclakkis on 27.5.2016.
- */
 public class TmcCliProgressObserver extends ProgressObserver {
     protected static final char PIPCHAR = '█';
     protected static final char EMPTYCHAR = '░';

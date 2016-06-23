@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 @Command(name = "prop", desc = "Set/unset TMC-CLI properties")
 public class PropertiesCommand extends AbstractCommand {
