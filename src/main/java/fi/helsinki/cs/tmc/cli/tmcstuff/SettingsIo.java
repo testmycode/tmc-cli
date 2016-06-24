@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 
 import com.google.gson.Gson;
 
@@ -42,7 +42,7 @@ public class SettingsIo {
      */
     public static Path getDefaultConfigRoot() {
         Path configPath;
-        if (Application.isWindows()) {
+        if (EnvironmentUtil.isWindows()) {
             String appdata = System.getenv("APPDATA");
             if (appdata == null) {
                 configPath = Paths.get(System.getProperty("user.home"));

@@ -2,8 +2,6 @@ package fi.helsinki.cs.tmc.cli.io;
 
 import static org.junit.Assert.assertEquals;
 
-import fi.helsinki.cs.tmc.cli.Application;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +11,7 @@ public class ColorTest {
 
     @Before
     public void setup() {
-        this.noColor = Application.isWindows();
+        this.noColor = EnvironmentUtil.isWindows();
     }
 
     @Test

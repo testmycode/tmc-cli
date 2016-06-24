@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
@@ -25,8 +26,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -34,12 +33,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * The application class for the program.
- * TODO: we should move all the command line related code to
- * somewhere else from here.
  */
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
@@ -127,7 +123,7 @@ public class Application {
             return null;
         }
         if (line.hasOption("v")) {
-            io.println("TMC-CLI version " + getVersion());
+            io.println("TMC-CLI version " + EnvironmentUtil.getVersion());
             return null;
         }
         return subArgs.toArray(new String[subArgs.size()]);
@@ -214,24 +210,6 @@ public class Application {
         app.run(args);
     }
 
-    public static String getVersion() {
-        String path = "/maven.prop";
-        InputStream stream = Application.class.getResourceAsStream(path);
-        if (stream == null) {
-            return "n/a";
-        }
-
-        Properties props = new Properties();
-        try {
-            props.load(stream);
-            stream.close();
-            return (String) props.get("version");
-        } catch (IOException e) {
-            logger.warn("Failed to get version", e);
-            return "n/a";
-        }
-    }
-
     public WorkDir getWorkDir() {
         return this.workDir;
     }
@@ -252,24 +230,6 @@ public class Application {
     public Boolean saveProperties() {
         // Saves properties to the global configuration file in .config/tmc-cli/
         return SettingsIo.saveProperties(properties);
-    }
-
-    public static boolean isWindows() {
-        String os = System.getProperty("os.name").toLowerCase();
-        return os.contains("windows");
-    }
-
-    public static int getTerminalWidth() {
-        String colEnv = System.getenv("COLUMNS");
-        if (colEnv != null && !colEnv.equals("")) {
-            // Determine the terminal width - this won't work on Windows
-            // Let's just hope our Windows users won't narrow their command prompt
-            // We'll also enforce a minimum size of 20 columns
-
-            return Math.max(Integer.parseInt(colEnv), 20);
-        } else {
-            return 70;
-        }
     }
 
     public CourseInfo createCourseInfo(Course course) {
@@ -297,7 +257,8 @@ public class Application {
             return;
         }
 
-        TmcCliUpdater update = new TmcCliUpdater(io, getVersion(), isWindows());
+        TmcCliUpdater update = new TmcCliUpdater(io, EnvironmentUtil.getVersion(),
+                EnvironmentUtil.isWindows());
         update.run();
 
         long timestamp = now.getTime();
@@ -305,11 +266,11 @@ public class Application {
         saveProperties();
     }
 
-    public Color.AnsiColor getColor(String context) {
-        String propertyValue = this.properties.get(context);
+    public Color.AnsiColor getColor(String propertyName) {
+        String propertyValue = this.properties.get(propertyName);
         Color.AnsiColor color = Color.getColor(propertyValue);
         if (color == null) {
-            switch (context) {
+            switch (propertyName) {
                 case "progressbar-left":    return Color.AnsiColor.ANSI_CYAN;
                 case "progressbar-right":   return Color.AnsiColor.ANSI_CYAN;
                 case "testresults-left":    return Color.AnsiColor.ANSI_GREEN;

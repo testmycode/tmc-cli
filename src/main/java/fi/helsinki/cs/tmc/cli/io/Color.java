@@ -1,7 +1,5 @@
 package fi.helsinki.cs.tmc.cli.io;
 
-import fi.helsinki.cs.tmc.cli.Application;
-
 public class Color {
 
     public enum AnsiColor {
@@ -28,7 +26,7 @@ public class Color {
     }
 
     public static String colorString(String string, AnsiColor color) {
-        if (!Application.isWindows() && color != AnsiColor.ANSI_NONE) {
+        if (!EnvironmentUtil.isWindows() && color != AnsiColor.ANSI_NONE) {
             return color + string + AnsiColor.ANSI_RESET;
         } else {
             return string;

@@ -16,7 +16,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Application.class)
+@PrepareForTest(EnvironmentUtil.class)
 public class TmcCliProgressObserverTest {
     private TestIo testIo;
 
@@ -24,8 +24,8 @@ public class TmcCliProgressObserverTest {
     public void setup() {
         this.testIo = new TestIo();
         this.testIo = spy(testIo);
-        PowerMockito.mockStatic(Application.class);
-        when(Application.getTerminalWidth()).thenReturn(50);
+        PowerMockito.mockStatic(EnvironmentUtil.class);
+        when(EnvironmentUtil.getTerminalWidth()).thenReturn(50);
     }
 
     @Test
