@@ -131,6 +131,7 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithoutArguments() {
+        io.addConfirmationPrompt(true);
         app.run(new String[] {"paste", "paste-exercise"});
         PowerMockito.verifyStatic(times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
@@ -145,6 +146,7 @@ public class PasteCommandTest {
                 io.out().contains("Paste sent for exercise paste-exercise"));
         assertTrue("Prints the paste URI",
                 io.out().contains("https://tmc.test.url/"));
+        io.assertAllPromptsUsed();
     }
 
     @Test
@@ -204,6 +206,7 @@ public class PasteCommandTest {
 
     @Test
     public void handlesExceptionWhenCallableFails() {
+        io.addConfirmationPrompt(true);
         appFail.run(new String[] {"paste", "paste-exercise"});
         verifyStatic(Mockito.times(1));
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
@@ -219,6 +222,7 @@ public class PasteCommandTest {
 
         assertTrue("Prints to IO failing to connect",
                 io.out().contains("Unable to connect to server"));
+        io.assertAllPromptsUsed();
     }
 
     @Test

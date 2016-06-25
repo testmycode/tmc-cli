@@ -110,7 +110,7 @@ public class LoginCommandTest {
         String[] args = {"login", "-s", SERVER, "-p", PASSWORD};
         io.addLinePrompt(USERNAME);
         app.run(args);
-        assertTrue(io.allPromptsUsed());
+        io.assertAllPromptsUsed();
     }
 
     @Test
@@ -120,7 +120,7 @@ public class LoginCommandTest {
         String[] args = {"login", "-s", SERVER, "-u", USERNAME};
         io.addPasswordPrompt(PASSWORD);
         app.run(args);
-        assertTrue(io.allPromptsUsed());
+        io.assertAllPromptsUsed();
     }
     
     @Test
@@ -130,7 +130,7 @@ public class LoginCommandTest {
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         io.addLinePrompt(SERVER);
         app.run(args);
-        assertTrue(io.allPromptsUsed());
+        io.assertAllPromptsUsed();
     }
 
     private static Callable<List<Course>> successfulCallable() {

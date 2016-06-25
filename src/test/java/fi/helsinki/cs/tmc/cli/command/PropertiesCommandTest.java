@@ -60,7 +60,7 @@ public class PropertiesCommandTest {
         app.run(new String[] {"prop", "cool", "yeah", "hello", "world"});
         assertEquals("yeah", props.get("cool"));
         assertEquals("world", props.get("hello"));
-        assertTrue("Asked for confirmation", io.allPromptsUsed());
+        io.assertAllPromptsUsed();
     }
 
     @Test
@@ -81,6 +81,6 @@ public class PropertiesCommandTest {
         assertTrue("Is removed from props", !props.containsValue("smalls"));
         assertTrue("Is removed from props", !props.containsKey("snoop"));
         assertTrue("Is removed from props", !props.containsValue("dogg"));
-        assertTrue("Asked for confirmation", io.allPromptsUsed());
+        io.assertAllPromptsUsed();
     }
 }

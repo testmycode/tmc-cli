@@ -54,10 +54,6 @@ public class TmcCliUpdaterTest {
         io = new TestIo();
     }
 
-    @After
-    public void tearDown() {
-    }
-
     @Test
     public void stub() {
         assertTrue(true);
@@ -102,6 +98,7 @@ public class TmcCliUpdaterTest {
         updater.run();
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+        io.assertAllPromptsUsed();
     }
 
     @Test
@@ -117,6 +114,7 @@ public class TmcCliUpdaterTest {
         assertThat(io.out(), containsString("Downloading..."));
         verify(updater, times(1)).fetchTmcCliBinary(any(String.class), any(File.class));
         verify(updater, times(1)).runNewTmcCliBinary(any(String.class));
+        io.assertAllPromptsUsed();
     }
 
     // Expected to fail once autoupdater is properly implemented on Windows.
