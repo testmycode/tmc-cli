@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
-import java.util.logging.Level;
 
 public class TmcCliUpdater {
 
@@ -67,8 +65,7 @@ public class TmcCliUpdater {
             return;
         }
 
-        String answer = io.readLine("Do you want to download it? (y/N): ");
-        if (!"y".equalsIgnoreCase(answer) && !"yes".equalsIgnoreCase(answer)) {
+        if (! io.readConfirmation("Do you want to download it?", true)) {
             return;
         }
 

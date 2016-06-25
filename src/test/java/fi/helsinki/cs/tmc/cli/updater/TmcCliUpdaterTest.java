@@ -91,7 +91,7 @@ public class TmcCliUpdaterTest {
 
     @Test
     public void doNothingIfUserDoesntWantToUpdate() {
-        io.addLinePrompt("n");
+        io.addConfirmationPrompt(false);
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
         doReturn(latestJson).when(updater).fetchLatestReleaseJson();
         //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
@@ -103,7 +103,7 @@ public class TmcCliUpdaterTest {
 
     @Test
     public void downloadsAndRunsNewBinaryIfOk() {
-        io.addLinePrompt("yes");
+        io.addConfirmationPrompt(true);
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
         doReturn(latestJson).when(updater).fetchLatestReleaseJson();
         //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
