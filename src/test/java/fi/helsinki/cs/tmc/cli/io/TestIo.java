@@ -1,14 +1,19 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
+
 import java.util.LinkedList;
 
 // This class is used to test program classes
 public class TestIo extends Io {
 
-    private StringBuilder printedText;
-    private LinkedList<String> linePrompts;
-    private LinkedList<Boolean> confirmationPrompts;
-    private LinkedList<String> passwordPrompts;
+    private final StringBuilder printedText;
+    private final LinkedList<String> linePrompts;
+    private final LinkedList<Boolean> confirmationPrompts;
+    private final LinkedList<String> passwordPrompts;
 
     public TestIo() {
         printedText = new StringBuilder();
@@ -68,4 +73,19 @@ public class TestIo extends Io {
         return passwordPrompts.pop();
     }
 
+    public void assertContains(String contains) {
+        assertThat(out(), containsString(contains));
+    }
+
+    public void assertNotContains(String contains) {
+        assertThat(out(), not(containsString(contains)));
+    }
+
+    public void assertEquals(String string) {
+        assertThat(out(), is(string));
+    }
+
+    public void assertNotEquals(String string) {
+        assertThat(out(), is(not(string)));
+    }
 }
