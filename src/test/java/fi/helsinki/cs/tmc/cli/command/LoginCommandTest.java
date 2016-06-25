@@ -1,8 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
@@ -64,7 +62,7 @@ public class LoginCommandTest {
         when(SettingsIo.save(any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
-        assertThat(io.out(), containsString("Login successful."));
+        io.assertContains("Login successful.");
     }
     
     @Test
@@ -74,7 +72,7 @@ public class LoginCommandTest {
         when(SettingsIo.save(any(Settings.class))).thenReturn(false);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", "WrongPassword"};
         app.run(args);
-        assertThat(io.out(), containsString("Login failed."));
+        io.assertContains("Login failed.");
     }
 
     @Test
@@ -88,7 +86,7 @@ public class LoginCommandTest {
         when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable401);
         String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
         app.run(args);
-        assertThat(io.out(), containsString("Incorrect username or password."));
+        io.assertContains("Incorrect username or password.");
     }
     
     @Test
@@ -102,7 +100,7 @@ public class LoginCommandTest {
         when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callableEx);
         String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
         app.run(args);
-        assertThat(io.out(), containsString("Unable to connect to server"));
+        io.assertContains("Unable to connect to server");
     }
 
     @Test

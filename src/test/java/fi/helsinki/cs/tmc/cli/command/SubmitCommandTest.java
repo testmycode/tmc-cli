@@ -2,9 +2,6 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -109,7 +106,7 @@ public class SubmitCommandTest {
     public void testSuccessInExerciseRoot() {
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});
-        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+        io.assertContains("Submitting: " + EXERCISE1_NAME);
 
         verifyStatic(times(1));
         TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
@@ -119,7 +116,7 @@ public class SubmitCommandTest {
     public void canSubmitFromCourseDirIfExerciseNameIsGiven() {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", EXERCISE1_NAME});
-        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+        io.assertContains("Submitting: " + EXERCISE1_NAME);
 
         verifyStatic(times(1));
         TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
@@ -129,8 +126,8 @@ public class SubmitCommandTest {
     public void canSubmitMultipleExercisesIfNamesAreGiven() {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", EXERCISE1_NAME, EXERCISE2_NAME});
-        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
-        assertThat(io.out(), containsString("Submitting: " + EXERCISE2_NAME));
+        io.assertContains("Submitting: " + EXERCISE1_NAME);
+        io.assertContains("Submitting: " + EXERCISE2_NAME);
 
         verifyStatic(times(2));
         TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
@@ -140,8 +137,8 @@ public class SubmitCommandTest {
     public void submitsAllExercisesFromCourseDirIfNoNameIsGiven() {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit"});
-        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
-        assertThat(io.out(), containsString("Submitting: " + EXERCISE2_NAME));
+        io.assertContains("Submitting: " + EXERCISE1_NAME);
+        io.assertContains("Submitting: " + EXERCISE2_NAME);
         assertEquals(2, countSubstring("Submitting: ", io.out()));
 
         verifyStatic(times(2));
@@ -166,7 +163,7 @@ public class SubmitCommandTest {
     public void abortIfInvalidCmdLineArgumentIsGiven() {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", EXERCISE1_NAME, "-foo"});
-        assertThat(io.out(), containsString("Invalid command line argument"));
+        io.assertContains("Invalid command line argument");
 
         verifyStatic(times(0));
         TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
@@ -176,7 +173,7 @@ public class SubmitCommandTest {
     public void abortIfInvalidExerciseNameIsGivenAsArgument() {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         app.run(new String[]{"submit", "foo"});
-        assertThat(io.out(), containsString("Error: foo is not a valid exercise."));
+        io.assertContains("Error: foo is not a valid exercise.");
         assertEquals(0, countSubstring("Submitting: ", io.out()));
     }
 
@@ -184,7 +181,7 @@ public class SubmitCommandTest {
     public void abortGracefullyIfNotInCourseDir() {
         app.setWorkdir(new WorkDir(pathToNonCourseDir));
         app.run(new String[]{"submit"});
-        assertThat(io.out(), containsString("No exercises specified."));
+        io.assertContains("No exercises specified.");
 
         verifyStatic(times(0));
         TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
@@ -208,7 +205,7 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyExerciseSrc));
         app.run(new String[]{"submit"});
 
-        assertThat(io.out(), containsString("Submitting: " + EXERCISE1_NAME));
+        io.assertContains("Submitting: " + EXERCISE1_NAME);
         verifyStatic(times(1));
         TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class));
     }
@@ -218,9 +215,9 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});
 
-        assertFalse(io.out().contains("available"));
-        assertFalse(io.out().contains("been changed on TMC server"));
-        assertFalse(io.out().contains("Use 'tmc update' to download"));
+        io.assertNotContains("available");
+        io.assertNotContains("been changed on TMC server");
+        io.assertNotContains("Use 'tmc update' to download");
     }
 
     @Test
@@ -248,9 +245,9 @@ public class SubmitCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});
 
-        assertThat(io.out(), containsString("1 new exercise available"));
-        assertThat(io.out(), containsString("1 exercise has been changed on TMC server"));
-        assertThat(io.out(), containsString("Use 'tmc update' to download them"));
+        io.assertContains("1 new exercise available");
+        io.assertContains("1 exercise has been changed on TMC server");
+        io.assertContains("Use 'tmc update' to download them");
     }
 
     private static int countSubstring(String subStr, String str) {

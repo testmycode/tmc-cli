@@ -1,7 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertTrue;
-
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
@@ -12,12 +10,12 @@ import org.junit.Test;
 public class HelpCommandTest {
 
     Application app;
-    TestIo testIo;
+    TestIo io;
 
     @Before
     public void setUp() {
-        testIo = new TestIo();
-        app = new Application(testIo);
+        io = new TestIo();
+        app = new Application(io);
         app.createTmcCore(new Settings());
     }
 
@@ -25,6 +23,6 @@ public class HelpCommandTest {
     public void helpListsAllCommands() {
         String[] args = {"help"};
         app.run(args);
-        assertTrue(testIo.out().contains("help"));
+        io.assertContains("help");
     }
 }

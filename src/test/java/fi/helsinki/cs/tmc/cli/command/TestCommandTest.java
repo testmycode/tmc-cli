@@ -1,7 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertTrue;
-
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
@@ -12,12 +10,12 @@ import org.junit.Test;
 public class TestCommandTest {
 
     Application app;
-    TestIo testIo;
+    TestIo io;
 
     @Before
     public void setUp() {
-        testIo = new TestIo();
-        app = new Application(testIo);
+        io = new TestIo();
+        app = new Application(io);
         app.createTmcCore(new Settings());
     }
 
@@ -25,13 +23,13 @@ public class TestCommandTest {
     public void runWorksRightWithoutOption() {
         String[] args = {"easter-egg"};
         app.run(args);
-        assertTrue(testIo.out().contains("Let's run easter egg."));
+        io.assertContains("Let's run easter egg.");
     }
     
     @Test
     public void runWorksRightWithOption() {
         String[] args = {"easter-egg", "-a"};
         app.run(args);
-        assertTrue(testIo.out().contains("Let's run easter egg with -a"));
+        io.assertContains("Let's run easter egg with -a");
     }
 }

@@ -1,9 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static junit.framework.Assert.assertNotNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -46,8 +43,8 @@ public class UpdateCommandTest {
     static Path pathToDummyExerciseSrc;
     static Path pathToNonCourseDir;
 
-    TestIo io;
     Application app;
+    TestIo io;
     TmcCore mockCore;
     ExerciseUpdater exerciseUpdater;
 
@@ -86,14 +83,14 @@ public class UpdateCommandTest {
 
         String[] args = {"update"};
         app.run(args);
-        assertFalse(io.out().contains("Not a course directory"));
+        io.assertNotContains("Not a course directory");
     }
 
     @Test
     public void printsAnErrorMessageIfGivenCourseName() {
         String[] args = {"update", "course"};
         app.run(args);
-        assertThat(io.out(), containsString("Use in the course directory"));
+        io.assertContains("Use in the course directory");
     }
 
     @Test
@@ -101,7 +98,7 @@ public class UpdateCommandTest {
         app.setWorkdir(new WorkDir(pathToNonCourseDir));
         String[] args = {"update"};
         app.run(args);
-        assertThat(io.out(), containsString("Not a course directory"));
+        io.assertContains("Not a course directory");
     }
 
     @Test
@@ -112,7 +109,7 @@ public class UpdateCommandTest {
         String[] args = {"update"};
         app.run(args);
 
-        assertThat(io.out(), containsString("All exercises are up-to-date"));
+        io.assertContains("All exercises are up-to-date");
     }
 
     @Test
@@ -143,11 +140,11 @@ public class UpdateCommandTest {
         String[] args = {"update"};
         app.run(args);
 
-        assertThat(io.out(), containsString("New exercises:"));
-        assertThat(io.out(), containsString(newExerciseName));
+        io.assertContains("New exercises:");
+        io.assertContains(newExerciseName);
 
-        assertThat(io.out(), containsString("Modified exercises:"));
-        assertThat(io.out(), containsString(changedExerciseName));
+        io.assertContains("Modified exercises:");
+        io.assertContains(changedExerciseName);
 
         verify(exerciseUpdater).updateCourseJson(any(CourseInfo.class), any(Path.class));
     }

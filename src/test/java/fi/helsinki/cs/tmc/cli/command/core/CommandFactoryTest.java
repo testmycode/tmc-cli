@@ -5,9 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
-import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
@@ -21,10 +18,10 @@ import org.junit.rules.ExpectedException;
 
 public class CommandFactoryTest {
 
+    Application app;
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
-
-    Application app;
 
     @Before
     public void setUp() {

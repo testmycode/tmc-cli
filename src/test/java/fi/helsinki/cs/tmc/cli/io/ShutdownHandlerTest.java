@@ -34,7 +34,7 @@ public class ShutdownHandlerTest {
     @Test
     public void printsAnsiResetAtRun() {
         shutdownHandler.run();
-        assertEquals(Color.AnsiColor.ANSI_RESET.toString() + "\n", io.out());
+        io.assertEquals(Color.AnsiColor.ANSI_RESET.toString() + "\n");
     }
 
     @Test

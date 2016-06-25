@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -45,7 +44,7 @@ public class PasteCommandTest {
 
     Application app;
     Application appFail;
-    TestIo testIo;
+    TestIo io;
     TmcCore mockCore;
     TmcCore mockCoreFail;
     ArrayList<String> exerciseNames;
@@ -63,7 +62,7 @@ public class PasteCommandTest {
     @Before
     public void setup() {
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("paste-test");
-        testIo = new TestIo();
+        io = new TestIo();
 
         workDir = mock(WorkDir.class);
         when(workDir.getCourseDirectory()).thenReturn(tempDir);
@@ -92,12 +91,12 @@ public class PasteCommandTest {
                 any(ProgressObserver.class), any(Exercise.class), anyString()))
                 .thenReturn(mockCallableFail);
 
-        app = new Application(testIo, workDir);
+        app = new Application(io, workDir);
 
         app = Mockito.spy(app);
         app.setTmcCore(mockCore);
 
-        appFail = new Application(testIo, workDir);
+        appFail = new Application(io, workDir);
 
         appFail = Mockito.spy(appFail);
         appFail.setTmcCore(mockCoreFail);
@@ -122,12 +121,12 @@ public class PasteCommandTest {
 
     @Test
     public void failIfCoreIsNull() {
-        Application application = spy(new Application(testIo, workDir));
+        Application application = spy(new Application(io, workDir));
         doReturn(null).when(application).getTmcCore();
 
         String[] args = {"paste"};
         application.run(args);
-        assertFalse(testIo.out().contains("No exercise specified"));
+        io.assertNotContains("No exercise specified");
     }
 
     @Test
@@ -143,9 +142,9 @@ public class PasteCommandTest {
         }
 
         assertTrue("Prints to IO when successful",
-                testIo.out().contains("Paste sent for exercise paste-exercise"));
+                io.out().contains("Paste sent for exercise paste-exercise"));
         assertTrue("Prints the paste URI",
-                testIo.out().contains("https://tmc.test.url/"));
+                io.out().contains("https://tmc.test.url/"));
     }
 
     @Test
@@ -166,9 +165,9 @@ public class PasteCommandTest {
         }
 
         assertTrue("Prints to IO when successful",
-                testIo.out().contains("Paste sent for exercise paste-exercise"));
+                io.out().contains("Paste sent for exercise paste-exercise"));
         assertTrue("Prints the paste URI",
-                testIo.out().contains("https://tmc.test.url/"));
+                io.out().contains("https://tmc.test.url/"));
     }
 
     @Test
@@ -178,7 +177,7 @@ public class PasteCommandTest {
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         assertTrue("Prints to IO when failing to parse",
-                testIo.out().contains("Invalid"));
+                io.out().contains("Invalid"));
     }
 
     @Test
@@ -198,9 +197,9 @@ public class PasteCommandTest {
         }
 
         assertTrue("Prints to IO when successful",
-                testIo.out().contains("Paste sent for exercise paste-exercise"));
+                io.out().contains("Paste sent for exercise paste-exercise"));
         assertTrue("Prints the paste URI",
-                testIo.out().contains("https://tmc.test.url/"));
+                io.out().contains("https://tmc.test.url/"));
     }
 
     @Test
@@ -219,7 +218,7 @@ public class PasteCommandTest {
         }
 
         assertTrue("Prints to IO failing to connect",
-                testIo.out().contains("Unable to connect to server"));
+                io.out().contains("Unable to connect to server"));
     }
 
     @Test
@@ -239,6 +238,6 @@ public class PasteCommandTest {
         }
 
         assertTrue("Prints to IO when no exercise is found",
-                testIo.out().contains("No exercise specified"));
+                io.out().contains("No exercise specified"));
     }
 }

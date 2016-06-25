@@ -1,7 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
@@ -39,6 +37,6 @@ public class LogoutCommandTest {
         verifyStatic(times(1));
         SettingsIo.delete();
 
-        assertThat(io.out(), containsString("Logged out."));
+        io.assertContains("Logged out.");
     }
 }

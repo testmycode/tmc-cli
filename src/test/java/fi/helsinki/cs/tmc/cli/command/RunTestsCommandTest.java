@@ -1,8 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -94,7 +92,7 @@ public class RunTestsCommandTest {
         app.getWorkDir().setWorkdir(pathToDummyCourse);
         String[] args = {"test"};
         app.run(args);
-        assertFalse(io.out().contains("Testing:"));
+        io.assertNotContains("Testing:");
     }
 
     @Test
@@ -103,7 +101,7 @@ public class RunTestsCommandTest {
         app.setWorkdir(workDir);
         String[] args = {"test"};
         app.run(args);
-        assertTrue(io.out().contains("You have to be in a course directory"));
+        io.assertContains("You have to be in a course directory");
     }
 
     @Test
@@ -116,8 +114,8 @@ public class RunTestsCommandTest {
 
         String[] args = {"test"};
         app.run(args);
-        assertTrue(io.out().contains("Testing: " + EXERCISE1_NAME));
-        assertTrue(io.out().contains("Testing: " + EXERCISE2_NAME));
+        io.assertContains("Testing: " + EXERCISE1_NAME);
+        io.assertContains("Testing: " + EXERCISE2_NAME);
     }
 
     @Test
@@ -130,6 +128,6 @@ public class RunTestsCommandTest {
 
         String[] args = {"test", EXERCISE1_NAME};
         app.run(args);
-        assertTrue(io.out().contains("Testing: " + EXERCISE1_NAME));
+        io.assertContains("Testing: " + EXERCISE1_NAME);
     }
 }

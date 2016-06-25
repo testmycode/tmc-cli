@@ -16,14 +16,14 @@ import java.util.HashMap;
 
 public class PropertiesCommandTest {
 
-    TestIo testio;
     Application app;
+    TestIo io;
     HashMap<String, String> props;
 
     @Before
     public void setup() {
-        testio = new TestIo();
-        app = new Application(testio);
+        io = new TestIo();
+        app = new Application(io);
         app = Mockito.spy(app);
         when(app.saveProperties()).thenReturn(true);
         props = new HashMap<>();
@@ -35,16 +35,16 @@ public class PropertiesCommandTest {
         props.put("hello", "world");
         props.put("toilet", "wonderland");
         app.run(new String[] {"prop"});
-        assertTrue("Contains props", testio.out().contains("hello"));
-        assertTrue("Contains props", testio.out().contains("world"));
-        assertTrue("Contains props", testio.out().contains("toilet"));
-        assertTrue("Contains props", testio.out().contains("wonderland"));
+        io.assertContains("hello");
+        io.assertContains("world");
+        io.assertContains("toilet");
+        io.assertContains("wonderland");
     }
 
     @Test
     public void failsCorrectlyWithUnevenArgs() {
         app.run(new String[] {"prop", "w"});
-        assertTrue("Prints an error message", testio.out().contains("Invalid argument count"));
+        io.assertContains("Invalid argument count");
     }
 
     @Test
@@ -56,11 +56,11 @@ public class PropertiesCommandTest {
 
     @Test
     public void setsMultiplePropsCorrectly() {
-        testio.addConfirmationPrompt(true);
+        io.addConfirmationPrompt(true);
         app.run(new String[] {"prop", "cool", "yeah", "hello", "world"});
         assertEquals("yeah", props.get("cool"));
         assertEquals("world", props.get("hello"));
-        assertTrue("Asked for confirmation", testio.allPromptsUsed());
+        assertTrue("Asked for confirmation", io.allPromptsUsed());
     }
 
     @Test
@@ -73,7 +73,7 @@ public class PropertiesCommandTest {
 
     @Test
     public void unsetsMultiplePropsCorrectly() {
-        testio.addConfirmationPrompt(true);
+        io.addConfirmationPrompt(true);
         props.put("biggie", "smalls");
         props.put("snoop", "dogg");
         app.run(new String[] {"prop", "-u", "biggie", "snoop"});
@@ -81,6 +81,6 @@ public class PropertiesCommandTest {
         assertTrue("Is removed from props", !props.containsValue("smalls"));
         assertTrue("Is removed from props", !props.containsKey("snoop"));
         assertTrue("Is removed from props", !props.containsValue("dogg"));
-        assertTrue("Asked for confirmation", testio.allPromptsUsed());
+        assertTrue("Asked for confirmation", io.allPromptsUsed());
     }
 }

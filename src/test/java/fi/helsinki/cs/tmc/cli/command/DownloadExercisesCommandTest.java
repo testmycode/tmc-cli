@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
@@ -40,7 +39,7 @@ import java.util.concurrent.Callable;
 public class DownloadExercisesCommandTest {
 
     Application app;
-    TestIo testIo;
+    TestIo io;
     TmcCore mockCore;
     Path tempDir;
 
@@ -49,8 +48,8 @@ public class DownloadExercisesCommandTest {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
         WorkDir workDir = new WorkDir();
         workDir.setWorkdir(tempDir);
-        testIo = new TestIo();
-        app = new Application(testIo, workDir);
+        io = new TestIo();
+        app = new Application(io, workDir);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
     }
@@ -70,14 +69,14 @@ public class DownloadExercisesCommandTest {
 
         String[] args = {"download", "foo"};
         app.run(args);
-        assertFalse(testIo.out().contains("Course doesn't exist"));
+        io.assertNotContains("Course doesn't exist");
     }
 
     @Test
     public void failIfCourseArgumentNotGiven() {
         String[] args = {"download"};
         app.run(args);
-        assertTrue(testIo.out().contains("You must give"));
+        io.assertContains("You must give");
     }
 
     @Test
@@ -92,7 +91,7 @@ public class DownloadExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"download", "foo"};
         app.run(args);
-        assertTrue(testIo.out().contains("Course doesn't exist"));
+        io.assertContains("Course doesn't exist");
     }
 
     @Test

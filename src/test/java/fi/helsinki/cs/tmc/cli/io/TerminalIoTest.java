@@ -11,11 +11,12 @@ import java.io.PrintStream;
 
 public class TerminalIoTest {
 
-    Io io = new TerminalIo();
+    Io io;
     OutputStream os;
 
     @Before
     public void setUp() {
+        io = new TerminalIo();
         os = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(os);
         System.setOut(ps);

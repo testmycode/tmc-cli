@@ -29,18 +29,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-
 public class TmcUtilTest {
 
-    static Path workDir;
     Application app;
-    TestIo testio;
+    TestIo io;
     TmcCore mockCore;
+    static Path workDir;
 
     @Before
     public void setUp() {
-        testio = new TestIo();
-        app = new Application(testio);
+        io = new TestIo();
+        app = new Application(io);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
 
@@ -121,7 +120,7 @@ public class TmcUtilTest {
         }).when(mockCore)
                 .downloadOrUpdateExercises(any(ProgressObserver.class), anyListOf(Exercise.class));
         List<Exercise> list = TmcUtil.downloadAllExercises(app.getTmcCore(), course,
-                new TmcCliProgressObserver(testio));
+                new TmcCliProgressObserver(io));
         for (Exercise exercise : list) {
             assertNotNull(TmcUtil.findExercise(course, exercise.getName()));
         }
@@ -146,7 +145,7 @@ public class TmcUtilTest {
         }).when(mockCore)
                 .downloadOrUpdateExercises(any(ProgressObserver.class), anyListOf(Exercise.class));
         List<Exercise> downloadList = TmcUtil.downloadExercises(app.getTmcCore(), list,
-                new TmcCliProgressObserver(testio));
+                new TmcCliProgressObserver(io));
         for (Exercise exercise : downloadList) {
             boolean found = false;
             for (Exercise exercise2 : list) {

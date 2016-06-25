@@ -1,9 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -80,7 +77,7 @@ public class ListExercisesCommandTest {
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
-        assertFalse(io.out().contains("Course 'foo' doesn't exist"));
+        io.assertNotContains("Course 'foo' doesn't exist");
     }
 
     @Test
@@ -88,7 +85,7 @@ public class ListExercisesCommandTest {
         app.setWorkdir(new WorkDir(pathToNonCourseDir));
         String[] args = {"exercises", "fooCourse", "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("You have to be in a course directory or use the -i"));
+        io.assertContains("You have to be in a course directory or use the -i");
     }
     
     @Test
@@ -96,7 +93,7 @@ public class ListExercisesCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"exercises", COURSE_NAME, "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("Deadline:"));
+        io.assertContains("Deadline:");
     }
     
     @Test
@@ -104,7 +101,7 @@ public class ListExercisesCommandTest {
         app.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"exercises", "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("Deadline:"));
+        io.assertContains("Deadline:");
     }
 
     @Test
@@ -119,7 +116,7 @@ public class ListExercisesCommandTest {
 
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("have any exercises"));
+        io.assertContains("have any exercises");
     }
 
     @Test
@@ -141,7 +138,7 @@ public class ListExercisesCommandTest {
 
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("hello-exerciseNames"));
+        io.assertContains("hello-exerciseNames");
     }
 
     @Test
@@ -149,7 +146,7 @@ public class ListExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(null);
         String[] args = {"exercises", "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("No course specified"));
+        io.assertContains("No course specified");
     }
 
     @Test
@@ -164,7 +161,7 @@ public class ListExercisesCommandTest {
 
         String[] args = {"exercises", "-n", "abc", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Course 'abc' doesn't exist"));
+        io.assertContains("Course 'abc' doesn't exist");
     }
 
     @Test
@@ -188,7 +185,7 @@ public class ListExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Requires review"));
+        io.assertContains("Requires review");
     }
 
     @Test
@@ -212,7 +209,7 @@ public class ListExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Completed"));
+        io.assertContains("Completed");
     }
 
     @Test
@@ -235,7 +232,7 @@ public class ListExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Completed"));
+        io.assertContains("Completed");
     }
 
     @Test
@@ -256,7 +253,7 @@ public class ListExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Not completed"));
+        io.assertContains("Not completed");
     }
 
     @Test
@@ -278,7 +275,7 @@ public class ListExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Attempted"));
+        io.assertContains("Attempted");
     }
 
     @Test
@@ -299,6 +296,6 @@ public class ListExercisesCommandTest {
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         String[] args = {"exercises", "-n", "test-course123", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Deadline passed"));
+        io.assertContains("Deadline passed");
     }
 }
