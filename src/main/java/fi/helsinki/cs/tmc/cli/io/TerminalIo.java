@@ -17,16 +17,14 @@ public class TerminalIo extends Io {
     @Override
     public String readLine(String prompt) {
         System.out.print(prompt);
-        try {
-            return new Scanner(System.in).nextLine();
-        } catch (Exception e) {
-            logger.warn("Line could not be read.", e);
-            return null;
+
+        try (Scanner scanner = new Scanner(System.in)) {
+            return scanner.nextLine();
         }
     }
 
     @Override
-    public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
+    public boolean readConfirmation(String prompt, boolean defaultToYes) {
         String yesNo;
         String input;
         if (defaultToYes) {
@@ -35,11 +33,8 @@ public class TerminalIo extends Io {
             yesNo = " [y/N] ";
         }
         System.out.print(prompt + yesNo);
-        try {
-            input = new Scanner(System.in).nextLine().toLowerCase();
-        } catch (Exception e) {
-            logger.warn("Line could not be read.", e);
-            return null;
+        try (Scanner scanner = new Scanner(System.in)) {
+            input = scanner.nextLine().toLowerCase();
         }
         if (input.isEmpty()) {
             return defaultToYes;
@@ -66,9 +61,10 @@ public class TerminalIo extends Io {
 
         // Read the password in cleartext if no console is present (might happen
         // in some IDEs?)
-        logger.info("System.console is not present, unable to read password "
+        logger.warn("Failed to read password");
+        println("System.console is not present, unable to read password "
                 + "securely. Reading password in cleartext.");
-        return this.readLine("\n" + prompt);
+        return readLine(prompt);
     }
 
 }

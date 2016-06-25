@@ -99,9 +99,9 @@ public class TestIo extends Io {
     }
 
     @Override
-    public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
+    public boolean readConfirmation(String prompt, boolean defaultToYes) {
         usePrompt(PromptType.CONFIRM_PROMPT);
-        return confirmationPrompts.pop();
+        return (boolean) confirmationPrompts.pop();
     }
 
     private <T> void addPrompt(PromptType type, T value) {
