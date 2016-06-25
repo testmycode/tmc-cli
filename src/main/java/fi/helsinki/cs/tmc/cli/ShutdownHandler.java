@@ -12,7 +12,7 @@ public class ShutdownHandler extends Thread {
     }
 
     /**
-     * Executes when the program exits.
+     * Executed when the program exits.
      */
     @Override
     public void run() {
@@ -21,4 +21,11 @@ public class ShutdownHandler extends Thread {
         io.println(Color.AnsiColor.ANSI_RESET.toString());
     }
 
+    public void enable() {
+        Runtime.getRuntime().addShutdownHook(this);
+    }
+
+    public void disable() {
+        Runtime.getRuntime().removeShutdownHook(this);
+    }
 }

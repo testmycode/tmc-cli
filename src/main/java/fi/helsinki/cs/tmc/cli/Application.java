@@ -67,7 +67,7 @@ public class Application {
             inTest = false;
             io = new TerminalIo();
             shutdownHandler = new ShutdownHandler(io);
-            Runtime.getRuntime().addShutdownHook(shutdownHandler);
+            shutdownHandler.enable();
         }
 
         this.io = io;
@@ -146,7 +146,7 @@ public class Application {
         runCommand(commandName, commandArgs);
 
         if (!inTest) {
-            Runtime.getRuntime().removeShutdownHook(shutdownHandler);
+            shutdownHandler.disable();
         }
     }
 
