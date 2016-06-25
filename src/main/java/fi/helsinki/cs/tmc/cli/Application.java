@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.io.ShutdownHandler;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;

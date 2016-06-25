@@ -1,7 +1,4 @@
-package fi.helsinki.cs.tmc.cli;
-
-import fi.helsinki.cs.tmc.cli.io.Color;
-import fi.helsinki.cs.tmc.cli.io.Io;
+package fi.helsinki.cs.tmc.cli.io;
 
 public class ShutdownHandler extends Thread {
 
