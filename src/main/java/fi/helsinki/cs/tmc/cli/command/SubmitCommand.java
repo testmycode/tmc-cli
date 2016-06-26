@@ -160,7 +160,7 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
-    protected void updateCourseJson(TmcCore core, List<Exercise> submittedExercises,
+    private void updateCourseJson(TmcCore core, List<Exercise> submittedExercises,
             CourseInfo courseInfo, Path courseInfoFile) {
 
         Course updatedCourse = TmcUtil.findCourse(core, courseInfo.getCourseName());
@@ -182,7 +182,7 @@ public class SubmitCommand extends AbstractCommand {
         CourseInfoIo.save(courseInfo, courseInfoFile);
     }
 
-    protected void checkForExerciseUpdates(TmcCore core, Course course) {
+    private void checkForExerciseUpdates(TmcCore core, Course course) {
         ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, course);
         if (!exerciseUpdater.updatesAvailable()) {
             return;
