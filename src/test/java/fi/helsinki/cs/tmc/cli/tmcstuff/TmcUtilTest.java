@@ -80,10 +80,20 @@ public class TmcUtilTest {
         };
     }
 
-    public Callable createThrowingCallback(final String errorMsg) {
-        return new Callable() {
+    public <T> Callable<T> createThrowingCallback(Class<T> type, final String errorMsg) {
+        return new Callable<T>() {
             @Override
-            public Object call() throws Exception {
+            public T call() throws Exception {
+                throw new Exception(errorMsg);
+            }
+        };
+    }
+
+    public <T> Callable<List<T>> createThrowingCallbackOfList(Class<T> type,
+            final String errorMsg) {
+        return new Callable<List<T>>() {
+            @Override
+            public List<T> call() throws Exception {
                 throw new Exception(errorMsg);
             }
         };
@@ -92,7 +102,7 @@ public class TmcUtilTest {
     @Test
     public void failToLogin() throws URISyntaxException {
         when(mockCore.listCourses(any(ProgressObserver.class)))
-                .thenReturn(createThrowingCallback("failed"));
+                .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
         boolean fail = true;
         try {
             assertFalse(TmcUtil.tryToLogin(mockCore));
@@ -171,10 +181,12 @@ public class TmcUtilTest {
     }
 
     @Test
-    public void failToDownloadCourses() {
+    public void failToDownloadCourses() throws Exception {
         List<Exercise> exercises = Arrays.asList(new Exercise("first"));
+        Callable<List<Exercise>> callable = createThrowingCallbackOfList(Exercise.class,
+                "failed");
         when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class),
-                eq(exercises))).thenReturn(createThrowingCallback("failed"));
+                eq(exercises))).thenReturn(callable);
 
         assertNull(TmcUtil.downloadExercises(mockCore, exercises,
                 new TmcCliProgressObserver(io)));
@@ -199,7 +211,7 @@ public class TmcUtilTest {
     public void failToSubmitExercise() {
         Exercise exercise = new Exercise("first");
         when(mockCore.submit(any(ProgressObserver.class), eq(exercise)))
-                .thenReturn(createThrowingCallback("failed"));
+                .thenReturn(createThrowingCallback(SubmissionResult.class, "failed"));
 
         assertNull(TmcUtil.submitExercise(mockCore, exercise));
     }
@@ -220,7 +232,7 @@ public class TmcUtilTest {
     public void failToGetUpdatableExercises() {
         Course course = new Course("test-course");
         when(mockCore.getExerciseUpdates(any(ProgressObserver.class), eq(course)))
-                .thenReturn(createThrowingCallback("failed"));
+                .thenReturn(createThrowingCallback(UpdateResult.class, "failed"));
 
         assertNull(TmcUtil.getUpdatableExercises(mockCore, course));
     }
@@ -241,7 +253,7 @@ public class TmcUtilTest {
     public void failToSendPaste() {
         Exercise exercise = new Exercise("test-course");
         when(mockCore.pasteWithComment(any(ProgressObserver.class), eq(exercise),
-                eq("message"))).thenReturn(createThrowingCallback("failed"));
+                eq("message"))).thenReturn(createThrowingCallback(URI.class, "failed"));
         assertNull(TmcUtil.sendPaste(mockCore, exercise, "message"));
     }
 
@@ -261,7 +273,7 @@ public class TmcUtilTest {
     public void failToRunLocalTests() {
         Exercise exercise = new Exercise("test-course");
         when(mockCore.runTests(any(ProgressObserver.class), eq(exercise)))
-                .thenReturn(createThrowingCallback("failed"));
+                .thenReturn(createThrowingCallback(RunResult.class, "failed"));
         assertNull(TmcUtil.runLocalTests(mockCore, exercise));
     }
 
@@ -281,8 +293,9 @@ public class TmcUtilTest {
         List<FeedbackAnswer> answers = null;
         URI feedbackUri = new URI("www.abc.org");
 
+        Callable<Boolean> callable = createThrowingCallback(Boolean.class, "failed");
         when(mockCore.sendFeedback(any(ProgressObserver.class), eq(answers),
-                eq(feedbackUri))).thenReturn(createThrowingCallback("failed"));
+                eq(feedbackUri))).thenReturn(callable);
 
         assertFalse(TmcUtil.sendFeedback(mockCore, answers, feedbackUri));
     }
