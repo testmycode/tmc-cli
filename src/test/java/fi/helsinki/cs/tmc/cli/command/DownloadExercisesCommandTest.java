@@ -127,18 +127,23 @@ public class DownloadExercisesCommandTest {
         completed1.setCompleted(true);
         completed2.setCompleted(true);
 
-        Course course = new Course("test-course");
+        List<Exercise> filteredExercises = Arrays.asList(notCompleted);
+
+        Course course = new Course("course1");
         course.setExercises(Arrays.asList(completed1, notCompleted, completed2));
 
-        /*TODO somehow get rid of this parser stuff */
-        GnuParser parser = new GnuParser();
-        CommandLine args = parser.parse(new Options(), new String[]{});
+        when(TmcUtil.findCourse(eq(mockCore), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(mockCore), anyListOf(Exercise.class),
+                any(ProgressObserver.class))).thenReturn(filteredExercises);
 
-        DownloadExercisesCommand dlCommand = new DownloadExercisesCommand();
-        List<Exercise> filtered = dlCommand.getFilteredExercises(course, args);
+        Settings settings = new Settings("server", "user", "password");
+        settings.setTmcProjectDirectory(tempDir);
+        app.setSettings(settings);
 
-        assertTrue(filtered.size() == 1);
-        assertEquals(notCompleted, filtered.get(0));
+        String[] args = {"download", "course1"};
+        app.run(args);
+
+        io.assertContains("which 1 exercises were downloaded");
     }
 
     @Test
@@ -151,23 +156,22 @@ public class DownloadExercisesCommandTest {
         completed1.setCompleted(true);
         completed2.setCompleted(true);
 
-        List<Exercise> exercises = new ArrayList<>();
-        exercises.add(completed1);
-        exercises.add(notCompleted);
-        exercises.add(completed2);
-
-        Course course = new Course("test-course");
+        List<Exercise> exercises = Arrays.asList(completed1, notCompleted,
+                completed2);
+        Course course = new Course("course1");
         course.setExercises(exercises);
 
-        /*TODO somehow get rid of this parser stuff */
-        GnuParser parser = new GnuParser();
-        Options options = new Options();
-        options.addOption("a", "all", false, "");
-        CommandLine args = parser.parse(options, new String[]{"-a"});
+        when(TmcUtil.findCourse(eq(mockCore), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(mockCore), anyListOf(Exercise.class),
+                any(ProgressObserver.class))).thenReturn(exercises);
 
-        DownloadExercisesCommand dlCommand = new DownloadExercisesCommand();
-        List<Exercise> filtered = dlCommand.getFilteredExercises(course, args);
+        Settings settings = new Settings("server", "user", "password");
+        settings.setTmcProjectDirectory(tempDir);
+        app.setSettings(settings);
 
-        assertTrue(filtered.size() == 3);
+        String[] args = {"download", "-a", "course1"};
+        app.run(args);
+
+        io.assertContains("which 3 exercises were downloaded");
     }
 }

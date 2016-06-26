@@ -24,6 +24,8 @@ import java.util.List;
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
 
+    private boolean showAll;
+
     @Override
     public void getOptions(Options options) {
         options.addOption("a", "all", false,
@@ -36,11 +38,13 @@ public class DownloadExercisesCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         String[] stringArgs = args.getArgs();
-        if (stringArgs.length == 0) {
+        if (stringArgs.length == 0 || stringArgs.length > 1) {
             io.println("You must give course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
         }
+
+        showAll = args.hasOption("a");
 
         Application app = getApp();
         TmcCore core = app.getTmcCore();
@@ -54,12 +58,13 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
-        Course course = TmcUtil.findCourse(core, stringArgs[0]);
+        String courseName = stringArgs[0];
+        Course course = TmcUtil.findCourse(core, courseName);
         if (course == null) {
             io.println("Course doesn't exist.");
             return;
         }
-        List<Exercise> filtered = getFilteredExercises(course, args);
+        List<Exercise> filtered = getFilteredExercises(course);
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
@@ -71,24 +76,38 @@ public class DownloadExercisesCommand extends AbstractCommand {
         if (exercises == null) {
             io.println("Failed to download exercises");
             return;
-        } else if (exercises.isEmpty()) {
-            io.println("Course doesn't have any exercises.");
+        }
 
-        } else if (exercises.size() != filtered.size()) {
-            io.println(Color.colorString("Some exercises could not be downloaded",
-                    Color.AnsiColor.ANSI_RED));
+        if (course.getExercises().isEmpty()) {
+            io.println("The '" + courseName + "' course doesn't have any exercises.");
+        } else {
+            io.println("The '" + courseName + "' course has " +
+                    course.getExercises().size() + " exercises");
+
+            int failedCount = (filtered.size() - exercises.size());
+            if (failedCount > 0) {
+                io.println("  from which " +
+                        exercises.size() + " exercises were succesfully downloaded");
+                io.println(Color.colorString("  and of which " + failedCount + " failed.",
+                        Color.AnsiColor.ANSI_RED));
+                //TODO we could print the names of the not downloaded exercises here
+            } else {
+                io.println("  from which " +
+                        exercises.size() + " exercises were downloaded.");
+            }
+            io.println("Use -a flag to download also your completed exercises.");
         }
 
         Path configFile = app.getWorkDir().getWorkingDirectory()
-                .resolve(stringArgs[0])
+                .resolve(courseName)
                 .resolve(CourseInfoIo.COURSE_CONFIG);
         CourseInfo info = app.createCourseInfo(course);
         info.setExercises(course.getExercises());
         CourseInfoIo.save(info, configFile);
     }
 
-    protected List<Exercise> getFilteredExercises(Course course, CommandLine args) {
-        if (args.hasOption("a")) {
+    private List<Exercise> getFilteredExercises(Course course) {
+        if (showAll) {
             return course.getExercises();
         }
 
