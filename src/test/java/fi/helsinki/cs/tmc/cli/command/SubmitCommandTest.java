@@ -89,15 +89,6 @@ public class SubmitCommandTest {
         when(TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class)))
                 .thenReturn(result).thenReturn(result2);
 
-        Callable<UpdateResult> callable = new Callable<UpdateResult>() {
-            @Override
-            public UpdateResult call() throws Exception {
-                return null;
-            }
-        };
-        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
-                .thenReturn(callable);
-
         PowerMockito.mockStatic(CourseInfoIo.class);
         when(CourseInfoIo.load(any(Path.class))).thenCallRealMethod();
         when(CourseInfoIo.save(any(CourseInfo.class), any(Path.class))).thenReturn(true);
@@ -221,28 +212,21 @@ public class SubmitCommandTest {
         io.assertNotContains("Use 'tmc update' to download");
     }
 
-    @Ignore("This created odd problems enable it after tmcutil is mocked")
     @Test
     public void showsMessageIfNewExercisesAreAvailable() {
-        Callable<UpdateResult> callableResult = new Callable<UpdateResult>() {
-            @Override
-            public UpdateResult call() throws Exception {
-                UpdateResult updateResult = mock(UpdateResult.class);
+        UpdateResult updateResult = mock(UpdateResult.class);
 
-                List<Exercise> newExercises = new ArrayList<>();
-                newExercises.add(new Exercise("new_exercise"));
+        List<Exercise> newExercises = new ArrayList<>();
+        newExercises.add(new Exercise("new_exercise"));
 
-                List<Exercise> updatedExercises = new ArrayList<>();
-                updatedExercises.add(new Exercise("updated_exercise"));
+        List<Exercise> updatedExercises = new ArrayList<>();
+        updatedExercises.add(new Exercise("updated_exercise"));
 
-                when(updateResult.getNewExercises()).thenReturn(newExercises);
-                when(updateResult.getUpdatedExercises()).thenReturn(updatedExercises);
-                return updateResult;
-            }
-        };
+        when(updateResult.getNewExercises()).thenReturn(newExercises);
+        when(updateResult.getUpdatedExercises()).thenReturn(updatedExercises);
 
-        when(mockCore.getExerciseUpdates(any(ProgressObserver.class), any(Course.class)))
-                .thenReturn(callableResult);
+        when(TmcUtil.getUpdatableExercises(any(TmcCore.class), any(Course.class)))
+                .thenReturn(updateResult);
 
         app.setWorkdir(new WorkDir(pathToDummyExercise));
         app.run(new String[]{"submit"});

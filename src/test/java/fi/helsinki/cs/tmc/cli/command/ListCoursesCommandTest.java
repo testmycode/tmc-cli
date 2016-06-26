@@ -1,22 +1,27 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcUtil.class)
 public class ListCoursesCommandTest {
 
     Application app;
@@ -29,6 +34,8 @@ public class ListCoursesCommandTest {
         app = new Application(io);
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
+
+        mockStatic(TmcUtil.class);
     }
     
     @Test
@@ -43,14 +50,9 @@ public class ListCoursesCommandTest {
     
     @Test
     public void listCoursesWorksWithNoCourses() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                return new ArrayList<>();
-            }
-        };
-        
-        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
+        List<Course> list = Arrays.asList();
+        when(TmcUtil.listCourses(eq(mockCore))).thenReturn(list);
+
         String[] args = {"courses"};
         app.run(args);
         io.assertContains("No courses found on this server");
@@ -58,17 +60,9 @@ public class ListCoursesCommandTest {
     
     @Test
     public void listCoursesWorksWithCourses() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                ArrayList<Course> tmp = new ArrayList<>();
-                tmp.add(new Course("course1"));
-                tmp.add(new Course("course2"));
-                return tmp;
-            }
-        };
-        
-        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
+        List<Course> list = Arrays.asList(new Course("course1"), new Course("course2"));
+        when(TmcUtil.listCourses(eq(mockCore))).thenReturn(list);
+
         String[] args = {"courses"};
         app.run(args);
         io.assertContains("Found 2 courses");

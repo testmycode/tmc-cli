@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-
 @Command(name = "test", desc = "Run local exercise tests")
 public class RunTestsCommand extends AbstractCommand {
 

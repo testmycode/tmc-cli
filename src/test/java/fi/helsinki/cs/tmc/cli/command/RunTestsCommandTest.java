@@ -1,19 +1,20 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
@@ -25,12 +26,16 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.Callable;
 
 /*TODO test the command line options */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcUtil.class)
 public class RunTestsCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -40,13 +45,12 @@ public class RunTestsCommandTest {
     static Path pathToDummyCourse;
     static Path pathToDummyExercise;
     static Path pathToDummyExerciseSrc;
-    static Path pathToNonCourseDir;
 
     private Application app;
     private TestIo io;
     private TmcCore mockCore;
     private WorkDir workDir;
-    private Callable<RunResult> callableRunResult;
+    private RunResult runResult;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -59,9 +63,6 @@ public class RunTestsCommandTest {
 
         pathToDummyExerciseSrc = pathToDummyExercise.resolve("src");
         assertNotNull(pathToDummyExerciseSrc);
-
-        pathToNonCourseDir = pathToDummyCourse.getParent();
-        assertNotNull(pathToNonCourseDir);
     }
 
     @Before
@@ -71,17 +72,12 @@ public class RunTestsCommandTest {
         mockCore = mock(TmcCore.class);
         app.setTmcCore(mockCore);
 
-        callableRunResult = new Callable<RunResult>() {
-            @Override
-            public RunResult call() throws Exception {
-                RunResult.Status status = Status.PASSED;
-                ImmutableList<TestResult> testResults = ImmutableList.of();
-                ImmutableMap<String, byte[]> logs = ImmutableMap.of();
-                RunResult result = new RunResult(status, testResults, logs);
+        RunResult.Status status = Status.PASSED;
+        ImmutableList<TestResult> testResults = ImmutableList.of();
+        ImmutableMap<String, byte[]> logs = ImmutableMap.of();
+        runResult = new RunResult(status, testResults, logs);
 
-                return result;
-            }
-        };
+        mockStatic(TmcUtil.class);
     }
 
     @Test
@@ -106,8 +102,8 @@ public class RunTestsCommandTest {
 
     @Test
     public void worksInCourseDirectory() {
-        when(mockCore.runTests((ProgressObserver) anyObject(),
-                (Exercise) anyObject())).thenReturn(callableRunResult);
+        when(TmcUtil.runLocalTests(any(TmcCore.class), any(Exercise.class)))
+                .thenReturn(runResult);
 
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
@@ -120,8 +116,8 @@ public class RunTestsCommandTest {
 
     @Test
     public void worksInCourseDirectoryIfExerciseIsGiven() {
-        when(mockCore.runTests((ProgressObserver) anyObject(),
-                (Exercise) anyObject())).thenReturn(callableRunResult);
+        when(TmcUtil.runLocalTests(any(TmcCore.class), any(Exercise.class)))
+                .thenReturn(runResult);
 
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);

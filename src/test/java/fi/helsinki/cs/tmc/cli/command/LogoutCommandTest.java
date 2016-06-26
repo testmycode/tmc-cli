@@ -30,7 +30,7 @@ public class LogoutCommandTest {
     }
 
     @Test
-    public void hello() {
+    public void logoutShouldDeleteSettings() {
         String[] args = {"logout"};
         app.run(args);
 

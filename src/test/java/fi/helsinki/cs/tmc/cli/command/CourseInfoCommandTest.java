@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -11,23 +11,27 @@ import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcUtil.class)
 public class CourseInfoCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -40,8 +44,6 @@ public class CourseInfoCommandTest {
     private TestIo io;
     private TmcCore mockCore;
     private Course course;
-    private Callable<List<Course>> callableList;
-    private Callable<Course> callableCourse;
     private WorkDir workDir;
 
     @BeforeClass
@@ -67,19 +69,7 @@ public class CourseInfoCommandTest {
         exercises.get(0).setCompleted(true);
         course.setExercises(exercises);
 
-        callableList = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                return Arrays.asList(course);
-            }
-        };
-
-        callableCourse = new Callable<Course>() {
-            @Override
-            public Course call() throws Exception {
-                return course;
-            }
-        };
+        PowerMockito.mockStatic(TmcUtil.class);
     }
 
     @Test
@@ -108,7 +98,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void showMessageIfCourseDoesNotExistOnTheServer() {
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
+        when(TmcUtil.findCourse(eq(mockCore), eq("foo"))).thenReturn(null);
         String[] args = {"info", "foo", "-i"};
         app.run(args);
         assertTrue(io.out().contains("The course foo doesn't exist on this server"));
@@ -116,9 +106,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printCourseWithOptionI() {
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
-        when(mockCore.getCourseDetails(any(ProgressObserver.class),
-                any(Course.class))).thenReturn(callableCourse);
+        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
@@ -128,9 +116,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printCourseWithOptionsIAndA() {
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
-        when(mockCore.getCourseDetails(any(ProgressObserver.class),
-                any(Course.class))).thenReturn(callableCourse);
+        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-a", "-i"};
         app.run(args);
@@ -140,9 +126,7 @@ public class CourseInfoCommandTest {
     @Test
     public void printCourseWithNoExercisesFromTheServer() {
         course.setExercises(new ArrayList<Exercise>());
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
-        when(mockCore.getCourseDetails(any(ProgressObserver.class),
-                any(Course.class))).thenReturn(callableCourse);
+        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
@@ -192,9 +176,7 @@ public class CourseInfoCommandTest {
         app.setWorkdir(workDir);
 
         course.setExercises(new ArrayList<Exercise>());
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
-        when(mockCore.getCourseDetails(any(ProgressObserver.class),
-                any(Course.class))).thenReturn(callableCourse);
+        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
@@ -206,9 +188,7 @@ public class CourseInfoCommandTest {
         workDir = new WorkDir(pathToDummyCourse);
         app.setWorkdir(workDir);
 
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
-        when(mockCore.getCourseDetails(any(ProgressObserver.class),
-                any(Course.class))).thenReturn(callableCourse);
+        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "notacourse", "-i"};
         app.run(args);
