@@ -7,10 +7,10 @@ import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 @Command(name = "paste", desc = "Submit exercise to pastebin")
 public class PasteCommand extends AbstractCommand {
@@ -46,12 +45,6 @@ public class PasteCommand extends AbstractCommand {
         WorkDir workdir = app.getWorkDir();
         String[] stringArgs = args.getArgs();
 
-//        if (argsList.size() > 1) {
-//            io.println(
-//                    "Error: Too many arguments. Pass the name of the exercise you wish to send to "
-//                            + "the pastebin as the only argument.");
-//            return;
-//        }
         Boolean valid;
         if (stringArgs.length == 0) {
             valid = workdir.addPath();
@@ -99,16 +92,9 @@ public class PasteCommand extends AbstractCommand {
         String exerciseName = exercisenames.get(0);
         CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
-        Callable<URI> callable = core.pasteWithComment(
-                ProgressObserver.NULL_OBSERVER, exercise, message);
-        URI uri;
-
-        try {
-            uri = callable.call();
-        } catch (Exception e) {
-            logger.error("Unable to connect to server", e);
-            io.println("Unable to connect to server:");
-            e.printStackTrace();
+        URI uri = TmcUtil.sendPaste(core, exercise, message);
+        if (uri == null) {
+            io.println("Unable to send the paste");
             return;
         }
 

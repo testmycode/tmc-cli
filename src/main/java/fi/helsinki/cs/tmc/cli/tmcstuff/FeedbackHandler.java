@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
@@ -16,9 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FeedbackHandler {
-    private List<FeedbackQuestion> questions;
-    private Io io;
     private static final Logger logger = LoggerFactory.getLogger(FeedbackHandler.class);
+    private final Io io;
+
+    private List<FeedbackQuestion> questions;
 
     public FeedbackHandler(Io io) {
         this.io = io;
@@ -32,14 +32,7 @@ public class FeedbackHandler {
         for (FeedbackQuestion question : questions) {
             answers.add(getAnswer(question));
         }
-        try {
-            Boolean call = core.sendFeedback(
-                    new TmcCliProgressObserver(io), answers, feedbackUri).call();
-            return call;
-        } catch (Exception e) {
-            logger.error("Couldn't send feedback", e);
-        }
-        return false;
+        return TmcUtil.sendFeedback(core, answers, feedbackUri);
     }
 
     private FeedbackAnswer getAnswer(FeedbackQuestion question) {

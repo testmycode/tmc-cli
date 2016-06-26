@@ -142,8 +142,7 @@ public class PasteCommandTest {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
-        assertTrue("Prints to IO when successful",
-                io.out().contains("Paste sent for exercise paste-exercise"));
+        io.assertContains("Paste sent for exercise paste-exercise");
         assertTrue("Prints the paste URI",
                 io.out().contains("https://tmc.test.url/"));
         io.assertAllPromptsUsed();
@@ -166,8 +165,7 @@ public class PasteCommandTest {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
-        assertTrue("Prints to IO when successful",
-                io.out().contains("Paste sent for exercise paste-exercise"));
+        io.assertContains("Paste sent for exercise paste-exercise");
         assertTrue("Prints the paste URI",
                 io.out().contains("https://tmc.test.url/"));
     }
@@ -198,8 +196,7 @@ public class PasteCommandTest {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
-        assertTrue("Prints to IO when successful",
-                io.out().contains("Paste sent for exercise paste-exercise"));
+        io.assertContains("Paste sent for exercise paste-exercise");
         assertTrue("Prints the paste URI",
                 io.out().contains("https://tmc.test.url/"));
     }
@@ -220,8 +217,7 @@ public class PasteCommandTest {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
-        assertTrue("Prints to IO failing to connect",
-                io.out().contains("Unable to connect to server"));
+        io.assertContains("Unable to send the paste");
         io.assertAllPromptsUsed();
     }
 
@@ -241,7 +237,6 @@ public class PasteCommandTest {
             // Ignore this stupid block, Mockito thinks there could be an exception thrown here
         }
 
-        assertTrue("Prints to IO when no exercise is found",
-                io.out().contains("No exercise specified"));
+        io.assertContains("No exercise specified");
     }
 }

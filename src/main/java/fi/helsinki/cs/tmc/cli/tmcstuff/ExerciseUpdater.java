@@ -5,7 +5,6 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,7 @@ import java.util.List;
 
 public class ExerciseUpdater {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ExerciseUpdater.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ExerciseUpdater.class);
 
     private final TmcCore core;
     private final Course course;
@@ -70,14 +69,7 @@ public class ExerciseUpdater {
      * @return true if there is something new to download, false if not.
      */
     public boolean updatesAvailable() {
-        UpdateResult result;
-        try {
-            result = core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course).call();
-        } catch (Exception ex) {
-            LOGGER.warn("Failed to get exercise updates.", ex);
-            return false;
-        }
-
+        UpdateResult result = TmcUtil.getUpdatableExercises(core, course);
         if (result == null) {
             return false;
         }

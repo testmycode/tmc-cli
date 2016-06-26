@@ -12,11 +12,11 @@ import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -25,7 +25,6 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
 import java.util.List;
 
 
@@ -35,7 +34,6 @@ public class RunTestsCommand extends AbstractCommand {
     private static final Logger logger
             = LoggerFactory.getLogger(RunTestsCommand.class);
 
-//    private Io io;
     private boolean showPassed;
     private boolean showDetails;
 
@@ -47,8 +45,6 @@ public class RunTestsCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
-//        this.io = io;
-
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
@@ -95,11 +91,9 @@ public class RunTestsCommand extends AbstractCommand {
                 io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
                 //name = name.replace("-", File.separator);
                 Exercise exercise = info.getExercise(name);
-//                Exercise exercise = new Exercise(name, courseName);
 
-                // TmcCliProgressObserver progobs = new TmcCliProgressObserver(io);
-                runResult = core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
-                // progobs.end(0);
+                // TODO use progress observer (Bug is in tmc-core)
+                runResult = TmcUtil.runLocalTests(core, exercise);
 
                 resultPrinter.printRunResult(runResult, exercise.isCompleted(),
                         isOnlyExercise, color1, color2);

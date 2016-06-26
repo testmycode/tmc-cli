@@ -5,11 +5,14 @@ import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -17,6 +20,13 @@ import java.util.concurrent.Callable;
 public class TmcUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
+
+    public static boolean tryToLogin(TmcCore core) throws Exception {
+        Callable<List<Course>> callable;
+        callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
+
+        return callable.call() != null;
+    }
 
     public static List<Course> listCourses(TmcCore core) {
         Callable<List<Course>> callable;
@@ -102,8 +112,42 @@ public class TmcUtil {
             return core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course)
                     .call();
         } catch (Exception e) {
+            logger.warn("Failed to get exercise updates.", e);
+            return null;
+        }
+    }
+
+    public static URI sendPaste(TmcCore core, Exercise exercise, String message) {
+        try {
+            return core.pasteWithComment(ProgressObserver.NULL_OBSERVER,
+                    exercise, message).call();
+
+        } catch (Exception e) {
+            logger.error("Failed to send paste", e);
             System.out.println(e);
             return null;
+        }
+    }
+
+    public static RunResult runLocalTests(TmcCore core, Exercise exercise) {
+        try {
+            return core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
+
+        } catch (Exception e) {
+            logger.error("Failed to run local tests", e);
+            return null;
+        }
+    }
+
+    public static boolean sendFeedback(TmcCore core, List<FeedbackAnswer> answers,
+            URI feedbackUri) {
+        try {
+            return core.sendFeedback(ProgressObserver.NULL_OBSERVER, answers,
+                    feedbackUri).call();
+
+        } catch (Exception e) {
+            logger.error("Couldn't send feedback", e);
+            return false;
         }
     }
 }
