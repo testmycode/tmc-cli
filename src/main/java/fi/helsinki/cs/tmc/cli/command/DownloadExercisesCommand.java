@@ -81,19 +81,19 @@ public class DownloadExercisesCommand extends AbstractCommand {
         if (course.getExercises().isEmpty()) {
             io.println("The '" + courseName + "' course doesn't have any exercises.");
         } else {
-            io.println("The '" + courseName + "' course has " +
-                    course.getExercises().size() + " exercises");
+            io.println("The '" + courseName + "' course has "
+                    + course.getExercises().size() + " exercises");
 
             int failedCount = (filtered.size() - exercises.size());
             if (failedCount > 0) {
-                io.println("  from which " +
-                        exercises.size() + " exercises were succesfully downloaded");
+                io.println("  from which "
+                        + exercises.size() + " exercises were succesfully downloaded");
                 io.println(Color.colorString("  and of which " + failedCount + " failed.",
                         Color.AnsiColor.ANSI_RED));
                 //TODO we could print the names of the not downloaded exercises here
             } else {
-                io.println("  from which " +
-                        exercises.size() + " exercises were downloaded.");
+                io.println("  from which "
+                        + exercises.size() + " exercises were downloaded.");
             }
             io.println("Use -a flag to download also your completed exercises.");
         }

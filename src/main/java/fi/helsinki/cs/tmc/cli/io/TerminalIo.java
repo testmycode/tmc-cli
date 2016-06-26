@@ -34,7 +34,7 @@ public class TerminalIo extends Io {
                 logger.warn("Password could not be read.", e);
             }
         } else {
-           logger.warn("Failed to read password due to System.console()");
+            logger.warn("Failed to read password due to System.console()");
         }
         println("Unable to read password securely. Reading password in cleartext.");
         println("Press Ctrl+C to abort");
