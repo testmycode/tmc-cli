@@ -57,6 +57,13 @@ public abstract class AbstractCommand {
     public abstract void run(CommandLine args, Io io);
 
     public void execute(String[] stringArgs, Io io) {
+        CommandLine args = parseArgs(stringArgs, io);
+        if (args != null) {
+            run(args, io);
+        }
+    }
+
+    public CommandLine parseArgs(String[] stringArgs, Io io) {
         GnuParser parser = new GnuParser();
         CommandLine args;
         Options options = getOptions();
@@ -67,7 +74,7 @@ public abstract class AbstractCommand {
             logger.warn("Invalid command line arguments.", e);
             io.println("Invalid command line arguments.");
             io.println(e.getMessage());
-            return;
+            return null;
         }
 
         if (args.hasOption("h")) {
@@ -81,9 +88,8 @@ public abstract class AbstractCommand {
                 desc = command.desc();
             }
             HelpGenerator.run(io, usage, desc, options);
-            return;
+            return null;
         }
-
-        run(args, io);
+        return args;
     }
 }
