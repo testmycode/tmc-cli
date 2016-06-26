@@ -43,7 +43,6 @@ public class HelpCommand extends AbstractCommand {
     private List<String> getCommandStrings() {
         List<String> strings = new ArrayList<>();
         Set<Class<Command>> commands = CommandFactory.getCommands();
-        commands.remove(castToCommandClass(TestCommand.class));
         commands.remove(castToCommandClass(ShellHelperCommand.class));
 
         longestNameLength = longestName(commands);
