@@ -2,12 +2,12 @@ package fi.helsinki.cs.tmc.cli.io;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -20,7 +20,7 @@ public class TmcCliProgressObserverTest {
     @Before
     public void setup() {
         this.io = new TestIo();
-        PowerMockito.mockStatic(EnvironmentUtil.class);
+        mockStatic(EnvironmentUtil.class);
         when(EnvironmentUtil.getTerminalWidth()).thenReturn(50);
     }
 

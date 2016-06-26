@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,8 +21,8 @@ public class EnvironmentUtilTest {
 
     @Before
     public void setUp() {
-        PowerMockito.mockStatic(System.class);
-        PowerMockito.mockStatic(Class.class);
+        mockStatic(System.class);
+        mockStatic(Class.class);
     }
 
     @Test

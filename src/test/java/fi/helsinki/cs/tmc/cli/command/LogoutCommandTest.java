@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.mockito.Mockito.times;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -10,7 +11,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -26,7 +26,7 @@ public class LogoutCommandTest {
         io = new TestIo();
         app = new Application(io);
 
-        PowerMockito.mockStatic(SettingsIo.class);
+        mockStatic(SettingsIo.class);
     }
 
     @Test

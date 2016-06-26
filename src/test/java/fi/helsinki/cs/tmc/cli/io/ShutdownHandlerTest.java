@@ -1,15 +1,14 @@
 package fi.helsinki.cs.tmc.cli.io;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -25,7 +24,7 @@ public class ShutdownHandlerTest {
     public void setUp() {
         io = new TestIo();
         shutdownHandler = new ShutdownHandler(io);
-        PowerMockito.mockStatic(Runtime.class);
+        mockStatic(Runtime.class);
 
         mockedRuntime = mock(Runtime.class);
         when(Runtime.getRuntime()).thenReturn(mockedRuntime);

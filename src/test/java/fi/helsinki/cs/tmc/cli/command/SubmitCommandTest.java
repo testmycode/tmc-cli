@@ -6,6 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
@@ -84,12 +85,12 @@ public class SubmitCommandTest {
         result = new SubmissionResult();
         result2 = new SubmissionResult();
 
-        PowerMockito.mockStatic(TmcUtil.class);
+        mockStatic(TmcUtil.class);
         when(TmcUtil.findCourse(any(TmcCore.class), any(String.class))).thenReturn(course);
         when(TmcUtil.submitExercise(any(TmcCore.class), any(Exercise.class)))
                 .thenReturn(result).thenReturn(result2);
 
-        PowerMockito.mockStatic(CourseInfoIo.class);
+        mockStatic(CourseInfoIo.class);
         when(CourseInfoIo.load(any(Path.class))).thenCallRealMethod();
         when(CourseInfoIo.save(any(CourseInfo.class), any(Path.class))).thenReturn(true);
     }
