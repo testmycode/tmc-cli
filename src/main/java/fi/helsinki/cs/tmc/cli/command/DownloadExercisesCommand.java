@@ -68,9 +68,12 @@ public class DownloadExercisesCommand extends AbstractCommand {
         TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
 
         List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
-        if (exercises.isEmpty()) {
+        if (exercises == null) {
             io.println("Failed to download exercises");
             return;
+        } else if (exercises.isEmpty()) {
+            io.println("Course doesn't have any exercises.");
+
         } else if (exercises.size() != filtered.size()) {
             io.println(Color.colorString("Some exercises could not be downloaded",
                     Color.AnsiColor.ANSI_RED));

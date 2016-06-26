@@ -79,7 +79,7 @@ public class TmcUtil {
             return core.downloadOrUpdateExercises(progobs, exercises).call();
         } catch (Exception e) {
             logger.warn("Failed to download exercises", e);
-            return new ArrayList<>();
+            return null;
         }
     }
 
@@ -90,11 +90,6 @@ public class TmcUtil {
         }
         List<Exercise> exercises = course.getExercises();
         return downloadExercises(core, exercises, progobs);
-    }
-
-    public static SubmissionResult submitExercise(TmcCore core, Course course, String name) {
-        Exercise exercise = TmcUtil.findExercise(course, name);
-        return submitExercise(core, exercise);
     }
 
     public static SubmissionResult submitExercise(TmcCore core, Exercise exercise) {
