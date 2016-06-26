@@ -1,11 +1,14 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -24,44 +27,46 @@ import java.util.List;
 @PrepareForTest(TmcUtil.class)
 public class ListCoursesCommandTest {
 
-    Application app;
-    TestIo io;
-    TmcCore mockCore;
+    private Application app;
+    private CliContext ctx;
+    private TestIo io;
+    private TmcCore mockCore;
 
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, mockCore);
+        app = new Application(ctx);
 
         mockStatic(TmcUtil.class);
     }
-    
+
     @Test
-    public void failIfCoreIsNull() {
-        TestIo io = new TestIo();
-        app = new Application(io);
-        app.setTmcCore(null);
+    public void failIfBackendFails() {
+        CliContext ctx = spy(new CliContext(io, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
+
         String[] args = {"courses", "foo"};
         app.run(args);
         io.assertNotContains("Course doesn't exist");
     }
-    
+
     @Test
     public void listCoursesWorksWithNoCourses() {
         List<Course> list = Arrays.asList();
-        when(TmcUtil.listCourses(eq(mockCore))).thenReturn(list);
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list);
 
         String[] args = {"courses"};
         app.run(args);
-        io.assertContains("No courses found on this server");
+        io.assertContains("No courses found");
     }
-    
+
     @Test
     public void listCoursesWorksWithCourses() {
         List<Course> list = Arrays.asList(new Course("course1"), new Course("course2"));
-        when(TmcUtil.listCourses(eq(mockCore))).thenReturn(list);
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list);
 
         String[] args = {"courses"};
         app.run(args);

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 
@@ -23,9 +24,11 @@ public class CommandFactoryTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
+    CliContext ctx;
+
     @Before
     public void setUp() {
-        app = new Application(new TerminalIo());
+        ctx = new CliContext(new TerminalIo());
     }
 
     @Test
@@ -35,12 +38,12 @@ public class CommandFactoryTest {
 
     @Test
     public void createCommandWorksWithRealCommand() {
-        assertNotNull(CommandFactory.createCommand(app, "help"));
+        assertNotNull(CommandFactory.createCommand(ctx, "help"));
     }
 
     @Test
     public void createCommandWorksWithBadCommand() {
-        assertNull(CommandFactory.createCommand(app, "foobar"));
+        assertNull(CommandFactory.createCommand(ctx, "foobar"));
     }
 
     @Command(name = "good", desc = "test")
@@ -61,7 +64,7 @@ public class CommandFactoryTest {
     public void addGoodCommand() {
         CommandFactory.addCommand(GoodCommand.class);
         //TODO check the all the stuff in the command
-        assertNotNull(CommandFactory.createCommand(app, "good"));
+        assertNotNull(CommandFactory.createCommand(ctx, "good"));
     }
 
     public static class BadCommand extends AbstractCommand {

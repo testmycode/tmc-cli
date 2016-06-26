@@ -8,6 +8,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
+
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -28,12 +31,14 @@ import java.util.List;
 @PrepareForTest(TmcUtil.class)
 public class ExerciseUpdaterTest {
 
-    TmcCore mockCore;
-    ExerciseUpdater exerciseUpdater;
+    private CliContext ctx;
+    private TmcCore mockCore;
+    private ExerciseUpdater exerciseUpdater;
 
     @Before
     public void setUp() {
         mockCore = mock(TmcCore.class);
+        ctx = new CliContext(new TestIo(), mockCore);
 
         mockStatic(TmcUtil.class);
     }
@@ -44,14 +49,14 @@ public class ExerciseUpdaterTest {
 
     @Test
     public void noUpdatesAfterConstructor() {
-        exerciseUpdater = new ExerciseUpdater(mockCore, new Course());
+        exerciseUpdater = new ExerciseUpdater(ctx, new Course());
         assertFalse(exerciseUpdater.newExercisesAvailable());
         assertFalse(exerciseUpdater.updatedExercisesAvailable());
     }
 
     @Test
     public void updateListsAreEmptyAfterConstructor() {
-        exerciseUpdater = new ExerciseUpdater(mockCore, new Course());
+        exerciseUpdater = new ExerciseUpdater(ctx, new Course());
         assertTrue(exerciseUpdater.getNewExercises().isEmpty());
         assertTrue(exerciseUpdater.getUpdatedExercises().isEmpty());
     }
@@ -61,7 +66,7 @@ public class ExerciseUpdaterTest {
         List<Exercise> newExercises = Arrays.asList(new Exercise("new"));
         List<Exercise> updatedExercises = Arrays.asList(new Exercise("updated"));
 
-        exerciseUpdater = new ExerciseUpdater(mockCore, new Course());
+        exerciseUpdater = new ExerciseUpdater(ctx, new Course());
         exerciseUpdater.setNewExercises(newExercises);
         exerciseUpdater.setUpdatedExercises(updatedExercises);
 
@@ -82,10 +87,10 @@ public class ExerciseUpdaterTest {
 
         when(result.getNewExercises()).thenReturn(exercises);
         when(result.getUpdatedExercises()).thenReturn(exercises);
-        when(TmcUtil.getUpdatableExercises(eq(mockCore), any(Course.class)))
+        when(TmcUtil.getUpdatableExercises(eq(ctx), any(Course.class)))
                 .thenReturn(result);
 
-        exerciseUpdater = new ExerciseUpdater(mockCore, new Course());
+        exerciseUpdater = new ExerciseUpdater(ctx, new Course());
         assertTrue(exerciseUpdater.updatesAvailable());
     }
 }

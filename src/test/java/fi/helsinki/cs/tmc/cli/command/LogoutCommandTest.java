@@ -5,6 +5,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 
@@ -18,13 +19,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(SettingsIo.class)
 public class LogoutCommandTest {
 
-    Application app;
-    TestIo io;
+    private Application app;
+    private TestIo io;
 
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
+        app = new Application(new CliContext(io));
 
         mockStatic(SettingsIo.class);
     }

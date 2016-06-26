@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class SettingsIoTest {
+
     private Settings settings;
     private Path tempDir;
 

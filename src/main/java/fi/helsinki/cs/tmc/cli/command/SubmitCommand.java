@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus.NONE_FAILED;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -36,6 +36,7 @@ public class SubmitCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
 
+    private CliContext ctx;
     private Io io;
     private boolean showAll;
     private boolean showDetails;
@@ -50,6 +51,7 @@ public class SubmitCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
+        this.ctx = getContext();
         this.io = io;
 
         String[] exercisesFromArgs = parseArgs(args);
@@ -57,13 +59,11 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        TmcCore core = getApp().getTmcCore();
-        if (core == null) {
+        if (!ctx.loadBackend()) {
             return;
         }
 
-        Application app = getApp();
-        WorkDir workDir = app.getWorkDir();
+        WorkDir workDir = ctx.getWorkDir();
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
                 io.println("Error: " + exercise + " is not a valid exercise.");
@@ -99,19 +99,19 @@ public class SubmitCommand extends AbstractCommand {
         int total = 0;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
-        Color.AnsiColor color1 = app.getColor("testresults-left");
-        Color.AnsiColor color2 = app.getColor("testresults-right");
+        Color.AnsiColor color1 = ctx.getApp().getColor("testresults-left");
+        Color.AnsiColor color2 = ctx.getApp().getColor("testresults-right");
 
         List<Exercise> submitExercises = info.getExercises(exerciseNames);
         List<List<FeedbackQuestion>> feedbackLists
-                = new ArrayList<List<FeedbackQuestion>>();
-        List<String> exercisesWithFeedback = new ArrayList<String>();
-        List<URI> feedbackUris = new ArrayList<URI>();
+                = new ArrayList<>();
+        List<String> exercisesWithFeedback = new ArrayList<>();
+        List<URI> feedbackUris = new ArrayList<>();
 
         for (Exercise exercise : submitExercises) {
             io.println(Color.colorString("Submitting: " + exercise.getName(),
                     Color.AnsiColor.ANSI_YELLOW));
-            SubmissionResult result = TmcUtil.submitExercise(core, exercise);
+            SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
                 io.println("Submission failed.");
             } else {
@@ -143,14 +143,14 @@ public class SubmitCommand extends AbstractCommand {
         }
 
         io.println("Updating " + CourseInfoIo.COURSE_CONFIG);
-        updateCourseJson(core, submitExercises, info, workDir.getConfigFile());
-        checkForExerciseUpdates(core, currentCourse);
+        updateCourseJson(submitExercises, info, workDir.getConfigFile());
+        checkForExerciseUpdates(currentCourse);
         for (int i = 0; i < exercisesWithFeedback.size(); i++) {
             if (io.readConfirmation(
                     "Send feedback for " + exercisesWithFeedback.get(i) + "?", true)) {
-                FeedbackHandler fbh = new FeedbackHandler(io);
-                Boolean success = fbh.sendFeedback(
-                        core, feedbackLists.get(i), feedbackUris.get(i));
+                FeedbackHandler fbh = new FeedbackHandler(ctx);
+                boolean success = fbh.sendFeedback(
+                        feedbackLists.get(i), feedbackUris.get(i));
                 if (success) {
                     io.println("Feedback sent.");
                 } else {
@@ -160,10 +160,10 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
-    private void updateCourseJson(TmcCore core, List<Exercise> submittedExercises,
+    private void updateCourseJson(List<Exercise> submittedExercises,
             CourseInfo courseInfo, Path courseInfoFile) {
 
-        Course updatedCourse = TmcUtil.findCourse(core, courseInfo.getCourseName());
+        Course updatedCourse = TmcUtil.findCourse(ctx, courseInfo.getCourseName());
         if (updatedCourse == null) {
             io.println("Failed to update config file for course " + courseInfo.getCourseName());
             return;
@@ -182,8 +182,8 @@ public class SubmitCommand extends AbstractCommand {
         CourseInfoIo.save(courseInfo, courseInfoFile);
     }
 
-    private void checkForExerciseUpdates(TmcCore core, Course course) {
-        ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, course);
+    private void checkForExerciseUpdates(Course course) {
+        ExerciseUpdater exerciseUpdater = new ExerciseUpdater(ctx, course);
         if (!exerciseUpdater.updatesAvailable()) {
             return;
         }

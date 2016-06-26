@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
@@ -12,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
@@ -21,9 +21,6 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 
@@ -38,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,20 +42,22 @@ import java.util.List;
 @PrepareForTest(TmcUtil.class)
 public class DownloadExercisesCommandTest {
 
-    Application app;
-    TestIo io;
-    TmcCore mockCore;
-    Path tempDir;
+    private Application app;
+    private CliContext ctx;
+    private TestIo io;
+    private TmcCore mockCore;
+    private WorkDir workDir;
+    private Path tempDir;
 
     @Before
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
-        WorkDir workDir = new WorkDir();
-        workDir.setWorkdir(tempDir);
+        workDir = new WorkDir(tempDir);
+
         io = new TestIo();
-        app = new Application(io, workDir);
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, workDir, mockCore);
+        app = new Application(ctx);
 
         mockStatic(TmcUtil.class);
     }
@@ -72,9 +70,10 @@ public class DownloadExercisesCommandTest {
     }
 
     @Test
-    public void failIfCoreIsNull() {
-        app = spy(app);
-        doReturn(null).when(app).getTmcCore();
+    public void failIfBackendFails() {
+        ctx = spy(new CliContext(io, workDir, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"download", "foo"};
         app.run(args);
@@ -90,7 +89,7 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void worksRightIfCourseIsNotFound() throws IOException {
-        when(TmcUtil.findCourse(eq(mockCore), eq("foo"))).thenReturn(null);
+        when(TmcUtil.findCourse(eq(ctx), eq("foo"))).thenReturn(null);
         String[] args = {"download", "foo"};
         app.run(args);
         io.assertContains("Course doesn't exist");
@@ -102,13 +101,12 @@ public class DownloadExercisesCommandTest {
         course.setExercises(Arrays.asList(new Exercise("exercise")));
         List<Exercise> exercises = Arrays.asList(new Exercise("exerciseName"));
 
-        when(TmcUtil.findCourse(eq(mockCore), eq("course1"))).thenReturn(course);
-        when(TmcUtil.downloadExercises(eq(mockCore), anyListOf(Exercise.class),
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(exercises);
 
         Settings settings = new Settings("server", "user", "password");
-        settings.setTmcProjectDirectory(tempDir);
-        app.setSettings(settings);
+        ctx.useSettings(settings);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -132,13 +130,13 @@ public class DownloadExercisesCommandTest {
         Course course = new Course("course1");
         course.setExercises(Arrays.asList(completed1, notCompleted, completed2));
 
-        when(TmcUtil.findCourse(eq(mockCore), eq("course1"))).thenReturn(course);
-        when(TmcUtil.downloadExercises(eq(mockCore), anyListOf(Exercise.class),
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(filteredExercises);
 
         Settings settings = new Settings("server", "user", "password");
-        settings.setTmcProjectDirectory(tempDir);
-        app.setSettings(settings);
+        workDir.setWorkdir(tempDir);
+        ctx.useSettings(settings);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -161,13 +159,13 @@ public class DownloadExercisesCommandTest {
         Course course = new Course("course1");
         course.setExercises(exercises);
 
-        when(TmcUtil.findCourse(eq(mockCore), eq("course1"))).thenReturn(course);
-        when(TmcUtil.downloadExercises(eq(mockCore), anyListOf(Exercise.class),
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(exercises);
 
         Settings settings = new Settings("server", "user", "password");
-        settings.setTmcProjectDirectory(tempDir);
-        app.setSettings(settings);
+        workDir.setWorkdir(tempDir);
+        ctx.useSettings(settings);
 
         String[] args = {"download", "-a", "course1"};
         app.run(args);

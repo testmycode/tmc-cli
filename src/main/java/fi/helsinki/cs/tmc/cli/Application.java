@@ -7,18 +7,8 @@ import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ShutdownHandler;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
-
-import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -27,13 +17,11 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The application class for the program.
@@ -44,45 +32,37 @@ public class Application {
     private static final long defaultUpdateInterval = 60 * 60 * 1000;
     private static final String usage = "tmc [args] COMMAND [command-args]";
 
-    private HashMap<String, String> properties;
-    private TmcCore tmcCore;
-    private Settings settings;
-    private WorkDir workDir;
-    private Io io;
-
-    private boolean inTest;
     private ShutdownHandler shutdownHandler;
+    private final CliContext context;
+    private final Io io;
 
-    private Options options;
-    private GnuParser parser;
+    private final Options options;
+    private final GnuParser parser;
     private String commandName;
 
-    public Application(Io io) {
+    public Application(CliContext context) {
         this.parser = new GnuParser();
         this.options = new Options();
+
+        this.context = context;
+        this.io = context.getIo();
+
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
 
-        inTest = true;
-        if (io == null) {
-            inTest = false;
-            io = new TerminalIo();
-            shutdownHandler = new ShutdownHandler(io);
+        //TODO implement the inTests as context.property
+        if (!context.inTests()) {
+            shutdownHandler = new ShutdownHandler(context.getIo());
             shutdownHandler.enable();
         }
-
-        this.io = io;
-        this.workDir = new WorkDir();
-        this.properties = SettingsIo.loadProperties();
     }
 
     public Application(Io io, WorkDir workDir) {
-        this(io);
-        this.workDir = workDir;
+        this(new CliContext(io, workDir));
     }
 
     private boolean runCommand(String name, String[] args) {
-        AbstractCommand command = CommandFactory.createCommand(this, name);
+        AbstractCommand command = CommandFactory.createCommand(this.context, name);
         if (command == null) {
             io.println("Command " + name + " doesn't exist.");
             return false;
@@ -135,7 +115,9 @@ public class Application {
     }
 
     public void run(String[] args) {
-        if (!inTest) {
+        context.setApp(this);
+
+        if (!context.inTests()) {
             versionCheck();
         }
 
@@ -146,98 +128,18 @@ public class Application {
 
         runCommand(commandName, commandArgs);
 
-        if (!inTest) {
+        if (!context.inTests()) {
             shutdownHandler.disable();
         }
     }
 
-    public void createTmcCore(Settings settings) {
-        TaskExecutor tmcLangs;
-
-        tmcLangs = new TaskExecutorImpl();
-        this.settings = settings;
-        this.tmcCore = new TmcCore(settings, tmcLangs);
-        /*XXX should we somehow check if the authentication is successful here */
-        Path path = getWorkDir().getCourseDirectory();
-        if (path == null) {
-            settings.setTmcProjectDirectory(Paths.get(System.getProperty("user.dir")));
-            return;
-        }
-        settings.setTmcProjectDirectory(path.getParent());
-    }
-    
-    // Method is used to help testing
-    public void setTmcCore(TmcCore tmcCore) {
-        this.tmcCore = tmcCore;
-    }
-
-    public TmcCore getTmcCore() {
-        if (this.tmcCore == null) {
-            SettingsIo settingsio = new SettingsIo();
-            Settings settings;
-
-            if (workDir.getConfigFile() != null) {
-                // If we're in a course directory, we load settings matching the course
-                // Otherwise we just load the last used settings
-                CourseInfo courseinfo = CourseInfoIo.load(workDir.getConfigFile());
-                if (courseinfo == null) {
-                    io.println("Course configuration file "
-                            + workDir.getConfigFile().toString()
-                            + "is invalid.");
-                    return null;
-                }
-                settings = settingsio.load(courseinfo.getUsername(),
-                        courseinfo.getServerAddress());
-            } else {
-                settings = settingsio.load();
-            }
-
-            if (settings == null) {
-                // If no settings are present
-                io.println("You are not logged in. Log in using: tmc login");
-                return null;
-            }
-            createTmcCore(settings);
-        }
-        return this.tmcCore;
-    }
-
-    public void setSettings(Settings settings) {
-        this.settings = settings;
-    }
-
     public static void main(String[] args) {
-        Application app = new Application(null);
+        Application app = new Application(new CliContext(null));
         app.run(args);
     }
 
-    public WorkDir getWorkDir() {
-        return this.workDir;
-    }
-
-    public void setWorkdir(WorkDir workDir) {
-        this.workDir = workDir;
-    }
-
-    public void setTmcProjectDirectory(Path path) {
-        this.settings.setTmcProjectDirectory(path);
-    }
-
-    public HashMap<String, String> getProperties() {
-        // Loads properties from the global configuration file in .config/tmc-cli/
-        return this.properties;
-    }
-
-    public Boolean saveProperties() {
-        // Saves properties to the global configuration file in .config/tmc-cli/
-        return SettingsIo.saveProperties(properties);
-    }
-
-    public CourseInfo createCourseInfo(Course course) {
-        return new CourseInfo(settings, course);
-    }
-
     private void versionCheck() {
+        Map<String, String> properties = context.getProperties();
         String previousTimestamp = properties.get(previousUpdateDateKey);
         Date previous = null;
 
@@ -264,11 +166,12 @@ public class Application {
 
         long timestamp = now.getTime();
         properties.put(previousUpdateDateKey, Long.toString(timestamp));
-        saveProperties();
+        context.saveProperties();
     }
 
+    //TODO rename this as getColorProperty
     public Color.AnsiColor getColor(String propertyName) {
-        String propertyValue = this.properties.get(propertyName);
+        String propertyValue = context.getProperties().get(propertyName);
         Color.AnsiColor color = Color.getColor(propertyValue);
         if (color == null) {
             switch (propertyName) {

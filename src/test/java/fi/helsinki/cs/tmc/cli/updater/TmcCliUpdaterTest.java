@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,12 +26,12 @@ import java.io.IOException;
 
 public class TmcCliUpdaterTest {
 
-    static String latestJson;
-    static String apiLimitExeededJson;
-    static String malformedJson;
-    static String changedJson;
+    private static String latestJson;
+    private static String apiLimitExeededJson;
+    private static String malformedJson;
+    private static String changedJson;
 
-    TestIo io;
+    private TestIo io;
 
     @BeforeClass
     public static void setUpClass() throws IOException {

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.junit.Before;
@@ -16,18 +17,19 @@ import java.util.HashMap;
 
 public class PropertiesCommandTest {
 
-    Application app;
-    TestIo io;
-    HashMap<String, String> props;
+    private Application app;
+    private TestIo io;
+    private HashMap<String, String> props;
 
     @Before
     public void setup() {
         io = new TestIo();
-        app = new Application(io);
-        app = Mockito.spy(app);
-        when(app.saveProperties()).thenReturn(true);
+        CliContext ctx = Mockito.spy(new CliContext(io));
+        app = new Application(ctx);
+
+        when(ctx.saveProperties()).thenReturn(true);
         props = new HashMap<>();
-        when(app.getProperties()).thenReturn(props);
+        when(ctx.getProperties()).thenReturn(props);
     }
 
     @Test

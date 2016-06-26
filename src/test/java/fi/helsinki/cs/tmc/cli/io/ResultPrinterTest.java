@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.cli.io;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
@@ -16,11 +15,8 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-
 public class ResultPrinterTest {
 
-    private Application app;
     private TestIo io;
     private ResultPrinter printer;
     private SubmissionResult mockSubResult;
@@ -34,8 +30,6 @@ public class ResultPrinterTest {
         printer = new ResultPrinter(io, true, true);
         mockSubResult = mock(SubmissionResult.class);
         logs = ImmutableMap.of();
-        app = mock(Application.class);
-        when(app.getProperties()).thenReturn(new HashMap<String, String>());
     }
 
     @Test

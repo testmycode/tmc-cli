@@ -14,6 +14,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -41,11 +42,12 @@ import java.util.ArrayList;
 public class PasteCommandTest {
 
     private Application app;
+    private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
+    private WorkDir workDir;
     private ArrayList<String> exerciseNames;
     private Exercise exercise;
-    private WorkDir workDir;
 
     private final URI pasteUri;
 
@@ -69,8 +71,8 @@ public class PasteCommandTest {
 
         mockCore = mock(TmcCore.class);
 
-        app = new Application(io, workDir);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, workDir, mockCore);
+        app = new Application(ctx);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
         exercise = new Exercise("paste-exercise");
@@ -93,17 +95,18 @@ public class PasteCommandTest {
 
     @Test
     public void failIfCoreIsNull() {
-        Application application = spy(new Application(io, workDir));
-        doReturn(null).when(application).getTmcCore();
+        ctx = spy(new CliContext(io, workDir, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"paste"};
-        application.run(args);
+        app.run(args);
         io.assertNotContains("No exercise specified");
     }
 
     @Test
     public void pasteRunsRightWithoutArguments() throws URISyntaxException {
-        when(TmcUtil.sendPaste(eq(mockCore), any(Exercise.class), anyString()))
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
                 .thenReturn(pasteUri);
         io.addConfirmationPrompt(true);
         app.run(new String[] {"paste", "paste-exercise"});
@@ -112,7 +115,7 @@ public class PasteCommandTest {
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verifyStatic(times(1));
-        TmcUtil.sendPaste(eq(mockCore), any(Exercise.class), anyString());
+        TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString());
 
         io.assertContains("Paste sent for exercise paste-exercise");
         assertTrue("Prints the paste URI",
@@ -122,7 +125,7 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithMessageSwitchWithMessage() {
-        when(TmcUtil.sendPaste(eq(mockCore), any(Exercise.class), anyString()))
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
                 .thenReturn(pasteUri);
         app.run(new String[] {"paste", "-m", "This is a message given as an argument",
                 "paste-exercise"});
@@ -131,7 +134,7 @@ public class PasteCommandTest {
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verifyStatic(Mockito.times(1));
-        TmcUtil.sendPaste(eq(mockCore), eq(exercise),
+        TmcUtil.sendPaste(eq(ctx), eq(exercise),
                 eq("This is a message given as an argument"));
 
         io.assertContains("Paste sent for exercise paste-exercise");
@@ -151,7 +154,7 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithNoMessageSwitch() {
-        when(TmcUtil.sendPaste(eq(mockCore), any(Exercise.class), anyString()))
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
                 .thenReturn(pasteUri);
         app.run(new String[] {"paste", "-n", "paste-exercise"});
 
@@ -159,7 +162,7 @@ public class PasteCommandTest {
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verifyStatic(Mockito.times(1));
-        TmcUtil.sendPaste(eq(mockCore), eq(exercise),
+        TmcUtil.sendPaste(eq(ctx), eq(exercise),
                 eq(""));
 
         io.assertContains("Paste sent for exercise paste-exercise");
@@ -170,7 +173,7 @@ public class PasteCommandTest {
     @Test
     public void handlesExceptionWhenCallableFails() {
         io.addConfirmationPrompt(true);
-        when(TmcUtil.sendPaste(eq(mockCore), any(Exercise.class), anyString()))
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
                 .thenReturn(null);
         app.run(new String[] {"paste", "paste-exercise"});
 
@@ -178,7 +181,7 @@ public class PasteCommandTest {
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verifyStatic(Mockito.times(1));
-        TmcUtil.sendPaste(eq(mockCore), eq(exercise), anyString());
+        TmcUtil.sendPaste(eq(ctx), eq(exercise), anyString());
 
         io.assertContains("Unable to send the paste");
         io.assertAllPromptsUsed();
@@ -192,7 +195,7 @@ public class PasteCommandTest {
         app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
 
         verifyStatic(Mockito.never());
-        TmcUtil.sendPaste(eq(mockCore), any(Exercise.class), anyString());
+        TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString());
 
         io.assertContains("No exercise specified");
     }

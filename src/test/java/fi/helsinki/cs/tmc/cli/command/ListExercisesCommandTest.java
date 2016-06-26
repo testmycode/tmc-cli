@@ -9,13 +9,13 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -33,12 +33,13 @@ import java.util.Arrays;
 public class ListExercisesCommandTest {
     
     private static final String COURSE_NAME = "2016-aalto-c";
-    static Path pathToDummyCourse;
-    static Path pathToNonCourseDir;
+    private static Path pathToDummyCourse;
+    private static Path pathToNonCourseDir;
 
-    Application app;
-    TestIo io;
-    TmcCore mockCore;
+    private Application app;
+    private CliContext ctx;
+    private TestIo io;
+    private TmcCore mockCore;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -53,17 +54,18 @@ public class ListExercisesCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, mockCore);
+        app = new Application(ctx);
 
         mockStatic(TmcUtil.class);
     }
 
     @Test
-    public void failIfCoreIsNull() {
-        app = spy(app);
-        doReturn(null).when(app).getTmcCore();
+    public void failIfBackendFails() {
+        ctx = spy(new CliContext(io, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
@@ -72,7 +74,7 @@ public class ListExercisesCommandTest {
 
     @Test
     public void worksLocallyIfNotInCourseDirectoryAndCourseIsSpecified() {
-        app.setWorkdir(new WorkDir(pathToNonCourseDir));
+        ctx.setWorkdir(new WorkDir(pathToNonCourseDir));
         String[] args = {"exercises", "fooCourse", "-n"};
         app.run(args);
         io.assertContains("You have to be in a course directory or use the -i");
@@ -80,7 +82,7 @@ public class ListExercisesCommandTest {
     
     @Test
     public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
-        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"exercises", COURSE_NAME, "-n"};
         app.run(args);
         io.assertContains("Deadline:");
@@ -88,7 +90,7 @@ public class ListExercisesCommandTest {
     
     @Test
     public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
-        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"exercises", "-n"};
         app.run(args);
         io.assertContains("Deadline:");
@@ -97,7 +99,7 @@ public class ListExercisesCommandTest {
     @Test
     public void giveMessageIfNoExercisesOnCourse() {
         Course course = new Course("test-course");
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -108,7 +110,7 @@ public class ListExercisesCommandTest {
     public void listExercisesGivesCorrectExercises() {
         Course course = new Course("test-course");
         course.setExercises(Arrays.asList(new Exercise("first"), new Exercise("second")));
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -118,7 +120,7 @@ public class ListExercisesCommandTest {
 
     @Test
     public void emptyArgsGivesAnErrorMessage() {
-        when(TmcUtil.listCourses(eq(mockCore))).thenReturn(null);
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(null);
         String[] args = {"exercises", "-n"};
         app.run(args);
         io.assertContains("No course specified");
@@ -126,7 +128,7 @@ public class ListExercisesCommandTest {
 
     @Test
     public void failIfCourseDoesNotExist() {
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(null);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(null);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -143,7 +145,7 @@ public class ListExercisesCommandTest {
         Course course = new Course("test-course");
         course.setExercises(Arrays.asList(exercise,
                 new Exercise("second-exercise")));
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -160,7 +162,7 @@ public class ListExercisesCommandTest {
         Course course = new Course("test-course");
         course.setExercises(Arrays.asList(exercise,
                 new Exercise("second-exercise")));
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -176,7 +178,7 @@ public class ListExercisesCommandTest {
         Course course = new Course("test-course");
         course.setExercises(Arrays.asList(exercise,
                 new Exercise("second-exercise")));
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -189,7 +191,7 @@ public class ListExercisesCommandTest {
         course.setExercises(Arrays.asList(
                 new Exercise("first-exercise"),
                 new Exercise("second-exercise")));
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -204,7 +206,7 @@ public class ListExercisesCommandTest {
         Course course = new Course("test-course");
         course.setExercises(Arrays.asList(exercise,
                 new Exercise("second-exercise")));
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
@@ -219,7 +221,7 @@ public class ListExercisesCommandTest {
         Course course = new Course("test-course");
         course.setExercises(Arrays.asList(exercise,
                 new Exercise("second-exercise")));
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);

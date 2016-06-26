@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -10,7 +10,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -46,10 +45,9 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         showAll = args.hasOption("a");
 
-        Application app = getApp();
-        TmcCore core = app.getTmcCore();
-        WorkDir workDir = getApp().getWorkDir();
-        if (core == null) {
+        CliContext ctx = getContext();
+        WorkDir workDir = ctx.getWorkDir();
+        if (!ctx.loadBackend()) {
             return;
         }
 
@@ -59,7 +57,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         String courseName = stringArgs[0];
-        Course course = TmcUtil.findCourse(core, courseName);
+        Course course = TmcUtil.findCourse(ctx, courseName);
         if (course == null) {
             io.println("Course doesn't exist.");
             return;
@@ -68,11 +66,11 @@ public class DownloadExercisesCommand extends AbstractCommand {
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
-        Color.AnsiColor color1 = app.getColor("progressbar-left");
-        Color.AnsiColor color2 = app.getColor("progressbar-right");
+        Color.AnsiColor color1 = ctx.getApp().getColor("progressbar-left");
+        Color.AnsiColor color2 = ctx.getApp().getColor("progressbar-right");
         TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
 
-        List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
+        List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {
             io.println("Failed to download exercises");
             return;
@@ -98,10 +96,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
             io.println("Use -a flag to download also your completed exercises.");
         }
 
-        Path configFile = app.getWorkDir().getWorkingDirectory()
+        Path configFile = workDir.getWorkingDirectory()
                 .resolve(courseName)
                 .resolve(CourseInfoIo.COURSE_CONFIG);
-        CourseInfo info = app.createCourseInfo(course);
+        CourseInfo info = ctx.createCourseInfo(course);
         info.setExercises(course.getExercises());
         CourseInfoIo.save(info, configFile);
     }

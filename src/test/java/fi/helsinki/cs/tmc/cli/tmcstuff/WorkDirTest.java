@@ -46,7 +46,7 @@ public class WorkDirTest {
         } catch (Exception e) {
             fail(e.toString());
         }
-        List<Exercise> exercises = new ArrayList<Exercise>();
+        List<Exercise> exercises = new ArrayList<>();
         exercises.add(new Exercise("viikko1-teht1"));
         exercises.add(new Exercise("viikko2-teht2"));
         exercises.add(new Exercise("viikko2-subdir-teht3"));

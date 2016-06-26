@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 
@@ -15,16 +15,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FeedbackHandler {
+
     private static final Logger logger = LoggerFactory.getLogger(FeedbackHandler.class);
+    private final CliContext ctx;
     private final Io io;
 
     private List<FeedbackQuestion> questions;
 
-    public FeedbackHandler(Io io) {
-        this.io = io;
+    public FeedbackHandler(CliContext context) {
+        this.ctx = context;
+        this.io = context.getIo();
     }
 
-    public Boolean sendFeedback(TmcCore core, List<FeedbackQuestion> questions,
+    public boolean sendFeedback(List<FeedbackQuestion> questions,
                              URI feedbackUri) {
         this.questions = questions;
         List<FeedbackAnswer> answers = new ArrayList<>();
@@ -32,7 +35,7 @@ public class FeedbackHandler {
         for (FeedbackQuestion question : questions) {
             answers.add(getAnswer(question));
         }
-        return TmcUtil.sendFeedback(core, answers, feedbackUri);
+        return TmcUtil.sendFeedback(ctx, answers, feedbackUri);
     }
 
     private FeedbackAnswer getAnswer(FeedbackQuestion question) {

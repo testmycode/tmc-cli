@@ -11,10 +11,10 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(EnvironmentUtil.class)
 public class TmcCliProgressObserverTest {
+
     private TestIo io;
 
     @Before

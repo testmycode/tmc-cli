@@ -25,7 +25,7 @@ public class HelpCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
-        Application app = getApp();
+        Application app = getContext().getApp();
         this.io = io;
 
         StringBuilder sb = new StringBuilder();

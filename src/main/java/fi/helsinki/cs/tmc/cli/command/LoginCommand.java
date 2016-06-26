@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 public class LoginCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
+    private CliContext ctx;
     private Io io;
 
     @Override
@@ -31,11 +32,17 @@ public class LoginCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
+        this.ctx = getContext();
         this.io = io;
         String serverAddress = getLoginInfo(args, "s", "server address: ");
         String username = getLoginInfo(args, "u", "username: ");
         String password = getLoginInfo(args, "p", "password: ");
 
+        if (! ctx.loadBackend(false)) {
+            return;
+        }
+
+        //TODO don't create new settings object.  
         Settings settings = new Settings(serverAddress, username, password);
         if (loginPossible(settings) && saveLoginSettings(settings)) {
             io.println("Login successful.");
@@ -67,13 +74,9 @@ public class LoginCommand extends AbstractCommand {
      * @return True if user exist
      */
     private boolean loginPossible(Settings settings) {
-        Application app = getApp();
-        app.createTmcCore(settings);
-        TmcCore core = app.getTmcCore();
-
         // we could move this whole try catch block into TmcUtil
         try {
-            TmcUtil.tryToLogin(core);
+            TmcUtil.tryToLogin(ctx, settings);
         } catch (Exception e) {
             Throwable cause = e.getCause();
             if (cause instanceof FailedHttpResponseException) {

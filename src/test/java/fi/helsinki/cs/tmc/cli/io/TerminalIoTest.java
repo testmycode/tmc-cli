@@ -28,9 +28,9 @@ import java.nio.charset.StandardCharsets;
 @PrepareForTest({TerminalIo.class, Console.class, System.class})
 public class TerminalIoTest {
 
-    Io io;
-    OutputStream os;
-    InputStream oldInputStream;
+    private Io io;
+    private OutputStream os;
+    private InputStream oldInputStream;
 
     @Before
     public void setUp() throws Exception {

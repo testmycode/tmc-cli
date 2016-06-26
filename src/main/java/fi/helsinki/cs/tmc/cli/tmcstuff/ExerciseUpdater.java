@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -17,14 +17,14 @@ public class ExerciseUpdater {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ExerciseUpdater.class);
 
-    private final TmcCore core;
+    private final CliContext ctx;
     private final Course course;
 
     private List<Exercise> newExercises;
     private List<Exercise> updatedExercises;
 
-    public ExerciseUpdater(TmcCore core, Course course) {
-        this.core = core;
+    public ExerciseUpdater(CliContext context, Course course) {
+        this.ctx = context;
         this.course = course;
 
         this.newExercises = new ArrayList<>();
@@ -69,7 +69,7 @@ public class ExerciseUpdater {
      * @return true if there is something new to download, false if not.
      */
     public boolean updatesAvailable() {
-        UpdateResult result = TmcUtil.getUpdatableExercises(core, course);
+        UpdateResult result = TmcUtil.getUpdatableExercises(ctx, course);
         if (result == null) {
             return false;
         }
@@ -88,11 +88,11 @@ public class ExerciseUpdater {
                 iterator.remove();
             }
         }
-        return TmcUtil.downloadExercises(core, newAndUpdated, progobs);
+        return TmcUtil.downloadExercises(ctx, newAndUpdated, progobs);
     }
 
     public boolean updateCourseJson(CourseInfo info, Path configFile) {
-        Course newDetailsCourse = TmcUtil.findCourse(core, course.getName());
+        Course newDetailsCourse = TmcUtil.findCourse(ctx, course.getName());
         if (newDetailsCourse == null) {
             return false;
         }

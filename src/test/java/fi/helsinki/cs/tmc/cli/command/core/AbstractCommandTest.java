@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command.core;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
@@ -10,6 +11,7 @@ import org.junit.Test;
 
 public class AbstractCommandTest {
     AbstractCommand emptyCommand;
+    CliContext ctx;
     TestIo io;
 
     @Command(name = "empty", desc = "Long description")
@@ -27,11 +29,13 @@ public class AbstractCommandTest {
     public AbstractCommandTest() {
         emptyCommand = new EmptyCommand();
         io = new TestIo();
+        ctx = new CliContext(io);
     }
 
     @Test
     public void helpMessagePrints() {
         String[] args = {"-h"};
+        emptyCommand.setContext(ctx);
         emptyCommand.execute(args, io);
         io.assertContains("tmc empty");
     }
@@ -39,6 +43,7 @@ public class AbstractCommandTest {
     @Test
     public void emptyCommandHasHelpOption() {
         String[] args = {"-h"};
+        emptyCommand.setContext(ctx);
         emptyCommand.execute(args, io);
         io.assertContains("--help");
     }
@@ -46,6 +51,7 @@ public class AbstractCommandTest {
     @Test
     public void failWhenInvalidOption() {
         String[] args = {"-a34t3"};
+        emptyCommand.setContext(ctx);
         emptyCommand.execute(args, io);
         io.assertContains("Invalid command");
     }

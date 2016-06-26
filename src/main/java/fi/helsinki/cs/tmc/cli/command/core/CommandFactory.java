@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command.core;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 
 import org.slf4j.LoggerFactory;
 
@@ -63,18 +63,18 @@ public class CommandFactory {
     /**
      * Create new instance of the command.
      *
-     * @param app Application that is given to the commands
+     * @param context Execution context given to the created command
      * @param name Name of the command
      * @return A new command instance
      */
-    public static AbstractCommand createCommand(Application app, String name) {
+    public static AbstractCommand createCommand(CliContext context, String name) {
         Class commandClass = CommandFactory.commands.get(name);
         if (commandClass == null) {
             return null;
         }
         try {
             AbstractCommand command = (AbstractCommand)commandClass.newInstance();
-            command.setApplication(app);
+            command.setContext(context);
             return command;
         } catch (InstantiationException | IllegalAccessException ex) {
             throw new RuntimeException("getCommand failed", ex);

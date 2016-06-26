@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
@@ -9,7 +9,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.cli.CommandLine;
@@ -37,12 +36,11 @@ public class PasteCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
-        Application app = getApp();
-        TmcCore core = app.getTmcCore();
-        if (core == null) {
+        CliContext ctx = getContext();
+        if (!ctx.loadBackend()) {
             return;
         }
-        WorkDir workdir = app.getWorkDir();
+        WorkDir workdir = ctx.getWorkDir();
         String[] stringArgs = args.getArgs();
 
         Boolean valid;
@@ -90,9 +88,9 @@ public class PasteCommand extends AbstractCommand {
         }
 
         String exerciseName = exercisenames.get(0);
-        CourseInfo courseinfo = CourseInfoIo.load(app.getWorkDir().getConfigFile());
+        CourseInfo courseinfo = CourseInfoIo.load(ctx.getWorkDir().getConfigFile());
         Exercise exercise = courseinfo.getExercise(exerciseName);
-        URI uri = TmcUtil.sendPaste(core, exercise, message);
+        URI uri = TmcUtil.sendPaste(ctx, exercise, message);
         if (uri == null) {
             io.println("Unable to send the paste");
             return;

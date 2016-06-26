@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static fi.helsinki.cs.tmc.langs.domain.RunResult.Status.PASSED;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -15,7 +15,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
@@ -44,13 +43,18 @@ public class RunTestsCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
+        CliContext ctx = getContext();
+
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
-        Application app = getApp();
-        WorkDir workDir = app.getWorkDir();
+        if (!ctx.loadBackend(false)) {
+            return;
+        }
+
+        WorkDir workDir = ctx.getWorkDir();
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
                 io.println("Error: " + exercise + " is not a valid exercise.");
@@ -65,26 +69,18 @@ public class RunTestsCommand extends AbstractCommand {
         }
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
 
-        // Local tests don't require login so make sure tmcCore is never null.
-        app.createTmcCore(new Settings());
-
-        TmcCore core = app.getTmcCore();
-        if (core == null) {
-            return;
-        }
-
         ResultPrinter resultPrinter
                 = new ResultPrinter(io, this.showDetails, this.showPassed);
         RunResult runResult;
         Boolean isOnlyExercise = exerciseNames.size() == 1;
 
-        Color.AnsiColor color1 = app.getColor("testresults-left");
-        Color.AnsiColor color2 = app.getColor("testresults-right");
+        Color.AnsiColor color1 = ctx.getApp().getColor("testresults-left");
+        Color.AnsiColor color2 = ctx.getApp().getColor("testresults-right");
 
         try {
             int total = 0;
             int passed = 0;
-            // TODO: use the proper progress observer once core/langs uses it correctly
+
             for (String name : exerciseNames) {
 
                 io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
@@ -92,7 +88,7 @@ public class RunTestsCommand extends AbstractCommand {
                 Exercise exercise = info.getExercise(name);
 
                 // TODO use progress observer (Bug is in tmc-core)
-                runResult = TmcUtil.runLocalTests(core, exercise);
+                runResult = TmcUtil.runLocalTests(ctx, exercise);
 
                 resultPrinter.printRunResult(runResult, exercise.isCompleted(),
                         isOnlyExercise, color1, color2);

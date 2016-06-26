@@ -11,7 +11,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -43,17 +43,17 @@ import java.util.concurrent.Callable;
 @PrepareForTest(RunResult.class)
 public class TmcUtilTest {
 
-    Application app;
+    static Path workDir;
+
+    CliContext ctx;
     TestIo io;
     TmcCore mockCore;
-    static Path workDir;
 
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, mockCore);
 
         Answer<Callable<Course>> answer = new Answer<Callable<Course>>() {
             @Override
@@ -104,8 +104,9 @@ public class TmcUtilTest {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
         boolean fail = true;
+        Settings settings = new Settings();
         try {
-            assertFalse(TmcUtil.tryToLogin(mockCore));
+            assertFalse(TmcUtil.tryToLogin(ctx, settings));
         } catch (Exception e) {
             assertEquals(Exception.class, e.getClass());
             assertEquals("failed", e.getMessage());
@@ -123,7 +124,7 @@ public class TmcUtilTest {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createReturningCallback(expectedResult));
 
-        List<Course> result = TmcUtil.listCourses(mockCore);
+        List<Course> result = TmcUtil.listCourses(ctx);
         assertEquals(expectedResult, result);
     }
 
@@ -135,7 +136,7 @@ public class TmcUtilTest {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createReturningCallback(courses));
 
-        Course result = TmcUtil.findCourse(mockCore, "test-course");
+        Course result = TmcUtil.findCourse(ctx, "test-course");
         assertEquals(expectedResult, result);
     }
 
@@ -145,7 +146,7 @@ public class TmcUtilTest {
                 new Course("another"));
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createReturningCallback(courses));
-        assertNull(TmcUtil.findCourse(mockCore, "not-existing-course"));
+        assertNull(TmcUtil.findCourse(ctx, "not-existing-course"));
     }
 
     @Test
@@ -175,7 +176,7 @@ public class TmcUtilTest {
                 anyListOf(Exercise.class)))
                 .thenReturn(createReturningCallback(expectedResult));
 
-        List<Exercise> result = TmcUtil.downloadExercises(mockCore, expectedResult,
+        List<Exercise> result = TmcUtil.downloadExercises(ctx, expectedResult,
                 new TmcCliProgressObserver(io));
         assertEquals(expectedResult, result);
     }
@@ -188,7 +189,7 @@ public class TmcUtilTest {
         when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class),
                 eq(exercises))).thenReturn(callable);
 
-        assertNull(TmcUtil.downloadExercises(mockCore, exercises,
+        assertNull(TmcUtil.downloadExercises(ctx, exercises,
                 new TmcCliProgressObserver(io)));
     }
 
@@ -203,7 +204,7 @@ public class TmcUtilTest {
         when(mockCore.submit(any(ProgressObserver.class), eq(exercise)))
                 .thenReturn(createReturningCallback(expectedResult));
 
-        SubmissionResult result = TmcUtil.submitExercise(mockCore, exercise);
+        SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
         assertEquals(expectedResult, result);
     }
 
@@ -213,7 +214,7 @@ public class TmcUtilTest {
         when(mockCore.submit(any(ProgressObserver.class), eq(exercise)))
                 .thenReturn(createThrowingCallback(SubmissionResult.class, "failed"));
 
-        assertNull(TmcUtil.submitExercise(mockCore, exercise));
+        assertNull(TmcUtil.submitExercise(ctx, exercise));
     }
 
     @Test
@@ -224,7 +225,7 @@ public class TmcUtilTest {
         when(mockCore.getExerciseUpdates(any(ProgressObserver.class), eq(course)))
                 .thenReturn(createReturningCallback(expectedResult));
 
-        UpdateResult result = TmcUtil.getUpdatableExercises(mockCore, course);
+        UpdateResult result = TmcUtil.getUpdatableExercises(ctx, course);
         assertEquals(expectedResult, result);
     }
 
@@ -234,7 +235,7 @@ public class TmcUtilTest {
         when(mockCore.getExerciseUpdates(any(ProgressObserver.class), eq(course)))
                 .thenReturn(createThrowingCallback(UpdateResult.class, "failed"));
 
-        assertNull(TmcUtil.getUpdatableExercises(mockCore, course));
+        assertNull(TmcUtil.getUpdatableExercises(ctx, course));
     }
 
     @Test
@@ -245,7 +246,7 @@ public class TmcUtilTest {
         when(mockCore.pasteWithComment(any(ProgressObserver.class), eq(exercise),
                 eq("message"))).thenReturn(createReturningCallback(expectedResult));
 
-        URI result = TmcUtil.sendPaste(mockCore, exercise, "message");
+        URI result = TmcUtil.sendPaste(ctx, exercise, "message");
         assertEquals(expectedResult, result);
     }
 
@@ -254,7 +255,7 @@ public class TmcUtilTest {
         Exercise exercise = new Exercise("test-course");
         when(mockCore.pasteWithComment(any(ProgressObserver.class), eq(exercise),
                 eq("message"))).thenReturn(createThrowingCallback(URI.class, "failed"));
-        assertNull(TmcUtil.sendPaste(mockCore, exercise, "message"));
+        assertNull(TmcUtil.sendPaste(ctx, exercise, "message"));
     }
 
     @Test
@@ -265,7 +266,7 @@ public class TmcUtilTest {
         when(mockCore.runTests(any(ProgressObserver.class), eq(exercise)))
                 .thenReturn(createReturningCallback(expectedResult));
 
-        RunResult result = TmcUtil.runLocalTests(mockCore, exercise);
+        RunResult result = TmcUtil.runLocalTests(ctx, exercise);
         assertEquals(expectedResult, result);
     }
 
@@ -274,7 +275,7 @@ public class TmcUtilTest {
         Exercise exercise = new Exercise("test-course");
         when(mockCore.runTests(any(ProgressObserver.class), eq(exercise)))
                 .thenReturn(createThrowingCallback(RunResult.class, "failed"));
-        assertNull(TmcUtil.runLocalTests(mockCore, exercise));
+        assertNull(TmcUtil.runLocalTests(ctx, exercise));
     }
 
     @Test
@@ -285,7 +286,7 @@ public class TmcUtilTest {
         when(mockCore.sendFeedback(any(ProgressObserver.class), eq(answers),
                 eq(feedbackUri))).thenReturn(createReturningCallback(true));
 
-        assertTrue(TmcUtil.sendFeedback(mockCore, answers, feedbackUri));
+        assertTrue(TmcUtil.sendFeedback(ctx, answers, feedbackUri));
     }
 
     @Test
@@ -297,6 +298,6 @@ public class TmcUtilTest {
         when(mockCore.sendFeedback(any(ProgressObserver.class), eq(answers),
                 eq(feedbackUri))).thenReturn(callable);
 
-        assertFalse(TmcUtil.sendFeedback(mockCore, answers, feedbackUri));
+        assertFalse(TmcUtil.sendFeedback(ctx, answers, feedbackUri));
     }
 }

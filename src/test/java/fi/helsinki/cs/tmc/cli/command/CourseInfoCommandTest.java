@@ -1,8 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -11,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
@@ -41,10 +40,11 @@ public class CourseInfoCommandTest {
     static Path pathToDummyExercise;
 
     private Application app;
+    private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
-    private Course course;
     private WorkDir workDir;
+    private Course course;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -59,9 +59,9 @@ public class CourseInfoCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, mockCore);
+        app = new Application(ctx);
 
         course = new Course("test-course123");
         List<Exercise> exercises = new ArrayList<>();
@@ -73,99 +73,100 @@ public class CourseInfoCommandTest {
     }
 
     @Test
-    public void failIfCoreIsNull() {
-        app = spy(app);
-        doReturn(null).when(app).getTmcCore();
+    public void failIfBackendFails() {
+        ctx = spy(new CliContext(io, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"info", "course", "-i"};
         app.run(args);
-        assertFalse(io.out().contains("doesn't exist on this server."));
+        io.assertNotContains("doesn't exist on this server.");
     }
 
     @Test
     public void showMessageIfCourseIsNotGiven() {
         String[] args = {"info"};
         app.run(args);
-        assertTrue(io.out().contains("You have to be in a course directory"));
+        io.assertContains("You have to be in a course directory");
     }
 
     @Test
     public void showErrorMessageIfNoCourseGivenWithIOption() {
         String[] args = {"info", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("You must give a course as a parameter."));
+        io.assertContains("You must give a course");
     }
 
     @Test
     public void showMessageIfCourseDoesNotExistOnTheServer() {
-        when(TmcUtil.findCourse(eq(mockCore), eq("foo"))).thenReturn(null);
+        when(TmcUtil.findCourse(eq(ctx), eq("foo"))).thenReturn(null);
         String[] args = {"info", "foo", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("The course foo doesn't exist on this server"));
+        io.assertContains("course foo doesn't exist");
     }
 
     @Test
     public void printCourseWithOptionI() {
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("Course name: test-course123"));
-        assertFalse(io.out().contains("Statistics URLs"));
+        io.assertContains("Course name: test-course123");
+        io.assertNotContains("Statistics URLs");
     }
 
     @Test
     public void printCourseWithOptionsIAndA() {
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-a", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("Statistics URLs"));
+        io.assertContains("Statistics URLs");
     }
 
     @Test
     public void printCourseWithNoExercisesFromTheServer() {
         course.setExercises(new ArrayList<Exercise>());
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("Exercises: -"));
+        io.assertContains("Exercises: -");
     }
 
     @Test
     public void printExerciseIfInExerciseDirectoryWithoutParameters() {
         workDir = new WorkDir(pathToDummyExercise);
-        app.setWorkdir(workDir);
+        ctx.setWorkdir(workDir);
         String[] args = {"info"};
         app.run(args);
-        assertTrue(io.out().contains(EXERCISE1_NAME));
-        assertTrue(io.out().contains("Exercise"));
+        io.assertContains(EXERCISE1_NAME);
+        io.assertContains("Exercise");
     }
 
     @Test
     public void printExerciseIfInCourseDirectoryAndGivenExerciseName() {
         workDir = new WorkDir(pathToDummyCourse);
-        app.setWorkdir(workDir);
+        ctx.setWorkdir(workDir);
         String[] args = {"info", EXERCISE1_NAME};
         app.run(args);
-        assertTrue(io.out().contains(EXERCISE1_NAME));
-        assertTrue(io.out().contains("Exercise"));
+        io.assertContains(EXERCISE1_NAME);
+        io.assertContains("Exercise");
     }
 
     @Test
     public void printCourseIfInCourseDirectoryWithoutParameters() {
         workDir = new WorkDir(pathToDummyCourse);
-        app.setWorkdir(workDir);
+        ctx.setWorkdir(workDir);
         String[] args = {"info"};
         app.run(args);
-        assertTrue(io.out().contains(("2016-aalto-c")));
+        io.assertContains("2016-aalto-c");
     }
 
     @Test
     public void printErrorMessageIfNotInCourseDirectoryAndCourseDoesntExist() {
         workDir = new WorkDir(Paths.get(System.getProperty("java.io.tmpdir")));
-        app.setWorkdir(workDir);
+        ctx.setWorkdir(workDir);
         String[] args = {"info", "notacourse"};
         app.run(args);
     }
@@ -173,36 +174,36 @@ public class CourseInfoCommandTest {
     @Test
     public void printGivenCourseFromTheServerIfInCourseDirectoryAndGivenCourseName() {
         workDir = new WorkDir(pathToDummyCourse);
-        app.setWorkdir(workDir);
+        ctx.setWorkdir(workDir);
 
         course.setExercises(new ArrayList<Exercise>());
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("test-course123"));
+        io.assertContains("test-course123");
     }
 
     @Test
     public void printsErrorIfInCourseDirectoryAndGivenCourseNameThatDoesntExistOnTheServer() {
         workDir = new WorkDir(pathToDummyCourse);
-        app.setWorkdir(workDir);
+        ctx.setWorkdir(workDir);
 
-        when(TmcUtil.findCourse(eq(mockCore), eq("test-course123"))).thenReturn(course);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "notacourse", "-i"};
         app.run(args);
-        assertTrue(io.out().contains("doesn't exist on this server."));
+        io.assertContains("doesn't exist on this server.");
     }
 
     @Test
     public void printsLongExerciseInfoWithOption() {
         workDir = new WorkDir(pathToDummyExercise);
-        app.setWorkdir(workDir);
+        ctx.setWorkdir(workDir);
         String[] args = {"info", "-a"};
         app.run(args);
 
-        assertTrue(io.out().contains("Exercise name"));
-        assertTrue(io.out().contains("Is returnable"));
+        io.assertContains("Exercise name");
+        io.assertContains("Is returnable");
     }
 }

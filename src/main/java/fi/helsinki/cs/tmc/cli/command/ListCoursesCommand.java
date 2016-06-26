@@ -25,11 +25,10 @@ public class ListCoursesCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
-        TmcCore core = getApp().getTmcCore();
-        if (core == null) {
+        if (! getContext().loadBackend()) {
             return;
         }
-        List<Course> courses = TmcUtil.listCourses(core);
+        List<Course> courses = TmcUtil.listCourses(getContext());
         if (courses.isEmpty()) {
             io.println("No courses found on this server.");
             return;
