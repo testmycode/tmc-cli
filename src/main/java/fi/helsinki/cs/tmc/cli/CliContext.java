@@ -22,9 +22,10 @@ public class CliContext {
     private Application application;
     private TmcCore tmcCore;
     private Settings settings;
+
+    /* cached values */
     private boolean hasLogin;
     private CourseInfo courseInfo;
-
     private HashMap<String, String> properties;
     private final boolean inTest;
 
@@ -59,6 +60,11 @@ public class CliContext {
         this.hasLogin = false;
         this.courseInfo = null;
     }
+
+    /*TODO create reset method for removing all cached data that is called
+     * when working directory is changed or by users demand also use it in
+     * constructor.
+     */
 
     protected void setApp(Application app) {
         this.application = app;
@@ -107,6 +113,24 @@ public class CliContext {
     public Boolean saveProperties() {
         // Saves properties to the global configuration file in .config/tmc-cli/
         return SettingsIo.saveProperties(properties);
+    }
+
+    public CourseInfo getCourseInfo() {
+        if (courseInfo != null) {
+            return courseInfo;
+        }
+        if (workDir.getConfigFile() == null) {
+            return null;
+        }
+        courseInfo = CourseInfoIo.load(workDir.getConfigFile());
+        if (courseInfo == null) {
+            io.println("Course configuration file "
+                    + workDir.getConfigFile().toString()
+                    + "is invalid.");
+            //TODO add a way to rewrite the course config file.
+            return null;
+        }
+        return this.courseInfo;
     }
 
     // Method is used to help testing
@@ -168,23 +192,18 @@ public class CliContext {
     }
 
     private boolean createTmcCore() {
-        Settings settings;
+        Settings cachedSettings = null;
 
         if (workDir.getConfigFile() != null) {
             // If we're in a course directory, we load settings matching the course
             // Otherwise we just load the last used settings
-            courseInfo = CourseInfoIo.load(workDir.getConfigFile());
-            if (courseInfo == null) {
-                io.println("Course configuration file "
-                        + workDir.getConfigFile().toString()
-                        + "is invalid.");
-                //TODO add a way to rewrite the course config file.
-                return false;
+            courseInfo = getCourseInfo();
+            if (courseInfo != null) {
+                cachedSettings = SettingsIo.load(courseInfo.getUsername(),
+                        courseInfo.getServerAddress());
             }
-            settings = SettingsIo.load(courseInfo.getUsername(),
-                    courseInfo.getServerAddress());
         } else {
-            settings = SettingsIo.load();
+            cachedSettings = SettingsIo.load();
         }
 
         hasLogin = true;
@@ -193,7 +212,7 @@ public class CliContext {
             settings = new Settings();
         }
 
-        createTmcCore(settings);
+        createTmcCore(cachedSettings);
         return true;
     }
 }
