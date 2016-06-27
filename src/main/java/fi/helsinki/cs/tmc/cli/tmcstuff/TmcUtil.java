@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.slf4j.Logger;
@@ -143,6 +144,16 @@ public class TmcUtil {
 
         } catch (Exception e) {
             logger.error("Failed to run local tests", e);
+            return null;
+        }
+    }
+
+    public static ValidationResult runCheckStyle(CliContext ctx, Exercise exercise) {
+        try {
+            TmcCore core = ctx.getTmcCore();
+            return core.runCheckStyle(ProgressObserver.NULL_OBSERVER, exercise).call();
+        } catch (Exception e) {
+            logger.error("Failed to run checkstyle", e);
             return null;
         }
     }
