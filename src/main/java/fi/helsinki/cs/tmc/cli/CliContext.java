@@ -22,6 +22,8 @@ public class CliContext {
     private Application application;
     private TmcCore tmcCore;
     private Settings settings;
+    private boolean hasLogin;
+    private CourseInfo courseInfo;
 
     private HashMap<String, String> properties;
     private final boolean inTest;
@@ -43,7 +45,7 @@ public class CliContext {
     public CliContext(Io io, WorkDir workDir, TmcCore core) {
         inTest = (io != null);
         if (!inTest) {
-            io = new TerminalIo();
+            io = new TerminalIo(System.in);
         }
         // This is only used when we want to mock the tmc core.
         if (core != null) {
@@ -54,6 +56,8 @@ public class CliContext {
         this.workDir = workDir;
         this.properties = SettingsIo.loadProperties();
         this.tmcCore = core;
+        this.hasLogin = false;
+        this.courseInfo = null;
     }
 
     protected void setApp(Application app) {
@@ -68,6 +72,7 @@ public class CliContext {
     }
 
     //TODO get rid of this (use properties)
+    @Deprecated
     public boolean inTests() {
         return inTest;
     }
@@ -118,7 +123,21 @@ public class CliContext {
             return true;
         }
 
-        return createTmcCore();
+        if (!createTmcCore()) {
+            return false;
+        }
+
+        if (useInternet && !hasLogin) {
+            // If no settings are present
+            if (courseInfo == null) {
+                io.println("You are not logged in. Log in using: tmc login");
+            } else {
+                io.println("You are not logged in as " + courseInfo.getUsername()
+                        + ". Log in using: tmc login");
+            }
+            return false;
+        }
+        return true;
     }
 
     public TmcCore getTmcCore() {
@@ -149,32 +168,31 @@ public class CliContext {
     }
 
     private boolean createTmcCore() {
-        SettingsIo settingsio = new SettingsIo();
         Settings settings;
 
         if (workDir.getConfigFile() != null) {
             // If we're in a course directory, we load settings matching the course
             // Otherwise we just load the last used settings
-            CourseInfo courseinfo = CourseInfoIo.load(workDir.getConfigFile());
-            if (courseinfo == null) {
-                //io.println("Course configuration file "
-                //        + workDir.getConfigFile().toString()
-                //        + "is invalid.");
-                //return false;
-                createTmcCore(new Settings());
-                return true;
+            courseInfo = CourseInfoIo.load(workDir.getConfigFile());
+            if (courseInfo == null) {
+                io.println("Course configuration file "
+                        + workDir.getConfigFile().toString()
+                        + "is invalid.");
+                //TODO add a way to rewrite the course config file.
+                return false;
             }
-            settings = settingsio.load(courseinfo.getUsername(),
-                    courseinfo.getServerAddress());
+            settings = SettingsIo.load(courseInfo.getUsername(),
+                    courseInfo.getServerAddress());
         } else {
-            settings = settingsio.load();
+            settings = SettingsIo.load();
         }
 
+        hasLogin = true;
         if (settings == null) {
-            // If no settings are present
-            io.println("You are not logged in. Log in using: tmc login");
-            return false;
+            hasLogin = false;
+            settings = new Settings();
         }
+
         createTmcCore(settings);
         return true;
     }
