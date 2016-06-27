@@ -4,11 +4,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Console;
+import java.io.InputStream;
 import java.util.Scanner;
 
 public class TerminalIo extends Io {
     
     private static final Logger logger = LoggerFactory.getLogger(TerminalIo.class);
+    private final Scanner scanner;
+
+    public TerminalIo(InputStream stream) {
+        Scanner newScanner = null;
+        if (stream != null) {
+            newScanner = new Scanner(stream);
+        }
+        scanner = newScanner;
+    }
 
     @Override
     public void print(String str) {
@@ -19,8 +29,11 @@ public class TerminalIo extends Io {
     public String readLine(String prompt) {
         print(prompt);
 
-        try (Scanner scanner = new Scanner(System.in)) {
+        try {
             return scanner.nextLine();
+        } catch (Exception e) {
+            logger.warn("Line could not be read.", e);
+            return null;
         }
     }
 

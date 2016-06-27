@@ -17,7 +17,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     protected Boolean hasProgressBar;
 
     public TmcCliProgressObserver() {
-        this(new TerminalIo());
+        this(new TerminalIo(System.in));
     }
 
     public TmcCliProgressObserver(Io io) {

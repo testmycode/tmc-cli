@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -28,7 +28,7 @@ public class CommandFactoryTest {
 
     @Before
     public void setUp() {
-        ctx = new CliContext(new TerminalIo());
+        ctx = new CliContext(new TestIo());
     }
 
     @Test

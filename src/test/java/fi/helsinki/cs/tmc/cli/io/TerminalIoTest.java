@@ -9,7 +9,6 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +18,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Console;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -30,12 +28,10 @@ public class TerminalIoTest {
 
     private Io io;
     private OutputStream os;
-    private InputStream oldInputStream;
 
     @Before
     public void setUp() throws Exception {
-        oldInputStream = System.in;
-        io = new TerminalIo();
+        io = new TerminalIo(null);
         os = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(os);
         System.setOut(ps);
@@ -43,14 +39,9 @@ public class TerminalIoTest {
         spy(System.class);
     }
 
-    @After
-    public void cleanUp() {
-        System.setIn(oldInputStream);
-    }
-
     public void writeString(String string) {
         byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
-        System.setIn(new ByteArrayInputStream(bytes));
+        io = new TerminalIo(new ByteArrayInputStream(bytes));
     }
 
     @Test
@@ -89,6 +80,14 @@ public class TerminalIoTest {
         writeString("test\nawugwufgv");
         assertEquals("test", io.readLine("abc "));
         assertEquals("abc ", os.toString());
+    }
+
+    @Test
+    public void readTwoLines() {
+        writeString("test\ncool\n");
+        assertEquals("test", io.readLine("abc "));
+        assertEquals("cool", io.readLine("abc "));
+        assertEquals("abc abc ", os.toString());
     }
 
     @Test
