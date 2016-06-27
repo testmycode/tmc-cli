@@ -40,6 +40,7 @@ public class ListExercisesCommandTest {
     private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
+    private WorkDir workDir;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -57,6 +58,7 @@ public class ListExercisesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
+        workDir = ctx.getWorkDir();
 
         mockStatic(TmcUtil.class);
     }
@@ -74,7 +76,7 @@ public class ListExercisesCommandTest {
 
     @Test
     public void worksLocallyIfNotInCourseDirectoryAndCourseIsSpecified() {
-        ctx.setWorkdir(new WorkDir(pathToNonCourseDir));
+        workDir.setWorkdir(pathToNonCourseDir);
         String[] args = {"exercises", "fooCourse", "-n"};
         app.run(args);
         io.assertContains("You have to be in a course directory or use the -i");
@@ -82,7 +84,7 @@ public class ListExercisesCommandTest {
     
     @Test
     public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         String[] args = {"exercises", COURSE_NAME, "-n"};
         app.run(args);
         io.assertContains("Deadline:");
@@ -90,7 +92,7 @@ public class ListExercisesCommandTest {
     
     @Test
     public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         String[] args = {"exercises", "-n"};
         app.run(args);
         io.assertContains("Deadline:");

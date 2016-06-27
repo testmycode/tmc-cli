@@ -62,6 +62,7 @@ public class CourseInfoCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
+        workDir = ctx.getWorkDir();
 
         course = new Course("test-course123");
         List<Exercise> exercises = new ArrayList<>();
@@ -136,8 +137,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printExerciseIfInExerciseDirectoryWithoutParameters() {
-        workDir = new WorkDir(pathToDummyExercise);
-        ctx.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyExercise);
         String[] args = {"info"};
         app.run(args);
         io.assertContains(EXERCISE1_NAME);
@@ -146,8 +146,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printExerciseIfInCourseDirectoryAndGivenExerciseName() {
-        workDir = new WorkDir(pathToDummyCourse);
-        ctx.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyCourse);
         String[] args = {"info", EXERCISE1_NAME};
         app.run(args);
         io.assertContains(EXERCISE1_NAME);
@@ -156,8 +155,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printCourseIfInCourseDirectoryWithoutParameters() {
-        workDir = new WorkDir(pathToDummyCourse);
-        ctx.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyCourse);
         String[] args = {"info"};
         app.run(args);
         io.assertContains("2016-aalto-c");
@@ -165,16 +163,14 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printErrorMessageIfNotInCourseDirectoryAndCourseDoesntExist() {
-        workDir = new WorkDir(Paths.get(System.getProperty("java.io.tmpdir")));
-        ctx.setWorkdir(workDir);
+        workDir.setWorkdir(Paths.get(System.getProperty("java.io.tmpdir")));
         String[] args = {"info", "notacourse"};
         app.run(args);
     }
 
     @Test
     public void printGivenCourseFromTheServerIfInCourseDirectoryAndGivenCourseName() {
-        workDir = new WorkDir(pathToDummyCourse);
-        ctx.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyCourse);
 
         course.setExercises(new ArrayList<Exercise>());
         when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
@@ -186,8 +182,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printsErrorIfInCourseDirectoryAndGivenCourseNameThatDoesntExistOnTheServer() {
-        workDir = new WorkDir(pathToDummyCourse);
-        ctx.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyCourse);
 
         when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
@@ -198,8 +193,7 @@ public class CourseInfoCommandTest {
 
     @Test
     public void printsLongExerciseInfoWithOption() {
-        workDir = new WorkDir(pathToDummyExercise);
-        ctx.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyExercise);
         String[] args = {"info", "-a"};
         app.run(args);
 

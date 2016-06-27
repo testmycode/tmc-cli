@@ -31,16 +31,11 @@ public class CliContext {
 
     /*TODO some of the constructors could be removed */
     public CliContext(Io io) {
-        this(io, new WorkDir());
+        this(io, new WorkDir(), null);
     }
 
     public CliContext(Io io, TmcCore core) {
         this(io, new WorkDir(), core);
-    }
-
-    @Deprecated
-    public CliContext(Io io, WorkDir workDir) {
-        this(io, workDir, null);
     }
 
     public CliContext(Io io, WorkDir workDir, TmcCore core) {
@@ -89,16 +84,6 @@ public class CliContext {
 
     public WorkDir getWorkDir() {
         return this.workDir;
-    }
-
-    /**
-     * Does some thing in old style.
-     *
-     * @deprecated use {@link fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir#setWorkdir(String)} instead.
-     */
-    @Deprecated
-    public void setWorkdir(WorkDir workDir) {
-        this.workDir = workDir;
     }
 
     public CourseInfo createCourseInfo(Course course) {
