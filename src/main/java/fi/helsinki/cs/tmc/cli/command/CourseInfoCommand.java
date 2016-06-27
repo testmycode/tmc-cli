@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_BLUE;
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_GREEN;
+import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_PURPLE;
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_RED;
 
 import fi.helsinki.cs.tmc.cli.CliContext;
@@ -152,12 +153,18 @@ public class CourseInfoCommand extends AbstractCommand {
     private void printExerciseShort() {
         io.println("Exercise: " + exercise.getName());
         io.println("Deadline: " + getDeadline(exercise));
-        io.println(formatString("completed", exercise.isCompleted()));
-        if (!exercise.isCompleted() && exercise.isAttempted()) {
-            io.println(Color.colorString("attempted", ANSI_BLUE));
-        }
-        if (exercise.requiresReview()) {
-            io.println(formatString("reviewed", exercise.isReviewed()));
+
+        if (exercise.hasDeadlinePassed() && !exercise.isCompleted()) {
+            io.println(Color.colorString("deadline passed", ANSI_PURPLE));
+        } else {
+            if (!exercise.isCompleted() && exercise.isAttempted()) {
+                io.println(Color.colorString("attempted", ANSI_BLUE));
+            } else {
+                io.println(formatString("completed", exercise.isCompleted()));
+            }
+            if (exercise.requiresReview()) {
+                io.println(formatString("reviewed", exercise.isReviewed()));
+            }
         }
     }
 
