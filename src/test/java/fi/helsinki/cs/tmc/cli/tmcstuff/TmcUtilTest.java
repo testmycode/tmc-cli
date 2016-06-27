@@ -21,6 +21,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.junit.Before;
@@ -276,6 +277,26 @@ public class TmcUtilTest {
         when(mockCore.runTests(any(ProgressObserver.class), eq(exercise)))
                 .thenReturn(createThrowingCallback(RunResult.class, "failed"));
         assertNull(TmcUtil.runLocalTests(ctx, exercise));
+    }
+
+    @Test
+    public void runCheckStyle() {
+        final ValidationResult expectedResult = PowerMockito.mock(ValidationResult.class);
+        Exercise exercise = new Exercise("test-course");
+
+        when(mockCore.runCheckStyle(any(ProgressObserver.class), eq(exercise)))
+                .thenReturn(createReturningCallback(expectedResult));
+
+        ValidationResult result = TmcUtil.runCheckStyle(ctx, exercise);
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void failToRunCheckStyle() {
+        Exercise exercise = new Exercise("test-course");
+        when(mockCore.runCheckStyle(any(ProgressObserver.class), eq(exercise)))
+                .thenReturn(createThrowingCallback(ValidationResult.class, "failed"));
+        assertNull(TmcUtil.runCheckStyle(ctx, exercise));
     }
 
     @Test
