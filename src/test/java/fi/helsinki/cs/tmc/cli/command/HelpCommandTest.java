@@ -1,30 +1,31 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.core.TmcCore;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class HelpCommandTest {
 
-    Application app;
-    TestIo testIo;
+    private Application app;
+    private TestIo io;
 
     @Before
     public void setUp() {
-        testIo = new TestIo();
-        app = new Application(testIo);
-        app.createTmcCore(new Settings());
+        io = new TestIo();
+        CliContext ctx = new CliContext(io, mock(TmcCore.class));
+        app = new Application(ctx);
     }
 
     @Test
     public void helpListsAllCommands() {
         String[] args = {"help"};
         app.run(args);
-        assertTrue(testIo.out().contains("help"));
+        io.assertContains("help");
     }
 }

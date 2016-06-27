@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -10,7 +11,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -22,6 +22,7 @@ import java.util.List;
 @Command(name = "exercises", desc = "List the exercises for a specific course")
 public class ListExercisesCommand extends AbstractCommand {
 
+    private CliContext ctx;
     private Io io;
 
     @Override
@@ -32,6 +33,7 @@ public class ListExercisesCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
+        this.ctx = getContext();
         this.io = io;
         
         String courseName = getCourseName(args);
@@ -73,7 +75,7 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     private CourseInfo getCourseInfoFromCurrentDirectory() {
-        WorkDir workDir = getApp().getWorkDir();
+        WorkDir workDir = ctx.getWorkDir();
         workDir.addPath();
         if (workDir.getConfigFile() != null) {
             return CourseInfoIo.load(workDir.getConfigFile());
@@ -82,12 +84,11 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     private List<Exercise> getExercisesFromServer(String courseName) {
-        TmcCore core = getApp().getTmcCore();
-        if (core == null) {
+        if (!ctx.loadBackend()) {
             return null;
         }
 
-        Course course = TmcUtil.findCourse(core, courseName);
+        Course course = TmcUtil.findCourse(ctx, courseName);
         if (course == null) {
             this.io.println("Course '" + courseName + "' doesn't exist on the server.");
             return null;

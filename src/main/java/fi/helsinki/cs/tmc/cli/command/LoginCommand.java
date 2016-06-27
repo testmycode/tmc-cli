@@ -1,14 +1,13 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.commons.cli.CommandLine;
@@ -17,13 +16,11 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-
 @Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
+    private CliContext ctx;
     private Io io;
 
     @Override
@@ -35,11 +32,17 @@ public class LoginCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
+        this.ctx = getContext();
         this.io = io;
         String serverAddress = getLoginInfo(args, "s", "server address: ");
         String username = getLoginInfo(args, "u", "username: ");
         String password = getLoginInfo(args, "p", "password: ");
-        
+
+        if (! ctx.loadBackend(false)) {
+            return;
+        }
+
+        //TODO don't create new settings object.  
         Settings settings = new Settings(serverAddress, username, password);
         if (loginPossible(settings) && saveLoginSettings(settings)) {
             io.println("Login successful.");
@@ -71,14 +74,9 @@ public class LoginCommand extends AbstractCommand {
      * @return True if user exist
      */
     private boolean loginPossible(Settings settings) {
-        Application app = getApp();
-        app.createTmcCore(settings);
-        TmcCore core = app.getTmcCore();
-        Callable<List<Course>> callable = core.listCourses(
-                new TmcCliProgressObserver(io));
-
+        // we could move this whole try catch block into TmcUtil
         try {
-            callable.call();
+            TmcUtil.tryToLogin(ctx, settings);
         } catch (Exception e) {
             Throwable cause = e.getCause();
             if (cause instanceof FailedHttpResponseException) {

@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -10,7 +10,6 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -24,6 +23,8 @@ import java.util.List;
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
 
+    private boolean showAll;
+
     @Override
     public void getOptions(Options options) {
         options.addOption("a", "all", false,
@@ -36,16 +37,17 @@ public class DownloadExercisesCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         String[] stringArgs = args.getArgs();
-        if (stringArgs.length == 0) {
+        if (stringArgs.length == 0 || stringArgs.length > 1) {
             io.println("You must give course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
         }
 
-        Application app = getApp();
-        TmcCore core = app.getTmcCore();
-        WorkDir workDir = getApp().getWorkDir();
-        if (core == null) {
+        showAll = args.hasOption("a");
+
+        CliContext ctx = getContext();
+        WorkDir workDir = ctx.getWorkDir();
+        if (!ctx.loadBackend()) {
             return;
         }
 
@@ -54,38 +56,56 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
-        Course course = TmcUtil.findCourse(core, stringArgs[0]);
+        String courseName = stringArgs[0];
+        Course course = TmcUtil.findCourse(ctx, courseName);
         if (course == null) {
             io.println("Course doesn't exist.");
             return;
         }
-        List<Exercise> filtered = getFilteredExercises(course, args);
+        List<Exercise> filtered = getFilteredExercises(course);
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
-        Color.AnsiColor color1 = app.getColor("progressbar-left");
-        Color.AnsiColor color2 = app.getColor("progressbar-right");
+        Color.AnsiColor color1 = ctx.getApp().getColor("progressbar-left");
+        Color.AnsiColor color2 = ctx.getApp().getColor("progressbar-right");
         TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
 
-        List<Exercise> exercises = TmcUtil.downloadExercises(core, filtered, progobs);
-        if (exercises.isEmpty()) {
+        List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
+        if (exercises == null) {
             io.println("Failed to download exercises");
             return;
-        } else if (exercises.size() != filtered.size()) {
-            io.println(Color.colorString("Some exercises could not be downloaded",
-                    Color.AnsiColor.ANSI_RED));
         }
 
-        Path configFile = app.getWorkDir().getWorkingDirectory()
-                .resolve(stringArgs[0])
+        if (course.getExercises().isEmpty()) {
+            io.println("The '" + courseName + "' course doesn't have any exercises.");
+        } else {
+            io.println("The '" + courseName + "' course has "
+                    + course.getExercises().size() + " exercises");
+
+            int failedCount = (filtered.size() - exercises.size());
+            if (failedCount > 0) {
+                io.println("  from which "
+                        + exercises.size() + " exercises were succesfully downloaded");
+                io.println(Color.colorString("  and of which " + failedCount + " failed.",
+                        Color.AnsiColor.ANSI_RED));
+                //TODO we could print the names of the not downloaded exercises here
+            } else {
+                io.println("  from which "
+                        + exercises.size() + " exercises were downloaded.");
+            }
+            io.println("Use -a flag to download also your completed exercises.");
+        }
+
+        Path configFile = workDir.getWorkingDirectory()
+                .resolve(courseName)
                 .resolve(CourseInfoIo.COURSE_CONFIG);
-        CourseInfo info = app.createCourseInfo(course);
+        CourseInfo info = ctx.createCourseInfo(course);
         info.setExercises(course.getExercises());
         CourseInfoIo.save(info, configFile);
     }
 
-    protected List<Exercise> getFilteredExercises(Course course, CommandLine args) {
-        if (args.hasOption("a")) {
+    private List<Exercise> getFilteredExercises(Course course) {
+        if (showAll) {
             return course.getExercises();
         }
 

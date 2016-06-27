@@ -4,6 +4,7 @@ import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_BLUE;
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_GREEN;
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_RED;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -12,7 +13,7 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
-import fi.helsinki.cs.tmc.core.TmcCore;
+
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -22,13 +23,14 @@ import org.apache.commons.cli.Options;
 import java.util.Arrays;
 import java.util.List;
 
-@Command(name = "info", desc = "Show course info for a specific course")
+@Command(name = "info", desc = "Show info about the current directory")
 public class CourseInfoCommand extends AbstractCommand {
     private Course course;
     private Exercise exercise;
     private CourseInfo info;
     private WorkDir workDir;
     private Io io;
+    private CliContext ctx;
 
     @Override
     public void getOptions(Options options) {
@@ -39,7 +41,8 @@ public class CourseInfoCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
-        workDir = getApp().getWorkDir();
+        this.ctx = getContext();
+        workDir = ctx.getWorkDir();
 
         if (!args.hasOption("i")) {
             printLocalCourseOrExercise(args);
@@ -48,15 +51,14 @@ public class CourseInfoCommand extends AbstractCommand {
 
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0) {
-            io.println("You must give a course as a parameter.");
+            io.println("You must give a course as an argument.");
             return;
         }
 
-        TmcCore core = getApp().getTmcCore();
-        if (core == null) {
+        if (! ctx.loadBackend()) {
             return;
         }
-        course = TmcUtil.findCourse(core, stringArgs[0]);
+        course = TmcUtil.findCourse(ctx, stringArgs[0]);
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
             return;

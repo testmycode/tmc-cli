@@ -1,7 +1,4 @@
-package fi.helsinki.cs.tmc.cli;
-
-import fi.helsinki.cs.tmc.cli.io.Color;
-import fi.helsinki.cs.tmc.cli.io.Io;
+package fi.helsinki.cs.tmc.cli.io;
 
 public class ShutdownHandler extends Thread {
 
@@ -12,7 +9,7 @@ public class ShutdownHandler extends Thread {
     }
 
     /**
-     * Executes when the program exits.
+     * Executed when the program exits.
      */
     @Override
     public void run() {
@@ -21,4 +18,11 @@ public class ShutdownHandler extends Thread {
         io.println(Color.AnsiColor.ANSI_RESET.toString());
     }
 
+    public void enable() {
+        Runtime.getRuntime().addShutdownHook(this);
+    }
+
+    public void disable() {
+        Runtime.getRuntime().removeShutdownHook(this);
+    }
 }

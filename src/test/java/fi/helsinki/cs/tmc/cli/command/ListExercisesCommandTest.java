@@ -1,46 +1,45 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.containsString;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Callable;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcUtil.class)
 public class ListExercisesCommandTest {
     
     private static final String COURSE_NAME = "2016-aalto-c";
-    static Path pathToDummyCourse;
-    static Path pathToNonCourseDir;
+    private static Path pathToDummyCourse;
+    private static Path pathToNonCourseDir;
 
-    Application app;
-    TestIo io;
-    TmcCore mockCore;
+    private Application app;
+    private CliContext ctx;
+    private TestIo io;
+    private TmcCore mockCore;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -55,250 +54,177 @@ public class ListExercisesCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, mockCore);
+        app = new Application(ctx);
 
-        doAnswer(new Answer<Callable<Course>>() {
-            @Override
-            public Callable<Course> answer(InvocationOnMock invocation) throws Throwable {
-                final Course course = (Course) invocation.getArguments()[1];
-                return new Callable<Course>() {
-                    @Override
-                    public Course call() throws Exception {
-                        return course;
-                    }
-                };
-            }
-        }).when(mockCore).getCourseDetails(any(ProgressObserver.class), any(Course.class));
+        mockStatic(TmcUtil.class);
     }
 
     @Test
-    public void failIfCoreIsNull() {
-        app = spy(app);
-        doReturn(null).when(app).getTmcCore();
+    public void failIfBackendFails() {
+        ctx = spy(new CliContext(io, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
-        assertFalse(io.out().contains("Course 'foo' doesn't exist"));
+        io.assertNotContains("Course 'foo' doesn't exist");
     }
 
     @Test
     public void worksLocallyIfNotInCourseDirectoryAndCourseIsSpecified() {
-        app.setWorkdir(new WorkDir(pathToNonCourseDir));
+        ctx.setWorkdir(new WorkDir(pathToNonCourseDir));
         String[] args = {"exercises", "fooCourse", "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("You have to be in a course directory or use the -i"));
+        io.assertContains("You have to be in a course directory or use the -i");
     }
     
     @Test
     public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
-        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"exercises", COURSE_NAME, "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("Deadline:"));
+        io.assertContains("Deadline:");
     }
     
     @Test
     public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
-        app.setWorkdir(new WorkDir(pathToDummyCourse));
+        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
         String[] args = {"exercises", "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("Deadline:"));
+        io.assertContains("Deadline:");
     }
 
     @Test
     public void giveMessageIfNoExercisesOnCourse() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                return Arrays.asList(new Course("test-course123"));
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        Course course = new Course("test-course");
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("have any exercises"));
+        io.assertContains("have any exercises");
     }
 
     @Test
     public void listExercisesGivesCorrectExercises() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exerciseNames"),
-                        new Exercise("cool-exerciseNames"));
+        Course course = new Course("test-course");
+        course.setExercises(Arrays.asList(new Exercise("first"), new Exercise("second")));
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
-                Course course = new Course("test-course123");
-                course.setExercises(list);
-
-                return Arrays.asList(course);
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("hello-exerciseNames"));
+        io.assertContains("first");
+        io.assertContains("second");
     }
 
     @Test
     public void emptyArgsGivesAnErrorMessage() {
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(null);
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(null);
         String[] args = {"exercises", "-n"};
         app.run(args);
-        assertThat(io.out(), containsString("No course specified"));
+        io.assertContains("No course specified");
     }
 
     @Test
     public void failIfCourseDoesNotExist() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                return Arrays.asList(new Course("hello-exerciseNames"));
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(null);
 
-        String[] args = {"exercises", "-n", "abc", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Course 'abc' doesn't exist"));
+        io.assertContains("Course 'test-course' doesn't exist");
     }
 
     @Test
     public void exerciseIsCompletedButRequiresReview() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exerciseNames"),
-                        new Exercise("cool-exerciseNames"));
-                list.get(1).setRequiresReview(true);
-                list.get(1).setReviewed(false);
-                list.get(1).setCompleted(true);
+        Exercise exercise = new Exercise("first-exercise");
+        exercise.setRequiresReview(true);
+        exercise.setReviewed(false);
+        exercise.setCompleted(true);
 
-                Course course = new Course("test-course123");
-                course.setExercises(list);
+        Course course = new Course("test-course");
+        course.setExercises(Arrays.asList(exercise,
+                new Exercise("second-exercise")));
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
-                return Arrays.asList(course);
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Requires review"));
+        io.assertContains("Requires review");
     }
 
     @Test
     public void exerciseIsCompletedAndReviewed() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exerciseNames"),
-                        new Exercise("cool-exerciseNames"));
-                list.get(1).setRequiresReview(true);
-                list.get(1).setReviewed(true);
-                list.get(1).setCompleted(true);
+        Exercise exercise = new Exercise("first-exercise");
+        exercise.setRequiresReview(true);
+        exercise.setReviewed(true);
+        exercise.setCompleted(true);
 
-                Course course = new Course("test-course123");
-                course.setExercises(list);
+        Course course = new Course("test-course");
+        course.setExercises(Arrays.asList(exercise,
+                new Exercise("second-exercise")));
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
-                return Arrays.asList(course);
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Completed"));
+        io.assertContains("Completed");
     }
 
     @Test
     public void exerciseIsCompleted() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exerciseNames"),
-                        new Exercise("cool-exerciseNames"));
-                list.get(1).setRequiresReview(false);
-                list.get(1).setCompleted(true);
+        Exercise exercise = new Exercise("first-exercise");
+        exercise.setRequiresReview(false);
+        exercise.setCompleted(true);
 
-                Course course = new Course("test-course123");
-                course.setExercises(list);
+        Course course = new Course("test-course");
+        course.setExercises(Arrays.asList(exercise,
+                new Exercise("second-exercise")));
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
-                return Arrays.asList(course);
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Completed"));
+        io.assertContains("Completed");
     }
 
     @Test
     public void exerciseIsNotCompleted() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exerciseNames"),
-                        new Exercise("cool-exerciseNames"));
+        Course course = new Course("test-course");
+        course.setExercises(Arrays.asList(
+                new Exercise("first-exercise"),
+                new Exercise("second-exercise")));
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
-                Course course = new Course("test-course123");
-                course.setExercises(list);
-
-                return Arrays.asList(course);
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Not completed"));
+        io.assertContains("Not completed");
     }
 
     @Test
     public void exerciseHasBeenAttempted() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exerciseNames"),
-                        new Exercise("cool-exerciseNames"));
-                list.get(1).setAttempted(true);
+        Exercise exercise = new Exercise("first-exercise");
+        exercise.setAttempted(true);
 
-                Course course = new Course("test-course123");
-                course.setExercises(list);
+        Course course = new Course("test-course");
+        course.setExercises(Arrays.asList(exercise,
+                new Exercise("second-exercise")));
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
-                return Arrays.asList(course);
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Attempted"));
+        io.assertContains("Attempted");
     }
 
     @Test
     public void exerciseDeadLinePassed() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                List<Exercise> list = Arrays.asList(
-                        new Exercise("hello-exerciseNames"),
-                        new Exercise("cool-exerciseNames"));
-                list.get(1).setDeadline("2014-09-10T14:00:00.000+03:00");
-                Course course = new Course("test-course123");
-                course.setExercises(list);
+        Exercise exercise = new Exercise("first-exercise");
+        exercise.setDeadline("2014-09-10T14:00:00.000+03:00");
 
-                return Arrays.asList(course);
-            }
-        };
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        String[] args = {"exercises", "-n", "test-course123", "-i"};
+        Course course = new Course("test-course");
+        course.setExercises(Arrays.asList(exercise,
+                new Exercise("second-exercise")));
+        when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
+
+        String[] args = {"exercises", "-n", "test-course", "-i"};
         app.run(args);
-        assertThat(io.out(), containsString("Deadline passed"));
+        io.assertContains("Deadline passed");
     }
 }

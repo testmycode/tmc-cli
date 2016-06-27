@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
@@ -16,7 +16,7 @@ public class Settings implements TmcSettings {
     private String username;
     private String password;
 
-    private transient Path workingDirectory;
+    private transient WorkDir workDir;
 
     public Settings(String serverAddress, String username, String password) {
         this.serverAddress = serverAddress;
@@ -25,6 +25,20 @@ public class Settings implements TmcSettings {
     }
     
     public Settings() {
+    }
+
+    /**
+     * This method is used for changing the main settings object.
+     * @param settings settings object where from the new values are copied
+     */
+    public void set(Settings settings) {
+        this.serverAddress = settings.serverAddress;
+        this.username = settings.username;
+        this.password = settings.password;
+    }
+
+    public void setWorkDir(WorkDir workDir) {
+        this.workDir = workDir;
     }
 
     @Override
@@ -65,7 +79,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public String clientVersion() {
-        return Application.getVersion();
+        return EnvironmentUtil.getVersion();
     }
 
     @Override
@@ -78,7 +92,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public Path getTmcProjectDirectory() {
-        return workingDirectory;
+        return workDir.getTmcDirectory();
     }
 
     @Override
@@ -102,9 +116,5 @@ public class Settings implements TmcSettings {
 
     @Override
     public void setConfigRoot(Path path) {
-    }
-    
-    public void setTmcProjectDirectory(Path dir) {
-        this.workingDirectory = dir;
     }
 }

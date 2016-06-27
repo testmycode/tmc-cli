@@ -1,15 +1,19 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -18,9 +22,22 @@ public class TmcUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
 
-    public static List<Course> listCourses(TmcCore core) {
+    public static boolean tryToLogin(CliContext ctx, Settings settings) throws Exception {
         Callable<List<Course>> callable;
+        TmcCore core = ctx.getTmcCore();
+
+        ctx.useSettings(settings);
         callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
+        //TODO restore the settings object
+
+        return callable.call() != null;
+    }
+
+
+
+    public static List<Course> listCourses(CliContext ctx) {
+        Callable<List<Course>> callable;
+        callable = ctx.getTmcCore().listCourses(ProgressObserver.NULL_OBSERVER);
 
         try {
             return callable.call();
@@ -30,8 +47,9 @@ public class TmcUtil {
         return new ArrayList<>();
     }
 
-    public static Course getDetails(TmcCore core, Course course) {
+    public static Course getDetails(CliContext ctx, Course course) {
         try {
+            TmcCore core = ctx.getTmcCore();
             return core.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
         } catch (Exception e) {
             logger.warn("Failed to get course details to list the exercises", e);
@@ -39,13 +57,13 @@ public class TmcUtil {
         }
     }
 
-    public static Course findCourse(TmcCore core, String name) {
+    public static Course findCourse(CliContext ctx, String name) {
         List<Course> courses;
-        courses = TmcUtil.listCourses(core);
+        courses = TmcUtil.listCourses(ctx);
 
         for (Course item : courses) {
             if (item.getName().equals(name)) {
-                return TmcUtil.getDetails(core, item);
+                return TmcUtil.getDetails(ctx, item);
             }
         }
         return null;
@@ -63,32 +81,29 @@ public class TmcUtil {
         return null;
     }
 
-    public static List<Exercise> downloadExercises(TmcCore core, List<Exercise> exercises,
+    public static List<Exercise> downloadExercises(CliContext ctx, List<Exercise> exercises,
             ProgressObserver progobs) {
         try {
+            TmcCore core = ctx.getTmcCore();
             return core.downloadOrUpdateExercises(progobs, exercises).call();
         } catch (Exception e) {
             logger.warn("Failed to download exercises", e);
-            return new ArrayList<>();
+            return null;
         }
     }
 
-    public static List<Exercise> downloadAllExercises(TmcCore core, Course course,
+    public static List<Exercise> downloadAllExercises(CliContext ctx, Course course,
             ProgressObserver progobs) {
         if (!course.isExercisesLoaded()) {
-            course = getDetails(core, course);
+            course = getDetails(ctx, course);
         }
         List<Exercise> exercises = course.getExercises();
-        return downloadExercises(core, exercises, progobs);
+        return downloadExercises(ctx, exercises, progobs);
     }
 
-    public static SubmissionResult submitExercise(TmcCore core, Course course, String name) {
-        Exercise exercise = TmcUtil.findExercise(course, name);
-        return submitExercise(core, exercise);
-    }
-
-    public static SubmissionResult submitExercise(TmcCore core, Exercise exercise) {
+    public static SubmissionResult submitExercise(CliContext ctx, Exercise exercise) {
         try {
+            TmcCore core = ctx.getTmcCore();
             return core.submit(ProgressObserver.NULL_OBSERVER, exercise).call();
         } catch (Exception ex) {
             logger.warn("Failed to submit the exercise", ex);
@@ -97,13 +112,51 @@ public class TmcUtil {
     }
 
     public static UpdateResult getUpdatableExercises(
-            TmcCore core, Course course) {
+            CliContext ctx, Course course) {
         try {
+            TmcCore core = ctx.getTmcCore();
             return core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course)
                     .call();
         } catch (Exception e) {
+            logger.warn("Failed to get exercise updates.", e);
+            return null;
+        }
+    }
+
+    public static URI sendPaste(CliContext ctx, Exercise exercise, String message) {
+        try {
+            TmcCore core = ctx.getTmcCore();
+            return core.pasteWithComment(ProgressObserver.NULL_OBSERVER,
+                    exercise, message).call();
+
+        } catch (Exception e) {
+            logger.error("Failed to send paste", e);
             System.out.println(e);
             return null;
+        }
+    }
+
+    public static RunResult runLocalTests(CliContext ctx, Exercise exercise) {
+        try {
+            TmcCore core = ctx.getTmcCore();
+            return core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
+
+        } catch (Exception e) {
+            logger.error("Failed to run local tests", e);
+            return null;
+        }
+    }
+
+    public static boolean sendFeedback(CliContext ctx, List<FeedbackAnswer> answers,
+            URI feedbackUri) {
+        try {
+            TmcCore core = ctx.getTmcCore();
+            return core.sendFeedback(ProgressObserver.NULL_OBSERVER, answers,
+                    feedbackUri).call();
+
+        } catch (Exception e) {
+            logger.error("Couldn't send feedback", e);
+            return false;
         }
     }
 }

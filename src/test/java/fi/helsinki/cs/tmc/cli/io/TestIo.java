@@ -1,41 +1,78 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.junit.matchers.JUnitMatchers.containsString;
+
 import java.util.LinkedList;
 
-// This class is used to test program classes
+/**
+ * Used for verifying program outputs.
+ */
 public class TestIo extends Io {
 
-    private StringBuilder printedText;
-    private LinkedList<String> linePrompts;
-    private LinkedList<Boolean> confirmationPrompts;
-    private LinkedList<String> passwordPrompts;
+    private static enum PromptType {
+        TEXT_PROMPT,
+        PASSWORD_PROMPT,
+        CONFIRM_PROMPT
+    }
+
+    private final StringBuilder printedText;
+    private final LinkedList<PromptType> promptOrder;
+    private final LinkedList<String> textPrompts;
+    private final LinkedList<String> passwordPrompts;
+    private final LinkedList<Boolean> confirmationPrompts;
+    private int expectedPromptCount;
 
     public TestIo() {
         printedText = new StringBuilder();
-        linePrompts = new LinkedList<>();
+        textPrompts = new LinkedList<>();
+        promptOrder = new LinkedList<>();
         passwordPrompts = new LinkedList<>();
         confirmationPrompts = new LinkedList<>();
+        expectedPromptCount = 0;
     }
 
-    public boolean allPromptsUsed() {
-        return linePrompts.isEmpty() && passwordPrompts.isEmpty()
-                && confirmationPrompts.isEmpty();
+    public void assertContains(String contains) {
+        assertThat(out(), containsString(contains));
     }
 
-    public void addLinePrompt(String prompt) {
-        linePrompts.add(prompt);
+    public void assertNotContains(String contains) {
+        assertThat(out(), not(containsString(contains)));
     }
 
-    public void addPasswordPrompt(String prompt) {
-        passwordPrompts.add(prompt);
+    public void assertEquals(String string) {
+        assertThat(out(), is(string));
+    }
+
+    public void assertNotEquals(String string) {
+        assertThat(out(), is(not(string)));
+    }
+
+    public void assertAllPromptsUsed() {
+        if (!allPromptsUsed()) {
+            fail("Program should have created " + expectedPromptCount
+                    + " prompts instead of " + promptOrder.size()
+                    + " prompts.");
+        }
+    }
+
+    public void addLinePrompt(String text) {
+        addPrompt(PromptType.TEXT_PROMPT, text);
+    }
+
+    public void addPasswordPrompt(String text) {
+        addPrompt(PromptType.PASSWORD_PROMPT, text);
     }
 
     public void addConfirmationPrompt(Boolean confirmation) {
-        confirmationPrompts.add(confirmation);
+        addPrompt(PromptType.CONFIRM_PROMPT, confirmation);
     }
 
     public void clearPrompts() {
-        linePrompts.clear();
+        textPrompts.clear();
         confirmationPrompts.clear();
         passwordPrompts.clear();
     }
@@ -51,21 +88,54 @@ public class TestIo extends Io {
 
     @Override
     public String readLine(String prompt) {
-        return linePrompts.pop();
-    }
-
-    @Override
-    public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
-        if (confirmationPrompts.size() >= 1) {
-            return confirmationPrompts.pop();
-        } else {
-            return defaultToYes;
-        }
+        usePrompt(PromptType.TEXT_PROMPT);
+        return textPrompts.pop();
     }
 
     @Override
     public String readPassword(String prompt) {
+        usePrompt(PromptType.PASSWORD_PROMPT);
         return passwordPrompts.pop();
     }
 
+    @Override
+    public boolean readConfirmation(String prompt, boolean defaultToYes) {
+        usePrompt(PromptType.CONFIRM_PROMPT);
+        return (boolean) confirmationPrompts.pop();
+    }
+
+    private <T> void addPrompt(PromptType type, T value) {
+        switch (type) {
+            case TEXT_PROMPT:
+                textPrompts.add((String)value);
+                break;
+            case PASSWORD_PROMPT:
+                passwordPrompts.add((String)value);
+                break;
+            case CONFIRM_PROMPT:
+                confirmationPrompts.add((Boolean)value);
+                break;
+            default:
+                break;
+        }
+        promptOrder.add(type);
+        expectedPromptCount++;
+    }
+
+    private void usePrompt(PromptType type) {
+        if (promptOrder.isEmpty()) {
+            throw new AssertionError("Too many prompts asked");
+        }
+
+        PromptType expected = promptOrder.pop();
+        if (expected != type) {
+            throw new AssertionError("Wrong prompt type expected " + expected.name()
+                    + ", got " + type);
+        }
+    }
+
+    private boolean allPromptsUsed() {
+        return textPrompts.isEmpty() && passwordPrompts.isEmpty()
+                && confirmationPrompts.isEmpty();
+    }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 
 public class CourseInfoTest {
 
-    CourseInfo courseInfo;
+    private CourseInfo courseInfo;
 
     @Before
     public void setUp() {

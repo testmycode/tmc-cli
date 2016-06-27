@@ -1,10 +1,8 @@
 package fi.helsinki.cs.tmc.cli.io;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
@@ -17,8 +15,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-
 public class ResultPrinterTest {
 
     private TestIo io;
@@ -27,7 +23,6 @@ public class ResultPrinterTest {
     private RunResult runResult;
     private ImmutableList<TestResult> testResults;
     private ImmutableMap<String, byte[]> logs;
-    private Application app;
 
     @Before
     public void setUp() {
@@ -35,14 +30,12 @@ public class ResultPrinterTest {
         printer = new ResultPrinter(io, true, true);
         mockSubResult = mock(SubmissionResult.class);
         logs = ImmutableMap.of();
-        app = mock(Application.class);
-        when(app.getProperties()).thenReturn(new HashMap<String, String>());
     }
 
     @Test
     public void printSubmissionResultWorksIfResultIsNull() {
         printer.printSubmissionResult(null, false, null, null);
-        assertTrue(io.out().isEmpty());
+        io.assertEquals("");
     }
 
     @Test
@@ -50,7 +43,7 @@ public class ResultPrinterTest {
         when(mockSubResult.getStatus()).thenReturn(SubmissionResult.Status.OK);
         when(mockSubResult.getTestResultStatus()).thenReturn(TestResultStatus.NONE_FAILED);
         printer.printSubmissionResult(mockSubResult, false, null, null);
-        assertTrue(io.out().contains("All tests passed on server!"));
+        io.assertContains("All tests passed on server!");
     }
 
     @Test
@@ -58,7 +51,7 @@ public class ResultPrinterTest {
         when(mockSubResult.getStatus()).thenReturn(SubmissionResult.Status.FAIL);
         when(mockSubResult.getTestResultStatus()).thenReturn(TestResultStatus.ALL_FAILED);
         printer.printSubmissionResult(mockSubResult, false, null, null);
-        assertTrue(io.out().contains("All tests failed on server."));
+        io.assertContains("All tests failed on server.");
     }
 
     @Test
@@ -66,7 +59,7 @@ public class ResultPrinterTest {
         when(mockSubResult.getStatus()).thenReturn(SubmissionResult.Status.FAIL);
         when(mockSubResult.getTestResultStatus()).thenReturn(TestResultStatus.SOME_FAILED);
         printer.printSubmissionResult(mockSubResult, false, null, null);
-        assertTrue(io.out().contains("Some tests failed on server."));
+        io.assertContains("Some tests failed on server.");
     }
 
     @Test
@@ -74,7 +67,7 @@ public class ResultPrinterTest {
         testResults = ImmutableList.of(new TestResult("test1", true, "Cool!"));
         runResult = new RunResult(Status.PASSED, testResults, logs);
         printer.printRunResult(runResult, false, false, null, null);
-        assertTrue(io.out().contains("All tests passed!"));
+        io.assertContains("All tests passed!");
     }
 
     @Test
@@ -83,7 +76,7 @@ public class ResultPrinterTest {
                 "Try harder", true));
         runResult = new RunResult(Status.TESTS_FAILED, testResults, logs);
         printer.printRunResult(runResult, false, false, null, null);
-        assertTrue(io.out().contains("Please review your answer before submitting"));
+        io.assertContains("Please review your answer before submitting");
     }
 
     @Test
@@ -94,7 +87,7 @@ public class ResultPrinterTest {
                 "Not good.", exceptions));
         runResult = new RunResult(Status.TESTS_FAILED, testResults, logs);
         printer.printRunResult(runResult, false, false, null, null);
-        assertTrue(io.out().contains("Please review your answer before submitting"));
+        io.assertContains("Please review your answer before submitting");
     }
 
     @Test
@@ -102,7 +95,7 @@ public class ResultPrinterTest {
         testResults = ImmutableList.of();
         runResult = new RunResult(Status.COMPILE_FAILED, testResults, logs);
         printer.printRunResult(runResult, false, false, null, null);
-        assertTrue(io.out().contains("Failed to compile project"));
+        io.assertContains("Failed to compile project");
     }
 
 }

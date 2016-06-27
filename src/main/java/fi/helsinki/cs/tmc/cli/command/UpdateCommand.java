@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
@@ -21,15 +22,17 @@ import java.util.List;
 @Command(name = "update", desc = "Update exercises")
 public class UpdateCommand extends AbstractCommand {
 
+    private CliContext ctx;
     private Io io;
 
     @Override
     public void getOptions(Options options) {
-        // --all or --force
+        //TODO --all or --force
     }
 
     @Override
     public void run(CommandLine args, Io io) {
+        this.ctx = getContext();
         this.io = io;
         String[] stringArgs = args.getArgs();
 
@@ -39,12 +42,11 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        TmcCore core = getApp().getTmcCore();
-        if (core == null) {
+        if (!ctx.loadBackend()) {
             return;
         }
 
-        WorkDir workDir = getApp().getWorkDir();
+        WorkDir workDir = ctx.getWorkDir();
 
         if (workDir.getCourseDirectory() == null) {
             io.println("Not a course directory");
@@ -52,11 +54,11 @@ public class UpdateCommand extends AbstractCommand {
         }
 
         CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
-        updateExercises(core, info, workDir.getConfigFile());
+        updateExercises(info, workDir.getConfigFile());
     }
 
-    public void updateExercises(TmcCore core, CourseInfo info, Path configFile) {
-        ExerciseUpdater exerciseUpdater = new ExerciseUpdater(core, info.getCourse());
+    private void updateExercises(CourseInfo info, Path configFile) {
+        ExerciseUpdater exerciseUpdater = new ExerciseUpdater(ctx, info.getCourse());
         if (!exerciseUpdater.updatesAvailable()) {
             io.println("All exercises are up-to-date");
             return;
@@ -66,8 +68,8 @@ public class UpdateCommand extends AbstractCommand {
         printExercises(exerciseUpdater.getUpdatedExercises(), "Modified exercises:");
         io.println("");
 
-        Color.AnsiColor color1 = getApp().getColor("progressbar-left");
-        Color.AnsiColor color2 = getApp().getColor("progressbar-right");
+        Color.AnsiColor color1 = getContext().getApp().getColor("progressbar-left");
+        Color.AnsiColor color2 = getContext().getApp().getColor("progressbar-right");
         List<Exercise> downloaded = exerciseUpdater.downloadUpdates(
                 new TmcCliProgressObserver(io, color1, color2));
         if (downloaded.isEmpty()) {

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,12 +26,12 @@ import java.io.IOException;
 
 public class TmcCliUpdaterTest {
 
-    static String latestJson;
-    static String apiLimitExeededJson;
-    static String malformedJson;
-    static String changedJson;
+    private static String latestJson;
+    private static String apiLimitExeededJson;
+    private static String malformedJson;
+    private static String changedJson;
 
-    TestIo io;
+    private TestIo io;
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -52,10 +51,6 @@ public class TmcCliUpdaterTest {
     @Before
     public void setUp() {
         io = new TestIo();
-    }
-
-    @After
-    public void tearDown() {
     }
 
     @Test
@@ -95,18 +90,19 @@ public class TmcCliUpdaterTest {
 
     @Test
     public void doNothingIfUserDoesntWantToUpdate() {
-        io.addLinePrompt("n");
+        io.addConfirmationPrompt(false);
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
         doReturn(latestJson).when(updater).fetchLatestReleaseJson();
         //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
         updater.run();
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
         verify(updater, never()).fetchTmcCliBinary(any(String.class), any(File.class));
+        io.assertAllPromptsUsed();
     }
 
     @Test
     public void downloadsAndRunsNewBinaryIfOk() {
-        io.addLinePrompt("yes");
+        io.addConfirmationPrompt(true);
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
         doReturn(latestJson).when(updater).fetchLatestReleaseJson();
         //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
@@ -117,6 +113,7 @@ public class TmcCliUpdaterTest {
         assertThat(io.out(), containsString("Downloading..."));
         verify(updater, times(1)).fetchTmcCliBinary(any(String.class), any(File.class));
         verify(updater, times(1)).runNewTmcCliBinary(any(String.class));
+        io.assertAllPromptsUsed();
     }
 
     // Expected to fail once autoupdater is properly implemented on Windows.

@@ -9,7 +9,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO should this be in io package?
 public class WorkDir {
+
     // Course root directory. null if n/a.
     private Path courseDirectory;
     // Course config file. null if n/a.
@@ -38,6 +40,14 @@ public class WorkDir {
         } else {
             return findCourseDir(this.workdir);
         }
+    }
+
+    public Path getTmcDirectory() {
+        Path path = getCourseDirectory();
+        if (path == null) {
+            return this.workdir;
+        }
+        return path.getParent();
     }
 
     /**
