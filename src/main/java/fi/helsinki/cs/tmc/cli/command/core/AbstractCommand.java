@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command.core;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.LoginCommand;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
 
-    private Application app;
+    private CliContext context;
 
-    protected void setApplication(Application app) {
-        this.app = app;
+    protected void setContext(CliContext context) {
+        this.context = context;
     }
 
-    protected Application getApp() {
-        return this.app;
+    protected CliContext getContext() {
+        return this.context;
     }
 
     /**
@@ -50,6 +50,7 @@ public abstract class AbstractCommand {
 
     /**
      * Method runs the command.
+     * TODO io param isn't needed anymore!!!!
      *
      * @param args Command line arguments for this command.
      * @param io The terminal IO object
@@ -57,9 +58,18 @@ public abstract class AbstractCommand {
     public abstract void run(CommandLine args, Io io);
 
     public void execute(String[] stringArgs, Io io) {
+        CommandLine args = parseArgs(stringArgs);
+        if (args != null) {
+            run(args, io);
+        }
+    }
+
+    public CommandLine parseArgs(String[] stringArgs) {
         GnuParser parser = new GnuParser();
         CommandLine args;
         Options options = getOptions();
+
+        Io io = context.getIo();
 
         try {
             args = parser.parse(options, stringArgs);
@@ -67,7 +77,7 @@ public abstract class AbstractCommand {
             logger.warn("Invalid command line arguments.", e);
             io.println("Invalid command line arguments.");
             io.println(e.getMessage());
-            return;
+            return null;
         }
 
         if (args.hasOption("h")) {
@@ -81,9 +91,8 @@ public abstract class AbstractCommand {
                 desc = command.desc();
             }
             HelpGenerator.run(io, usage, desc, options);
-            return;
+            return null;
         }
-
-        run(args, io);
+        return args;
     }
 }

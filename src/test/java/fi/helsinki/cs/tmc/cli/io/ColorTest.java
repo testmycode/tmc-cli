@@ -1,29 +1,36 @@
 package fi.helsinki.cs.tmc.cli.io;
 
 import static org.junit.Assert.assertEquals;
-
-import fi.helsinki.cs.tmc.cli.Application;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(EnvironmentUtil.class)
 public class ColorTest {
-
-    private Boolean noColor;
 
     @Before
     public void setup() {
-        this.noColor = Application.isWindows();
+        mockStatic(EnvironmentUtil.class);
     }
 
     @Test
-    public void colorsWork() {
+    public void colorsWorkInNonWindows() {
+        when(EnvironmentUtil.isWindows()).thenReturn(false);
         String string = Color.colorString("foobar", Color.AnsiColor.ANSI_BLACK);
-        if (!noColor) {
-            assertEquals("\u001B[30mfoobar\u001B[0m", string);
-        } else {
-            assertEquals("foobar", string);
-        }
+        assertEquals("\u001B[30mfoobar\u001B[0m", string);
+    }
+
+    @Test
+    public void colorsWorkInWindows() {
+        when(EnvironmentUtil.isWindows()).thenReturn(true);
+        String string = Color.colorString("foobar", Color.AnsiColor.ANSI_BLACK);
+        assertEquals("foobar", string);
     }
 
     @Test

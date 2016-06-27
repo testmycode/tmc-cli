@@ -3,11 +3,22 @@ package fi.helsinki.cs.tmc.cli.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Console;
+import java.io.InputStream;
 import java.util.Scanner;
 
 public class TerminalIo extends Io {
     
     private static final Logger logger = LoggerFactory.getLogger(TerminalIo.class);
+    private final Scanner scanner;
+
+    public TerminalIo(InputStream stream) {
+        Scanner newScanner = null;
+        if (stream != null) {
+            newScanner = new Scanner(stream);
+        }
+        scanner = newScanner;
+    }
 
     @Override
     public void print(String str) {
@@ -16,59 +27,47 @@ public class TerminalIo extends Io {
 
     @Override
     public String readLine(String prompt) {
-        System.out.print(prompt);
-        try {
-            return new Scanner(System.in).nextLine();
-        } catch (Exception e) {
-            logger.warn("Line could not be read.", e);
-            return null;
-        }
-    }
+        print(prompt);
 
-    @Override
-    public Boolean readConfirmation(String prompt, Boolean defaultToYes) {
-        String yesNo;
-        String input;
-        if (defaultToYes) {
-            yesNo = " [Y/n] ";
-        } else {
-            yesNo = " [y/N] ";
-        }
-        System.out.print(prompt + yesNo);
         try {
-            input = new Scanner(System.in).nextLine().toLowerCase();
+            return scanner.nextLine();
         } catch (Exception e) {
             logger.warn("Line could not be read.", e);
             return null;
         }
-        if (input.isEmpty()) {
-            return defaultToYes;
-        } else if (input.charAt(0) == 'y') {
-            return true;
-        } else if (input.charAt(0) == 'n') {
-            return false;
-        }
-        return defaultToYes;
     }
 
     @Override
     public String readPassword(String prompt) {
-        if (System.console() != null) {
-            char[] pwd;
+        Console console = System.console();
+        if (console != null) {
             try {
-                pwd = System.console().readPassword(prompt);
+                return new String(console.readPassword(prompt));
             } catch (Exception e) {
                 logger.warn("Password could not be read.", e);
-                return null;
             }
-            return new String(pwd);
+        } else {
+            logger.warn("Failed to read password due to System.console()");
         }
-
-        // Read the password in cleartext if no console is present (might happen
-        // in some IDEs?)
-        logger.info("System.console is not present, unable to read password "
-                + "securely. Reading password in cleartext.");
-        return this.readLine("\n" + prompt);
+        println("Unable to read password securely. Reading password in cleartext.");
+        println("Press Ctrl+C to abort");
+        return readLine(prompt);
     }
 
+    @Override
+    public boolean readConfirmation(String prompt, boolean defaultToYes) {
+        String yesNo = (defaultToYes) ? " [Y/n] " : " [y/N] ";
+        String input = readLine(prompt + yesNo).toLowerCase();
+
+        switch (input) {
+            case "y": //fall through
+            case "yes":
+                return true;
+            case "n": //fall through
+            case "no":
+                return false;
+            default:
+                return defaultToYes;
+        }
+    }
 }

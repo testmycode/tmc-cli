@@ -1,7 +1,10 @@
 package fi.helsinki.cs.tmc.cli.command.core;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -23,6 +26,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -56,7 +60,7 @@ public class CommandAnnotationProcessorTest {
         ProcessingEnvironment processingEnv = new ProcessingEnvironment() {
             @Override
             public Map<String, String> getOptions() {
-                return new HashMap<String, String>();
+                return new HashMap<>();
             }
 
             @Override
@@ -138,7 +142,7 @@ public class CommandAnnotationProcessorTest {
 
         Set<TypeElement> annotations = new HashSet<>();
         assertTrue(processor.process(annotations, roundEnv));
-        assertFalse(stringWriter.toString().contains(".class"));
+        assertThat("" + stringWriter, not(containsString(".class")));
     }
 
     @Test
@@ -158,7 +162,7 @@ public class CommandAnnotationProcessorTest {
 
         Set<TypeElement> annotations = new HashSet<>();
         assertTrue(processor.process(annotations, roundEnv));
-        assertTrue(stringWriter.toString().contains("TestTest.class"));
+        assertThat("" + stringWriter, containsString("TestTest.class"));
     }
 
     @Test
@@ -189,7 +193,7 @@ public class CommandAnnotationProcessorTest {
 
         Set<TypeElement> annotations = new HashSet<>();
         assertTrue(processor.process(annotations, roundEnv));
-        assertTrue(stringWriter.toString().contains("(\"commmand1\", TestTest1.class)"));
-        assertTrue(stringWriter.toString().contains("(\"commmand2\", TestTest2.class)"));
+        assertThat("" + stringWriter, containsString("(\"commmand1\", TestTest1.class)"));
+        assertThat("" + stringWriter, containsString("(\"commmand2\", TestTest2.class)"));
     }
 }

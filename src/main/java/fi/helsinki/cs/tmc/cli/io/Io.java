@@ -18,9 +18,9 @@ public abstract class Io extends Writer {
 
     public abstract String readLine(String prompt);
 
-    public abstract Boolean readConfirmation(String prompt, Boolean defaultToYes);
-
     public abstract String readPassword(String prompt);
+
+    public abstract boolean readConfirmation(String prompt, boolean defaultToYes);
 
     @Override
     public void write(char[] cbuf, int offset, int len) throws IOException {

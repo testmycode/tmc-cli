@@ -1,21 +1,22 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
@@ -27,28 +28,32 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.Callable;
 
 /*TODO test the command line options */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcUtil.class)
 public class RunTestsCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
     private static final String EXERCISE1_NAME = "Module_1-02_intro";
     private static final String EXERCISE2_NAME = "Module_1-04_func";
 
-    static Path pathToDummyCourse;
-    static Path pathToDummyExercise;
-    static Path pathToDummyExerciseSrc;
-    static Path pathToNonCourseDir;
+    private static Path pathToDummyCourse;
+    private static Path pathToDummyExercise;
+    private static Path pathToDummyExerciseSrc;
 
     private Application app;
+    private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
     private WorkDir workDir;
-    private Callable<RunResult> callableRunResult;
+    private RunResult runResult;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -61,75 +66,65 @@ public class RunTestsCommandTest {
 
         pathToDummyExerciseSrc = pathToDummyExercise.resolve("src");
         assertNotNull(pathToDummyExerciseSrc);
-
-        pathToNonCourseDir = pathToDummyCourse.getParent();
-        assertNotNull(pathToNonCourseDir);
     }
 
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, mockCore);
+        app = new Application(ctx);
+        workDir = ctx.getWorkDir();
 
-        callableRunResult = new Callable<RunResult>() {
-            @Override
-            public RunResult call() throws Exception {
-                RunResult.Status status = Status.PASSED;
-                ImmutableList<TestResult> testResults = ImmutableList.of();
-                ImmutableMap<String, byte[]> logs = ImmutableMap.of();
-                RunResult result = new RunResult(status, testResults, logs);
+        RunResult.Status status = Status.PASSED;
+        ImmutableList<TestResult> testResults = ImmutableList.of();
+        ImmutableMap<String, byte[]> logs = ImmutableMap.of();
+        runResult = new RunResult(status, testResults, logs);
 
-                return result;
-            }
-        };
+        mockStatic(TmcUtil.class);
     }
 
     @Test
-    public void failIfCoreIsNull() {
-        app = spy(app);
-        doReturn(null).when(app).getTmcCore();
+    public void failIfBackendFails() {
+        ctx = spy(new CliContext(io, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
 
-        app.getWorkDir().setWorkdir(pathToDummyCourse);
         String[] args = {"test"};
         app.run(args);
-        assertFalse(io.out().contains("Testing:"));
+        io.assertNotContains("Testing:");
     }
 
     @Test
     public void givesAnErrorMessageIfNotInCourseDirectory() {
-        workDir = new WorkDir(Paths.get(System.getProperty("java.io.tmpdir")));
-        app.setWorkdir(workDir);
+        workDir.setWorkdir(Paths.get(System.getProperty("java.io.tmpdir")));
         String[] args = {"test"};
         app.run(args);
-        assertTrue(io.out().contains("You have to be in a course directory"));
+        io.assertContains("You have to be in a course directory");
     }
 
     @Test
     public void worksInCourseDirectory() {
-        when(mockCore.runTests((ProgressObserver) anyObject(),
-                (Exercise) anyObject())).thenReturn(callableRunResult);
+        when(TmcUtil.runLocalTests(eq(ctx), any(Exercise.class)))
+                .thenReturn(runResult);
 
-        workDir = new WorkDir(pathToDummyCourse);
-        app.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyCourse);
 
         String[] args = {"test"};
         app.run(args);
-        assertTrue(io.out().contains("Testing: " + EXERCISE1_NAME));
-        assertTrue(io.out().contains("Testing: " + EXERCISE2_NAME));
+        io.assertContains("Testing: " + EXERCISE1_NAME);
+        io.assertContains("Testing: " + EXERCISE2_NAME);
     }
 
     @Test
     public void worksInCourseDirectoryIfExerciseIsGiven() {
-        when(mockCore.runTests((ProgressObserver) anyObject(),
-                (Exercise) anyObject())).thenReturn(callableRunResult);
+        when(TmcUtil.runLocalTests(eq(ctx), any(Exercise.class)))
+                .thenReturn(runResult);
 
-        workDir = new WorkDir(pathToDummyCourse);
-        app.setWorkdir(workDir);
+        workDir.setWorkdir(pathToDummyCourse);
 
         String[] args = {"test", EXERCISE1_NAME};
         app.run(args);
-        assertTrue(io.out().contains("Testing: " + EXERCISE1_NAME));
+        io.assertContains("Testing: " + EXERCISE1_NAME);
     }
 }

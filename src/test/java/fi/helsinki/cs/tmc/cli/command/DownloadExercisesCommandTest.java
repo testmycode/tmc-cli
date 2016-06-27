@@ -1,141 +1,112 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcUtil.class)
 public class DownloadExercisesCommandTest {
 
-    Application app;
-    TestIo testIo;
-    TmcCore mockCore;
-    Path tempDir;
+    private Application app;
+    private CliContext ctx;
+    private TestIo io;
+    private TmcCore mockCore;
+    private WorkDir workDir;
+    private Path tempDir;
 
     @Before
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
-        WorkDir workDir = new WorkDir();
-        workDir.setWorkdir(tempDir);
-        testIo = new TestIo();
-        app = new Application(testIo, workDir);
+        workDir = new WorkDir(tempDir);
+
+        io = new TestIo();
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, workDir, mockCore);
+        app = new Application(ctx);
+
+        mockStatic(TmcUtil.class);
     }
 
     @After
     public void tearDown() {
         try {
             FileUtils.deleteDirectory(tempDir.toFile());
-        } catch (Exception e) {
-        }
+        } catch (Exception e) { }
     }
 
     @Test
-    public void failIfCoreIsNull() {
-        app = spy(app);
-        doReturn(null).when(app).getTmcCore();
+    public void failIfBackendFails() {
+        ctx = spy(new CliContext(io, workDir, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"download", "foo"};
         app.run(args);
-        assertFalse(testIo.out().contains("Course doesn't exist"));
+        io.assertNotContains("Course doesn't exist");
     }
 
     @Test
     public void failIfCourseArgumentNotGiven() {
         String[] args = {"download"};
         app.run(args);
-        assertTrue(testIo.out().contains("You must give"));
+        io.assertContains("You must give");
     }
 
     @Test
     public void worksRightIfCourseIsNotFound() throws IOException {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                return new ArrayList<>();
-            }
-        };
-
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
+        when(TmcUtil.findCourse(eq(ctx), eq("foo"))).thenReturn(null);
         String[] args = {"download", "foo"};
         app.run(args);
-        assertTrue(testIo.out().contains("Course doesn't exist"));
+        io.assertContains("Course doesn't exist");
     }
 
     @Test
     public void worksRightIfCourseIsFound() throws IOException {
-        Callable<List<Course>> callableList = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                ArrayList<Course> tmp = new ArrayList<>();
-                tmp.add(new Course("course1"));
-                tmp.add(new Course("course2"));
-                return tmp;
-            }
-        };
+        Course course = new Course("course1");
+        course.setExercises(Arrays.asList(new Exercise("exercise")));
+        List<Exercise> exercises = Arrays.asList(new Exercise("exerciseName"));
 
-        Callable<Course> callableCourse = new Callable<Course>() {
-            @Override
-            public Course call() throws Exception {
-                Course course = new Course("course1");
-                List<Exercise> lst = new ArrayList<>();
-                lst.add(new Exercise("exercise"));
-                course.setExercises(lst);
-                return course;
-            }
-        };
-
-        Callable<List<Exercise>> callableExercise = new Callable<List<Exercise>>() {
-            @Override
-            public List<Exercise> call() throws Exception {
-                ArrayList<Exercise> tmp = new ArrayList<>();
-                tmp.add(new Exercise("exerciseName"));
-                return tmp;
-            }
-        };
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
+                any(ProgressObserver.class))).thenReturn(exercises);
 
         Settings settings = new Settings("server", "user", "password");
-        settings.setTmcProjectDirectory(tempDir);
-        app.setSettings(settings);
-
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callableList);
-        when(mockCore.getCourseDetails(any(ProgressObserver.class),
-                any(Course.class))).thenReturn(callableCourse);
-        when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class),
-                anyListOf(Exercise.class))).thenReturn(callableExercise);
+        ctx.useSettings(settings);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -154,22 +125,23 @@ public class DownloadExercisesCommandTest {
         completed1.setCompleted(true);
         completed2.setCompleted(true);
 
-        List<Exercise> exercises = new ArrayList<>();
-        exercises.add(completed1);
-        exercises.add(notCompleted);
-        exercises.add(completed2);
+        List<Exercise> filteredExercises = Arrays.asList(notCompleted);
 
-        Course course = new Course("test-course");
-        course.setExercises(exercises);
+        Course course = new Course("course1");
+        course.setExercises(Arrays.asList(completed1, notCompleted, completed2));
 
-        GnuParser parser = new GnuParser();
-        CommandLine args = parser.parse(new Options(), new String[]{});
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
+                any(ProgressObserver.class))).thenReturn(filteredExercises);
 
-        DownloadExercisesCommand dlCommand = new DownloadExercisesCommand();
-        List<Exercise> filtered = dlCommand.getFilteredExercises(course, args);
+        Settings settings = new Settings("server", "user", "password");
+        workDir.setWorkdir(tempDir);
+        ctx.useSettings(settings);
 
-        assertTrue(filtered.size() == 1);
-        assertEquals(notCompleted, filtered.get(0));
+        String[] args = {"download", "course1"};
+        app.run(args);
+
+        io.assertContains("which 1 exercises were downloaded");
     }
 
     @Test
@@ -182,22 +154,22 @@ public class DownloadExercisesCommandTest {
         completed1.setCompleted(true);
         completed2.setCompleted(true);
 
-        List<Exercise> exercises = new ArrayList<>();
-        exercises.add(completed1);
-        exercises.add(notCompleted);
-        exercises.add(completed2);
-
-        Course course = new Course("test-course");
+        List<Exercise> exercises = Arrays.asList(completed1, notCompleted,
+                completed2);
+        Course course = new Course("course1");
         course.setExercises(exercises);
 
-        GnuParser parser = new GnuParser();
-        Options options = new Options();
-        options.addOption("a", "all", false, "");
-        CommandLine args = parser.parse(options, new String[]{"-a"});
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
+                any(ProgressObserver.class))).thenReturn(exercises);
 
-        DownloadExercisesCommand dlCommand = new DownloadExercisesCommand();
-        List<Exercise> filtered = dlCommand.getFilteredExercises(course, args);
+        Settings settings = new Settings("server", "user", "password");
+        workDir.setWorkdir(tempDir);
+        ctx.useSettings(settings);
 
-        assertTrue(filtered.size() == 3);
+        String[] args = {"download", "-a", "course1"};
+        app.run(args);
+
+        io.assertContains("which 3 exercises were downloaded");
     }
 }

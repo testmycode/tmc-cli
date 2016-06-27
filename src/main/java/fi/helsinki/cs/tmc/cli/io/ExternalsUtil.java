@@ -1,9 +1,5 @@
 package fi.helsinki.cs.tmc.cli.io;
 
-import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
-import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +17,7 @@ import java.util.List;
 public class ExternalsUtil {
 
     private static final Logger logger
-            = LoggerFactory.getLogger(TmcCliUpdater.class);
+            = LoggerFactory.getLogger(ExternalsUtil.class);
 
     /**
      * Create a temp file with a template and open an editor for the user.
@@ -115,7 +111,6 @@ public class ExternalsUtil {
      * @param uri Link to be opened in browser
      */
     public static void openInBrowser(URI uri) {
-        Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
         String browser = System.getenv("BROWSER");
         if (browser != null) {
             execExternal(browser, uri.toString(), false);
@@ -137,10 +132,9 @@ public class ExternalsUtil {
     }
 
     private static boolean execExternal(String program, boolean wait) {
-        Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
         logger.info("Launching external program " + program);
         String[] exec;
-        if (Application.isWindows()) {
+        if (EnvironmentUtil.isWindows()) {
             exec = new String[]{program};
         } else {
             exec = new String[]{
@@ -174,7 +168,6 @@ public class ExternalsUtil {
             writer.print(string);
             writer.close();
         } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
             logger.error("Couldn't write to file", e);
             return false;
         }
@@ -186,7 +179,6 @@ public class ExternalsUtil {
         try {
             message = new String(Files.readAllBytes(path));
         } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(ExternalsUtil.class);
             logger.error("Couldn't read file as bytes", e);
             return null;
         }
@@ -198,7 +190,6 @@ public class ExternalsUtil {
         try {
             messageLines = Files.readAllLines(path, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
             logger.error("Couldn't read file as array", e);
             return null;
         }

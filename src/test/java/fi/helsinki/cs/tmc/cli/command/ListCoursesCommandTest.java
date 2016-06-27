@@ -1,82 +1,75 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcUtil.class)
 public class ListCoursesCommandTest {
 
-    Application app;
-    Io mockIo;
-    TestIo testIo;
-    TmcCore mockCore;
+    private Application app;
+    private CliContext ctx;
+    private TestIo io;
+    private TmcCore mockCore;
 
     @Before
     public void setUp() {
-        mockIo = mock(TerminalIo.class);
-        app = new Application(mockIo);
+        io = new TestIo();
         mockCore = mock(TmcCore.class);
-        app.setTmcCore(mockCore);
+        ctx = new CliContext(io, mockCore);
+        app = new Application(ctx);
+
+        mockStatic(TmcUtil.class);
     }
-    
+
     @Test
-    public void failIfCoreIsNull() {
-        testIo = new TestIo();
-        app = new Application(testIo);
-        app.setTmcCore(null);
+    public void failIfBackendFails() {
+        CliContext ctx = spy(new CliContext(io, mockCore));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
+
         String[] args = {"courses", "foo"};
         app.run(args);
-        assertFalse(testIo.out().contains("Course doesn't exist"));
+        io.assertNotContains("Course doesn't exist");
     }
-    
+
     @Test
     public void listCoursesWorksWithNoCourses() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                return new ArrayList<>();
-            }
-        };
-        
-        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
+        List<Course> list = Arrays.asList();
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list);
+
         String[] args = {"courses"};
         app.run(args);
-        verify(mockIo).println(Mockito.contains("No courses found on this server"));
+        io.assertContains("No courses found");
     }
-    
+
     @Test
     public void listCoursesWorksWithCourses() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                ArrayList<Course> tmp = new ArrayList<>();
-                tmp.add(new Course("course1"));
-                tmp.add(new Course("course2"));
-                return tmp;
-            }
-        };
-        
-        when(mockCore.listCourses((ProgressObserver) anyObject())).thenReturn(callable);
+        List<Course> list = Arrays.asList(new Course("course1"), new Course("course2"));
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list);
+
         String[] args = {"courses"};
         app.run(args);
-        verify(mockIo).println(Mockito.contains("Found 2 courses"));
+        io.assertContains("Found 2 courses");
     }
 }

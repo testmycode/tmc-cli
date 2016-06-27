@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.cli.tmcstuff;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class SettingsTest {
 
     @Test
     public void correctClientVersion() {
-        assertEquals(Application.getVersion(), settings.clientVersion());
+        assertEquals(EnvironmentUtil.getVersion(), settings.clientVersion());
     }
 
     @Test

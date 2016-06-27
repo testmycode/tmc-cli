@@ -2,34 +2,12 @@ package fi.helsinki.cs.tmc.cli.updater;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class VersionTest {
-
-    public VersionTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
 
     @Test
     public void constructorWorksWithNumbering() {
@@ -78,27 +56,27 @@ public class VersionTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException1() {
-        new Version("1");
+        assertNotNull(new Version("1"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException2() {
-        new Version("0.1");
+        assertNotNull(new Version("0.1"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException3() {
-        new Version("0.0.0.1");
+        assertNotNull(new Version("0.0.0.1"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException4() {
-        new Version("0.0.1+meta");
+        assertNotNull(new Version("0.0.1+meta"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException5() {
-        new Version("v0.0.1");
+        assertNotNull(new Version("v0.0.1"));
     }
 
     @Test

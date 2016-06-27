@@ -19,9 +19,8 @@ public class ShellHelperCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
-        CommandFactory commands = getApp().getCommandFactory();
         if (args.hasOption("c")) {
-            for (Class<Command> commandClass : commands.getCommands()) {
+            for (Class<Command> commandClass : CommandFactory.getCommands()) {
                 Command command = CommandFactory.getCommand(commandClass);
                 io.println(command.name());
             }

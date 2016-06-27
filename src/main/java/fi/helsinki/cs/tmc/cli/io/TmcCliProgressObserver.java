@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.io;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 public class TmcCliProgressObserver extends ProgressObserver {
@@ -18,7 +17,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     protected Boolean hasProgressBar;
 
     public TmcCliProgressObserver() {
-        this(new TerminalIo());
+        this(new TerminalIo(System.in));
     }
 
     public TmcCliProgressObserver(Io io) {
@@ -28,7 +27,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
     public TmcCliProgressObserver(Io io, Color.AnsiColor color1, Color.AnsiColor color2) {
         this.hasProgressBar = false;
         this.io = io;
-        this.maxline = Application.getTerminalWidth();
+        this.maxline = EnvironmentUtil.getTerminalWidth();
         this.pips = this.maxline - 6;
         this.color1 = color1;
         this.color2 = color2;
@@ -145,7 +144,7 @@ public class TmcCliProgressObserver extends ProgressObserver {
                                            Color.AnsiColor color1, Color.AnsiColor color2) {
         return TmcCliProgressObserver.progressBar(
                 (double) passed / total,
-                Application.getTerminalWidth(),
+                EnvironmentUtil.getTerminalWidth(),
                 color1, color2,
                 '[', ']', '█', '░'
         );

@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.cli;
 
 import static org.junit.Assert.assertTrue;
 
-import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.junit.Before;
@@ -16,7 +15,7 @@ public class ApplicationTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(io);
+        app = new Application(new CliContext(io));
     }
 
     @Test

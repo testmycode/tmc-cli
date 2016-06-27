@@ -5,11 +5,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
-import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
+import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -21,31 +19,31 @@ import org.junit.rules.ExpectedException;
 
 public class CommandFactoryTest {
 
+    Application app;
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    CommandFactory factory;
-    Application app;
+    CliContext ctx;
 
     @Before
     public void setUp() {
-        app = new Application(new TerminalIo());
-        factory = app.getCommandFactory();
+        ctx = new CliContext(new TestIo());
     }
 
     @Test
     public void constructorAddsCommands() {
-        assertTrue(!factory.getCommands().isEmpty());
+        assertTrue(!CommandFactory.getCommands().isEmpty());
     }
 
     @Test
     public void createCommandWorksWithRealCommand() {
-        assertNotNull(factory.createCommand(app, "help"));
+        assertNotNull(CommandFactory.createCommand(ctx, "help"));
     }
 
     @Test
     public void createCommandWorksWithBadCommand() {
-        assertNull(factory.createCommand(app, "foobar"));
+        assertNull(CommandFactory.createCommand(ctx, "foobar"));
     }
 
     @Command(name = "good", desc = "test")
@@ -64,9 +62,9 @@ public class CommandFactoryTest {
 
     @Test
     public void addGoodCommand() {
-        factory.addCommand(GoodCommand.class);
+        CommandFactory.addCommand(GoodCommand.class);
         //TODO check the all the stuff in the command
-        assertNotNull(factory.createCommand(app, "good"));
+        assertNotNull(CommandFactory.createCommand(ctx, "good"));
     }
 
     public static class BadCommand extends AbstractCommand {
@@ -87,7 +85,7 @@ public class CommandFactoryTest {
         //WARNING The exception code leads to unpredicatble test results
         //exception.expect(RuntimeException.class);
         //exception.expectMessage(contains("annotation"));
-        factory.addCommand(BadCommand.class);
+        CommandFactory.addCommand(BadCommand.class);
     }
 
     public static class ReallyBadCommand {
@@ -98,7 +96,7 @@ public class CommandFactoryTest {
         //WARNING The exception code leads to unpredicatble test results
         //exception.expect(RuntimeException.class);
         //exception.expectMessage(contains("Interface"));
-        factory.addCommand(ReallyBadCommand.class);
+        CommandFactory.addCommand(ReallyBadCommand.class);
     }
 }
 

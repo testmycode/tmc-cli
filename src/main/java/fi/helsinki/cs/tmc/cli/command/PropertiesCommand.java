@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -28,9 +29,10 @@ public class PropertiesCommand extends AbstractCommand {
     @Override
     public void run(CommandLine args, Io io) {
         this.io = io;
+        CliContext ctx = getContext();
         Boolean unset = args.hasOption("u");
         String[] arguments = args.getArgs();
-        HashMap<String, String> props = getApp().getProperties();
+        HashMap<String, String> props = ctx.getProperties();
         if (arguments.length == 0) {
             printAllProps(props);
             return;
@@ -55,7 +57,6 @@ public class PropertiesCommand extends AbstractCommand {
             for (String key : arguments) {
                 io.println("Unset key " + key + ", was " + props.remove(key));
             }
-            getApp().saveProperties();
         } else {
             if (arguments.length > 2) {
                 io.print("Setting property keys:");
@@ -72,8 +73,8 @@ public class PropertiesCommand extends AbstractCommand {
                 io.println("Set " + arguments[i] + "=>" + arguments[i + 1]
                         + ", was " + last);
             }
-            getApp().saveProperties();
         }
+        ctx.saveProperties();
     }
 
     private void printAllProps(HashMap<String, String> props) {

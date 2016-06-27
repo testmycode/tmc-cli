@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class CourseInfoIoTest {
+
     private Settings settings;
     private CourseInfo course;
     private Path courseFile;
