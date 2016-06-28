@@ -53,7 +53,7 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
+        CourseInfo info = ctx.getCourseInfo();
         updateExercises(info, workDir.getConfigFile());
     }
 

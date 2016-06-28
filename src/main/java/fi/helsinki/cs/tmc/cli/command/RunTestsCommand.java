@@ -70,7 +70,7 @@ public class RunTestsCommand extends AbstractCommand {
             io.println("You have to be in a course directory to run tests");
             return;
         }
-        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
+        CourseInfo info = ctx.getCourseInfo();
 
         ResultPrinter resultPrinter
                 = new ResultPrinter(io, this.showDetails, this.showPassed);

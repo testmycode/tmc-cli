@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * This is a class for storing all different login settings as a single array.

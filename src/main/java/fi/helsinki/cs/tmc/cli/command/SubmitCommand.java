@@ -88,7 +88,7 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        CourseInfo info = CourseInfoIo.load(workDir.getConfigFile());
+        CourseInfo info = ctx.getCourseInfo();
         Course currentCourse = info.getCourse();
         if (currentCourse == null) {
             return;

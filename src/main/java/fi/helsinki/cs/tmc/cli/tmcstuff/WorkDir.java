@@ -81,6 +81,7 @@ public class WorkDir {
                 return new ArrayList<>();
             }
         }
+        /*TODO somehow use the ctx.getCourseInfo */
         CourseInfo courseinfo = CourseInfoIo.load(getConfigFile());
         if (courseinfo == null) {
             return new ArrayList<>();

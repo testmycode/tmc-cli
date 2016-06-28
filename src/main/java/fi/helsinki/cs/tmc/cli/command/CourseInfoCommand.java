@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_BLUE;
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_GREEN;
+import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_PURPLE;
 import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_RED;
 
 import fi.helsinki.cs.tmc.cli.CliContext;
@@ -44,7 +45,13 @@ public class CourseInfoCommand extends AbstractCommand {
         this.ctx = getContext();
         workDir = ctx.getWorkDir();
 
-        if (!args.hasOption("i")) {
+        boolean fetchFromInternet = args.hasOption("i");
+
+        if (! ctx.loadBackend()) {
+            return;
+        }
+
+        if (!fetchFromInternet) {
             printLocalCourseOrExercise(args);
             return;
         }
@@ -55,9 +62,6 @@ public class CourseInfoCommand extends AbstractCommand {
             return;
         }
 
-        if (! ctx.loadBackend()) {
-            return;
-        }
         course = TmcUtil.findCourse(ctx, stringArgs[0]);
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
@@ -67,8 +71,8 @@ public class CourseInfoCommand extends AbstractCommand {
     }
 
     private void printLocalCourseOrExercise(CommandLine args) {
-        if (workDir.getConfigFile() != null) {
-            info = CourseInfoIo.load(workDir.getConfigFile());
+        info = ctx.getCourseInfo();
+        if (info != null) {
             course = info.getCourse();
             printCourseOrExercise(args);
         } else {
@@ -152,12 +156,18 @@ public class CourseInfoCommand extends AbstractCommand {
     private void printExerciseShort() {
         io.println("Exercise: " + exercise.getName());
         io.println("Deadline: " + getDeadline(exercise));
-        io.println(formatString("completed", exercise.isCompleted()));
-        if (!exercise.isCompleted() && exercise.isAttempted()) {
-            io.println(Color.colorString("attempted", ANSI_BLUE));
-        }
-        if (exercise.requiresReview()) {
-            io.println(formatString("reviewed", exercise.isReviewed()));
+
+        if (exercise.hasDeadlinePassed() && !exercise.isCompleted()) {
+            io.println(Color.colorString("deadline passed", ANSI_PURPLE));
+        } else {
+            if (!exercise.isCompleted() && exercise.isAttempted()) {
+                io.println(Color.colorString("attempted", ANSI_BLUE));
+            } else {
+                io.println(formatString("completed", exercise.isCompleted()));
+            }
+            if (exercise.requiresReview()) {
+                io.println(formatString("reviewed", exercise.isReviewed()));
+            }
         }
     }
 
