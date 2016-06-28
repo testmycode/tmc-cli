@@ -11,11 +11,12 @@ import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -24,7 +25,9 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 @Command(name = "test", desc = "Run local exercise tests")
 public class RunTestsCommand extends AbstractCommand {
@@ -90,9 +93,12 @@ public class RunTestsCommand extends AbstractCommand {
                 // TODO use progress observer (Bug is in tmc-core)
                 runResult = TmcUtil.runLocalTests(ctx, exercise);
 
+                ValidationResult validationResult = TmcUtil.runCheckStyle(ctx, exercise);
+                printValidationResult(validationResult);
+
                 resultPrinter.printRunResult(runResult, exercise.isCompleted(),
                         isOnlyExercise, color1, color2);
-                total += runResult.testResults.size();
+                total += runResult.testResults.size(); // lisää validationResult.getValidationErrors().size();
                 passed += ResultPrinter.passedTests(runResult.testResults);
                 exercise.setAttempted(true);
                 if (runResult.status == PASSED && !exercise.isCompleted()) {
@@ -126,5 +132,30 @@ public class RunTestsCommand extends AbstractCommand {
         this.showPassed = args.hasOption("a");
         this.showDetails = args.hasOption("d");
         return args.getArgs();
+    }
+
+    private void printValidationResult(ValidationResult result) {
+        if (result == null) {
+            return;
+        }
+
+        System.out.println("Strategy: " + result.getStrategy());
+
+        Map<File, List<ValidationError>> validationErrors = result.getValidationErrors();
+        for (Map.Entry<File, List<ValidationError>> entry : validationErrors.entrySet()) {
+            System.out.println("Key: " + entry.getKey());
+            
+            System.out.println("Value:");
+            for (ValidationError validationError : entry.getValue()) {
+                System.out.println(" ValidationError:");
+                System.out.println(" SourceName: " + validationError.getSourceName());
+                System.out.println(" Message: " + validationError.getMessage());
+                System.out.println(" Line: " + validationError.getLine());
+                System.out.println(" Column: " + validationError.getColumn());
+                System.out.println("Error(line:%d, column: %d): " + validationError.getColumn());
+            }
+            
+            System.out.println("");
+        }
     }
 }
