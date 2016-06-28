@@ -15,16 +15,12 @@ import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
-import org.apache.http.entity.BasicHttpEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.rmi.ServerException;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SettingsIo.class, TmcUtil.class})
@@ -61,7 +57,7 @@ public class LoginCommandTest {
         app.run(args);
         io.assertContains("Login successful.");
     }
-    
+
     @Test
     public void userGetsErrorMessageIfLoginFails() throws Exception {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
@@ -69,25 +65,6 @@ public class LoginCommandTest {
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", "WrongPassword"};
         app.run(args);
         io.assertContains("Login failed.");
-    }
-
-    @Test
-    public void catches401IfCorrectServerAndWrongUsername() throws Exception {
-        Exception cause = new FailedHttpResponseException(401, new BasicHttpEntity());
-        Exception exception = new Exception(cause);
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenThrow(exception);
-        String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
-        app.run(args);
-        io.assertContains("Incorrect username or password.");
-    }
-    
-    @Test
-    public void userGetsErrorMessageIfUnableToConnectToServer() throws Exception {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class)))
-                .thenThrow(new ServerException("Error"));
-        String[] args = {"login", "-s", SERVER, "-u", "foo", "-p", PASSWORD};
-        app.run(args);
-        io.assertContains("Unable to connect to server");
     }
 
     @Test
@@ -107,7 +84,7 @@ public class LoginCommandTest {
         app.run(args);
         io.assertAllPromptsUsed();
     }
-    
+
     @Test
     public void loginAsksServerFromUserIfNotGiven() throws Exception {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
