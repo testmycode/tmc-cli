@@ -52,6 +52,7 @@ public class SubmitCommandTest {
     private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
+    private WorkDir workDir;
 
     private Course course;
     private SubmissionResult result;
@@ -79,6 +80,7 @@ public class SubmitCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
+        workDir = ctx.getWorkDir();
 
         course = new Course(COURSE_NAME);
         result = new SubmissionResult();
@@ -96,7 +98,7 @@ public class SubmitCommandTest {
 
     @Test
     public void testSuccessInExerciseRoot() {
-        ctx.setWorkdir(new WorkDir(pathToDummyExercise));
+        workDir.setWorkdir(pathToDummyExercise);
         app.run(new String[]{"submit"});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
 
@@ -106,7 +108,7 @@ public class SubmitCommandTest {
 
     @Test
     public void canSubmitFromCourseDirIfExerciseNameIsGiven() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[]{"submit", EXERCISE1_NAME});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
 
@@ -116,7 +118,7 @@ public class SubmitCommandTest {
 
     @Test
     public void canSubmitMultipleExercisesIfNamesAreGiven() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[]{"submit", EXERCISE1_NAME, EXERCISE2_NAME});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         io.assertContains("Submitting: " + EXERCISE2_NAME);
@@ -127,7 +129,7 @@ public class SubmitCommandTest {
 
     @Test
     public void submitsAllExercisesFromCourseDirIfNoNameIsGiven() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[]{"submit"});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         io.assertContains("Submitting: " + EXERCISE2_NAME);
@@ -139,21 +141,21 @@ public class SubmitCommandTest {
 
     @Test
     public void doesNotSubmitExtraExercisesFromExerciseRoot() {
-        ctx.setWorkdir(new WorkDir(pathToDummyExercise));
+        workDir.setWorkdir(pathToDummyExercise);
         app.run(new String[]{"submit"});
         assertEquals(1, countSubstring("Submitting: ", io.out()));
     }
 
     @Test
     public void doesNotSubmitExtraExercisesFromCourseDir() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[]{"submit", EXERCISE1_NAME});
         assertEquals(1, countSubstring("Submitting: ", io.out()));
     }
 
     @Test
     public void abortIfInvalidCmdLineArgumentIsGiven() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[]{"submit", EXERCISE1_NAME, "-foo"});
         io.assertContains("Invalid command line argument");
 
@@ -163,7 +165,7 @@ public class SubmitCommandTest {
 
     @Test
     public void abortIfInvalidExerciseNameIsGivenAsArgument() {
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[]{"submit", "foo"});
         io.assertContains("Error: foo is not a valid exercise.");
         assertEquals(0, countSubstring("Submitting: ", io.out()));
@@ -171,7 +173,7 @@ public class SubmitCommandTest {
 
     @Test
     public void abortGracefullyIfNotInCourseDir() {
-        ctx.setWorkdir(new WorkDir(pathToNonCourseDir));
+        workDir.setWorkdir(pathToNonCourseDir);
         app.run(new String[]{"submit"});
         io.assertContains("No exercises specified.");
 
@@ -182,7 +184,7 @@ public class SubmitCommandTest {
     @Test
     public void showFailMsgIfSubmissionFailsInCore() {
         when(TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class))).thenReturn(null);
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[]{"submit", EXERCISE1_NAME});
 
         assertEquals(1, countSubstring("Submitting: ", io.out()));
@@ -194,7 +196,7 @@ public class SubmitCommandTest {
 
     @Test
     public void canSubmitFromExerciseSubdirs() {
-        ctx.setWorkdir(new WorkDir(pathToDummyExerciseSrc));
+        workDir.setWorkdir(pathToDummyExerciseSrc);
         app.run(new String[]{"submit"});
 
         io.assertContains("Submitting: " + EXERCISE1_NAME);
@@ -204,7 +206,7 @@ public class SubmitCommandTest {
 
     @Test
     public void doesNotShowUpdateMessageIfNoUpdatesAvailable() {
-        ctx.setWorkdir(new WorkDir(pathToDummyExercise));
+        workDir.setWorkdir(pathToDummyExercise);
         app.run(new String[]{"submit"});
 
         io.assertNotContains("available");
@@ -225,7 +227,7 @@ public class SubmitCommandTest {
         when(TmcUtil.getUpdatableExercises(any(CliContext.class), any(Course.class)))
                 .thenReturn(updateResult);
 
-        ctx.getWorkDir().setWorkdir(pathToDummyExercise);
+        workDir.setWorkdir(pathToDummyExercise);
         app.run(new String[]{"submit"});
 
         io.assertContains("1 new exercise available");

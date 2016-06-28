@@ -35,7 +35,7 @@ public class ListExercisesCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         this.ctx = getContext();
         this.io = io;
-        
+
         String courseName = getCourseName(args);
         if (courseName == null) {
             return;
@@ -77,10 +77,7 @@ public class ListExercisesCommand extends AbstractCommand {
     private CourseInfo getCourseInfoFromCurrentDirectory() {
         WorkDir workDir = ctx.getWorkDir();
         workDir.addPath();
-        if (workDir.getConfigFile() != null) {
-            return CourseInfoIo.load(workDir.getConfigFile());
-        }
-        return null;
+        return ctx.getCourseInfo();
     }
 
     private List<Exercise> getExercisesFromServer(String courseName) {

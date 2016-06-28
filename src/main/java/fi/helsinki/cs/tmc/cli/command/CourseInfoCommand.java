@@ -45,7 +45,13 @@ public class CourseInfoCommand extends AbstractCommand {
         this.ctx = getContext();
         workDir = ctx.getWorkDir();
 
-        if (!args.hasOption("i")) {
+        boolean fetchFromInternet = args.hasOption("i");
+
+        if (! ctx.loadBackend()) {
+            return;
+        }
+
+        if (!fetchFromInternet) {
             printLocalCourseOrExercise(args);
             return;
         }
@@ -56,9 +62,6 @@ public class CourseInfoCommand extends AbstractCommand {
             return;
         }
 
-        if (! ctx.loadBackend()) {
-            return;
-        }
         course = TmcUtil.findCourse(ctx, stringArgs[0]);
         if (course == null) {
             io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
@@ -68,8 +71,8 @@ public class CourseInfoCommand extends AbstractCommand {
     }
 
     private void printLocalCourseOrExercise(CommandLine args) {
-        if (workDir.getConfigFile() != null) {
-            info = CourseInfoIo.load(workDir.getConfigFile());
+        info = ctx.getCourseInfo();
+        if (info != null) {
             course = info.getCourse();
             printCourseOrExercise(args);
         } else {
