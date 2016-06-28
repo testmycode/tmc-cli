@@ -57,10 +57,6 @@ public class Application {
         }
     }
 
-    public Application(Io io, WorkDir workDir) {
-        this(new CliContext(io, workDir));
-    }
-
     private boolean runCommand(String name, String[] args) {
         AbstractCommand command = CommandFactory.createCommand(this.context, name);
         if (command == null) {
