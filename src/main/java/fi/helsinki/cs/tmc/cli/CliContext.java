@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class CliContext {
 
-    private WorkDir workDir;//TODO make this final
+    private final WorkDir workDir;
     private final Io io;
 
     private Application application;
@@ -29,16 +29,15 @@ public class CliContext {
     private HashMap<String, String> properties;
     private final boolean inTest;
 
-    /*TODO some of the constructors could be removed */
     public CliContext(Io io) {
-        this(io, new WorkDir(), null);
+        this(io, null);
     }
 
     public CliContext(Io io, TmcCore core) {
-        this(io, new WorkDir(), core);
+        this(io, core, new WorkDir());
     }
 
-    public CliContext(Io io, WorkDir workDir, TmcCore core) {
+    public CliContext(Io io, TmcCore core, WorkDir workDir) {
         inTest = (io != null);
         if (!inTest) {
             io = new TerminalIo(System.in);
@@ -160,10 +159,6 @@ public class CliContext {
         if (this.tmcCore == null) {
             createTmcCore(settings);
         }
-        this.settings.set(settings);
-    }
-
-    public void restoreSettings() {
         this.settings.set(settings);
     }
 

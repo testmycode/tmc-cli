@@ -71,7 +71,7 @@ public class PasteCommandTest {
 
         mockCore = mock(TmcCore.class);
 
-        ctx = new CliContext(io, workDir, mockCore);
+        ctx = new CliContext(io, mockCore, workDir);
         app = new Application(ctx);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
@@ -95,7 +95,7 @@ public class PasteCommandTest {
 
     @Test
     public void failIfCoreIsNull() {
-        ctx = spy(new CliContext(io, workDir, mockCore));
+        ctx = spy(new CliContext(io, mockCore, workDir));
         app = new Application(ctx);
         doReturn(false).when(ctx).loadBackend();
 
