@@ -7,7 +7,6 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.commons.cli.CommandLine;
@@ -38,7 +37,7 @@ public class LoginCommand extends AbstractCommand {
         String username = getLoginInfo(args, "u", "username: ");
         String password = getLoginInfo(args, "p", "password: ");
 
-        if (! ctx.loadBackend(false)) {
+        if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 

@@ -56,7 +56,7 @@ public class CliContext {
     }
 
     /*TODO create reset method for removing all cached data that is called
-     * when working directory is changed or by users demand also use it in
+     * when working directory is changed or by user's demand, also use it in
      * constructor.
      */
 
@@ -64,9 +64,14 @@ public class CliContext {
         this.application = app;
     }
 
+    /**
+     * Get singleton Application object.
+     *
+     * @return application object
+     */
     public Application getApp() {
         if (application == null) {
-            throw new RuntimeException("Application isn't usually set in tests.");
+            throw new RuntimeException("Application isn't set in some tests.");
         }
         return application;
     }
@@ -77,28 +82,63 @@ public class CliContext {
         return inTest;
     }
 
+    /**
+     * Get singleton Io object.
+     *
+     * @return io object
+     */
     public Io getIo() {
         return io;
     }
 
-    public WorkDir getWorkDir() {
-        return this.workDir;
+    public boolean hasLogin() {
+        return hasLogin;
     }
 
+    /**
+     * Get singleton WorkDir object.
+     *
+     * @return singleton work dir object
+     */
+    public WorkDir getWorkDir() {
+        return workDir;
+    }
+
+    /**
+     * Create local course info file after download.
+     *
+     * @param course local copy of course object
+     * @return cached course data object
+     */
     public CourseInfo createCourseInfo(Course course) {
         return new CourseInfo(settings, course);
     }
 
+    /**
+     * Get map of the properties.
+     *
+     * @return the whole mutable map
+     */
     public HashMap<String, String> getProperties() {
         // Loads properties from the global configuration file in .config/tmc-cli/
         return this.properties;
     }
 
-    public Boolean saveProperties() {
+    /**
+     * Save the properties map into the a file.
+     *
+     * @return true if success
+     */
+    public boolean saveProperties() {
         // Saves properties to the global configuration file in .config/tmc-cli/
         return SettingsIo.saveProperties(properties);
     }
 
+    /**
+     * Lazy load the course info from course directory.
+     *
+     * @return local course info
+     */
     public CourseInfo getCourseInfo() {
         if (courseInfo != null) {
             return courseInfo;
@@ -111,33 +151,43 @@ public class CliContext {
             io.println("Course configuration file "
                     + workDir.getConfigFile().toString()
                     + "is invalid.");
-            //TODO add a way to rewrite the course config file.
+            //TODO add a way to rewrite the corrupted course config file.
             return null;
         }
         return this.courseInfo;
     }
 
-    // Method is used to help testing
-    public void setTmcCore(TmcCore tmcCore) {
-        this.tmcCore = tmcCore;
+    /**
+     * Getter of TmcCore for TmcUtil class.
+     * This method should never be used except in TmcUtil class.
+     *
+     * @return global tmcutil
+     */
+    public TmcCore getTmcCore() {
+        if (this.tmcCore == null) {
+            throw new RuntimeException("The loadBackend* method was NOT called");
+        }
+        return this.tmcCore;
     }
 
+    /**
+     * Initialize the tmc-core and other cached info.
+     * Use this method if you need i
+     * @return true if success
+     */
     public boolean loadBackend() {
-        return loadBackend(true);
-    }
-
-    public boolean loadBackend(boolean useInternet) {
         if (this.tmcCore != null) {
             return true;
         }
 
-        if (!createTmcCore()) {
+        if (! createTmcCore()) {
             return false;
         }
 
-        if (useInternet && !hasLogin) {
-            // If no settings are present
+        //Bug: what if we have wrong login?
+        if (!hasLogin) {
             if (courseInfo == null) {
+                // if user is not in course folder.
                 io.println("You are not logged in. Log in using: tmc login");
             } else {
                 io.println("You are not logged in as " + courseInfo.getUsername()
@@ -148,13 +198,24 @@ public class CliContext {
         return true;
     }
 
-    public TmcCore getTmcCore() {
-        if (this.tmcCore == null) {
-            throw new RuntimeException("The loadBackend method was NOT called");
+    /**
+     * Initialize the cached data, but don't fail if there is not login.
+     *
+     * @return true if success
+     */
+    public boolean loadBackendWithoutLogin() {
+        if (this.tmcCore != null) {
+            return true;
         }
-        return this.tmcCore;
+
+        return createTmcCore();
     }
 
+    /**
+     * Copy login info from different settings object and them.
+     * TODO: separate settings object and login info.
+     * @param settings login info
+     */
     public void useSettings(Settings settings) {
         if (this.tmcCore == null) {
             createTmcCore(settings);
@@ -183,6 +244,8 @@ public class CliContext {
                         courseInfo.getServerAddress());
             }
         } else {
+            // Bug: if we are not inside course directory
+            // then we may not correctly guess the correct settings.
             cachedSettings = SettingsIo.load();
         }
 
