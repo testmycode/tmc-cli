@@ -192,9 +192,9 @@ public class CliContext {
         }
 
         hasLogin = true;
-        if (settings == null) {
+        if (cachedSettings == null) {
             hasLogin = false;
-            settings = new Settings();
+            cachedSettings = new Settings();
         }
 
         createTmcCore(cachedSettings);
