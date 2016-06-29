@@ -122,7 +122,7 @@ public class TmcUtilTest {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(callable);
         TmcUtil.tryToLogin(ctx, new Settings());
-        assertTrue(io.out().contains("Your tmc-cli is outdated"));
+        io.assertContains("Your tmc-cli is outdated");
     }
     
     @Test
@@ -138,7 +138,7 @@ public class TmcUtilTest {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(callable);
         TmcUtil.tryToLogin(ctx, new Settings());
-        assertTrue(io.out().contains("Incorrect username or password"));
+        io.assertContains("Incorrect username or password");
     }
 
     @Test
