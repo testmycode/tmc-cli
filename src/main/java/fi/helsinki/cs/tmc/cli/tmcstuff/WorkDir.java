@@ -87,16 +87,12 @@ public class WorkDir {
             return new ArrayList<>();
         }
         List<Exercise> allExercises = courseinfo.getExercises();
-        List<String> exerciseNames = new ArrayList<>();
+        List<Exercise> exercises = new ArrayList<>();
+        List<String> filteredExerciseNames = new ArrayList<>();
         List<String> locallyTested = courseinfo.getLocalCompletedExercises();
 
         if (directories.contains(getCourseDirectory())) {
-            for (File file : getCourseDirectory().toFile().listFiles()) {
-                if (file.isDirectory()) {
-                    addPath(file.toPath());
-                }
-            }
-            directories.remove(getCourseDirectory());
+            allExercises.addAll(allExercises);
         }
 
         for (Path dir : directories) {
@@ -105,27 +101,27 @@ public class WorkDir {
             String exDir = getCourseDirectory().relativize(dir)
                     .toString();
             for (Exercise exercise : allExercises) {
-                if (filterExercise(exercise, exDir, locallyTested,
-                        exists, onlyTested, filterCompleted)
-                        && !exDir.isEmpty()) {
-                    exerciseNames.add(exercise.getName());
+                if (exercise.getName().startsWith(exDir.replace(File.separator, "-"))
+                || exDir.replace(File.separator, "-").startsWith(exercise.getName())) {
+                    exercises.add(exercise);
                 }
             }
         }
+        for (Exercise exercise : exercises) {
+            if (filterExercise(exercise, locallyTested, exists, onlyTested, filterCompleted)) {
+                filteredExerciseNames.add(exercise.getName());
+            }
+        }
 
-        return exerciseNames;
+        return filteredExerciseNames;
     }
 
-    private Boolean filterExercise(Exercise exercise, String exDir, List<String> tested,
+    private Boolean filterExercise(Exercise exercise, List<String> tested,
                                    Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
-        // if the exercise starts with this path, add it
-        if (exercise.getName().startsWith(exDir.replace(File.separator, "-"))
-                || exDir.replace(File.separator, "-").startsWith(exercise.getName())) {
-            if (!onlyTested || tested.contains(exercise.getName())) {
-                if (!filterCompleted || !exercise.isCompleted()) {
-                    if (!exists || Files.exists(courseDirectory.resolve(exDir))) {
-                        return true;
-                    }
+        if (!onlyTested || tested.contains(exercise.getName())) {
+            if (!filterCompleted || !exercise.isCompleted()) {
+                if (!exists || Files.exists(courseDirectory.resolve(exercise.getName()))) {
+                    return true;
                 }
             }
         }
