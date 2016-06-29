@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
@@ -46,7 +47,8 @@ public class ListExercisesCommand extends AbstractCommand {
             return;
         }
 
-        printExercises(courseName, exercises, !args.hasOption("n"));
+        printExercises(courseName, exercises, !args.hasOption("n")
+                && !EnvironmentUtil.isWindows());
     }
     
     private String getCourseName(CommandLine args) {
