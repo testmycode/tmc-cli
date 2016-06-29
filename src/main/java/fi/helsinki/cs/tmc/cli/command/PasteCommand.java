@@ -88,9 +88,14 @@ public class PasteCommand extends AbstractCommand {
         }
 
         String exerciseName = exercisenames.get(0);
-        CourseInfo courseinfo = CourseInfoIo.load(ctx.getWorkDir().getConfigFile());
-        Exercise exercise = courseinfo.getExercise(exerciseName);
+        CourseInfo info = ctx.getCourseInfo();
+        Exercise exercise = info.getExercise(exerciseName);
         URI uri = TmcUtil.sendPaste(ctx, exercise, message);
+        if (uri == null && exercise.hasDeadlinePassed()) {
+            io.println("Unable to send the paste."
+                    + " The deadline for submitting this exercise has passed");
+            return;
+        }
         if (uri == null) {
             io.println("Unable to send the paste");
             return;

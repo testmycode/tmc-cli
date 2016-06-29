@@ -47,6 +47,7 @@ public class UpdateCommandTest {
     private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
+    private WorkDir workDir;
     private ExerciseUpdater exerciseUpdater;
 
     @BeforeClass
@@ -68,6 +69,7 @@ public class UpdateCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
+        workDir = ctx.getWorkDir();
 
         exerciseUpdater = PowerMockito.mock(ExerciseUpdater.class);
         PowerMockito.whenNew(ExerciseUpdater.class).withAnyArguments().thenReturn(exerciseUpdater);
@@ -93,7 +95,7 @@ public class UpdateCommandTest {
 
     @Test
     public void printsAnErrorMessageIfUsedOutsideCourseDirectory() {
-        ctx.setWorkdir(new WorkDir(pathToNonCourseDir));
+        workDir.setWorkdir(pathToNonCourseDir);
         String[] args = {"update"};
         app.run(args);
         io.assertContains("Not a course directory");
@@ -103,7 +105,7 @@ public class UpdateCommandTest {
     public void worksRightIfAllExercisesAreUpToDate() {
         when(exerciseUpdater.updatesAvailable()).thenReturn(false);
 
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         String[] args = {"update"};
         app.run(args);
 
@@ -134,7 +136,7 @@ public class UpdateCommandTest {
                 .thenReturn(newAndChanged);
         when(exerciseUpdater.updateCourseJson(any(CourseInfo.class), any(Path.class)))
                 .thenReturn(true);
-        ctx.setWorkdir(new WorkDir(pathToDummyCourse));
+        workDir.setWorkdir(pathToDummyCourse);
         String[] args = {"update"};
         app.run(args);
 
