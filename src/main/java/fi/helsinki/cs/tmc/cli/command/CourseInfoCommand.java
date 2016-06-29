@@ -84,10 +84,11 @@ public class CourseInfoCommand extends AbstractCommand {
 
     private void printCourseOrExercise(CommandLine args) {
         String[] stringArgs = args.getArgs();
+        workDir.getExerciseNames(false, false, false);
 
         // if in exercise directory and no parameters given, print info for that exercise.
-        if (workDir.getExerciseNames().size() == 1 && stringArgs.length == 0) {
-            String currentExercise = workDir.getExerciseNames().get(0);
+        if (workDir.getExerciseNames(false, false, false).size() == 1 && stringArgs.length == 0) {
+            String currentExercise = workDir.getExerciseNames(false, false, false).get(0);
             exercise = info.getExercise(currentExercise);
             printOneExercise(args.hasOption("a"));
             return;
@@ -102,7 +103,8 @@ public class CourseInfoCommand extends AbstractCommand {
 
     private void printCourseOrExerciseFromParameters(CommandLine args) {
         String[] stringArgs = args.getArgs();
-        // if parameter is given, check if it is an exercise or a course. If neither, print an error message.
+        // if parameter is given, check if it is an exercise
+        // or a course. If neither, print an error message.
         if (info.getExercise(stringArgs[0]) != null) {
             exercise = info.getExercise(stringArgs[0]);
             printOneExercise(args.hasOption("a"));
