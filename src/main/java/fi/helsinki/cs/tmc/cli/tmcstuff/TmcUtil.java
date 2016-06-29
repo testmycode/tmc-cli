@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import fi.helsinki.cs.tmc.cli.CliContext;
+import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -8,6 +9,8 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
+import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.slf4j.Logger;
@@ -22,18 +25,23 @@ public class TmcUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
 
-    public static boolean tryToLogin(CliContext ctx, Settings settings) throws Exception {
-        Callable<List<Course>> callable;
+    public static boolean tryToLogin(CliContext ctx, Settings settings) {
         TmcCore core = ctx.getTmcCore();
-
         ctx.useSettings(settings);
-        callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
+        Callable<List<Course>> callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
         //TODO restore the settings object
 
-        return callable.call() != null;
+        try {
+            return callable.call() != null;
+        } catch (Exception e) {
+            if (isAuthenticationError(e)) {
+                ctx.getIo().println("Incorrect username or password.");
+                return false;
+            }
+            handleTmcExceptions(ctx, e);
+            return false;
+        }
     }
-
-
 
     public static List<Course> listCourses(CliContext ctx) {
         Callable<List<Course>> callable;
@@ -42,6 +50,7 @@ public class TmcUtil {
         try {
             return callable.call();
         } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
             TmcUtil.logger.warn("Failed to get courses to list the exercises", e);
         }
         return new ArrayList<>();
@@ -52,6 +61,7 @@ public class TmcUtil {
             TmcCore core = ctx.getTmcCore();
             return core.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
         } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
             logger.warn("Failed to get course details to list the exercises", e);
             return null;
         }
@@ -87,6 +97,7 @@ public class TmcUtil {
             TmcCore core = ctx.getTmcCore();
             return core.downloadOrUpdateExercises(progobs, exercises).call();
         } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
             logger.warn("Failed to download exercises", e);
             return null;
         }
@@ -105,8 +116,9 @@ public class TmcUtil {
         try {
             TmcCore core = ctx.getTmcCore();
             return core.submit(ProgressObserver.NULL_OBSERVER, exercise).call();
-        } catch (Exception ex) {
-            logger.warn("Failed to submit the exercise", ex);
+        } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
+            logger.warn("Failed to submit the exercise", e);
             return null;
         }
     }
@@ -118,6 +130,7 @@ public class TmcUtil {
             return core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course)
                     .call();
         } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
             logger.warn("Failed to get exercise updates.", e);
             return null;
         }
@@ -130,8 +143,9 @@ public class TmcUtil {
                     exercise, message).call();
 
         } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
             logger.error("Failed to send paste", e);
-            System.out.println(e);
+            ctx.getIo().println(e.toString());
             return null;
         }
     }
@@ -142,6 +156,7 @@ public class TmcUtil {
             return core.runTests(ProgressObserver.NULL_OBSERVER, exercise).call();
 
         } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
             logger.error("Failed to run local tests", e);
             return null;
         }
@@ -155,8 +170,42 @@ public class TmcUtil {
                     feedbackUri).call();
 
         } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
             logger.error("Couldn't send feedback", e);
             return false;
         }
+    }
+
+    protected static void handleTmcExceptions(CliContext ctx, Exception exception) {
+        Io io = ctx.getIo();
+        Throwable cause = exception.getCause();
+
+        if (isAuthenticationError(exception)) {
+            io.println("Your username or password is not valid anymore.");
+            return;
+        }
+        if (cause instanceof FailedHttpResponseException) {
+            logger.error("Unable to connect to server", exception);
+            io.println("Unable to connect to server.");
+            return;
+        }
+        if (cause instanceof ObsoleteClientException) {
+            logger.error("Outdated tmc client");
+            io.println("Your tmc-cli is outdated. Please update it.");
+            return;
+        }
+        io.println("Failed to connect to server.");
+    }
+
+    private static boolean isAuthenticationError(Exception exception) {
+        Throwable cause = exception.getCause();
+        if (cause instanceof FailedHttpResponseException) {
+            FailedHttpResponseException httpEx
+                    = (FailedHttpResponseException) cause;
+            if (httpEx.getStatusCode() == 401) {
+                return true;
+            }
+        }
+        return false;
     }
 }
