@@ -149,6 +149,9 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
+    /**
+     * Fetch updated exercise statuses from server and update course JSON file accordingly.
+     */
     private void updateCourseJson(List<Exercise> submittedExercises,
             CourseInfo courseInfo, Path courseInfoFile) {
 
