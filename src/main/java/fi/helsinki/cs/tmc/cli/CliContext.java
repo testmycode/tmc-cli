@@ -51,7 +51,7 @@ public class CliContext {
         this.workDir = workDir;
         this.properties = SettingsIo.loadProperties();
         this.tmcCore = core;
-        this.hasLogin = false;
+        this.hasLogin = (core != null);
         this.courseInfo = null;
     }
 

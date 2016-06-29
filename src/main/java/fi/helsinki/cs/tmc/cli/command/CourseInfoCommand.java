@@ -52,10 +52,6 @@ public class CourseInfoCommand extends AbstractCommand {
         }
 
         if (!fetchFromInternet) {
-            if (!ctx.hasLogin()) {
-                io.println("Loading course from internet requires login.");
-                return;
-            }
             printLocalCourseOrExercise(args);
             return;
         }
@@ -63,6 +59,11 @@ public class CourseInfoCommand extends AbstractCommand {
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0) {
             io.println("You must give a course as an argument.");
+            return;
+        }
+
+        if (!ctx.hasLogin()) {
+            io.println("Loading course from internet requires login.");
             return;
         }
 
