@@ -103,6 +103,7 @@ public class TmcCliUpdater {
 
         } catch (IOException ex) {
             logger.warn("Failed to create http connection to github.", ex);
+            io.println("Failed to create https connection to github.");
             return null;
         }
         try {
