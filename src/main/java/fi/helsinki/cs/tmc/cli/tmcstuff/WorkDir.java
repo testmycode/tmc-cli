@@ -76,10 +76,8 @@ public class WorkDir {
      */
     public List<String> getExerciseNames(
             Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
-        if (this.directories.isEmpty()) {
-            if (!addPath()) {
-                return new ArrayList<>();
-            }
+        if (this.directories.isEmpty() && getConfigFile() == null) {
+            return new ArrayList<>();
         }
         /*TODO somehow use the ctx.getCourseInfo */
         CourseInfo courseinfo = CourseInfoIo.load(getConfigFile());
@@ -91,18 +89,29 @@ public class WorkDir {
         List<String> filteredExerciseNames = new ArrayList<>();
         List<String> locallyTested = courseinfo.getLocalCompletedExercises();
 
-        if (directories.contains(getCourseDirectory())) {
-            allExercises.addAll(allExercises);
+        // Conditions for adding all exercises:
+        //   course dir given as parameter
+        //   working dir is course dir and no parameters
+        if (directories.contains(getCourseDirectory())
+                || (getCourseDirectory().equals(workdir) && directories.size() == 0)) {
+            exercises.addAll(allExercises);
+        } else if (workdir.startsWith(getCourseDirectory())
+                && !workdir.equals(getCourseDirectory())) {
+            // if workdir is an exercise directory, add it to directories
+            directories.add(workdir);
+        } else if (getCourseDirectory() == null) {
+            // if we still don't have a course directory, return an empty list
+            return new ArrayList<>();
         }
 
         for (Path dir : directories) {
 
             // convert path to a string relative to the course dir
-            String exDir = getCourseDirectory().relativize(dir)
-                    .toString();
+            String exDir = getCourseDirectory().relativize(dir).toString();
             for (Exercise exercise : allExercises) {
-                if (exercise.getName().startsWith(exDir.replace(File.separator, "-"))
-                || exDir.replace(File.separator, "-").startsWith(exercise.getName())) {
+                if ((exercise.getName().startsWith(exDir.replace(File.separator, "-"))
+                        || exDir.replace(File.separator, "-").startsWith(exercise.getName()))
+                        && !exercises.contains(exercise)) {
                     exercises.add(exercise);
                 }
             }
@@ -117,10 +126,10 @@ public class WorkDir {
     }
 
     private Boolean filterExercise(Exercise exercise, List<String> tested,
-                                   Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
+            Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
         if (!onlyTested || tested.contains(exercise.getName())) {
             if (!filterCompleted || !exercise.isCompleted()) {
-                if (!exists || Files.exists(courseDirectory.resolve(exercise.getName()))) {
+                if (!exists || Files.exists(getCourseDirectory().resolve(exercise.getName()))) {
                     return true;
                 }
             }
