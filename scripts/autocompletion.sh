@@ -31,7 +31,11 @@ _tmc_opts()
 	esac
 
 	if [[ ! -z "\$sub_command" ]]; then
-		COMPREPLY=( \$(compgen -f -- \${cur}) )
+		# use a hack to enable file mode in bash < 4
+		# this is from git's autocompletion script
+		compopt -o nospace
+		compopt -o filenames +o nospace 2>/dev/null ||
+		compgen -f /non-existing-dir/ > /dev/null
 		return 0
 	fi
 
@@ -39,4 +43,5 @@ _tmc_opts()
 	return 0
 }
 
-complete -F _tmc_opts tmc
+complete  -o bashdefault -o default -F _tmc_opts tmc \
+        || complete -o default -F _tmc_opts tmc
