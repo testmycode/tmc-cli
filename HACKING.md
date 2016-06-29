@@ -2,30 +2,30 @@ Hacking the tmc-cli
 ===================
 
 ## Requirements for developing tmc-cli
- * java jdk 7
+ * jdk 7
  * linux bash (mac's bash won't work)
 
 
-## Building a tmc-cli
-To build tmc-cli run the appropriate maven command.
+## Building tmc-cli
+To build tmc-cli run the appropriate Maven command.
 
 	$ git clone https://github.com/tmc-cli/tmc-cli.git
 	$ mvn clean install
 
 ## Creating new commands
 
-Every command must have `@Command` annotation and it's highly recomended to extend the
-AbstractCommand. Note that the `@Command` annotation is used for creating help messages
-and it's name field is used as the sub-command name in terminal.
+Every command must have `@Command` annotation and it's highly recommended to extend the
+AbstractCommand class. Note that the `@Command` annotation is used for creating help messages
+and its 'name' field is used as the sub-command name in terminal.
 
-Please put the new commands into the `command` package.
+Please create all new commands inside the `command` package.
 
 ```java
-@Command(name = "command-name", desc = "Description of command")
+@Command(name = "command-name", desc = "Command description goes here")
 public class ExampleCommand extends AbstractCommand {
     @Override
     public void getOptions(Options options) {
-        options.addOption("l", "long-option", false, "This will be seen in help message.");
+        options.addOption("l", "long-option", false, "This will be seen in the help message.");
         // ...
     }
 }
@@ -33,22 +33,22 @@ public class ExampleCommand extends AbstractCommand {
 
 ## Architecture
 
-The architecture is based around running single command per execution of program. The commands
-use the utility classes in other packages. CliContext object contains some cached objects
-that are commonly used in utility classes and commands. Most importantly it has the `Io` object
-which responsibility is to print to the terminal, and help with other user interactions.
+Tmc-cli architecture is based on running only a single command on each program execution.
+Commands use the utility classes in other packages. The `CliContext` object contains some cached
+objects that are commonly used by utility classes and commands. Most importantly it has the `Io`
+object which is responsible for printing messages for the user and helping with other user interactions.
 
 ## Logging error messages
 
-In case of failure please put some message into error log by using slf4j logger and print some
-useful error message to user with `ctx.getIo().println(' ... ');`. Ctx context object is
-passed into most of the code in the tmc-cli and you can use it to interact with the user.
+In case of failure, please print debug info in the error log by using slf4j logger and print some
+useful error messages to user with `ctx.getIo().println(' ... ');`. Ctx context object is
+passed into most of the code in tmc-cli and you can use it to interact with the user.
 
 ## Unit testing
 
-If you create new command then please use only integration tests. If you want to verify that command
-or some utility class printed into terminal then use io.assertContains method. The custom assert
-method gives good error messages when it fails and it's short to write.
+If you create a new command, please use integration tests only. If you want to verify that a command
+or a utility class has printed text into the terminal, use `io.assertContains()` method. This custom
+assert method prints easily understandable error messages when it fails and doesn't require much code.
 
 ```java
 @RunWith(PowerMockRunner.class)
@@ -95,5 +95,5 @@ public class ExampleCommand {
 }
 ```
 
-If you are doing tests for any other class then just create normal unit tests
+If you are doing tests for any other class, simply create normal unit tests
 that don't depend on any command.
