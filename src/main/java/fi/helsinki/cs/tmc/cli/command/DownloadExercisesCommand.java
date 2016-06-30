@@ -93,7 +93,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
                 io.println("  from which "
                         + exercises.size() + " exercises were downloaded.");
             }
-            io.println("Use -a/-all to download completed exercises as well.");
+            io.println("Use -a/--all to download completed exercises as well.");
         }
 
         Path configFile = workDir.getWorkingDirectory()
