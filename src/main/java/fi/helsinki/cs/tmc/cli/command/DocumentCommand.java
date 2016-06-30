@@ -17,11 +17,23 @@ import java.nio.charset.StandardCharsets;
 @Command(name = "document", desc = "Show lots of boring info about tmc-cli")
 public class DocumentCommand extends AbstractCommand {
 
+    private static final String ERROR_MESSAGE = ""
+            + "Exception in thread \"main\" java.lang.NullPointerException\n"
+            + "\tat fi.helsinki.cs.tmc.cli.command.EasterEggCommand.run("
+            + "DocumentCommand.java:78)\n"
+            + "\tat fi.helsinki.cs.tmc.cli.command.core.AbstractCommand.execute("
+            + "AbstractCommand.java:63)\n"
+            + "\tat fi.helsinki.cs.tmc.cli.Application.runCommand(Application.java:71)\n"
+            + "\tat fi.helsinki.cs.tmc.cli.Application.run(Application.java:129)\n"
+            + "\tat fi.helsinki.cs.tmc.cli.Application.main(Application.java:138)\n"
+            + "Exception in thread \"Thread-0\" java.lang.NullPointerException\n"
+            + "\tat fi.helsinki.cs.tmc.cli.io.ShutdownHandler.run(ShutdownHandler.java:18)";
     private Io io;
     private int width;
     private int height;
     private int cursorX;
     private int cursorY;
+    private int speed;
 
     private Blittable logo;
     private Blittable logoText;
@@ -61,8 +73,8 @@ public class DocumentCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {
-        options.addOption("i", false, "???");
-        options.addOption("h", false, "???");
+        options.addOption("h", true, "???");
+        options.addOption("s", true, "???");
     }
 
     @Override
@@ -70,30 +82,43 @@ public class DocumentCommand extends AbstractCommand {
         this.io = io;
         this.width = EnvironmentUtil.getTerminalWidth();
         this.height = 30;
-        cursorX = 0;
-        cursorY = 0;
+        this.cursorX = 0;
+        this.cursorY = 0;
+        this.speed = 100;
 
         if (args.hasOption('h')) {
             try {
                 this.height = Integer.parseInt(args.getOptionValue('h'));
-            } catch (Exception e) { }
+            } catch (NumberFormatException e) {
+                io.println("Height must be integer");
+                return;
+            }
+        }
+        if (args.hasOption('s')) {
+            try {
+                this.speed = Integer.parseInt(args.getOptionValue('s'));
+            } catch (NumberFormatException e) {
+                io.println("Speed must be integer");
+                return;
+            }
         }
         if (EnvironmentUtil.isWindows()) {
             io.println("Command document doesn't exist. ;)");
             return;
         }
-        if (args.hasOption('i')) {
-            init();
-        }
+
+        io.println(ERROR_MESSAGE);
+        cursorY += ERROR_MESSAGE.split("\n").length;
+        wait(2000);
 
         for (; cursorY < height; cursorY++) {
+            if (cursorY == height / 2) {
+                io.println("Just kidding :)");
+            }
             io.println("");
             wait(50);
         }
         fadeOut();
-
-        //io.println("-----------------------------------------");
-        //cursorY++;
 
         //Blittable logo = new Blittable(loadFile("/test.ansi"));
         logo = new Blittable(loadFile("/logo.ansi"));
@@ -114,7 +139,7 @@ public class DocumentCommand extends AbstractCommand {
         setCursor(0, 0);
         io.print("\u001B[0J");
 
-        blitter(Color.colorString("Dev team", Color.AnsiColor.ANSI_BLUE),
+        blitter(Color.colorString("Original dev team", Color.AnsiColor.ANSI_BLUE),
                 Math.max(centerX - 10, 0), centerY - 2);
         blitter("Johannes L. (jclc)", centerX, centerY++);
         centerY++;
@@ -130,22 +155,24 @@ public class DocumentCommand extends AbstractCommand {
         setCursor(0, 0);
         io.print("\u001B[0J");
 
-        centerY = height / 2 - 2;
+        centerY = height / 2 - 3;
+        blitter(Color.colorString("Special thanks for", Color.AnsiColor.ANSI_CYAN),
+                Math.max(centerX - 10, 0), centerY - 2);
         blitter("Jarmo Isotalo (Jamo)", centerX, centerY++);
         centerY++;
         blitter("Kati Kyllönen (kxkyll)", centerX, centerY++);
+        centerY++;
+        blitter("Matti Luukkainen (mluukkai)", centerX, centerY++);
         wait(4000);
 
         fadeOut();
-        io.print("\u001B[1A\u001B[0K");
-        wait(50);
-        io.print("\u001B[1A\u001B[0K");
+        io.print("\u001B[1A\u001B[1A\u001B[0K");
         wait(200);
     }
 
     private void fadeOut() {
         io.print("\u001B[?25h");
-        for (int i = height - 1; i > 0; i--) {
+        for (int i = height - 1; i >= 0; i--) {
             setCursor(0, i);
             io.print("\u001B[0K");
             wait(50);
@@ -171,6 +198,7 @@ public class DocumentCommand extends AbstractCommand {
 
     private void scrollTheText() {
         int scrollY = -logoText.getHeight();
+        // scroll to the middle of screen
         int target = height / 2 - logoText.getHeight() / 2;
 
         while (true) {
@@ -179,6 +207,7 @@ public class DocumentCommand extends AbstractCommand {
 
             scrollY++;
             if (scrollY >= target) {
+                // don't erase the text after last rendering
                 return;
             }
 
@@ -209,7 +238,7 @@ public class DocumentCommand extends AbstractCommand {
 
     private void wait(int waitMs) {
         try {
-            Thread.sleep(waitMs);
+            Thread.sleep(waitMs * speed / 100);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
@@ -269,23 +298,6 @@ public class DocumentCommand extends AbstractCommand {
             start = -cursorX;
         }
         io.print(trim(line, start, end));
-    }
-
-    private void init() {
-        String errorMessage = ""
-                + "Exception in thread \"main\" java.lang.NullPointerException\n"
-                + "\tat fi.helsinki.cs.tmc.cli.command.EasterEggCommand.run("
-                + "DocumentCommand.java:78)\n"
-                + "\tat fi.helsinki.cs.tmc.cli.command.core.AbstractCommand.execute("
-                + "AbstractCommand.java:63)\n"
-                + "\tat fi.helsinki.cs.tmc.cli.Application.runCommand(Application.java:71)\n"
-                + "\tat fi.helsinki.cs.tmc.cli.Application.run(Application.java:129)\n"
-                + "\tat fi.helsinki.cs.tmc.cli.Application.main(Application.java:138)\n"
-                + "Exception in thread \"Thread-0\" java.lang.NullPointerException\n"
-                + "\tat fi.helsinki.cs.tmc.cli.io.ShutdownHandler.run(ShutdownHandler.java:18)";
-        io.println(errorMessage);
-        cursorY += errorMessage.split("\n").length;
-        wait(10000);
     }
 
     private String trim(String line, int start, int end) {
