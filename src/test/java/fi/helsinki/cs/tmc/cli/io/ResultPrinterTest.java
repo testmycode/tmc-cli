@@ -7,9 +7,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus;
 import fi.helsinki.cs.tmc.core.domain.submission.ValidationErrorImpl;
 import fi.helsinki.cs.tmc.core.domain.submission.ValidationResultImpl;
-import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
-import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
@@ -17,14 +15,11 @@ import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import org.apache.http.annotation.Immutable;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ResultPrinterTest {
@@ -33,7 +28,6 @@ public class ResultPrinterTest {
     private ResultPrinter printer;
     private SubmissionResult mockSubResult;
     private RunResult runResult;
-    private ValidationResult valResult;
     private ImmutableList<TestResult> testResults;
     private ImmutableMap<String, byte[]> logs;
     private ImmutableList<ValidationError> validationErrors;
