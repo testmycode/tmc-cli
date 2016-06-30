@@ -52,7 +52,6 @@ public class LoginCommandTest {
     public void logsInWithCorrectServerUserAndPassword() throws Exception {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
         when(SettingsIo.save(any(Settings.class))).thenReturn(true);
-        doNothing().when(ctx).setTmcCore(any(TmcCore.class));
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
         io.assertContains("Login successful.");

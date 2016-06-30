@@ -50,7 +50,7 @@ public class RunTestsCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.loadBackend(false)) {
+        if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
