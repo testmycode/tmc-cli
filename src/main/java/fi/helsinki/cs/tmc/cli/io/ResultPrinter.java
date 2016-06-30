@@ -257,7 +257,7 @@ public class ResultPrinter {
             io.println(valgrind);
             totalTests++;
         }
-        // validations
+        // TODO: check validations when it's fixed in tmc-core (hangs atm if validation fails)
 
         io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
         if (printResultBar) {
