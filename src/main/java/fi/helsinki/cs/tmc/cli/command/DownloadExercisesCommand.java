@@ -8,6 +8,8 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -58,9 +60,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         String courseName = stringArgs[0];
-        Course course = TmcUtil.findCourse(ctx, courseName);
+        Course course = findCourse(courseName);
         if (course == null) {
-            io.println("Course doesn't exist.");
             return;
         }
         List<Exercise> filtered = getFilteredExercises(course);
@@ -79,6 +80,39 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         printStatistics(course, filtered.size(), exercises.size());
         createNewCourse(course);
+    }
+
+    // TODO This method could be moved somewhere else.
+    private Course findCourse(String courseName) {
+        Io io = ctx.getIo();
+        Course found = null;
+        boolean hasDuplicateNames = false;
+
+        List<Settings> accountsList = SettingsIo.getSettingsList();
+
+        for (Settings settings : accountsList) {
+            ctx.useSettings(settings);
+            Course course = TmcUtil.findCourse(ctx, courseName);
+            if (course == null) {
+                continue;
+            }
+            if (found != null) {
+                if (!hasDuplicateNames) {
+                    io.println("There is multiple courses with same name at different servers.");
+                }
+                if (io.readConfirmation("Download course from "
+                        + settings.getServerAddress(), false)) {
+                    return course;
+                }
+                hasDuplicateNames = true;
+            }
+            found = course;
+        }
+        if (found == null) {
+            io.println("Course doesn't exist.");
+            return null;
+        }
+        return found;
     }
 
     private List<Exercise> getFilteredExercises(Course course) {
@@ -108,14 +142,14 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
             int failedCount = (requestCount - downloadCount);
             if (failedCount > 0) {
-                io.println("  from which "
-                        + requestCount + " exercises were succesfully downloaded");
+                io.println("  from which " + (requestCount - failedCount)
+                        + " exercises were succesfully downloaded");
                 io.println(Color.colorString("  and of which " + failedCount + " failed.",
                         Color.AnsiColor.ANSI_RED));
                 //TODO we could print the names of the not downloaded exercises here
             } else {
                 io.println("  from which "
-                        + requestCount + " exercises were downloaded.");
+                        + downloadCount + " exercises were downloaded.");
             }
             io.println("Use -a/--all to download completed exercises as well.");
         }
