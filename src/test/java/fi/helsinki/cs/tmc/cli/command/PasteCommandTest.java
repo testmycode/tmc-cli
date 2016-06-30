@@ -122,7 +122,13 @@ public class PasteCommandTest {
         verifyStatic(times(1));
         TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString());
     }
-
+    
+    @Test
+    public void pasteRunsRightwithTooManyArguments() {
+        app.run(new String[] {"paste", "paste-exercise", "secondArgument"});
+        io.assertContains("Error: Too many arguments. Expected 1, got");
+    }
+    
     @Test
     public void pasteRunsRightWithMessageSwitchWithMessage() {
         when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
@@ -195,7 +201,7 @@ public class PasteCommandTest {
         Mockito.when(workDir.addPath(anyString())).thenReturn(false);
         app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
 
-        io.assertContains("No exercise specified");
+        io.assertContains("The command can be used in an exercise directory");
 
         verifyStatic(Mockito.never());
         TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString());
