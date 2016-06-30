@@ -205,7 +205,8 @@ public class TmcUtil {
             io.println("Your tmc-cli is outdated. Please update it.");
             return;
         }
-        io.println("Failed to connect to server.");
+        logger.error("Command failed in tmc-core", exception);
+        io.println("Command failed in tmc-core, check tmc-cli.log file for more info");
     }
 
     private static boolean isAuthenticationError(Exception exception) {
