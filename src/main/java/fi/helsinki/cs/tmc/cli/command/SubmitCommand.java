@@ -1,21 +1,17 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus.NONE_FAILED;
-
 import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
 import fi.helsinki.cs.tmc.cli.tmcstuff.FeedbackHandler;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
-import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
@@ -94,14 +90,12 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
-        int passed = 0;
-        int total = 0;
-        Boolean isOnlyExercise = exerciseNames.size() == 1;
-
         Color.AnsiColor color1 = ctx.getApp().getColor("testresults-left");
         Color.AnsiColor color2 = ctx.getApp().getColor("testresults-right");
+        ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll,
+                color1, color2);
 
+        Boolean isOnlyExercise = exerciseNames.size() == 1;
         List<Exercise> submitExercises = info.getExercises(exerciseNames);
         List<List<FeedbackQuestion>> feedbackLists
                 = new ArrayList<>();
@@ -114,35 +108,24 @@ public class SubmitCommand extends AbstractCommand {
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
                 io.println("Submission failed.");
-            } else {
-                resultPrinter.printSubmissionResult(result, isOnlyExercise, color1, color2);
-                total += result.getTestCases().size();
-                passed += ResultPrinter.passedTests(result.getTestCases());
-
-                exercise.setAttempted(true);
-                if (result.getTestResultStatus() == NONE_FAILED) {
-                    if (info.getLocalCompletedExercises().contains(exercise.getName())) {
-                        info.getLocalCompletedExercises().remove(exercise.getName());
-                    }
-                    exercise.setCompleted(true);
-                }
-                List<FeedbackQuestion> feedback = result.getFeedbackQuestions();
-                if (feedback != null && feedback.size() > 0) {
-                    feedbackLists.add(feedback);
-                    exercisesWithFeedback.add(exercise.getName());
-                    feedbackUris.add(URI.create(result.getFeedbackAnswerUrl()));
-                }
+                resultPrinter.addFailedExercise();
+                continue;
             }
-        }
-        CourseInfoIo.save(info, workDir.getConfigFile());
-        if (total > 0 && !isOnlyExercise) {
-            // Print a progress bar showing how the ratio of passed exercises
+
+            resultPrinter.printSubmissionResult(result, isOnlyExercise);
+
+            List<FeedbackQuestion> feedback = result.getFeedbackQuestions();
+            if (feedback != null && feedback.size() > 0) {
+                feedbackLists.add(feedback);
+                exercisesWithFeedback.add(exercise.getName());
+                feedbackUris.add(URI.create(result.getFeedbackAnswerUrl()));
+            }
             io.println("");
-            io.println("Total tests passed: " + passed + "/" + total);
-            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
+        }
+        if (!isOnlyExercise) {
+            resultPrinter.printTotalExerciseResults();
         }
 
-        io.println("Updating " + CourseInfoIo.COURSE_CONFIG);
         updateCourseJson(submitExercises, info, workDir.getConfigFile());
         checkForExerciseUpdates(currentCourse);
         for (int i = 0; i < exercisesWithFeedback.size(); i++) {
@@ -160,6 +143,9 @@ public class SubmitCommand extends AbstractCommand {
         }
     }
 
+    /**
+     * Fetch updated exercise statuses from server and update course JSON file accordingly.
+     */
     private void updateCourseJson(List<Exercise> submittedExercises,
             CourseInfo courseInfo, Path courseInfoFile) {
 
@@ -172,10 +158,15 @@ public class SubmitCommand extends AbstractCommand {
         for (Exercise submitted : submittedExercises) {
             Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
             if (updatedEx == null) {
-                // Does this reaaally ever happen?
                 io.println("Failed to update config file for exercise " + submitted.getName()
                         + ". The exercise doesn't exist in server anymore.");
                 continue;
+            }
+
+            if (updatedEx.isCompleted()) {
+                if (courseInfo.getLocalCompletedExercises().contains(updatedEx.getName())) {
+                    courseInfo.getLocalCompletedExercises().remove(updatedEx.getName());
+                }
             }
             courseInfo.replaceOldExercise(updatedEx);
         }

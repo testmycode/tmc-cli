@@ -1,12 +1,17 @@
 package fi.helsinki.cs.tmc.cli.io;
 
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.SpecialLogs;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class ResultPrinter {
 
@@ -14,28 +19,34 @@ public class ResultPrinter {
             = Color.colorString("Failed to compile project", Color.AnsiColor.ANSI_PURPLE);
     private static final String FAIL_MESSAGE = "Failed: ";
     private static final String PASS_MESSAGE = "Passed: ";
-    private final String tab;
+    private static final String PADDING = createPaddingString(PASS_MESSAGE.length());
 
     private final Io io;
+    private final Color.AnsiColor passedColor;
+    private final Color.AnsiColor failedColor;
 
     private boolean showDetails;
     private boolean showPassed;
-    private int passed;
-    private int total;
+    private int totalExercises;
+    private int passedExercises;
 
-    public ResultPrinter(Io io, boolean showDetails, boolean showPassed) {
+    public ResultPrinter(Io io, boolean showDetails, boolean showPassed,
+            Color.AnsiColor passedColor, Color.AnsiColor failedColor) {
         this.io = io;
+        this.passedColor = passedColor;
+        this.failedColor = failedColor;
+
         this.showDetails = showDetails;
         this.showPassed = showPassed;
-
-        this.tab = createPaddingString(PASS_MESSAGE.length());
+        this.totalExercises = 0;
+        this.passedExercises = 0;
     }
 
-    public boolean isShowDetails() {
+    public boolean showDetails() {
         return showDetails;
     }
 
-    public boolean isShowPassed() {
+    public boolean showPassed() {
         return showPassed;
     }
 
@@ -47,104 +58,214 @@ public class ResultPrinter {
         this.showPassed = showPassed;
     }
 
-    public void printSubmissionResult(SubmissionResult result, Boolean printProgressBar,
-                                      Color.AnsiColor color1, Color.AnsiColor color2) {
-        if (result == null) {
+    public void addFailedExercise() {
+        totalExercises++;
+    }
+
+    public boolean printSubmissionResult(SubmissionResult submResult, boolean printResultBar) {
+        if (submResult == null) {
+            return false;
+        }
+        totalExercises++;
+
+        switch (submResult.getStatus()) {
+            case OK:
+                printPassedSubmissionResult(submResult, printResultBar);
+                return true;
+
+            case FAIL:
+                printFailedSubmissionResult(submResult, printResultBar);
+                return false;
+
+            case ERROR:
+                io.println(submResult.getError());
+                return false;
+
+            case PROCESSING:
+                io.println("Processing");
+                return false;
+
+            default:
+                return false;
+        }
+    }
+
+    public boolean printLocalTestResult(RunResult runResult, ValidationResult valResult,
+            boolean printResultBar) {
+        if (runResult == null) {
+            return false;
+        }
+
+        totalExercises++;
+
+        switch (runResult.status) {
+            case PASSED: // fall through
+            case TESTS_FAILED:
+                printTestCases(runResult.testResults);
+                int passedTests = passedTests(runResult.testResults);
+                int totalTests = runResult.testResults.size();
+
+                boolean validationsPassed = validationsPassed(valResult);
+                if (!validationsPassed) {
+                    printValidationErrors(valResult);
+                    totalTests++;
+                }
+
+                io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
+                if (printResultBar) {
+                    printResultBar(passedTests, totalTests);
+                }
+
+                if (runResult.status == RunResult.Status.PASSED && validationsPassed) {
+                    io.print(Color.colorString("All tests passed!", Color.AnsiColor.ANSI_GREEN));
+                    io.println(" Submit to server with 'tmc submit'");
+                    passedExercises++;
+                    return true;
+                }
+                return false;
+
+            case COMPILE_FAILED:
+                io.println(COMPILE_ERROR_MESSAGE);
+                return false;
+
+            case GENERIC_ERROR:
+                byte[] log = runResult.logs.get(SpecialLogs.GENERIC_ERROR_MESSAGE);
+                if (log == null) {
+                    log = new byte[0];
+                }
+                io.println(new String(log));
+                return false;
+
+            case TESTRUN_INTERRUPTED:
+                io.println("Testrun interrupted");
+                return false;
+
+            default:
+                return false;
+        }
+    }
+
+    public void printTotalExerciseResults() {
+        if (totalExercises == 0) {
             return;
         }
+        io.println("Total results: "
+                + passedExercises + "/" + totalExercises
+                + " exercises passed");
+        printResultBar(passedExercises, totalExercises);
+    }
 
-        this.total = result.getTestCases().size();
-        this.passed = passedTests(result.getTestCases());
+    private void printResultBar(int passed, int total) {
+        if (total == 0) {
+            return;
+        }
+        io.println(
+                TmcCliProgressObserver.getPassedTestsBar(passed, total, passedColor, failedColor)
+        );
+    }
 
-        printTestResults(result.getTestCases());
+    private boolean validationsPassed(ValidationResult result) {
+        if (result == null || result.getStrategy() == Strategy.DISABLED) {
+            return true;
+        }
+        Map<File, List<ValidationError>> errors = result.getValidationErrors();
+        return errors == null || errors.isEmpty();
+    }
 
-        switch (result.getStatus()) {
-            case ERROR:
+    private void printValidationErrors(ValidationResult result) {
+        Map<File, List<ValidationError>> errors = result.getValidationErrors();
+        io.println(Color.colorString("Validation error:", failedColor));
+
+        for (Map.Entry<File, List<ValidationError>> entry : errors.entrySet()) {
+            io.println("File: " + entry.getKey());
+
+            for (ValidationError error : entry.getValue()) {
+                io.println("  Line " + error.getLine() + ": " + error.getMessage());
+            }
+            io.println("");
+        }
+    }
+
+    private void printTestCases(List<TestResult> testResults) {
+        for (TestResult testResult : testResults) {
+            if (!testResult.isSuccessful()) {
+                printFailedTest(testResult);
                 io.println("");
-                io.println(result.getError());
-                break;
-            case FAIL:
-                String valgrind = result.getValgrind();
-                if (valgrind != null && !valgrind.isEmpty()) {
-                    io.println(Color.colorString("Valgrind error:",
-                            Color.AnsiColor.ANSI_RED));
-                    io.println(valgrind);
-                    return;
-                }
-                break;
-            case PROCESSING:
-                io.println("PROCESSING");
-                break;
-            case OK:
-                //io.println("OK");
-                break;
-            default:
-        }
-
-        if (printProgressBar && this.total > 0) {
-            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
-        }
-        String msg = null;
-        switch (    result.getTestResultStatus()) {
-            case NONE_FAILED:
-                msg = "All tests passed on server!";
-                msg = Color.colorString(msg, Color.AnsiColor.ANSI_GREEN)
-                        + "\nPoints permanently awarded: " + result.getPoints()
-                        + "\nModel solution: " + result.getSolutionUrl();
-                break;
-            case ALL_FAILED:
-                msg = Color.colorString("All tests failed on server.", Color.AnsiColor.ANSI_RED)
-                        + " Please review your answer";
-                break;
-            case SOME_FAILED:
-                msg = Color.colorString("Some tests failed on server.", Color.AnsiColor.ANSI_RED)
-                        + " Please review your answer";
-                break;
-            default:
-        }
-        if (msg != null) {
-            io.println(msg);
+            } else if (showPassed) {
+                printPassedTest(testResult);
+                io.println("");
+            }
         }
     }
 
-    public void printRunResult(RunResult result, Boolean submitted, Boolean printProgressBar,
-                               Color.AnsiColor color1, Color.AnsiColor color2) {
-        printTestResults(result.testResults);
-        this.total = result.testResults.size();
-        this.passed = passedTests(result.testResults);
+    private void printFailedTest(TestResult testResult) {
+        io.print(Color.colorString(FAIL_MESSAGE, failedColor));
+        io.println(testResult.getName());
+        io.println(PADDING + testResult.getMessage());
 
-        if (printProgressBar && this.total > 0) {
-            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
-        }
+        if (showDetails) {
+            String details = joinStrings(testResult.getDetailedMessage(), "\n");
+            if (details != null) {
+                io.println("");
+                io.println("Detailed message:");
+                io.println(details);
+            }
 
-        String msg = null;
-        switch (result.status) {
-            case PASSED:
-                msg = Color.colorString("All tests passed!", Color.AnsiColor.ANSI_GREEN);
-                if (!submitted) {
-                    msg += " Submit to server with 'tmc submit'";
-                }
-                break;
-            case TESTS_FAILED:
-                msg = "Please review your answer before submitting";
-                break;
-            case COMPILE_FAILED:
-                msg = ResultPrinter.COMPILE_ERROR_MESSAGE;
-                break;
-            case TESTRUN_INTERRUPTED:
-                msg = "Testrun interrupted";
-                break;
-            case GENERIC_ERROR:
-                msg = new String(result.logs.get(SpecialLogs.GENERIC_ERROR_MESSAGE));
-                break;
-            default:
-        }
-        if (msg != null) {
-            io.println(msg);
+            String exception = joinStrings(testResult.getException(), "\n");
+            if (exception != null) {
+                io.println("");
+                io.println("Exception:");
+                io.println(exception);
+            }
         }
     }
 
-    public static int passedTests(List<TestResult> testResults) {
+    private void printPassedTest(TestResult testResult) {
+        io.print(Color.colorString(PASS_MESSAGE, passedColor));
+        io.println(testResult.getName());
+    }
+
+    private void printPassedSubmissionResult(SubmissionResult submResult, boolean printResultBar) {
+        printTestCases(submResult.getTestCases());
+        int passedTests = passedTests(submResult.getTestCases());
+        int totalTests = submResult.getTestCases().size();
+
+        io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
+        if (printResultBar) {
+            printResultBar(passedTests, totalTests);
+        }
+
+        io.println(Color.colorString("All tests passed on server!", passedColor));
+        passedExercises++;
+
+        if (!submResult.getPoints().isEmpty()) {
+            io.println("Points permanently awarded: " + submResult.getPoints());
+        }
+        if (submResult.getSolutionUrl() != null && !submResult.getSolutionUrl().isEmpty()) {
+            io.println("Model solution: " + submResult.getSolutionUrl());
+        }
+    }
+
+    private void printFailedSubmissionResult(SubmissionResult submResult, boolean printResultBar) {
+        printTestCases(submResult.getTestCases());
+        int passedTests = passedTests(submResult.getTestCases());
+        int totalTests = submResult.getTestCases().size();
+
+        String valgrind = submResult.getValgrind();
+        if (valgrind != null && !valgrind.isEmpty()) {
+            io.println(Color.colorString("Valgrind error:", failedColor));
+            io.println(valgrind);
+            totalTests++;
+        }
+        // TODO: check validations when it's fixed in tmc-core (hangs atm if validation fails)
+
+        io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
+        if (printResultBar) {
+            printResultBar(passedTests, totalTests);
+        }
+    }
+
+    private int passedTests(List<TestResult> testResults) {
         int passed = 0;
         for (TestResult testResult : testResults) {
             if (testResult.isSuccessful()) {
@@ -154,57 +275,24 @@ public class ResultPrinter {
         return passed;
     }
 
-    private void printTestResults(List<TestResult> testResults) {
-        for (TestResult testResult : testResults) {
-            if (!testResult.isSuccessful()) {
-                printFailMessage(testResult);
-            } else if (showPassed) {
-                printPassMessage(testResult);
-            }
-        }
-        io.println("Test results: "
-                + passedTests(testResults) + "/"
-                + testResults.size() + " tests passed");
-
-    }
-
-    private void printFailMessage(TestResult testResult) {
-        io.print(Color.colorString(FAIL_MESSAGE, Color.AnsiColor.ANSI_RED));
-        io.println(testResult.getName());
-        io.println(this.tab + testResult.getMessage());
-
-        if (showDetails) {
-            String details = listToString(testResult.getDetailedMessage());
-            if (details != null) {
-                io.println("\nDetailed message:");
-                io.println(details);
-            }
-
-            String exception = listToString(testResult.getException());
-            if (exception != null) {
-                io.println("\nException:");
-                io.println(exception);
-            }
-        }
-    }
-
-    private void printPassMessage(TestResult testResult) {
-        io.print(Color.colorString(PASS_MESSAGE, Color.AnsiColor.ANSI_GREEN));
-        io.println(testResult.getName());
-    }
-
-    private String listToString(List<String> strings) {
+    private String joinStrings(List<String> strings, String delimiter) {
         if (strings == null || strings.isEmpty()) {
             return null;
         }
+
         StringBuilder sb = new StringBuilder();
         for (String string : strings) {
-            sb.append(string).append("\n");
+            sb.append(string).append(delimiter);
+        }
+
+        if (sb.length() > 0) {
+            // remove last delimiter
+            sb.setLength(sb.length() - delimiter.length());
         }
         return sb.toString();
     }
 
-    private String createPaddingString(int size) {
+    private static String createPaddingString(int size) {
         char[] charArray = new char[size];
         Arrays.fill(charArray, ' ');
         return new String(charArray);
