@@ -54,7 +54,7 @@ public class LoginCommandTest {
     @Test
     public void failIfBackendFails() {
         app = new Application(ctx);
-        when(ctx.loadBackend()).thenReturn(false);
+        when(ctx.loadBackendWithoutLogin()).thenReturn(false);
 
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
