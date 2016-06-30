@@ -7,19 +7,13 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand extends AbstractCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoginCommand.class);
     private CliContext ctx;
     private Io io;
 
@@ -38,13 +32,13 @@ public class LoginCommand extends AbstractCommand {
         String username = getLoginInfo(args, "u", "username: ");
         String password = getLoginInfo(args, "p", "password: ");
 
-        if (! ctx.loadBackend(false)) {
+        if (!ctx.loadBackend(false)) {
             return;
         }
 
         //TODO don't create new settings object.  
         Settings settings = new Settings(serverAddress, username, password);
-        if (loginPossible(settings) && saveLoginSettings(settings)) {
+        if (TmcUtil.tryToLogin(ctx, settings) && saveLoginSettings(settings)) {
             io.println("Login successful.");
         }
     }
@@ -66,34 +60,5 @@ public class LoginCommand extends AbstractCommand {
             io.println("Login failed.");
             return false;
         }
-    }
-
-    /**
-     * Try to contact TMC server. If successful, user exists.
-     *
-     * @return True if user exist
-     */
-    private boolean loginPossible(Settings settings) {
-        // we could move this whole try catch block into TmcUtil
-        try {
-            TmcUtil.tryToLogin(ctx, settings);
-        } catch (Exception e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof FailedHttpResponseException) {
-                FailedHttpResponseException httpEx
-                        = (FailedHttpResponseException) cause;
-                if (httpEx.getStatusCode() == 401) {
-                    io.println("Incorrect username or password.");
-                    return false;
-                }
-            }
-
-            logger.error("Unable to connect to server", e);
-            io.println("Unable to connect to server "
-                    + settings.getServerAddress());
-            return false;
-        }
-
-        return true;
     }
 }

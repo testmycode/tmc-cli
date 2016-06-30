@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/tmc-cli/tmc-cli/badge.svg?branch=master)](https://coveralls.io/github/tmc-cli/tmc-cli?branch=master)
 [![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
 
-[![tmc-cli logo](https://rawgit.com/tmc-cli/tmc-cli/master/docs/logo_plain.svg)](logo_plain.svg)
+![tmc-cli logo](https://rawgit.com/tmc-cli/tmc-cli/master/docs/logo_plain.svg)
 
 #tmc-cli
 
@@ -41,6 +41,8 @@ To summarise:
 If for some reason the alias was not added to your .bashrc or your shell of choice is not Bash, you can manually add the following line `alias tmc="[PATH_TO_TMC]"` to your .bashrc / other shell rc file.
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace `tmc` with this command. (note: you must have set Java on your system `%PATH%`. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
+
+Tip: On Windows, use `doskey tmc="java - jar [path_to_tmc-cli.jar] $@"` to get a convenient alias
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`. You can also view all available options for commands by running them with the `--help` switch, for example `tmc courses --help`.
 
@@ -139,7 +141,7 @@ If you're having trouble with an exercise or just want to have your code peer-re
 Zipping project
 Submitting project
 Paste sent for exercise exercise1
-Model solution: https://link.to.paste/bin
+https://link.to.paste/bin
 ```
 
 You cannot submit exercises that you have completed.

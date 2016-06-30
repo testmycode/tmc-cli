@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
@@ -21,9 +20,12 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
+import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
+import org.apache.http.entity.BasicHttpEntity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +61,7 @@ public class TmcUtilTest {
         Answer<Callable<Course>> answer = new Answer<Callable<Course>>() {
             @Override
             public Callable<Course> answer(InvocationOnMock invocation) throws Throwable {
-                final Course course = (Course)invocation.getArguments()[1];
+                final Course course = (Course) invocation.getArguments()[1];
                 return new Callable<Course>() {
                     @Override
                     public Course call() throws Exception {
@@ -104,18 +106,40 @@ public class TmcUtilTest {
     public void failToLogin() throws URISyntaxException {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
-        boolean fail = true;
         Settings settings = new Settings();
-        try {
-            assertFalse(TmcUtil.tryToLogin(ctx, settings));
-        } catch (Exception e) {
-            assertEquals(Exception.class, e.getClass());
-            assertEquals("failed", e.getMessage());
-            fail = false;
-        }
-        if (fail) {
-            fail("Login should throw the exception");
-        }
+        assertFalse(TmcUtil.tryToLogin(ctx, settings));
+    }
+
+    @Test
+    public void tryToLoginCatchesObsoleteClientException() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                Exception exception = new ObsoleteClientException();
+                throw new Exception(exception);
+            }
+        };
+
+        when(mockCore.listCourses(any(ProgressObserver.class)))
+                .thenReturn(callable);
+        TmcUtil.tryToLogin(ctx, new Settings());
+        io.assertContains("Your tmc-cli is outdated");
+    }
+
+    @Test
+    public void tryToLoginCatchesFailedHttpResponseException() {
+        Callable<List<Course>> callable = new Callable<List<Course>>() {
+            @Override
+            public List<Course> call() throws Exception {
+                Exception exception = new FailedHttpResponseException(401, new BasicHttpEntity());
+                throw new Exception(exception);
+            }
+        };
+
+        when(mockCore.listCourses(any(ProgressObserver.class)))
+                .thenReturn(callable);
+        TmcUtil.tryToLogin(ctx, new Settings());
+        io.assertContains("Incorrect username or password");
     }
 
     @Test
