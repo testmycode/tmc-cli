@@ -92,6 +92,11 @@ tmc_detect_profile() {
 if [ ! -f "$AUTOCOMPLETE" ]; then
 	tmc_update_autocomplete
 
+	if type tmc &> /dev/null; then
+		# don't add new alias if it exists already
+		return
+	fi
+
 	PROFILE_FILE=$(tmc_detect_profile)
 	if [ -z "$PROFILE_FILE" ]; then
 		echo "Profile file not found"
@@ -102,15 +107,24 @@ if [ ! -f "$AUTOCOMPLETE" ]; then
 fi
 
 if [ "${1-}" == "++internal-update" ]; then
+	echo "Please report any error messages that may come up below."
 	if [ ! -f tmc.new ]; then
 		echo "Could not find the updated file."
 		exit 127
 	fi
 
 	echo "Moving the tmc files..."
-	mv tmc tmc.orig
-	mv tmc.new tmc
-	rm tmc.orig
+	if mv tmc tmc.orig; then
+		echo "Failed to backup the original tmc binary"
+		exit 128
+	fi
+	if mv tmc.new tmc; then
+		echo "Failed to replace the original binary with new version"
+		echo "You can replace manually the $PWD/tmc with $PWD/tmc.new"
+		exit 129
+	fi
+
+	rm tmc.orig &> /dev/null
 	echo "Running the new tmc update script..."
 	tmc_update
 
