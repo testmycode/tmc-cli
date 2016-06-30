@@ -11,6 +11,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.slf4j.Logger;
@@ -162,6 +163,16 @@ public class TmcUtil {
         }
     }
 
+    public static ValidationResult runCheckStyle(CliContext ctx, Exercise exercise) {
+        try {
+            TmcCore core = ctx.getTmcCore();
+            return core.runCheckStyle(ProgressObserver.NULL_OBSERVER, exercise).call();
+        } catch (Exception e) {
+            logger.error("Failed to run checkstyle", e);
+            return null;
+        }
+    }
+
     public static boolean sendFeedback(CliContext ctx, List<FeedbackAnswer> answers,
             URI feedbackUri) {
         try {
@@ -194,7 +205,8 @@ public class TmcUtil {
             io.println("Your tmc-cli is outdated. Please update it.");
             return;
         }
-        io.println("Failed to connect to server.");
+        logger.error("Command failed in tmc-core", exception);
+        io.println("Command failed in tmc-core, check tmc-cli.log file for more info");
     }
 
     private static boolean isAuthenticationError(Exception exception) {

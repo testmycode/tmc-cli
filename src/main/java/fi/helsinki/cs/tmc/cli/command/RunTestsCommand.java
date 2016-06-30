@@ -1,21 +1,18 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static fi.helsinki.cs.tmc.langs.domain.RunResult.Status.PASSED;
-
 import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.cli.CommandLine;
@@ -43,14 +40,13 @@ public class RunTestsCommand extends AbstractCommand {
 
     @Override
     public void run(CommandLine args, Io io) {
-        CliContext ctx = getContext();
-
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
-        if (!ctx.loadBackend(false)) {
+        CliContext ctx = getContext();
+        if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
@@ -61,64 +57,44 @@ public class RunTestsCommand extends AbstractCommand {
                 return;
             }
         }
-        List<String> exerciseNames = workDir.getExerciseNames();
 
+        List<String> exerciseNames = workDir.getExerciseNames();
         if (exerciseNames.isEmpty()) {
             io.println("You have to be in a course directory to run tests");
             return;
         }
+
         CourseInfo info = ctx.getCourseInfo();
 
-        ResultPrinter resultPrinter
-                = new ResultPrinter(io, this.showDetails, this.showPassed);
-        RunResult runResult;
-        Boolean isOnlyExercise = exerciseNames.size() == 1;
+        Color.AnsiColor passedColor = ctx.getApp().getColor("testresults-left");
+        Color.AnsiColor failedColor = ctx.getApp().getColor("testresults-right");
+        ResultPrinter resultPrinter = new ResultPrinter(io, showDetails, showPassed,
+                passedColor, failedColor);
 
-        Color.AnsiColor color1 = ctx.getApp().getColor("testresults-left");
-        Color.AnsiColor color2 = ctx.getApp().getColor("testresults-right");
+        boolean isOnlyExercise = (exerciseNames.size() == 1);
 
-        try {
-            int total = 0;
-            int passed = 0;
+        for (String name : exerciseNames) {
+            io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
+            Exercise exercise = info.getExercise(name);
 
-            for (String name : exerciseNames) {
-
-                io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
-                //name = name.replace("-", File.separator);
-                Exercise exercise = info.getExercise(name);
-
-                // TODO use progress observer (Bug is in tmc-core)
-                runResult = TmcUtil.runLocalTests(ctx, exercise);
-
-                resultPrinter.printRunResult(runResult, exercise.isCompleted(),
-                        isOnlyExercise, color1, color2);
-                total += runResult.testResults.size();
-                passed += ResultPrinter.passedTests(runResult.testResults);
-                exercise.setAttempted(true);
-                if (runResult.status == PASSED && !exercise.isCompleted()) {
-                    // add exercise to locally tested exercises
-                    if (!info.getLocalCompletedExercises().contains(exercise.getName())) {
-                        info.getLocalCompletedExercises().add(exercise.getName());
-                    }
-                } else {
-                    if (info.getLocalCompletedExercises().contains(exercise.getName())) {
-                        info.getLocalCompletedExercises().remove(exercise.getName());
-                    }
-                }
+            RunResult runResult = TmcUtil.runLocalTests(ctx, exercise);
+            if (runResult == null) {
+                io.println("Failed to run test");
+                resultPrinter.addFailedExercise();
+                continue;
             }
-            CourseInfoIo.save(info, workDir.getConfigFile());
-            if (total > 0 && !isOnlyExercise) {
-                // Print a progress bar showing how the ratio of passed exercises
-                // But only if more than one exercise was tested
-                io.println("");
-                io.println("Total tests passed: " + passed + "/" + total);
-                io.println(TmcCliProgressObserver.getPassedTestsBar(
-                        passed, total, color1, color2));
-            }
-        } catch (Exception ex) {
-            io.println("Failed to run tests.\n"
-                    + ex.getMessage());
-            logger.error("Failed to run tests.", ex);
+
+            ValidationResult valResult = TmcUtil.runCheckStyle(ctx, exercise);
+            boolean testsPassed = resultPrinter.printLocalTestResult(
+                    runResult, valResult, isOnlyExercise);
+
+            updateCourseInfo(info, exercise, testsPassed);
+            io.println("");
+        }
+        CourseInfoIo.save(info, workDir.getConfigFile());
+
+        if (!isOnlyExercise) {
+            resultPrinter.printTotalExerciseResults();
         }
     }
 
@@ -126,5 +102,18 @@ public class RunTestsCommand extends AbstractCommand {
         this.showPassed = args.hasOption("a");
         this.showDetails = args.hasOption("d");
         return args.getArgs();
+    }
+
+    private void updateCourseInfo(CourseInfo courseInfo, Exercise exercise, boolean testsPassed) {
+        exercise.setAttempted(true);
+
+        if (!exercise.isCompleted() && testsPassed) {
+            // add exercise to locally tested exercises
+            if (!courseInfo.getLocalCompletedExercises().contains(exercise.getName())) {
+                courseInfo.getLocalCompletedExercises().add(exercise.getName());
+            }
+        } else if (courseInfo.getLocalCompletedExercises().contains(exercise.getName())) {
+            courseInfo.getLocalCompletedExercises().remove(exercise.getName());
+        }
     }
 }

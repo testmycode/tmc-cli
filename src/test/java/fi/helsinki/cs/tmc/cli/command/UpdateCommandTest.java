@@ -77,7 +77,7 @@ public class UpdateCommandTest {
 
     @Test
     public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, new WorkDir(pathToNonCourseDir), mockCore));
+        ctx = spy(new CliContext(io, mockCore, new WorkDir(pathToNonCourseDir)));
         app = new Application(ctx);
         doReturn(false).when(ctx).loadBackend();
 

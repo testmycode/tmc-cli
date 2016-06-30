@@ -11,7 +11,6 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
@@ -26,6 +25,7 @@ import java.util.List;
 
 @Command(name = "info", desc = "Show info about the current directory")
 public class CourseInfoCommand extends AbstractCommand {
+
     private Course course;
     private Exercise exercise;
     private CourseInfo info;
@@ -47,7 +47,7 @@ public class CourseInfoCommand extends AbstractCommand {
 
         boolean fetchFromInternet = args.hasOption("i");
 
-        if (! ctx.loadBackend()) {
+        if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
@@ -59,6 +59,11 @@ public class CourseInfoCommand extends AbstractCommand {
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0) {
             io.println("You must give a course as an argument.");
+            return;
+        }
+
+        if (!ctx.hasLogin()) {
+            io.println("Loading course from internet requires login.");
             return;
         }
 

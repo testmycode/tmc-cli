@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -49,14 +48,18 @@ public class PasteCommand extends AbstractCommand {
         } else if (stringArgs.length == 1) {
             valid = workdir.addPath(stringArgs[0]);
         } else {
-            io.println(
-                    "Error: Too many arguments. Expected 1, got " + stringArgs.length);
+            io.println("Error: Too many arguments. Expected 1, got " + stringArgs.length);
             return;
         }
         if (!valid) {
-            io.println(
-                    "No exercise specified. Please use this command in an exercise directory "
-                    + "or pass the name of the exercise as an argument.");
+            io.println("The command can be used in an exercise directory without the exercise name"
+                    + " or in a course directory with the name as an argument.");
+            return;
+        }
+        
+        List<String> exercisenames = workdir.getExerciseNames();
+        if (exercisenames.size() != 1) {
+            io.println("Error: Matched too many exercises.");
             return;
         }
 
@@ -78,13 +81,6 @@ public class PasteCommand extends AbstractCommand {
             }
         } else {
             message = "";
-        }
-
-        List<String> exercisenames = workdir.getExerciseNames();
-        if (exercisenames.size() != 1) {
-            io.println(
-                    "Error: Matched too many exercises.");
-            return;
         }
 
         String exerciseName = exercisenames.get(0);
