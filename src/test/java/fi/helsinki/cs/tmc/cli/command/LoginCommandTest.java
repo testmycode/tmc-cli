@@ -2,23 +2,26 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -49,7 +52,17 @@ public class LoginCommandTest {
     }
 
     @Test
-    public void logsInWithCorrectServerUserAndPassword() throws Exception {
+    public void failIfBackendFails() {
+        app = new Application(ctx);
+        when(ctx.loadBackend()).thenReturn(false);
+
+        String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
+        app.run(args);
+        io.assertNotContains("Login successful");
+    }
+
+    @Test
+    public void logsInWithCorrectServerUserAndPassword() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
         when(SettingsIo.save(any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
@@ -58,16 +71,16 @@ public class LoginCommandTest {
     }
 
     @Test
-    public void userGetsErrorMessageIfLoginFails() throws Exception {
+    public void userGetsErrorMessageIfLoginFails() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
         when(SettingsIo.save(any(Settings.class))).thenReturn(false);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", "WrongPassword"};
         app.run(args);
-        io.assertContains("Login failed.");
+        io.assertContains("Failed to write the accounts file.");
     }
 
     @Test
-    public void loginAsksUsernameFromUserIfNotGiven() throws Exception {
+    public void loginAsksUsernameFromUserIfNotGiven() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-p", PASSWORD};
         io.addLinePrompt(USERNAME);
@@ -76,7 +89,7 @@ public class LoginCommandTest {
     }
 
     @Test
-    public void loginAsksPasswordFromUserIfNotGiven() throws Exception {
+    public void loginAsksPasswordFromUserIfNotGiven() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME};
         io.addPasswordPrompt(PASSWORD);
@@ -85,11 +98,38 @@ public class LoginCommandTest {
     }
 
     @Test
-    public void loginAsksServerFromUserIfNotGiven() throws Exception {
+    public void loginAsksServerFromUserIfNotGiven() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         io.addLinePrompt(SERVER);
         app.run(args);
         io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void serverAndNotAskedAfterLogout() {
+        TmcSettings settings = new Settings(SERVER, "username", "pass");
+        CourseInfo info = new CourseInfo(settings, null);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
+        when(ctx.getCourseInfo()).thenReturn(info);
+        String[] args = {"login"};
+        io.addPasswordPrompt(PASSWORD);
+        app.run(args);
+        io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void courseInfoValuesOverridedByOptions() {
+        Settings settings = new Settings(SERVER, "username", "pass");
+        CourseInfo info = new CourseInfo(settings, null);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
+        when(ctx.getCourseInfo()).thenReturn(info);
+        String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
+        app.run(args);
+        io.assertAllPromptsUsed();
+
+        Settings expectedSettings = new Settings(SERVER, USERNAME, PASSWORD);
+        verifyStatic();
+        TmcUtil.tryToLogin(eq(ctx), eq(expectedSettings));
     }
 }

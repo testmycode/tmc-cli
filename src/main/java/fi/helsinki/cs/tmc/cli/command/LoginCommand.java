@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
 import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
@@ -17,6 +18,10 @@ public class LoginCommand extends AbstractCommand {
     private CliContext ctx;
     private Io io;
 
+    private String serverAddress;
+    private String username;
+    private String password;
+
     @Override
     public void getOptions(Options options) {
         options.addOption("u", "user", true, "TMC username");
@@ -28,37 +33,47 @@ public class LoginCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         this.ctx = getContext();
         this.io = io;
-        String serverAddress = getLoginInfo(args, "s", "server address: ");
-        String username = getLoginInfo(args, "u", "username: ");
-        String password = getLoginInfo(args, "p", "password: ");
 
         if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
+        CourseInfo info = ctx.getCourseInfo();
+        if (info != null) {
+            serverAddress = info.getServerAddress();
+            username = info.getUsername();
+        }
+
+        serverAddress = getLoginInfo(args, serverAddress, "s", "server address: ");
+        username = getLoginInfo(args, username, "u", "username: ");
+        password = getLoginInfo(args, null, "p", "password: ");
+
         //TODO don't create new settings object.  
         Settings settings = new Settings(serverAddress, username, password);
-        if (TmcUtil.tryToLogin(ctx, settings) && saveLoginSettings(settings)) {
-            io.println("Login successful.");
+        if (!TmcUtil.tryToLogin(ctx, settings)) {
+            return;
         }
+        if (!SettingsIo.save(settings)) {
+            io.println("Failed to write the accounts file.");
+            return;
+        }
+
+        io.println("Login successful.");
     }
 
-    private String getLoginInfo(CommandLine line, String option, String prompt) {
-        String info = line.getOptionValue(option);
-        if (info == null && option.equals("p")) {
-            info = io.readPassword(prompt);
-        } else if (info == null) {
-            info = io.readLine(prompt);
-        }
-        return info;
-    }
+    private String getLoginInfo(CommandLine line, String oldValue, String option,
+            String prompt) {
+        String value = oldValue;
 
-    private boolean saveLoginSettings(Settings settings) {
-        if (SettingsIo.save(settings)) {
-            return true;
-        } else {
-            io.println("Login failed.");
-            return false;
+        if (line.hasOption(option)) {
+            value = line.getOptionValue(option);
         }
+
+        if (value == null && option.equals("p")) {
+            value = io.readPassword(prompt);
+        } else if (value == null) {
+            value = io.readLine(prompt);
+        }
+        return value;
     }
 }
