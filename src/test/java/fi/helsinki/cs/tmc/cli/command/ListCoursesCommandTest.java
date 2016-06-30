@@ -10,6 +10,8 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -24,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({TmcUtil.class, SettingsIo.class})
 public class ListCoursesCommandTest {
 
     private Application app;
@@ -38,8 +40,11 @@ public class ListCoursesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
+        Settings settings = new Settings("http://test.test", "", "");
 
         mockStatic(TmcUtil.class);
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.getSettingsList()).thenReturn(Arrays.asList(settings));
     }
 
     @Test
@@ -71,5 +76,22 @@ public class ListCoursesCommandTest {
         String[] args = {"courses"};
         app.run(args);
         io.assertContains("Found 2 courses");
+    }
+
+    @Test
+    public void listCoursesWorksWithTwoServers() {
+        Settings settings1 = new Settings("http://test.test", "", "");
+        Settings settings2 = new Settings("http://hello.test", "", "");
+        when(SettingsIo.getSettingsList()).thenReturn(
+                Arrays.asList(settings1, settings2));
+
+        List<Course> list1 = Arrays.asList(new Course("course1"));
+        List<Course> list2 = Arrays.asList(new Course("course2"));
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
+
+        String[] args = {"courses"};
+        app.run(args);
+        io.assertContains("Server http://test.test");
+        io.assertContains("Server http://hello.test");
     }
 }
