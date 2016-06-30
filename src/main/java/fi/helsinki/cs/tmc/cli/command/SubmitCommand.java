@@ -108,8 +108,12 @@ public class SubmitCommand extends AbstractCommand {
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
                 io.println("Submission failed.");
-                resultPrinter.addFailedExercise();
-                continue;
+                if (!isOnlyExercise) {
+                    io.println("Try to submit exercises one by one.");
+                }
+                return;
+                //resultPrinter.addFailedExercise();
+                //continue;
             }
 
             resultPrinter.printSubmissionResult(result, isOnlyExercise);
