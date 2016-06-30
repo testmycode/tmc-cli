@@ -48,7 +48,7 @@ Now that you've installed tmc-cli, you can view all available commands by runnin
 
 ##Manual
 
-The Unix man page for tmc-cli is located in docs/tmc.1. To view it, open it with `man -l docs/tmc.1`.
+The Unix man page for tmc-cli is located in docs/tmc.1 in this repository. To view it, open it with `man -l tmc.1`.
 
 The man page is generated from docs/MANUAL.md using [md2man](https://github.com/sunaku/md2man).
 
