@@ -1,0 +1,152 @@
+.TH TMC\-CLI 1 2016\-06\-30 "Helsinki Uni Dep. of CS" "TMC\-CLI Manual"
+.SH NAME
+.PP
+tmc \- Command\-line client for TestMyCode
+.SH SYNOPSIS
+.PP
+\fB\fCtmc\fR [\fB\fC\-h|\-\-help\fR] [\fB\fC\-v|\-\-version\fR]
+      <\fB\fCCOMMAND\fR> [\fB\fC\-h|\-\-help\fR]
+      <\fB\fCCOMMAND\fR> [\fB\fCoptions\fR] [\fIpath\fP] ...
+.SH DESCRIPTION
+.PP
+\fB\fCtmc\fR is an exercise testing and submission utility for students participating
+on online courses utilising the free and open TestMyCode\-framework. TMC\-CLI is
+a command\-line interface for TMC\-CORE, the TestMyCode backend. TMC\-CLI's primary
+features include downloading exercises, running tests, viewing progress and
+submitting completed exercises.
+.SH OPTIONS
+.TP
+\fB\fC\-v\fR \fB\fC\-\-version\fR
+Display the version of this build
+.TP
+\fB\fC\-h\fR \fB\fC\-\-help\fR
+Display a concise help message. If issued with a command, display a help
+message for that command.
+.SH COMMANDS:
+.SH LOGIN
+.IP
+\fB\fCtmc\fR \fB\fClogin\fR [\fB\fC\-s\fR \fIserver address\fP] [\fB\fC\-u\fR \fIusername\fP] [\fB\fC\-p\fR \fIpassword\fP]
+.IP
+Login to TMC server. If credentials are not given as options, the user will
+be asked to input any missing credentials.
+.IP
+\fB\fC\-s\fR \fB\fC\-\-server\fR
+Specify which server to connect to.
+.IP
+\fB\fC\-u\fR \fB\fC\-\-user\fR
+Specify username.
+.IP
+\fB\fC\-p\fR \fB\fC\-\-password\fR
+Specify password.
+.SH COURSES
+.IP
+\fB\fCtmc\fR \fB\fCcourses\fR
+.IP
+List all available courses on the server.
+.SH DOWNLOAD
+.IP
+\fB\fCtmc\fR \fB\fCdownload\fR \fIcourse\fP
+.IP
+Download a course from the server.
+.IP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Download all exercises, including completed ones.
+.SH EXERCISES
+.IP
+\fB\fCtmc\fR \fB\fCexercises\fR [\fB\fC\-n\fR] [\fB\fC\-i\fR]
+.IP
+List the status of all of the course's exercises. Exercises are grouped by
+their deadlines. On Unix, the list is displayed on a pager.
+.IP
+\fB\fC\-n\fR \fB\fC\-\-no\-pager\fR
+Print the list directly to the terminal.
+.IP
+\fB\fC\-i\fR \fB\fC\-\-internet\fR
+Fetch exercises from the server, as opposed to reading from the local cache.
+.SH UPDATE
+.IP
+\fB\fCtmc\fR \fB\fCupdate\fR
+.IP
+Update the course cache and download newly available exercises.
+.SH TEST
+.IP
+\fB\fCtmc\fR \fB\fCtest\fR [\fB\fC\-a\fR] [\fB\fC\-d\fR] [\fIpath\fP] ...
+.IP
+Run tests for the specified exercise. If no \fIpath\fP is given, tests will be
+run in the current working directory. Several exercises can be tested at once.
+If the current work directory is the course root directory or the course root
+directory was given as a \fIpath\fP, then all exercises will be tested.
+.IP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Display all test results, instead of only the failed tests.
+.IP
+\fB\fC\-d\fR \fB\fC\-\-details\fR
+Display more detailed error messages.
+.SH SUBMIT
+.IP
+\fB\fCtmc\fR \fB\fCsubmit\fR [\fB\fC\-a\fR] [\fB\fC\-d\fR] [\fB\fC\-c\fR] [\fIpath\fP] ...
+.IP
+Submit exercises to the server. If no \fIpath\fP is given, the exercise in the
+current working directory will be submitted. Several exercises can be submitted
+at once. If the current work directory is the course root directory or the
+course root directory was given as a \fIpath\fP, then all exercises will be submitted.
+.IP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Display all test results, instead of only the failed tests.
+.IP
+\fB\fC\-d\fR \fB\fC\-\-details\fR
+Display more detailed error messages.
+.IP
+\fB\fC\-c\fR \fB\fC\-\-completed\fR
+Submit all exercises in the current course which have passed local tests.
+.SH INFO
+.IP
+\fB\fCtmc\fR \fB\fCinfo\fR [\fB\fC\-a\fR] [\fB\fC\-i\fR] [\fIcourse or exercise\fP]
+.IP
+Display the current status of a course or an exercise. If used for a course,
+shows the total amount of available, completed and locked exercises. If used
+for an exercise, shows the exercise's status and deadline.
+.IP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Displays all information for given course and exercises.
+.IP
+\fB\fC\-i\fR \fB\fC\-\-internet\fR
+Fetches information from the server, as opposed to reading from local cache.
+.SH FILES
+.TP
+\fI~/.config/tmc\-cli/properties.json\fP
+User configuration file. Use \fB\fCtmc prop *KEY* *VALUE* ...\fR to edit properties.
+.TP
+\fI~/.config/tmc\-cli/accounts.json\fP
+User login credentials. Use \fB\fCtmc logout\fR to safely delete.
+.TP
+\fI~/.config/tmc\-cli/logs/tmc\-cli.log\fP
+Debug logging.
+.PP
+If \fB\fC$XDG_CONFIG_HOME\fR is set, \fI~/.config/\fP is replaced with its value.
+.PP
+On Windows, \fI~/.config/\fP is replaced with the value of \fB\fC%APPDATA%\fR, usually
+\fIC:\[rs]Users\[rs]Username\[rs]AppData\[rs]Roaming\[rs]\&.\fP
+.SH ENVIRONMENT
+.TP
+\fB\fCEDITOR\fR
+Text editor for editing messages for pastebin and feedback. If unset, defaults
+to \fB\fCnano\fR on Unix and \fB\fCnotepad\fR on Windows.
+.TP
+\fB\fCPAGER\fR
+Pager for displaying text files. If unset, defaults to \fB\fCless \-R\fR on Unix.
+This functionality is broken on Windows, but defaults to \fB\fCmore\fR\&.
+.SH BUGS
+.PP
+Most likely. Please submit bug reports and other issues to the tmc\-cli issue tracker \[la]https://github.com/tmc-cli/tmc-cli/issues\[ra]\&.
+.SH AUTHORS
+.PP
+.RS
+.nf
+Johannes L. [jclc](https://github.com/jclc)
+Matti L. [matike](https://github.com/matike)
+Mikko M. [mikkomaa](https://github.com/mikkomaa)
+Aleksi S. [salmela](https://github.com/salmela)
+Juha V. [juvester](https://github.com/juvester)
+.fi
+.RE
