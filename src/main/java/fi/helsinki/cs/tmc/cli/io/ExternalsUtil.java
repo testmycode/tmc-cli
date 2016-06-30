@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 /** Utility class for using external programs.
@@ -83,13 +84,17 @@ public class ExternalsUtil {
     public static void showFileInPager(Path file) {
         String pager = System.getenv("PAGER");
         if (pager == null) {
-            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            if (EnvironmentUtil.isWindows()) {
                 pager = "more";
             } else {
                 pager = "less -R";
             }
         }
-        execExternal(pager, file.toString(), true);
+        if (EnvironmentUtil.isWindows()) {
+            execExternal(new String[]{"cmd.exe", "/c", pager, file.toString()}, true);
+        } else {
+            execExternal(pager, file.toString(), true);
+        }
     }
 
     public static void runUpdater(Io io, String pathToNewBinary) {
@@ -128,29 +133,50 @@ public class ExternalsUtil {
     }
 
     private static boolean execExternal(String program, String arg, boolean wait) {
-        return execExternal(program + " \'" + arg + "\'", wait);
+        return execExternal(new String[]{program, arg}, wait);
     }
 
     private static boolean execExternal(String program, boolean wait) {
-        logger.info("Launching external program " + program);
-        String[] exec;
+        return execExternal(new String[]{program}, wait);
+    }
+
+    private static boolean execExternal(String[] args, boolean wait) {
         if (EnvironmentUtil.isWindows()) {
-            exec = new String[]{program};
-        } else {
-            exec = new String[]{
-                    "sh", "-c", program + " </dev/tty >/dev/tty"};
-        }
-        try {
-            Process proc = Runtime.getRuntime().exec(exec);
-            if (wait) {
-                logger.info("Waiting for " + program + " to finish executing");
-                proc.waitFor();
+            logger.info("Launching external program " + Arrays.toString(args));
+            try {
+                Process proc = new ProcessBuilder(args).start();
+                if (wait) {
+                    logger.info("Waiting for " + Arrays.toString(args) + " to finish executing");
+                    proc.waitFor();
+                }
+            } catch (Exception e) {
+                logger.error("(Windows) Exception when running external program "
+                        + Arrays.toString(args), e);
+                return false;
             }
-            return proc.exitValue() == 0;
-        } catch (Exception e) {
-            logger.error("Exception when running external program " + program, e);
-            return false;
+        } else {
+
+            String[] exec = new String[args.length + 3];
+            exec[0] = "sh";
+            exec[1] = "-c";
+            for (int i = 0; i < args.length; i++) {
+                exec[2 + i] = args[i];
+            }
+            exec[args.length + 2] = " </dev/tty >/dev/tty";
+            try {
+                Process proc = Runtime.getRuntime().exec(exec);
+                if (wait) {
+                    logger.info("Waiting for " + Arrays.toString(exec) + " to finish executing");
+                    proc.waitFor();
+                }
+                return proc.exitValue() == 0;
+            } catch (Exception e) {
+                logger.error("(Unix) Exception when running external program "
+                        + Arrays.toString(exec), e);
+                return false;
+            }
         }
+        return false;
     }
 
     /**
@@ -160,6 +186,9 @@ public class ExternalsUtil {
      * @return: Whether or not writing was successful
      */
     private static boolean writeToFile(Path path, String string) {
+        if (EnvironmentUtil.isWindows()) {
+            string = string.replace("\n", "\r\n");
+        }
         try {
             if (path.getParent() != null && !Files.exists(path.getParent())) {
                 Files.createDirectories(path.getParent());

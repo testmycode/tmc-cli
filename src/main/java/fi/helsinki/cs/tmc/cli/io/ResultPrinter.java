@@ -161,8 +161,10 @@ public class ResultPrinter {
                 return false;
 
             case GENERIC_ERROR:
-                byte[] log = runResult.logs.getOrDefault(
-                        SpecialLogs.GENERIC_ERROR_MESSAGE, new byte[0]);
+                byte[] log = runResult.logs.get(SpecialLogs.GENERIC_ERROR_MESSAGE);
+                if (log == null) {
+                    log = new byte[0];
+                }
                 io.println(new String(log));
                 return false;
 

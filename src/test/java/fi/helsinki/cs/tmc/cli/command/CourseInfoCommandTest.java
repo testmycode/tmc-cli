@@ -77,7 +77,7 @@ public class CourseInfoCommandTest {
     public void failIfBackendFails() {
         ctx = spy(new CliContext(io, mockCore));
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
+        doReturn(false).when(ctx).loadBackendWithoutLogin();
 
         String[] args = {"info", "course", "-i"};
         app.run(args);

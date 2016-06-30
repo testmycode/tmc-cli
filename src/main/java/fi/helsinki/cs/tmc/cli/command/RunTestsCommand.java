@@ -46,7 +46,7 @@ public class RunTestsCommand extends AbstractCommand {
         }
 
         CliContext ctx = getContext();
-        if (!ctx.loadBackend(false)) {
+        if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 

@@ -32,7 +32,7 @@ public class LoginCommand extends AbstractCommand {
         String username = getLoginInfo(args, "u", "username: ");
         String password = getLoginInfo(args, "p", "password: ");
 
-        if (!ctx.loadBackend(false)) {
+        if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
