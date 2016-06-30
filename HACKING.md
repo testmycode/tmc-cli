@@ -1,5 +1,5 @@
-Hacking the tmc-cli
-===================
+Architecture and Hacking the tmc-cli
+====================================
 
 ## Requirements for developing tmc-cli
  * jdk 7
@@ -11,6 +11,31 @@ To build tmc-cli run the appropriate Maven command.
 
 	$ git clone https://github.com/tmc-cli/tmc-cli.git
 	$ mvn clean install
+
+## Architecture
+
+Program architecture is based on command design pattern. The program runs only a single command
+on each program execution.
+
+Conceptually, there are three main parts in the program; the launch code, backend related code
+and the commands. The commands are gathered into their own package. In addition, there are utility
+classes in order to take care of user input/output and file handling.
+
+The tmc-cli itself is mostly just an command line interface for the backend libraries.
+All the heavy lifting is done by [tmc-core](https://github.com/testmycode/tmc-core) and
+[tmc-langs](https://github.com/testmycode/tmc-langs) libraries. The tmc-cli also requires the
+server-side component of TestMyCode aka. [tmc-server](https://github.com/testmycode/tmc-server).
+
+### Important classes
+
+The `CliContext` object contains some cached data and singleton objects that are commonly used
+by utility classes and commands. Most importantly it has the `Io` object which is responsible
+for printing messages for the user and helping with other user interactions.
+
+The `WorkDir` object handles most of the directory path handling. And it's used by most
+commands to parse the exercise arguments.
+
+The `TmcUtil` class has wraps all tmc-cores functions into nicer interfac.
 
 ## Creating new commands
 
@@ -31,13 +56,6 @@ public class ExampleCommand extends AbstractCommand {
 }
 ```
 
-## Architecture
-
-Tmc-cli architecture is based on running only a single command on each program execution.
-Commands use the utility classes in other packages. The `CliContext` object contains some cached
-objects that are commonly used by utility classes and commands. Most importantly it has the `Io`
-object which is responsible for printing messages for the user and helping with other user interactions.
-
 ## Logging error messages
 
 In case of failure, please print debug info in the error log by using slf4j logger and print some
@@ -53,7 +71,7 @@ assert method prints easily understandable error messages when it fails and does
 ```java
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(TmcUtil.class)
-public class ExampleCommand {
+public class ExampleCommandTest {
 
     private Application app;
     private CliContext ctx;
