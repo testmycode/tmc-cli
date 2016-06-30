@@ -23,6 +23,7 @@ import java.util.List;
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
 
+    private CliContext ctx;
     private boolean showAll;
 
     @Override
@@ -43,14 +44,14 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
+        ctx = getContext();
         showAll = args.hasOption("a");
 
-        CliContext ctx = getContext();
-        WorkDir workDir = ctx.getWorkDir();
         if (!ctx.loadBackend()) {
             return;
         }
 
+        WorkDir workDir = ctx.getWorkDir();
         if (workDir.getConfigFile() != null) {
             io.println("Can't download a course inside a course directory.");
             return;
@@ -76,32 +77,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
-        if (course.getExercises().isEmpty()) {
-            io.println("The '" + courseName + "' course doesn't have any exercises.");
-        } else {
-            io.println("The '" + courseName + "' course has "
-                    + course.getExercises().size() + " exercises");
-
-            int failedCount = (filtered.size() - exercises.size());
-            if (failedCount > 0) {
-                io.println("  from which "
-                        + exercises.size() + " exercises were succesfully downloaded");
-                io.println(Color.colorString("  and of which " + failedCount + " failed.",
-                        Color.AnsiColor.ANSI_RED));
-                //TODO we could print the names of the not downloaded exercises here
-            } else {
-                io.println("  from which "
-                        + exercises.size() + " exercises were downloaded.");
-            }
-            io.println("Use -a/--all to download completed exercises as well.");
-        }
-
-        Path configFile = workDir.getWorkingDirectory()
-                .resolve(courseName)
-                .resolve(CourseInfoIo.COURSE_CONFIG);
-        CourseInfo info = ctx.createCourseInfo(course);
-        info.setExercises(course.getExercises());
-        CourseInfoIo.save(info, configFile);
+        printStatistics(course, filtered.size(), exercises.size());
+        createNewCourse(course);
     }
 
     private List<Exercise> getFilteredExercises(Course course) {
@@ -118,5 +95,40 @@ public class DownloadExercisesCommand extends AbstractCommand {
             }
         }
         return filtered;
+    }
+
+    private void printStatistics(Course course, int requestCount, int downloadCount) {
+        Io io = ctx.getIo();
+        String courseName = course.getName();
+        if (course.getExercises().isEmpty()) {
+            io.println("The '" + courseName + "' course doesn't have any exercises.");
+        } else {
+            io.println("The '" + courseName + "' course has "
+                    + course.getExercises().size() + " exercises");
+
+            int failedCount = (requestCount - downloadCount);
+            if (failedCount > 0) {
+                io.println("  from which "
+                        + requestCount + " exercises were succesfully downloaded");
+                io.println(Color.colorString("  and of which " + failedCount + " failed.",
+                        Color.AnsiColor.ANSI_RED));
+                //TODO we could print the names of the not downloaded exercises here
+            } else {
+                io.println("  from which "
+                        + requestCount + " exercises were downloaded.");
+            }
+            io.println("Use -a/--all to download completed exercises as well.");
+        }
+    }
+
+    private void createNewCourse(Course course) {
+        WorkDir workDir = ctx.getWorkDir();
+        Path configFile = workDir.getWorkingDirectory()
+                .resolve(course.getName())
+                .resolve(CourseInfoIo.COURSE_CONFIG);
+
+        CourseInfo info = ctx.createCourseInfo(course);
+        info.setExercises(course.getExercises());
+        CourseInfoIo.save(info, configFile);
     }
 }
