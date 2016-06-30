@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.cli.command.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
@@ -91,14 +90,12 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll);
-        int passed = 0;
-        int total = 0;
-        Boolean isOnlyExercise = exerciseNames.size() == 1;
-
         Color.AnsiColor color1 = ctx.getApp().getColor("testresults-left");
         Color.AnsiColor color2 = ctx.getApp().getColor("testresults-right");
+        ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll,
+                color1, color2);
 
+        Boolean isOnlyExercise = exerciseNames.size() == 1;
         List<Exercise> submitExercises = info.getExercises(exerciseNames);
         List<List<FeedbackQuestion>> feedbackLists
                 = new ArrayList<>();
@@ -111,27 +108,24 @@ public class SubmitCommand extends AbstractCommand {
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
                 io.println("Submission failed.");
-            } else {
-                resultPrinter.printSubmissionResult(result, isOnlyExercise, color1, color2);
-                total += result.getTestCases().size();
-                passed += ResultPrinter.passedTests(result.getTestCases());
-
-                List<FeedbackQuestion> feedback = result.getFeedbackQuestions();
-                if (feedback != null && feedback.size() > 0) {
-                    feedbackLists.add(feedback);
-                    exercisesWithFeedback.add(exercise.getName());
-                    feedbackUris.add(URI.create(result.getFeedbackAnswerUrl()));
-                }
+                resultPrinter.addFailedExercise();
+                continue;
             }
-        }
-        if (total > 0 && !isOnlyExercise) {
-            // Print a progress bar showing how the ratio of passed exercises
+
+            resultPrinter.printSubmissionResult(result, isOnlyExercise);
+
+            List<FeedbackQuestion> feedback = result.getFeedbackQuestions();
+            if (feedback != null && feedback.size() > 0) {
+                feedbackLists.add(feedback);
+                exercisesWithFeedback.add(exercise.getName());
+                feedbackUris.add(URI.create(result.getFeedbackAnswerUrl()));
+            }
             io.println("");
-            io.println("Total tests passed: " + passed + "/" + total);
-            io.println(TmcCliProgressObserver.getPassedTestsBar(passed, total, color1, color2));
+        }
+        if (!isOnlyExercise) {
+            resultPrinter.printTotalExerciseResults();
         }
 
-        //io.println("Updating " + CourseInfoIo.COURSE_CONFIG);
         updateCourseJson(submitExercises, info, workDir.getConfigFile());
         checkForExerciseUpdates(currentCourse);
         for (int i = 0; i < exercisesWithFeedback.size(); i++) {
