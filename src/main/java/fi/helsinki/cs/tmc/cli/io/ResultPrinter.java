@@ -70,43 +70,11 @@ public class ResultPrinter {
 
         switch (submResult.getStatus()) {
             case OK:
-                printTestCases(submResult.getTestCases());
-                int passedTests = passedTests(submResult.getTestCases());
-                int totalTests = submResult.getTestCases().size();
-
-                io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
-                if (printResultBar) {
-                    printResultBar(passedTests, totalTests);
-                }
-
-                io.println(Color.colorString("All tests passed on server!", passedColor));
-                passedExercises++;
-
-                if (!submResult.getPoints().isEmpty()) {
-                    io.println("Points permanently awarded: " + submResult.getPoints());
-                }
-                if (submResult.getSolutionUrl() != null && !submResult.getSolutionUrl().isEmpty()) {
-                    io.println("Model solution: " + submResult.getSolutionUrl());
-                }
+                printPassedSubmissionResult(submResult, printResultBar);
                 return true;
 
             case FAIL:
-                printTestCases(submResult.getTestCases());
-                passedTests = passedTests(submResult.getTestCases());
-                totalTests = submResult.getTestCases().size();
-
-                String valgrind = submResult.getValgrind();
-                if (valgrind != null && !valgrind.isEmpty()) {
-                    io.println(Color.colorString("Valgrind error:", failedColor));
-                    io.println(valgrind);
-                    totalTests++;
-                }
-                // validations
-
-                io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
-                if (printResultBar) {
-                    printResultBar(passedTests, totalTests);
-                }
+                printFailedSubmissionResult(submResult, printResultBar);
                 return false;
 
             case ERROR:
@@ -255,6 +223,46 @@ public class ResultPrinter {
     private void printPassedTest(TestResult testResult) {
         io.print(Color.colorString(PASS_MESSAGE, passedColor));
         io.println(testResult.getName());
+    }
+
+    private void printPassedSubmissionResult(SubmissionResult submResult, boolean printResultBar) {
+        printTestCases(submResult.getTestCases());
+        int passedTests = passedTests(submResult.getTestCases());
+        int totalTests = submResult.getTestCases().size();
+
+        io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
+        if (printResultBar) {
+            printResultBar(passedTests, totalTests);
+        }
+
+        io.println(Color.colorString("All tests passed on server!", passedColor));
+        passedExercises++;
+
+        if (!submResult.getPoints().isEmpty()) {
+            io.println("Points permanently awarded: " + submResult.getPoints());
+        }
+        if (submResult.getSolutionUrl() != null && !submResult.getSolutionUrl().isEmpty()) {
+            io.println("Model solution: " + submResult.getSolutionUrl());
+        }
+    }
+
+    private void printFailedSubmissionResult(SubmissionResult submResult, boolean printResultBar) {
+        printTestCases(submResult.getTestCases());
+        int passedTests = passedTests(submResult.getTestCases());
+        int totalTests = submResult.getTestCases().size();
+
+        String valgrind = submResult.getValgrind();
+        if (valgrind != null && !valgrind.isEmpty()) {
+            io.println(Color.colorString("Valgrind error:", failedColor));
+            io.println(valgrind);
+            totalTests++;
+        }
+        // validations
+
+        io.println("Test results: " + passedTests + "/" + totalTests + " tests passed");
+        if (printResultBar) {
+            printResultBar(passedTests, totalTests);
+        }
     }
 
     private int passedTests(List<TestResult> testResults) {
