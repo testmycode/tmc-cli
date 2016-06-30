@@ -207,7 +207,6 @@ public class TmcUtil {
         }
         logger.error("Command failed in tmc-core", exception);
         io.println("Command failed in tmc-core, check tmc-cli.log file for more info");
-        //io.println("Failed to connect to server.");
     }
 
     private static boolean isAuthenticationError(Exception exception) {
