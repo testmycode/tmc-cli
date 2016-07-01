@@ -1,5 +1,5 @@
-TMC-CLI 1 2016-06-30 "Helsinki Univ. Dep. of CS" "TMC-CLI Manual"
-=================================================================
+TMC-CLI 1 2016-06-30 "TestMyCode" "TMC-CLI Manual"
+==================================================
 
 NAME
 ----
@@ -207,8 +207,7 @@ FILES
 `[course directory]/.tmc.json`
   Course configuration and cache file. Saves the status of the username, server
   address and course's exercises. Manually editing this file may have adverse
-  effects.
-  
+  effects.  
 
 `~/.config/tmc-cli/properties.json`
   User configuration file. Use `tmc prop` to edit properties.
