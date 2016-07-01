@@ -63,13 +63,13 @@ public class CourseInfoCommand extends AbstractCommand {
         }
 
         if (!ctx.hasLogin()) {
-            io.println("Loading course from internet requires login.");
+            io.println("Loading a course from a server requires login.");
             return;
         }
 
         course = TmcUtil.findCourse(ctx, stringArgs[0]);
         if (course == null) {
-            io.println("The course " + stringArgs[0] + " doesn't exist on this server.");
+            io.println("The course " + stringArgs[0] + " doesn't exist on the server.");
             return;
         }
         printCourse(args.hasOption("a"));
