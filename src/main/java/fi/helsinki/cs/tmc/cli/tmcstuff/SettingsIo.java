@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Reads and writes to config files on the system.
@@ -127,6 +128,15 @@ public class SettingsIo {
         Settings ret = holder.getSettings(username, server);
         saveHolderToJson(holder, file);
         return ret;
+    }
+
+    public static List<Settings> getSettingsList() {
+        Path file = getAccountsFile(getDefaultConfigRoot());
+        if (!Files.exists(file)) {
+            return null;
+        }
+        SettingsHolder holder = getHolderFromJson(file);
+        return holder.getSettingsList();
     }
 
     private static SettingsHolder getHolderFromJson(Path file) {

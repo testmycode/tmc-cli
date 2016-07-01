@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -26,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -39,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({TmcUtil.class, SettingsIo.class})
 public class DownloadExercisesCommandTest {
 
     private Application app;
@@ -58,8 +60,11 @@ public class DownloadExercisesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore, workDir);
         app = new Application(ctx);
+        Settings settings = new Settings("http://test.test", "", "");
 
         mockStatic(TmcUtil.class);
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.getSettingsList()).thenReturn(Arrays.asList(settings));
     }
 
     @After
@@ -171,5 +176,48 @@ public class DownloadExercisesCommandTest {
         app.run(args);
 
         io.assertContains("which 3 exercises were downloaded");
+    }
+
+    @Test
+    public void failsToLoadExercises() throws ParseException {
+        Exercise exercise1 = new Exercise("exercise1");
+        Exercise exercise2 = new Exercise("exercise2");
+        Exercise exercise3 = new Exercise("exercise3");
+
+        List<Exercise> exercises = Arrays.asList(exercise1, exercise2, exercise3);
+        List<Exercise> downloaded = Arrays.asList(exercise1, exercise3);
+        Course course = new Course("course1");
+        course.setExercises(exercises);
+
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
+                any(ProgressObserver.class))).thenReturn(downloaded);
+
+        Settings settings = new Settings("server", "user", "password");
+        workDir.setWorkdir(tempDir);
+        ctx.useSettings(settings);
+
+        String[] args = {"download", "course1"};
+        app.run(args);
+
+        io.assertContains("The 'course1' course has 3 exercises");
+        io.assertContains("from which 2 exercises were succesfully downloaded");
+        io.assertContains("and of which 1 failed.");
+    }
+
+    @Ignore
+    @Test
+    public void findFromMultipleServer() {
+        List<Course> list1 = Arrays.asList(new Course("course1"));
+        List<Course> list2 = Arrays.asList(new Course("course2"));
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
+    }
+
+    @Ignore
+    @Test
+    public void findFromMultipleServerWithSameName() {
+        List<Course> list1 = Arrays.asList(new Course("course1"));
+        List<Course> list2 = Arrays.asList(new Course("course1"));
+        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
     }
 }
