@@ -188,7 +188,7 @@ public class CourseInfoCommandTest {
 
         String[] args = {"info", "notacourse", "-i"};
         app.run(args);
-        io.assertContains("doesn't exist on this server.");
+        io.assertContains("doesn't exist on the server.");
     }
 
     @Test
