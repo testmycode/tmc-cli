@@ -121,5 +121,5 @@ that don't depend on any command.
 Please document any new features or revisions in MANUAL.md and HISTORY.md as well
 as README.md, if the affected feature is already documented there.
 
-If you make changes to MANUAL.md, please rebuild tmc.1 before you push your changes.
-Use `[md2man](https://github.com/sunaku/md2man)-roff docs/MANUAL.md > docs/tmc.1` to build the manpage.
+If you make changes to MANUAL.md, please rebuild tmc.1 with [md2man](https://github.com/sunaku/md2man) before you push your changes.
+Use `md2man-roff docs/MANUAL.md > docs/tmc.1` to build the manpage.
