@@ -57,12 +57,15 @@ public class CourseInfoTest {
         Exercise newEx2 = new Exercise("test-exercise2", "test-course");
         newEx2.setCompleted(true);
 
+        List<Exercise> exercises = new ArrayList<>();
+        exercises.add(newEx1);
+        exercises.add(newEx2);
+
         courseInfo.getExercises().add(oldEx1);
         courseInfo.getExercises().add(oldEx2);
         assertFalse(courseInfo.getExercise("test-exercise1").isCompleted());
         assertFalse(courseInfo.getExercise("test-exercise2").isCompleted());
-        courseInfo.replaceOldExercise(newEx1);
-        courseInfo.replaceOldExercise(newEx2);
+        courseInfo.replaceOldExercises(exercises);
         assertTrue(courseInfo.getExercise("test-exercise1").isCompleted());
         assertTrue(courseInfo.getExercise("test-exercise2").isCompleted());
 
@@ -89,5 +92,22 @@ public class CourseInfoTest {
         assertTrue(got.contains(ex1));
         assertTrue(got.contains(ex3));
         assertEquals(2, got.size());
+    }
+
+    @Test
+    public void canGetListOfExerciseNames() {
+        Exercise ex1 = new Exercise("test-exercise1", "test-course");
+        Exercise ex2 = new Exercise("test-exercise2", "test-course");
+
+        List<Exercise> exercises = new ArrayList<>();
+        exercises.add(ex1);
+        exercises.add(ex2);
+
+        courseInfo.setExercises(exercises);
+
+        List<String> got = courseInfo.getExerciseNames();
+
+        assertEquals(got.get(0), "test-exercise1");
+        assertEquals(got.get(1), "test-exercise2");
     }
 }
