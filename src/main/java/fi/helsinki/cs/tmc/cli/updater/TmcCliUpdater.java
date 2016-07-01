@@ -10,16 +10,15 @@ import com.google.gson.JsonParser;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class TmcCliUpdater {
 
@@ -46,27 +45,27 @@ public class TmcCliUpdater {
      * Checks if there's a newer tmc-cli version released on Github and asks if
      * the user wants to download it. TODO: split it up
      */
-    public void run() {
+    public boolean run() {
         JsonObject release = toJsonObject(fetchLatestReleaseJson());
         if (release == null || !isNewer(release)) {
-            return;
+            return false;
         }
 
         JsonObject binAsset = findCorrectAsset(release, isWindows);
         if (binAsset == null || !binAsset.has("name") || !binAsset.has("browser_download_url")) {
             logger.warn("The JSON does not contain necessary information for update.");
-            return;
+            return false;
         }
 
         io.println("A new version of tmc-cli is available!");
 
         if (isWindows) { //just show a link for Windows users now, todo...
             io.println("Download: https://github.com/tmc-cli/tmc-cli/releases/latest");
-            return;
+            return false;
         }
 
         if (! io.readConfirmation("Do you want to download it?", true)) {
-            return;
+            return false;
         }
 
         String binName = binAsset.get("name").getAsString() + ".new";
@@ -74,7 +73,7 @@ public class TmcCliUpdater {
         String currentBinLocation = getJarLocation();
         if (currentBinLocation == null) {
             io.println("Unable to find current program location, aborting update.");
-            return;
+            return false;
         }
         File destination = new File(currentBinLocation + binName);
 
@@ -82,37 +81,37 @@ public class TmcCliUpdater {
         fetchTmcCliBinary(dlUrl, destination);
 
         io.println("Running " + destination.getAbsolutePath());
-        runNewTmcCliBinary(destination.getAbsolutePath());
+        return runNewTmcCliBinary(destination.getAbsolutePath());
     }
 
-    protected byte[] fetchHttpEntity(String url) {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(url);
-        httpGet.addHeader("User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
+    protected byte[] fetchHttpEntity(String urlAddress) {
+        URL url;
 
-        HttpEntity entity;
-        byte[] content;
         try {
-            CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
-            entity = httpResponse.getEntity();
-            if (entity == null) {
-                logger.warn("Failed to get http request content.");
-                httpGet.releaseConnection();
-                return null;
-            }
+            url = new URL(urlAddress);
+        } catch (MalformedURLException ex) {
+            logger.warn("Url formatting failed", ex);
+            return null;
+        }
 
+        InputStream inputStream;
+        try {
+            URLConnection connection = url.openConnection();
+            connection.setRequestProperty("User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
+            inputStream = connection.getInputStream();
         } catch (IOException ex) {
-            logger.warn("Failed to create http connection to github.", ex);
+            logger.warn("Failed to fetch page", ex);
             io.println("Failed to create https connection to github.");
             return null;
         }
+
+        byte[] content;
         try {
-            content = IOUtils.toByteArray(entity.getContent());
+            content = IOUtils.toByteArray(inputStream);
         } catch (IOException ex) {
             logger.warn("Failed to fetch data from github", ex);
             content = null;
         }
-        httpGet.releaseConnection();
         return content;
     }
 
@@ -153,8 +152,8 @@ public class TmcCliUpdater {
     /**
      * Finish the update by running downloaded binary.
      */
-    protected void runNewTmcCliBinary(String pathToNewBinary) {
-        ExternalsUtil.runUpdater(io, pathToNewBinary);
+    protected boolean runNewTmcCliBinary(String pathToNewBinary) {
+        return ExternalsUtil.runUpdater(io, pathToNewBinary);
     }
 
     /**

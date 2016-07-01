@@ -97,16 +97,19 @@ public class ExternalsUtil {
         }
     }
 
-    public static void runUpdater(Io io, String pathToNewBinary) {
-        if (!execExternal("chmod u+x", pathToNewBinary, true)) {
+    public static boolean runUpdater(Io io, String pathToNewBinary) {
+        if (!ExternalsUtil.execExternal("chmod u+x " + pathToNewBinary, true)) {
             logger.error("Failed to set execution permissions to the new binary");
-            return;
+            io.println("Failed to set execution permissions to the new binary");
+            return false;
         }
-        if (!execExternal(pathToNewBinary, "++internal-update", true)) {
+        if (!ExternalsUtil.execExternal(pathToNewBinary + " ++internal-update", true)) {
             io.println("Failed to run the tmc-cli at " + pathToNewBinary);
             io.println("Run it with ++internal-update argument or contact the help desk");
             logger.error("Failed to run the new tmc");
+            return false;
         }
+        return true;
     }
 
     /**

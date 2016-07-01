@@ -20,8 +20,9 @@ public class CommandFactory {
     private static final Map<String, Class<Command>> commands = new HashMap<>();
 
     static {
-        /* force load the CommandList so that it's static initialization block is executed
-           this is used instead of import so that the ide's won't cry about the nonexistent class
+        /* Force load the CommandList so that it's static initialization block is executed.
+         * This hack is used instead of import so that the IDEs won't cry about the nonexistent
+         * class.
          */
         try {
             Class.forName("fi.helsinki.cs.tmc.cli.command.core.CommandList");
