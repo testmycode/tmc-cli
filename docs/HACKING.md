@@ -26,6 +26,9 @@ All the heavy lifting is done by [tmc-core](https://github.com/testmycode/tmc-co
 [tmc-langs](https://github.com/testmycode/tmc-langs) libraries. The tmc-cli also requires the
 server-side component of TestMyCode aka. [tmc-server](https://github.com/testmycode/tmc-server).
 
+### Methods involved in program launch
+[![Launch graph](https://rawgit.com/testmycode/duckling/master/startup_control_flow.svg)]
+
 ### Important classes
 
 The `CliContext` object contains some cached data and singleton objects that are commonly used
