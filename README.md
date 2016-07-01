@@ -23,8 +23,19 @@ TMC-CLI is the command-line client for University of Helsinki's Test My Code -fr
 
 ##Installation
 
-Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases/latest).
-If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
+###Using the install script (Linux/OS X only)
+
+Copy and paste the following command in your terminal:
+
+```
+curl -L0 https://raw.githubusercontent.com/tmc-cli/tmc-cli/master/scripts/install.sh | bash
+```
+
+Now try `source ~/.bashrc` or launching a new terminal - `tmc` should work.
+
+###Downloading manually
+
+Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases/latest). If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
 
 If you downloaded "tmc", navigate to the download directory on your terminal and make it executable with `chmod u+x ./tmc`.
 
