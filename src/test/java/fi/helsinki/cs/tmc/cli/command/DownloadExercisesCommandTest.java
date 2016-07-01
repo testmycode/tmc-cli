@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.CliContext;
@@ -27,11 +29,12 @@ import org.apache.commons.io.FileUtils;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import java.io.File;
 import java.io.IOException;
@@ -205,19 +208,68 @@ public class DownloadExercisesCommandTest {
         io.assertContains("and of which 1 failed.");
     }
 
-    @Ignore
     @Test
     public void findFromMultipleServer() {
-        List<Course> list1 = Arrays.asList(new Course("course1"));
-        List<Course> list2 = Arrays.asList(new Course("course2"));
-        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
+        Settings settings1 = new Settings("http://test.test", "", "");
+        Settings settings2 = new Settings("http://hello.test", "", "");
+
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
+                .thenReturn(new Course("course2"));
+        when(SettingsIo.getSettingsList()).thenReturn(
+                Arrays.asList(settings1, settings2));
+
+        String[] args = {"download", "course2"};
+        app.run(args);
     }
 
-    @Ignore
     @Test
-    public void findFromMultipleServerWithSameName() {
-        List<Course> list1 = Arrays.asList(new Course("course1"));
-        List<Course> list2 = Arrays.asList(new Course("course1"));
-        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
+    public void findFromMultipleServerWithSameNameWithoutTakingAny() {
+        Settings settings1 = new Settings("http://test.test", "abc", "");
+        Settings settings2 = new Settings("http://hello.test", "def", "");
+
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
+                .thenReturn(new Course("course1"));
+        when(SettingsIo.getSettingsList()).thenReturn(
+                Arrays.asList(settings1, settings2));
+
+        List<Exercise> exercises = Arrays.asList();
+        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
+                any(ProgressObserver.class))).thenReturn(exercises);
+
+        String[] args = {"download", "course1"};
+        io.addConfirmationPrompt(false);
+        io.addConfirmationPrompt(false);
+        app.run(args);
+        io.assertContains("There is 2 courses with same name at different servers");
+        io.assertContains("Download course from http://test.test with 'abc' account");
+        io.assertContains("Download course from http://hello.test with 'def' account");
+        io.assertContains("The previous course was last that matched");
+        io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void findFromMultipleServerWithSameNameWithTakingFirst() {
+        Settings settings1 = new Settings("http://test.test", "abc", "");
+        Settings settings2 = new Settings("http://hello.test", "def", "");
+
+        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
+                .thenReturn(new Course("course1"));
+        when(SettingsIo.getSettingsList()).thenReturn(
+                Arrays.asList(settings1, settings2));
+
+        String[] args = {"download", "course1"};
+        io.addConfirmationPrompt(true);
+        app.run(args);
+        io.assertContains("There is 2 courses with same name at different servers");
+        io.assertContains("Download course from http://test.test with 'abc' account");
+        io.assertAllPromptsUsed();
+
+        ArgumentCaptor<CliContext> ctxCaptor = ArgumentCaptor.forClass(CliContext.class);
+        verifyStatic();
+        TmcUtil.downloadExercises(ctxCaptor.capture(), anyListOf(Exercise.class),
+                any(ProgressObserver.class));
+
+        Settings usedSettings = Whitebox.getInternalState(ctx, "settings");
+        assertEquals(usedSettings, settings1);
     }
 }
