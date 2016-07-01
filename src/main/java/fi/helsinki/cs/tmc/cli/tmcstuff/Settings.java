@@ -41,6 +41,24 @@ public class Settings implements TmcSettings {
         this.workDir = workDir;
     }
 
+    public static boolean stringEquals(String str1, String str2) {
+        return (str1 == null ? str2 == null : str1.equals(str2));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Settings)) {
+            return false;
+        }
+        Settings another = (Settings)obj;
+        return stringEquals(this.serverAddress, another.serverAddress)
+                && stringEquals(this.username, another.username)
+                && stringEquals(this.password, another.password);
+    }
+
     @Override
     public String getServerAddress() {
         return serverAddress;

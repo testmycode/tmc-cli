@@ -27,6 +27,24 @@ public class SettingsTest {
     }
 
     @Test
+    public void equalsWorksWithSameValues() {
+        Settings compared = new Settings("testserver", "testuser", "testpassword");
+        assertEquals(true, settings.equals(compared));
+    }
+
+    @Test
+    public void equalsWorksWithNull() {
+        Settings compared = new Settings(null, "testuser", "testpassword");
+        assertEquals(false, settings.equals(compared));
+    }
+
+    @Test
+    public void equalsWorksWithRandomValue() {
+        Settings compared = new Settings("xyz", "testuser", "testpassword");
+        assertEquals(false, settings.equals(compared));
+    }
+
+    @Test
     public void correctApiVersion() {
         assertEquals("7", settings.apiVersion());
     }
