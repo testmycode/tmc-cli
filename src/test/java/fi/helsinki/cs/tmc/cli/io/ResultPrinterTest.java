@@ -5,7 +5,10 @@ import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus;
-import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.core.domain.submission.ValidationErrorImpl;
+import fi.helsinki.cs.tmc.core.domain.submission.ValidationResultImpl;
+import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
@@ -16,15 +19,19 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 public class ResultPrinterTest {
 
     private TestIo io;
     private ResultPrinter printer;
     private SubmissionResult mockSubResult;
     private RunResult runResult;
-    private ValidationResult valResult;
     private ImmutableList<TestResult> testResults;
     private ImmutableMap<String, byte[]> logs;
+    private ImmutableList<ValidationError> validationErrors;
 
     @Before
     public void setUp() {
@@ -130,4 +137,43 @@ public class ResultPrinterTest {
         io.assertContains("Failed to compile project");
     }
 
+    @Test
+    public void printValidationErrorsInLocalTests() {
+        testResults = ImmutableList.of(new TestResult("test1", true, "Cool!"));
+        runResult = new RunResult(Status.PASSED, testResults, logs);
+
+        ValidationErrorImpl error = new ValidationErrorImpl();
+        ValidationResultImpl valResult = new ValidationResultImpl();
+        error.setMessage("validation error");
+        validationErrors = ImmutableList.of((ValidationError) error);
+        File file = new File("");
+        Map map = new HashMap<>();
+        map.put(file, validationErrors);
+        valResult.setValidationErrors(map);
+
+        printer.printLocalTestResult(runResult, valResult, false);
+        io.assertContains("validation error");
+    }
+
+    @Test
+    public void printValidationErrorsInSubmit() {
+        ValidationErrorImpl error = new ValidationErrorImpl();
+        error.setMessage("Incorrect indentation");
+
+        File file = new File("Test.java");
+        Map valErrors = new HashMap<>();
+        valErrors.put(file, ImmutableList.of((ValidationError) error));
+
+        ValidationResultImpl valResult = new ValidationResultImpl();
+        valResult.setStrategy(Strategy.FAIL);
+        valResult.setValidationErrors(valErrors);
+
+        SubmissionResult subResult = new SubmissionResult();
+        subResult.setStatus(SubmissionResult.Status.FAIL);
+        subResult.setValidationResult(valResult);
+
+        printer.printSubmissionResult(subResult, false);
+        io.assertContains("Validation error:");
+        io.assertContains("Incorrect indentation");
+    }
 }

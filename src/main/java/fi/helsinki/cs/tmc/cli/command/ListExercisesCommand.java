@@ -29,7 +29,7 @@ public class ListExercisesCommand extends AbstractCommand {
     @Override
     public void getOptions(Options options) {
         options.addOption("n", "no-pager", false, "Don't use a pager to list the exercises");
-        options.addOption("i", false, "Get the list of exercises from the server");
+        options.addOption("i", "internet", false, "Get the list of exercises from the server");
     }
 
     @Override
