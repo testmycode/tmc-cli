@@ -20,7 +20,11 @@ import org.apache.commons.cli.Options;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
@@ -85,34 +89,44 @@ public class DownloadExercisesCommand extends AbstractCommand {
     // TODO This method could be moved somewhere else.
     private Course findCourse(String courseName) {
         Io io = ctx.getIo();
-        Course found = null;
-        boolean hasDuplicateNames = false;
 
         List<Settings> accountsList = SettingsIo.getSettingsList();
+        // LinkedHashMap is used here to preserve ordering.
+        Map<Settings, Course> matches = new LinkedHashMap<>();
 
         for (Settings settings : accountsList) {
             ctx.useSettings(settings);
             Course course = TmcUtil.findCourse(ctx, courseName);
-            if (course == null) {
-                continue;
+            if (course != null) {
+                matches.put(settings, course);
             }
-            if (found != null) {
-                if (!hasDuplicateNames) {
-                    io.println("There is multiple courses with same name at different servers.");
-                }
-                if (io.readConfirmation("Download course from "
-                        + settings.getServerAddress(), false)) {
-                    return course;
-                }
-                hasDuplicateNames = true;
-            }
-            found = course;
         }
-        if (found == null) {
+
+        if (matches.size() == 1) {
+            Entry<Settings, Course> firstEntry = matches.entrySet().iterator().next();
+            ctx.useSettings(firstEntry.getKey());
+            return firstEntry.getValue();
+        } else if (matches.isEmpty()) {
             io.println("Course doesn't exist.");
             return null;
         }
-        return found;
+
+        io.println("There is " + matches.size()
+                + " courses with same name at different servers.");
+
+        for (Entry<Settings, Course> entrySet : matches.entrySet()) {
+            Settings settings = entrySet.getKey();
+            Course course = entrySet.getValue();
+
+            if (io.readConfirmation("Download course from "
+                    + settings.getServerAddress() + " with '"
+                    + settings.getUsername() + "' account", false)) {
+                ctx.useSettings(settings);
+                return course;
+            }
+        }
+        io.println("The previous course was last that matched.");
+        return null;
     }
 
     private List<Exercise> getFilteredExercises(Course course) {
@@ -134,6 +148,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
     private void printStatistics(Course course, int requestCount, int downloadCount) {
         Io io = ctx.getIo();
         String courseName = course.getName();
+
         if (course.getExercises().isEmpty()) {
             io.println("The '" + courseName + "' course doesn't have any exercises.");
         } else {
