@@ -39,7 +39,7 @@ To summarise:
 ~ $ echo "Now you can run tmc anywhere."
 ```
 
-If for some reason nothing was added added to your .bashrc or your shell of choice is not Bash, you can manually add the following line `source $HOME/.tmc-autocomplete.sh` (or `alias tmc="[PATH_TO_TMC]"` for tmc with no autocompletion) to your .bashrc / other shell rc file.
+If for some reason nothing was added to your .bashrc or your shell of choice is not Bash, you can manually add the following line `source $HOME/.tmc-autocomplete.sh` (or `alias tmc="[PATH_TO_TMC]"` for tmc with no autocompletion) to your .bashrc / other shell rc file.
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace `tmc` with this command. (note: you must have set Java on your system `%PATH%`. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
