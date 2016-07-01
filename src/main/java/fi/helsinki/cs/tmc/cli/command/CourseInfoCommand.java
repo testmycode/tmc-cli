@@ -35,8 +35,8 @@ public class CourseInfoCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {
-        options.addOption("a", false, "Show all information for a specific course");
-        options.addOption("i", false, "Get the information from the server");
+        options.addOption("a", "all", false, "Show all information for a specific course");
+        options.addOption("i", "internet", false, "Get the information from the server");
     }
 
     @Override
