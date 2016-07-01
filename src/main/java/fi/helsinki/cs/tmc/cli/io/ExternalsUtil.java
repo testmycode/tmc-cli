@@ -136,10 +136,6 @@ public class ExternalsUtil {
         return execExternal(new String[]{program, arg}, wait);
     }
 
-    private static boolean execExternal(String program, boolean wait) {
-        return execExternal(new String[]{program}, wait);
-    }
-
     private static boolean execExternal(String[] args, boolean wait) {
         if (EnvironmentUtil.isWindows()) {
             logger.info("Launching external program " + Arrays.toString(args));
@@ -208,17 +204,6 @@ public class ExternalsUtil {
             return false;
         }
         return true;
-    }
-
-    private static String readFromFileAsString(Path path) {
-        String message;
-        try {
-            message = new String(Files.readAllBytes(path));
-        } catch (Exception e) {
-            logger.error("Couldn't read file as bytes", e);
-            return null;
-        }
-        return message;
     }
 
     private static List<String> readFromFileAsList(Path path) {
