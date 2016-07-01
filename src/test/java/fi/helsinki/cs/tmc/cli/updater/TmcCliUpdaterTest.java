@@ -107,7 +107,7 @@ public class TmcCliUpdaterTest {
         TmcCliUpdater updater = spy(new TmcCliUpdater(io, "0.1.0", false));
         doReturn(latestJson).when(updater).fetchLatestReleaseJson();
         //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
-        doNothing().when(updater).fetchTmcCliBinary(any(String.class), any(File.class));
+        doReturn(true).when(updater).fetchTmcCliBinary(any(String.class), any(File.class));
         when(updater.runNewTmcCliBinary(any(String.class))).thenReturn(true);
         updater.run();
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
