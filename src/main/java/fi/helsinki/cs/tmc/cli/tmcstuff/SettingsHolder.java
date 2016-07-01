@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.tmcstuff;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This is a class for storing all different login settings as a single array.
@@ -68,5 +70,9 @@ public class SettingsHolder {
 
     public int settingsCount() {
         return this.settingsArray.size();
+    }
+
+    public List<Settings> getSettingsList() {
+        return Collections.unmodifiableList(this.settingsArray);
     }
 }
