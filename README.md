@@ -31,6 +31,7 @@ If you downloaded "tmc", navigate to the download directory on your terminal and
 Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an alias to your .bashrc, enabling you to use tmc-cli by invoking the command `tmc`. For the alias to come into effect, execute `. ~/.bashrc` or simply open a new terminal.
 
 To summarise:
+
 ```
 ~ $ chmod u+x tmc
 ~ $ ./tmc
@@ -38,11 +39,11 @@ To summarise:
 ~ $ echo "Now you can run tmc anywhere."
 ```
 
-If for some reason the alias was not added to your .bashrc or your shell of choice is not Bash, you can manually add the following line `alias tmc="[PATH_TO_TMC]"` to your .bashrc / other shell rc file.
+If for some reason nothing was added to your .bashrc or your shell of choice is not Bash, you can manually add the following line `source $HOME/.tmc-autocomplete.sh` (or `alias tmc="[PATH_TO_TMC]"` for tmc with no autocompletion) to your .bashrc / other shell rc file.
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace `tmc` with this command. (note: you must have set Java on your system `%PATH%`. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
-Tip: On Windows, use `doskey tmc="java - jar [path_to_tmc-cli.jar] $@"` to create a convenient alias.
+Tip: On Windows, use `doskey tmc="java -jar [path_to_tmc-cli.jar] $*"` in cmd.exe or `doskey /exename=powershell.exe tmc="java -jar [path_to_tmc-cli.jar] $*"` in PowerShell to create a convenient alias.
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`. You can also view all available options for commands by running them with the `--help` switch, for example `tmc courses --help`.
 
@@ -57,6 +58,7 @@ For system administrators/packagers: To make the man page available for all user
 ##Logging in
 
 Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or %APPDATA% on Windows) - you will only have to log in once.
+
 ```
 ~ $ tmc login
 server address:
@@ -76,11 +78,12 @@ algorithms-101
 c-mooc
 javascript-for-lazy-hipsters
 ```
+
 Note that you can only submit exercises on courses for which you have enrolled.
 
 ##Downloading courses
 
-Navigate to a suitable directory in which you wish to download your course(s). Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it.
+Navigate to a suitable directory in which you wish to download your course(s). Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it. By default, only exercises that you have not fully completed are downloaded - download all exercises with `-a`.
 
 ```
 ~ $ mkdir tmc-courses; cd tmc-courses
@@ -91,6 +94,7 @@ Downloading: test-course
 ~/tmc-courses/test-course $ ls -pa
 exercise1/  exercise2/  exercise3/  exercise4/  .tmc.json
 ```
+
 Course-specific information is stored in .tmc.json. Do not manually edit or remove it unless you are completely done with the course - doing so will cause tmc to not function properly.
 
 ##Running tests
