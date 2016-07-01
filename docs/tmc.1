@@ -1,0 +1,222 @@
+.TH TMC\-CLI 1 2016\-06\-30 "Helsinki Univ. Dep. of CS" "TMC\-CLI Manual"
+.SH NAME
+.PP
+tmc \- Command\-line client for TestMyCode
+.SH SYNOPSIS
+.PP
+\fB\fCtmc\fR [\fB\fC\-h|\-\-help\fR] [\fB\fC\-v|\-\-version\fR]
+      <\fB\fCCOMMAND\fR> [\fB\fC\-h|\-\-help\fR]
+      <\fB\fCCOMMAND\fR> [\fB\fCarguments\fR] ...
+.SH DESCRIPTION
+.PP
+\fB\fCtmc\fR is an exercise testing and submission utility for students participating
+on online courses utilising the free and open TestMyCode\-framework. TMC\-CLI is
+a command\-line interface for TMC\-CORE, the TestMyCode client backend. TMC\-CLI's
+primary features include downloading exercises, running tests, viewing progress
+and submitting completed exercises.
+.PP
+All functionality is divided between different commands. To use \fB\fCtmc\fR for any
+meaningful task, you must issue a command after \fB\fCtmc\fR\&. Commands each have their own
+options. For more information on commands and their options, see the \fB\fCCOMMAND\fR
+sections below.
+.SH OPTIONS
+.TP
+\fB\fC\-v\fR \fB\fC\-\-version\fR
+Display the version of this build.
+.TP
+\fB\fC\-h\fR \fB\fC\-\-help\fR
+Display a concise help message. Shows all commonly used commands. If issued
+with a command, display a help message for that command.
+.ti 0
+\l'\n(.lu'
+.SH COMMANDS
+.ti 0
+\l'\n(.lu'
+.SH COMMAND: LOGIN
+.PP
+\fB\fCtmc\fR \fB\fClogin\fR [\fB\fC\-s\fR \fIserver address\fP] [\fB\fC\-u\fR \fIusername\fP] [\fB\fC\-p\fR \fIpassword\fP]
+.PP
+Login to TMC server. If credentials are not given as options, the user will
+be asked to input any missing credentials. You will have to be logged in
+in order to use certain commands.
+.TP
+\fB\fC\-s\fR \fB\fC\-\-server\fR
+Specify which server to connect to.
+.TP
+\fB\fC\-u\fR \fB\fC\-\-user\fR
+Specify username.
+.TP
+\fB\fC\-p\fR \fB\fC\-\-password\fR
+Specify password.
+.SH COMMAND: LOGOUT
+.PP
+\fB\fCtmc\fR \fB\fClogout\fR
+.PP
+Delete login credentials from configurations.
+.SH COMMAND: COURSES
+.PP
+\fB\fCtmc\fR \fB\fCcourses\fR
+.PP
+List all available courses on the server.
+.SH COMMAND: DOWNLOAD
+.PP
+\fB\fCtmc\fR \fB\fCdownload\fR [\fB\fC\-a\fR] \fIcourse\fP
+.PP
+Download a course from the server.
+.TP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Download all exercises, including completed ones.
+.SH COMMAND: EXERCISES
+.PP
+\fB\fCtmc\fR \fB\fCexercises\fR [\fB\fC\-n\fR] [\fB\fC\-i\fR]
+.PP
+List the status of all of the course's exercises. Exercises are grouped by
+their deadlines. On Unix, the list is displayed on a pager.
+.TP
+\fB\fC\-n\fR \fB\fC\-\-no\-pager\fR
+Print the list directly to the terminal.
+.TP
+\fB\fC\-i\fR \fB\fC\-\-internet\fR
+Fetch exercises' statuses from the server, as opposed to reading from the
+local cache.
+.SH COMMAND: UPDATE
+.PP
+\fB\fCtmc\fR \fB\fCupdate\fR
+.PP
+Update the course cache and download newly available exercises.
+.SH COMMAND: TEST
+.PP
+\fB\fCtmc\fR \fB\fCtest\fR [\fB\fC\-a\fR] [\fB\fC\-d\fR] [\fIpath\fP] ...
+.PP
+Run tests for the specified exercise. If no \fIpath\fP is given, tests will be
+run in the current working directory. Several exercises can be tested at once.
+If the current work directory is the course root directory or the course root
+directory was given as a \fIpath\fP, then all exercises will be tested.
+.TP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Display all test results, instead of only the failed tests.
+.TP
+\fB\fC\-d\fR \fB\fC\-\-details\fR
+Display more detailed error messages.
+.SH COMMAND: SUBMIT
+.PP
+\fB\fCtmc\fR \fB\fCsubmit\fR [\fB\fC\-a\fR] [\fB\fC\-d\fR] [\fB\fC\-c\fR] [\fIpath\fP] ...
+.PP
+Submit exercises to the server. If no \fIpath\fP is given, the exercise in the
+current working directory will be submitted. Several exercises can be submitted
+at once. If the current work directory is the course root directory or the
+course root directory was given as a \fIpath\fP, then all exercises will be submitted.
+.PP
+For every successful submission, you'll be prompted to send feedback for the
+exercise if the course has enabledfeedback questions. Sending feedback is
+always optional.
+.TP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Display all test results, instead of only the failed tests.
+.TP
+\fB\fC\-d\fR \fB\fC\-\-details\fR
+Display more detailed error messages.
+.TP
+\fB\fC\-c\fR \fB\fC\-\-completed\fR
+Submit all exercises in the current course which have passed local tests.
+.SH COMMAND: INFO
+.PP
+\fB\fCtmc\fR \fB\fCinfo\fR [\fB\fC\-a\fR] [\fB\fC\-i\fR] [\fIcourse or exercise\fP]
+.PP
+Display the current status of a course or an exercise. If used for a course,
+shows the total amount of available, completed and locked exercises. If used
+for an exercise, shows the exercise's status and deadline.
+.TP
+\fB\fC\-a\fR \fB\fC\-\-all\fR
+Displays all information for given course and exercises.
+.TP
+\fB\fC\-i\fR \fB\fC\-\-internet\fR
+Fetches information from the server, as opposed to reading from local cache.
+.SH COMMAND: PASTE
+.PP
+\fB\fCtmc\fR \fB\fCpaste\fR [\fB\fC\-o\fR] [\fB\fC\-n\fR] [\fB\fC\-m\fR \fImessage\fP] [\fIexercise\fP]
+.PP
+Submit an exercise to the tmc\-pastebin. You can attach a message to your paste.
+Once submission is successful, a shareable link will be printed.
+.TP
+\fB\fC\-o\fR \fB\fC\-\-open\fR
+Open the link to the paste in the default internet browser after submission.
+.TP
+\fB\fC\-n\fR \fB\fC\-\-no\-message\fR
+Do not send a message alongside the paste.
+.TP
+\fB\fC\-m\fR \fB\fC\-\-message\fR
+Give the paste as an argument instead of opening a text editor.
+.SH COMMAND: PROP
+.PP
+\fB\fCtmc\fR \fB\fCprop\fR [\fIKEY\fP] [\fIVALUE\fP] ...
+      \fB\fCprop\fR \fB\fC\-u\fR \fIKEY\fP ... 
+.PP
+Set or unset TMC\-CLI properties. Invoke without any arguments to display all
+current properties. If more than a single property is added or removed, the user
+will be asked to confirm the changes.
+.TP
+\fB\fC\-u\fR \fB\fC\-\-unset\fR
+Unset given properties.
+.PP
+List of properties:
+.RS
+.IP \(bu 2
+\fIupdate\-date\fP
+Scheduled time for the next version check.
+.IP \(bu 2
+\fItestresults\-left\fP \fItestresults\-right\fP \fIprogressbar\-left\fP \fIprogressbar\-right\fP
+Change progress bar colours. Recognised values: black, red, green, yellow,
+blue, purple, cyan, white, none.
+.RE
+.ti 0
+\l'\n(.lu'
+.SH FILES
+.TP
+\fB\fC[course directory]/.tmc.json\fR
+Course configuration and cache file. Saves the status of the username, server
+address and course's exercises. Manually editing this file may have adverse
+effects.
+.TP
+\fB\fC~/.config/tmc\-cli/properties.json\fR
+User configuration file. Use \fB\fCtmc prop\fR to edit properties.
+.TP
+\fB\fC~/.config/tmc\-cli/accounts.json\fR
+User login credentials. Use \fB\fCtmc logout\fR to safely delete.
+.TP
+\fB\fC~/.config/tmc\-cli/logs/tmc\-cli.log\fR
+Debug logging.
+.PP
+For more on config locations, see \fB\fCENVIRONMENT\fR \-> \fB\fCXDG_CONFIG_HOME\fR and \fB\fCAPPDATA\fR\&.
+.SH ENVIRONMENT
+.TP
+\fB\fCEDITOR\fR
+Text editor for editing messages for pastebin and feedback. If unset, defaults
+to \fB\fCnano\fR on Unix and \fB\fCnotepad\fR on Windows.
+.TP
+\fB\fCPAGER\fR
+Pager for displaying text files. If unset, defaults to \fB\fCless \-R\fR on Unix.
+This functionality is broken on Windows, but defaults to \fB\fCmore\fR\&.
+.TP
+\fB\fCXDG_CONFIG_HOME\fR
+If set on Unix, \fI~/.config/\fP in config file paths is replaced with its value.
+.TP
+\fB\fCAPPDATA\fR
+On Windows, \fI~/.config/\fP is replaced with the value of \fB\fC%APPDATA%\fR, usually
+\fIC:\[rs]Users\[rs]Username\[rs]AppData\[rs]Roaming\[rs]\&.\fP If \fB\fC%APPDATA%\fR is unset, user's home
+directory will be used instead.
+.SH BUGS
+.PP
+Most likely. Please submit bug reports, spelling and grammar corrections and
+other issues to the tmc\-cli issue tracker \[la]https://github.com/tmc-cli/tmc-cli/issues\[ra]\&.
+.SH AUTHORS
+.PP
+.RS
+.nf
+Johannes L. [jclc](https://github.com/jclc)
+Matti L. [matike](https://github.com/matike)
+Mikko M. [mikkomaa](https://github.com/mikkomaa)
+Aleksi S. [salmela](https://github.com/salmela)
+Juha V. [juvester](https://github.com/juvester)
+.fi
+.RE
