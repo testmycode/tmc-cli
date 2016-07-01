@@ -113,8 +113,8 @@ public class Application {
     public void run(String[] args) {
         context.setApp(this);
 
-        if (!context.inTests()) {
-            versionCheck();
+        if (!context.inTests() && versionCheck()) {
+            return;
         }
 
         String[] commandArgs = parseArgs(args);
@@ -134,7 +134,7 @@ public class Application {
         app.run(args);
     }
 
-    private void versionCheck() {
+    private boolean versionCheck() {
         Map<String, String> properties = context.getProperties();
         String previousTimestamp = properties.get(previousUpdateDateKey);
         Date previous = null;
@@ -146,23 +146,25 @@ public class Application {
             } catch (NumberFormatException ex) {
                 io.println("The previous update date isn't number.");
                 logger.warn("The previous update date isn't number.", ex);
-                return;
+                return false;
             }
             previous = new Date(time);
         }
 
         Date now = new Date();
         if (previous != null && previous.getTime() + defaultUpdateInterval > now.getTime()) {
-            return;
+            return false;
         }
 
         TmcCliUpdater update = new TmcCliUpdater(io, EnvironmentUtil.getVersion(),
                 EnvironmentUtil.isWindows());
-        update.run();
+        boolean updated = update.run();
 
         long timestamp = now.getTime();
         properties.put(previousUpdateDateKey, Long.toString(timestamp));
         context.saveProperties();
+
+        return updated;
     }
 
     //TODO rename this as getColorProperty

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
@@ -107,7 +108,7 @@ public class TmcCliUpdaterTest {
         doReturn(latestJson).when(updater).fetchLatestReleaseJson();
         //when(updater.fetchLatestReleaseJson()).thenReturn(latestJson);
         doNothing().when(updater).fetchTmcCliBinary(any(String.class), any(File.class));
-        doNothing().when(updater).runNewTmcCliBinary(any(String.class));
+        when(updater.runNewTmcCliBinary(any(String.class))).thenReturn(true);
         updater.run();
         assertThat(io.out(), containsString("A new version of tmc-cli is available!"));
         assertThat(io.out(), containsString("Downloading..."));
