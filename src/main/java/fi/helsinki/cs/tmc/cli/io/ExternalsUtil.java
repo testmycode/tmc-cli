@@ -38,7 +38,7 @@ public class ExternalsUtil {
         }
         String editor = System.getenv("EDITOR");
         if (editor == null) {
-            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            if (EnvironmentUtil.isWindows()) {
                 editor = "notepad";
             } else {
                 editor = "nano";
@@ -143,50 +143,8 @@ public class ExternalsUtil {
         return execExternal(new String[]{program}, wait);
     }
 
-    private static boolean execExternal(String[] args, boolean wait) {
-        if (EnvironmentUtil.isWindows()) {
-            logger.info("Launching external program " + Arrays.toString(args));
-            try {
-                Process proc = new ProcessBuilder(args).start();
-                if (wait) {
-                    logger.info("(Windows) Waiting for "
-                            + Arrays.toString(args) + " to finish executing");
-                    proc.waitFor();
-                }
-            } catch (Exception e) {
-                logger.error("(Windows) Exception when running external program "
-                        + Arrays.toString(args), e);
-                return false;
-            }
-        } else {
-
-            StringBuilder program = new StringBuilder();
-            for (int i = 0; i < args.length; i++) {
-                program.append(" " + args[i]);
-            }
-            String[] exec = {"sh", "-c", program.toString() + " </dev/tty >/dev/tty"};
-//            exec[0] = "sh";
-//            exec[1] = "-c";
-//            for (int i = 0; i < args.length; i++) {
-//                exec[2 + i] = args[i];
-//            }
-//            exec[args.length + 2] = " </dev/tty >/dev/tty";
-//            exec = {"sh -c "}
-            try {
-                Process proc = Runtime.getRuntime().exec(exec);
-                if (wait) {
-                    logger.info("(Unix) Waiting for "
-                            + Arrays.toString(exec) + " to finish executing");
-                    proc.waitFor();
-                }
-                return proc.exitValue() == 0;
-            } catch (Exception e) {
-                logger.error("(Unix) Exception when running external program "
-                        + Arrays.toString(exec), e);
-                return false;
-            }
-        }
-        return false;
+    public static boolean execExternal(String[] args, boolean wait) {
+        return EnvironmentUtil.runProcess(args, wait);
     }
 
     /**
