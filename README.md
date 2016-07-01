@@ -42,13 +42,21 @@ If for some reason the alias was not added to your .bashrc or your shell of choi
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace `tmc` with this command. (note: you must have set Java on your system `%PATH%`. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
-Tip: On Windows, use `doskey tmc="java - jar [path_to_tmc-cli.jar] $@"` to get a convenient alias
+Tip: On Windows, use `doskey tmc="java - jar [path_to_tmc-cli.jar] $@"` to create a convenient alias.
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`. You can also view all available options for commands by running them with the `--help` switch, for example `tmc courses --help`.
 
+##Manual
+
+The Unix man page for tmc-cli is located in docs/tmc.1 in this repository. To view it, open it with `man -l tmc.1`.
+
+The man page is generated from docs/MANUAL.md using [md2man](https://github.com/sunaku/md2man).
+
+For system administrators/packagers: To make the man page available for all users, move it to /usr/share/man/man1 - then it can be displayed with `man tmc`.
+
 ##Logging in
 
-Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or %LOCALAPPDATA% on Windows) - you will only have to log in once.
+Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or %APPDATA% on Windows) - you will only have to log in once.
 ```
 ~ $ tmc login
 server address:
