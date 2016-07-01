@@ -78,7 +78,9 @@ public class TmcCliUpdater {
         File destination = new File(currentBinLocation + binName);
 
         io.println("Downloading...");
-        fetchTmcCliBinary(dlUrl, destination);
+        if (!fetchTmcCliBinary(dlUrl, destination)) {
+            return false;
+        }
 
         io.println("Running " + destination.getAbsolutePath());
         return runNewTmcCliBinary(destination.getAbsolutePath());
@@ -136,16 +138,18 @@ public class TmcCliUpdater {
      * Downloads a binary file from downloadUrl and saves it to destination
      * file.
      */
-    protected void fetchTmcCliBinary(String downloadUrl, File destination) {
+    protected boolean fetchTmcCliBinary(String downloadUrl, File destination) {
         byte[] content = fetchHttpEntity(downloadUrl);
         if (content == null) {
             io.println("Failed to download tmc-cli.");
-            return;
+            return false;
         }
         try {
             FileUtils.writeByteArrayToFile(destination, content);
+            return true;
         } catch (IOException ex) {
             io.println("Failed to write the new version into \'" + destination + "\'.");
+            return false;
         }
     }
 
