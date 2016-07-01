@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus;
 import fi.helsinki.cs.tmc.core.domain.submission.ValidationErrorImpl;
 import fi.helsinki.cs.tmc.core.domain.submission.ValidationResultImpl;
+import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
@@ -137,7 +138,7 @@ public class ResultPrinterTest {
     }
 
     @Test
-    public void printValidationErrors() {
+    public void printValidationErrorsInLocalTests() {
         testResults = ImmutableList.of(new TestResult("test1", true, "Cool!"));
         runResult = new RunResult(Status.PASSED, testResults, logs);
 
@@ -152,5 +153,27 @@ public class ResultPrinterTest {
 
         printer.printLocalTestResult(runResult, valResult, false);
         io.assertContains("validation error");
+    }
+
+    @Test
+    public void printValidationErrorsInSubmit() {
+        ValidationErrorImpl error = new ValidationErrorImpl();
+        error.setMessage("Incorrect indentation");
+
+        File file = new File("Test.java");
+        Map valErrors = new HashMap<>();
+        valErrors.put(file, ImmutableList.of((ValidationError) error));
+
+        ValidationResultImpl valResult = new ValidationResultImpl();
+        valResult.setStrategy(Strategy.FAIL);
+        valResult.setValidationErrors(valErrors);
+
+        SubmissionResult subResult = new SubmissionResult();
+        subResult.setStatus(SubmissionResult.Status.FAIL);
+        subResult.setValidationResult(valResult);
+
+        printer.printSubmissionResult(subResult, false);
+        io.assertContains("Validation error:");
+        io.assertContains("Incorrect indentation");
     }
 }
