@@ -8,6 +8,8 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -23,6 +25,7 @@ import java.util.List;
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
 
+    private CliContext ctx;
     private boolean showAll;
 
     @Override
@@ -43,23 +46,22 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
+        ctx = getContext();
         showAll = args.hasOption("a");
 
-        CliContext ctx = getContext();
-        WorkDir workDir = ctx.getWorkDir();
         if (!ctx.loadBackend()) {
             return;
         }
 
+        WorkDir workDir = ctx.getWorkDir();
         if (workDir.getConfigFile() != null) {
             io.println("Can't download a course inside a course directory.");
             return;
         }
 
         String courseName = stringArgs[0];
-        Course course = TmcUtil.findCourse(ctx, courseName);
+        Course course = findCourse(courseName);
         if (course == null) {
-            io.println("Course doesn't exist.");
             return;
         }
         List<Exercise> filtered = getFilteredExercises(course);
@@ -76,32 +78,41 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
-        if (course.getExercises().isEmpty()) {
-            io.println("The '" + courseName + "' course doesn't have any exercises.");
-        } else {
-            io.println("The '" + courseName + "' course has "
-                    + course.getExercises().size() + " exercises");
+        printStatistics(course, filtered.size(), exercises.size());
+        createNewCourse(course);
+    }
 
-            int failedCount = (filtered.size() - exercises.size());
-            if (failedCount > 0) {
-                io.println("  from which "
-                        + exercises.size() + " exercises were succesfully downloaded");
-                io.println(Color.colorString("  and of which " + failedCount + " failed.",
-                        Color.AnsiColor.ANSI_RED));
-                //TODO we could print the names of the not downloaded exercises here
-            } else {
-                io.println("  from which "
-                        + exercises.size() + " exercises were downloaded.");
+    // TODO This method could be moved somewhere else.
+    private Course findCourse(String courseName) {
+        Io io = ctx.getIo();
+        Course found = null;
+        boolean hasDuplicateNames = false;
+
+        List<Settings> accountsList = SettingsIo.getSettingsList();
+
+        for (Settings settings : accountsList) {
+            ctx.useSettings(settings);
+            Course course = TmcUtil.findCourse(ctx, courseName);
+            if (course == null) {
+                continue;
             }
-            io.println("Use -a/--all to download completed exercises as well.");
+            if (found != null) {
+                if (!hasDuplicateNames) {
+                    io.println("There is multiple courses with same name at different servers.");
+                }
+                if (io.readConfirmation("Download course from "
+                        + settings.getServerAddress(), false)) {
+                    return course;
+                }
+                hasDuplicateNames = true;
+            }
+            found = course;
         }
-
-        Path configFile = workDir.getWorkingDirectory()
-                .resolve(courseName)
-                .resolve(CourseInfoIo.COURSE_CONFIG);
-        CourseInfo info = ctx.createCourseInfo(course);
-        info.setExercises(course.getExercises());
-        CourseInfoIo.save(info, configFile);
+        if (found == null) {
+            io.println("Course doesn't exist.");
+            return null;
+        }
+        return found;
     }
 
     private List<Exercise> getFilteredExercises(Course course) {
@@ -118,5 +129,40 @@ public class DownloadExercisesCommand extends AbstractCommand {
             }
         }
         return filtered;
+    }
+
+    private void printStatistics(Course course, int requestCount, int downloadCount) {
+        Io io = ctx.getIo();
+        String courseName = course.getName();
+        if (course.getExercises().isEmpty()) {
+            io.println("The '" + courseName + "' course doesn't have any exercises.");
+        } else {
+            io.println("The '" + courseName + "' course has "
+                    + course.getExercises().size() + " exercises");
+
+            int failedCount = (requestCount - downloadCount);
+            if (failedCount > 0) {
+                io.println("  from which " + (requestCount - failedCount)
+                        + " exercises were succesfully downloaded");
+                io.println(Color.colorString("  and of which " + failedCount + " failed.",
+                        Color.AnsiColor.ANSI_RED));
+                //TODO we could print the names of the not downloaded exercises here
+            } else {
+                io.println("  from which "
+                        + downloadCount + " exercises were downloaded.");
+            }
+            io.println("Use -a/--all to download completed exercises as well.");
+        }
+    }
+
+    private void createNewCourse(Course course) {
+        WorkDir workDir = ctx.getWorkDir();
+        Path configFile = workDir.getWorkingDirectory()
+                .resolve(course.getName())
+                .resolve(CourseInfoIo.COURSE_CONFIG);
+
+        CourseInfo info = ctx.createCourseInfo(course);
+        info.setExercises(course.getExercises());
+        CourseInfoIo.save(info, configFile);
     }
 }
