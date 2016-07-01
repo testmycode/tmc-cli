@@ -41,7 +41,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
-            io.println("You must give course name as an argument.");
+            io.println("You must give a course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
         }
@@ -137,21 +137,24 @@ public class DownloadExercisesCommand extends AbstractCommand {
         if (course.getExercises().isEmpty()) {
             io.println("The '" + courseName + "' course doesn't have any exercises.");
         } else {
+            int totalCount = course.getExercises().size();
             io.println("The '" + courseName + "' course has "
-                    + course.getExercises().size() + " exercises");
+                    + totalCount + " exercises available");
 
             int failedCount = (requestCount - downloadCount);
             if (failedCount > 0) {
-                io.println("  from which " + (requestCount - failedCount)
+                io.println("  of which " + (requestCount - failedCount)
                         + " exercises were succesfully downloaded");
                 io.println(Color.colorString("  and of which " + failedCount + " failed.",
                         Color.AnsiColor.ANSI_RED));
                 //TODO we could print the names of the not downloaded exercises here
             } else {
-                io.println("  from which "
+                io.println("  of which "
                         + downloadCount + " exercises were downloaded.");
             }
-            io.println("Use -a/--all to download completed exercises as well.");
+            if (!showAll && totalCount != downloadCount) {
+                io.println("Use -a/--all to download completed exercises as well.");
+            }
         }
     }
 
