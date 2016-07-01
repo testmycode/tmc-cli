@@ -157,13 +157,13 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
             int failedCount = (requestCount - downloadCount);
             if (failedCount > 0) {
-                io.println("  from which " + (requestCount - failedCount)
+                io.println("  of which " + (requestCount - failedCount)
                         + " exercises were succesfully downloaded");
                 io.println(Color.colorString("  and of which " + failedCount + " failed.",
                         Color.AnsiColor.ANSI_RED));
                 //TODO we could print the names of the not downloaded exercises here
             } else {
-                io.println("  from which "
+                io.println("  of which "
                         + downloadCount + " exercises were downloaded.");
             }
             io.println("Use -a/--all to download completed exercises as well.");

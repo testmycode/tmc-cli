@@ -204,7 +204,7 @@ public class DownloadExercisesCommandTest {
         app.run(args);
 
         io.assertContains("The 'course1' course has 3 exercises");
-        io.assertContains("from which 2 exercises were succesfully downloaded");
+        io.assertContains("of which 2 exercises were succesfully downloaded");
         io.assertContains("and of which 1 failed.");
     }
 
