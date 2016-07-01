@@ -89,13 +89,9 @@ tmc_detect_profile() {
 	fi
 }
 
-if [ ! -f "$AUTOCOMPLETE" ]; then
+# create the alias and autocompletion code if tmc alias not set
+if type tmc &> /dev/null; then
 	tmc_update_autocomplete
-
-	if type tmc &> /dev/null; then
-		# don't add new alias if it exists already
-		return
-	fi
 
 	PROFILE_FILE=$(tmc_detect_profile)
 	if [ -z "$PROFILE_FILE" ]; then
