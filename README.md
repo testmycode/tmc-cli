@@ -42,7 +42,7 @@ If for some reason the alias was not added to your .bashrc or your shell of choi
 
 If you are using Windows and you downloaded the .jar file, you must use tmc-cli directly with Java like so: `java -jar [path_to_tmc-cli.jar]`. In the following examples, replace `tmc` with this command. (note: you must have set Java on your system `%PATH%`. For more information, see [this Java help page](https://www.java.com/en/download/help/path.xml).)
 
-Tip: On Windows, use `doskey tmc="java - jar [path_to_tmc-cli.jar] $@"` to create a convenient alias.
+Tip: On Windows, use `doskey tmc="java -jar [path_to_tmc-cli.jar] $*"` in cmd.exe or `doskey /exename=powershell.exe tmc="java -jar [path_to_tmc-cli.jar] $*"` in PowerShell to create a convenient alias.
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`. You can also view all available options for commands by running them with the `--help` switch, for example `tmc courses --help`.
 

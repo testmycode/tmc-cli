@@ -2,8 +2,8 @@ Architecture and Hacking the tmc-cli
 ====================================
 
 ## Requirements for developing tmc-cli
- * jdk 7
- * linux bash (mac's bash won't work)
+ * JDK 7
+ * Modern Linux Bash (Mac's Bash won't work)
 
 
 ## Building tmc-cli
@@ -21,9 +21,9 @@ Conceptually, there are three main parts in the program; the launch code, backen
 and the commands. The commands are gathered into their own package. In addition, there are utility
 classes in order to take care of user input/output and file handling.
 
-The tmc-cli itself is mostly just an command line interface for the backend libraries.
+Tmc-cli itself is mostly just an command line interface for the backend libraries.
 All the heavy lifting is done by [tmc-core](https://github.com/testmycode/tmc-core) and
-[tmc-langs](https://github.com/testmycode/tmc-langs) libraries. The tmc-cli also requires the
+[tmc-langs](https://github.com/testmycode/tmc-langs) libraries. Tmc-cli also requires the
 server-side component of TestMyCode aka. [tmc-server](https://github.com/testmycode/tmc-server).
 
 ### Important classes
@@ -115,3 +115,11 @@ public class ExampleCommandTest {
 
 If you are doing tests for any other class, simply create normal unit tests
 that don't depend on any command.
+
+##Updating the documentation
+
+Please document any new features or revisions in MANUAL.md and HISTORY.md as well
+as README.md, if the affected feature is already documented there.
+
+If you make changes to MANUAL.md, please rebuild tmc.1 before you push your changes.
+Use `[md2man](https://github.com/sunaku/md2man)-roff docs/MANUAL.md > docs/tmc.1` to build the manpage.
