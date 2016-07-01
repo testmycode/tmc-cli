@@ -44,7 +44,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
     public void run(CommandLine args, Io io) {
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
-            io.println("You must give course name as an argument.");
+            io.println("You must give a course name as an argument.");
             io.println("Usage: tmc download COURSE");
             return;
         }
