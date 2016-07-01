@@ -137,8 +137,9 @@ public class DownloadExercisesCommand extends AbstractCommand {
         if (course.getExercises().isEmpty()) {
             io.println("The '" + courseName + "' course doesn't have any exercises.");
         } else {
+            int totalCount = course.getExercises().size();
             io.println("The '" + courseName + "' course has "
-                    + course.getExercises().size() + " exercises");
+                    + totalCount + " exercises available");
 
             int failedCount = (requestCount - downloadCount);
             if (failedCount > 0) {
@@ -151,7 +152,9 @@ public class DownloadExercisesCommand extends AbstractCommand {
                 io.println("  of which "
                         + downloadCount + " exercises were downloaded.");
             }
-            io.println("Use -a/--all to download completed exercises as well.");
+            if (!showAll && totalCount != downloadCount) {
+                io.println("Use -a/--all to download completed exercises as well.");
+            }
         }
     }
 
