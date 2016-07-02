@@ -1,65 +1,163 @@
 package fi.helsinki.cs.tmc.cli.io;
 
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.junit.Ignore;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import static org.mockito.Mockito.when;
+import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Runtime.class, EnvironmentUtil.class})
+@PrepareForTest({Runtime.class, EnvironmentUtil.class,
+        Desktop.class, ExternalsUtil.class})
 public class ExternalUtilTest {
-    
-    private static String filename;
+
+    //TODO add more test cases
+    private Path tempDir;
 
     @Before
     public void setUp() {
-        filename = System.getProperty("java.io.tmpdir");
+        tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("tmc-cli");
+
+        mockStatic(System.class);
         mockStatic(Runtime.class);
+        mockStatic(Desktop.class);
         mockStatic(EnvironmentUtil.class);
-        when(EnvironmentUtil.isWindows()).thenReturn(false);
+        when(System.getenv(anyString())).thenReturn(null);
+        when(System.getProperty(anyString())).thenCallRealMethod();
     }
 
-    @Ignore
+    @After
+    public void tearDown() {
+        try {
+            FileUtils.deleteDirectory(tempDir.toFile());
+        } catch (Exception e) { }
+    }
+
     @Test
     public void getUserEditedMessage() {
-        //when(EnvironmentUtil.runProcess(, true)).thenReturn(true);
-        ExternalsUtil.getUserEditedMessage("template", filename, false);
+        when(EnvironmentUtil.isWindows()).thenReturn(false);
+        when(EnvironmentUtil.runProcess(any(String[].class), eq(true))).thenReturn(true);
+
+        ExternalsUtil.getUserEditedMessage("template", "test-filename", false);
+
+        ArgumentCaptor<String[]> argsCaptor = ArgumentCaptor.forClass(String[].class);
+        verifyStatic(times(1));
+        EnvironmentUtil.runProcess(argsCaptor.capture(), eq(true));
+
+        String[] args = argsCaptor.getValue();
+        assertEquals(2, args.length);
+        assertEquals("nano", args[0]);
+        assertThat(args[1], containsString("test-filename-"));
     }
 
-    @Ignore
     @Test
     public void showStringInPager() {
-        ExternalsUtil.showStringInPager("Show", filename);
+        when(EnvironmentUtil.isWindows()).thenReturn(false);
+        when(EnvironmentUtil.runProcess(any(String[].class), eq(true))).thenReturn(true);
+        ExternalsUtil.showStringInPager("Show", "test-filename-");
+
+        ArgumentCaptor<String[]> argsCaptor = ArgumentCaptor.forClass(String[].class);
+        verifyStatic(times(1));
+        EnvironmentUtil.runProcess(argsCaptor.capture(), eq(true));
+
+        String[] args = argsCaptor.getValue();
+        assertEquals(2, args.length);
+        assertEquals("less -R", args[0]);
+        assertThat(args[1], containsString("test-filename-"));
     }
 
-    @Ignore
     @Test
     public void showFileInPager() {
-        ExternalsUtil.showFileInPager(Paths.get(filename));
+        Path filename = tempDir.resolve("pager-file");
+        when(EnvironmentUtil.isWindows()).thenReturn(false);
+        when(EnvironmentUtil.runProcess(any(String[].class), eq(true))).thenReturn(true);
+        ExternalsUtil.showFileInPager(filename);
+
+        ArgumentCaptor<String[]> argsCaptor = ArgumentCaptor.forClass(String[].class);
+        verifyStatic(times(1));
+        EnvironmentUtil.runProcess(argsCaptor.capture(), eq(true));
+
+        String[] args = argsCaptor.getValue();
+        assertEquals(2, args.length);
+        assertEquals("less -R", args[0]);
+        assertEquals(filename.toString(), args[1]);
     }
 
-    @Ignore
     @Test
-    public void runUpdater() {
+    public void runUpdater() throws IOException {
+        Path filename = tempDir.resolve("updater-file");
+        File file = filename.toFile();
+        file.getParentFile().mkdirs();
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write("...");
+        }
+
+        when(EnvironmentUtil.isWindows()).thenReturn(false);
+        when(EnvironmentUtil.runProcess(any(String[].class), eq(true))).thenReturn(true);
         Io io = new TestIo();
-        String pathToNewBinary = "/tmp/test";
-        ExternalsUtil.runUpdater(io, pathToNewBinary);
+        ExternalsUtil.runUpdater(io, filename.toString());
+
+        ArgumentCaptor<String[]> argsCaptor = ArgumentCaptor.forClass(String[].class);
+        verifyStatic(times(2));
+        EnvironmentUtil.runProcess(argsCaptor.capture(), eq(true));
+
+        List<String[]> runs = argsCaptor.getAllValues();
+        String[] args = runs.get(0);
+        assertEquals(2, args.length);
+        assertEquals("chmod u+x", args[0]);
+        assertEquals(filename.toString(), args[1]);
+
+        String[] args2 = runs.get(1);
+        assertEquals(2, args2.length);
+        assertEquals(filename.toString(), args2[0]);
+        assertEquals("++internal-update", args2[1]);
     }
 
-    @Ignore
     @Test
-    public void openInBrowser() throws URISyntaxException {
+    public void openInBrowser() throws URISyntaxException, IOException {
         URI uri = new URI("http://example.com");
+        Desktop mockDescktop = mock(Desktop.class);
+        when(Desktop.isDesktopSupported()).thenReturn(true);
+        when(Desktop.getDesktop()).thenReturn(mockDescktop);
         ExternalsUtil.openInBrowser(uri);
+
+        verify(mockDescktop, times(1)).browse(eq(uri));
+    }
+
+    @Test
+    public void notSupportedDesktopInOpenInBrowser() throws URISyntaxException {
+        URI uri = new URI("http://example.com");
+        when(Desktop.isDesktopSupported()).thenReturn(false);
+        ExternalsUtil.openInBrowser(uri);
+
+        verifyStatic(never());
+        Desktop.getDesktop();
     }
 }
