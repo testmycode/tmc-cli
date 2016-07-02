@@ -20,8 +20,8 @@ Conceptually, there are three main parts in the program; the launch code, backen
 
 Tmc-cli itself is mostly just an command line interface for the backend libraries. All the heavy lifting is done by [tmc-core](https://github.com/testmycode/tmc-core) and [tmc-langs](https://github.com/testmycode/tmc-langs) libraries. Tmc-cli also requires the server-side component of TestMyCode aka. [tmc-server](https://github.com/testmycode/tmc-server).
 
-### Methods involved in program launch
-[![Launch graph](https://rawgit.com/testmycode/duckling/master/startup_control_flow.svg)]
+### Methods involved in program start up
+![Launch graph](https://rawgit.com/tmc-cli/tmc-cli/master/startup_control_flow.svg)
 
 ### Important classes
 
