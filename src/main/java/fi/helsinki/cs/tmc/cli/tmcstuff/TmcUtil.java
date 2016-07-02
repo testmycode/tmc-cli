@@ -203,6 +203,7 @@ public class TmcUtil {
         if (cause instanceof ObsoleteClientException) {
             logger.error("Outdated tmc client");
             io.println("Your tmc-cli is outdated. Please update it.");
+            ctx.getApp().runAutoUpdate();
             return;
         }
         logger.error("Command failed in tmc-core", exception);

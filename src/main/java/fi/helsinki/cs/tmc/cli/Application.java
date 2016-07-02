@@ -7,7 +7,6 @@ import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ShutdownHandler;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
 
 import org.apache.commons.cli.CommandLine;
@@ -49,6 +48,7 @@ public class Application {
 
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
+        options.addOption("f", "force-update", false, "Force the auto-update");
 
         //TODO implement the inTests as context.property
         if (!context.inTests()) {
@@ -90,7 +90,11 @@ public class Application {
             return null;
         }
 
-        if (line.hasOption("h")) {
+        boolean showHelp = line.hasOption("h");
+        boolean showVersion = line.hasOption("v");
+        boolean forceUpdate = line.hasOption("f");
+
+        if (showHelp) {
             // don't run the help sub-command with -h switch
             if (commandName.equals("help")) {
                 runCommand("help", new String[0]);
@@ -99,8 +103,12 @@ public class Application {
             runCommand(commandName, new String[]{"-h"});
             return null;
         }
-        if (line.hasOption("v")) {
+        if (showVersion) {
             io.println("TMC-CLI version " + EnvironmentUtil.getVersion());
+            return null;
+        }
+        if (forceUpdate) {
+            runAutoUpdate();
             return null;
         }
         return subArgs.toArray(new String[subArgs.size()]);
@@ -113,12 +121,12 @@ public class Application {
     public void run(String[] args) {
         context.setApp(this);
 
-        if (!context.inTests() && versionCheck()) {
+        String[] commandArgs = parseArgs(args);
+        if (commandArgs == null) {
             return;
         }
 
-        String[] commandArgs = parseArgs(args);
-        if (commandArgs == null) {
+        if (!context.inTests() && versionCheck()) {
             return;
         }
 
@@ -156,6 +164,12 @@ public class Application {
             return false;
         }
 
+        return runAutoUpdate();
+    }
+
+    public boolean runAutoUpdate() {
+        Map<String, String> properties = context.getProperties();
+        Date now = new Date();
         TmcCliUpdater update = new TmcCliUpdater(io, EnvironmentUtil.getVersion(),
                 EnvironmentUtil.isWindows());
         boolean updated = update.run();
