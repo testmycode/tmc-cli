@@ -130,9 +130,10 @@ public class ExternalUtilTest {
 
         List<String[]> runs = argsCaptor.getAllValues();
         String[] args = runs.get(0);
-        assertEquals(2, args.length);
-        assertEquals("chmod u+x", args[0]);
-        assertEquals(filename.toString(), args[1]);
+        assertEquals(3, args.length);
+        assertEquals("chmod", args[0]);
+        assertEquals("u+x", args[1]);
+        assertEquals(filename.toString(), args[2]);
 
         String[] args2 = runs.get(1);
         assertEquals(2, args2.length);

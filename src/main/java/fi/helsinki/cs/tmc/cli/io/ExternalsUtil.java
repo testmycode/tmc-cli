@@ -45,7 +45,7 @@ public class ExternalsUtil {
             }
         }
         // User writes to file
-        execExternal(editor, tempFile.toString(), true);
+        execExternalAndWait(editor, tempFile.toString());
         List<String> messageLines = readFromFileAsList(tempFile);
         if (messageLines == null) {
             return null;
@@ -91,21 +91,21 @@ public class ExternalsUtil {
             }
         }
         if (EnvironmentUtil.isWindows()) {
-            execExternal(new String[]{"cmd.exe", "/c", pager, file.toString()}, true);
+            execExternalAndWait("cmd.exe", "/c", pager, file.toString());
         } else {
-            execExternal(pager, file.toString(), true);
+            execExternalAndWait(pager, file.toString());
         }
     }
 
     public static boolean runUpdater(Io io, String pathToNewBinary) {
-        if (!ExternalsUtil.execExternal("chmod u+x " + pathToNewBinary, true)) {
+        if (!ExternalsUtil.execExternalAndWait("chmod", "u+x", pathToNewBinary)) {
             logger.error("Failed to set execution permissions to the new binary");
             io.println("Failed to set execution permissions to the new binary");
             return false;
         }
-        if (!ExternalsUtil.execExternal(pathToNewBinary + " ++internal-update", true)) {
+        if (!ExternalsUtil.execExternalAndWait(pathToNewBinary, "++internal-update")) {
             io.println("Failed to run the tmc-cli at " + pathToNewBinary);
-            io.println("Run it with ++internal-update argument or contact the help desk");
+            io.println("Run it with ++internal-update argument");
             logger.error("Failed to run the new tmc");
             return false;
         }
@@ -121,7 +121,7 @@ public class ExternalsUtil {
     public static void openInBrowser(URI uri) {
         String browser = System.getenv("BROWSER");
         if (browser != null) {
-            execExternal(browser, uri.toString(), false);
+            execExternal(browser, uri.toString());
         } else {
             if (Desktop.isDesktopSupported()) {
                 try {
@@ -135,16 +135,12 @@ public class ExternalsUtil {
         }
     }
 
-    private static boolean execExternal(String program, String arg, boolean wait) {
-        return execExternal(new String[]{program, arg}, wait);
+    private static boolean execExternal(String... args) {
+        return EnvironmentUtil.runProcess(args, false);
     }
 
-    private static boolean execExternal(String program, boolean wait) {
-        return execExternal(new String[]{program}, wait);
-    }
-
-    public static boolean execExternal(String[] args, boolean wait) {
-        return EnvironmentUtil.runProcess(args, wait);
+    private static boolean execExternalAndWait(String... args) {
+        return EnvironmentUtil.runProcess(args, true);
     }
 
     /**
