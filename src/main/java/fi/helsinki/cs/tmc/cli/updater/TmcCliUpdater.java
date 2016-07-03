@@ -86,6 +86,9 @@ public class TmcCliUpdater {
             return false;
         }
 
+        // Below is "THE INSTALL SCRIPT DEBUGGING LINE"
+        //destination = new File(currentBinLocation + "tmc");
+
         io.println("Running " + destination.getAbsolutePath());
         return runNewTmcCliBinary(destination.getAbsolutePath());
     }
