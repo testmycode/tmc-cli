@@ -41,6 +41,10 @@ public class TmcCliUpdater {
         this.isWindows = isWindows;
     }
 
+    public static TmcCliUpdater createUpdater(Io io, String currentVersion, boolean isWindows) {
+        return new TmcCliUpdater(io, currentVersion, isWindows);
+    }
+
     /**
      * Checks if there's a newer tmc-cli version released on Github and asks if
      * the user wants to download it. TODO: split it up
@@ -61,7 +65,7 @@ public class TmcCliUpdater {
 
         if (isWindows) { //just show a link for Windows users now, todo...
             io.println("Download: https://github.com/tmc-cli/tmc-cli/releases/latest");
-            return false;
+            return true;
         }
 
         if (! io.readConfirmation("Do you want to download it?", true)) {

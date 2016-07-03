@@ -48,7 +48,7 @@ public class Application {
 
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
-        options.addOption("f", "force-update", false, "Force the auto-update");
+        options.addOption("u", "force-update", false, "Force the auto-update");
 
         //TODO implement the inTests as context.property
         if (!context.inTests()) {
@@ -73,7 +73,6 @@ public class Application {
         try {
             line = this.parser.parse(this.options, args, true);
         } catch (ParseException e) {
-            io.println("Invalid command line arguments.");
             io.println(e.getMessage());
             return null;
         }
@@ -92,7 +91,7 @@ public class Application {
 
         boolean showHelp = line.hasOption("h");
         boolean showVersion = line.hasOption("v");
-        boolean forceUpdate = line.hasOption("f");
+        boolean forceUpdate = line.hasOption("u");
 
         if (showHelp) {
             // don't run the help sub-command with -h switch
@@ -170,8 +169,8 @@ public class Application {
     public boolean runAutoUpdate() {
         Map<String, String> properties = context.getProperties();
         Date now = new Date();
-        TmcCliUpdater update = new TmcCliUpdater(io, EnvironmentUtil.getVersion(),
-                EnvironmentUtil.isWindows());
+        TmcCliUpdater update = TmcCliUpdater.createUpdater(io,
+                EnvironmentUtil.getVersion(), EnvironmentUtil.isWindows());
         boolean updated = update.run();
 
         long timestamp = now.getTime();
@@ -181,7 +180,7 @@ public class Application {
         return updated;
     }
 
-    //TODO rename this as getColorProperty
+    //TODO rename this as getColorProperty and move it somewhere else
     public Color.AnsiColor getColor(String propertyName) {
         String propertyValue = context.getProperties().get(propertyName);
         Color.AnsiColor color = Color.getColor(propertyValue);
