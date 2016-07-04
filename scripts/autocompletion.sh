@@ -10,8 +10,6 @@ _tmc_opts()
 	local cur
 	local sub_command
 	local main_args
-	# Pointer to current completion word.
-	# By convention, it's named "cur" but this isn't strictly necessary.
 
 	COMPREPLY=()
 	cur="\${COMP_WORDS[COMP_CWORD]}"

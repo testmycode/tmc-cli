@@ -20,6 +20,9 @@ Conceptually, there are three main parts in the program; the launch code, backen
 
 Tmc-cli itself is mostly just an command line interface for the backend libraries. All the heavy lifting is done by [tmc-core](https://github.com/testmycode/tmc-core) and [tmc-langs](https://github.com/testmycode/tmc-langs) libraries. Tmc-cli also requires the server-side component of TestMyCode aka. [tmc-server](https://github.com/testmycode/tmc-server).
 
+### Methods involved in program start up
+![Launch graph](https://rawgit.com/tmc-cli/tmc-cli/master/startup_control_flow.svg)
+
 ### Important classes
 
 The `CliContext` object contains some cached data and singleton objects that are commonly used by utility classes and commands. Most importantly, it has the `Io` object which handles all user interaction via terminal. Never print anything using System.out.print(), since tests use the `TestIo` class which is dependent on the `Io` interface.

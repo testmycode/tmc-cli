@@ -60,7 +60,7 @@ public class CliContext {
      * constructor.
      */
 
-    protected void setApp(Application app) {
+    public void setApp(Application app) {
         this.application = app;
     }
 
