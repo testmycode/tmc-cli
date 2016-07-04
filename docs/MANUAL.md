@@ -176,7 +176,7 @@ Once submission is successful, a shareable link will be printed.
   Do not send a message alongside the paste.
   
 `-m` `--message`
-  Give the paste as an argument instead of opening a text editor.
+  Give the message as an argument instead of opening a text editor.
 
 COMMAND: PROP
 -------------
