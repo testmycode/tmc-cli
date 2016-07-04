@@ -269,7 +269,7 @@ public class DownloadExercisesCommandTest {
         TmcUtil.downloadExercises(ctxCaptor.capture(), anyListOf(Exercise.class),
                 any(ProgressObserver.class));
 
-        Settings usedSettings = Whitebox.getInternalState(ctx, "settings");
-        assertEquals(usedSettings, settings1);
+        Settings usedSettings = Whitebox.getInternalState(ctxCaptor.getValue(), "settings");
+        assertEquals(settings1, usedSettings);
     }
 }
