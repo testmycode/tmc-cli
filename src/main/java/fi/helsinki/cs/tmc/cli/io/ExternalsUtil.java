@@ -38,14 +38,14 @@ public class ExternalsUtil {
         }
         String editor = System.getenv("EDITOR");
         if (editor == null) {
-            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            if (EnvironmentUtil.isWindows()) {
                 editor = "notepad";
             } else {
                 editor = "nano";
             }
         }
         // User writes to file
-        execExternal(editor, tempFile.toString(), true);
+        execExternalAndWait(editor, tempFile.toString());
         List<String> messageLines = readFromFileAsList(tempFile);
         if (messageLines == null) {
             return null;
@@ -91,21 +91,21 @@ public class ExternalsUtil {
             }
         }
         if (EnvironmentUtil.isWindows()) {
-            execExternal(new String[]{"cmd.exe", "/c", pager, file.toString()}, true);
+            execExternalAndWait("cmd.exe", "/c", pager, file.toString());
         } else {
-            execExternal(pager, file.toString(), true);
+            execExternalAndWait(pager, file.toString());
         }
     }
 
     public static boolean runUpdater(Io io, String pathToNewBinary) {
-        if (!ExternalsUtil.execExternal("chmod u+x " + pathToNewBinary, true)) {
+        if (!ExternalsUtil.execExternalAndWait("chmod", "u+x", pathToNewBinary)) {
             logger.error("Failed to set execution permissions to the new binary");
             io.println("Failed to set execution permissions to the new binary");
             return false;
         }
-        if (!ExternalsUtil.execExternal(pathToNewBinary + " ++internal-update", true)) {
+        if (!ExternalsUtil.execExternalAndWait(pathToNewBinary, "++internal-update")) {
             io.println("Failed to run the tmc-cli at " + pathToNewBinary);
-            io.println("Run it with ++internal-update argument or contact the help desk");
+            io.println("Run it with ++internal-update argument");
             logger.error("Failed to run the new tmc");
             return false;
         }
@@ -121,7 +121,7 @@ public class ExternalsUtil {
     public static void openInBrowser(URI uri) {
         String browser = System.getenv("BROWSER");
         if (browser != null) {
-            execExternal(browser, uri.toString(), false);
+            execExternal(browser, uri.toString());
         } else {
             if (Desktop.isDesktopSupported()) {
                 try {
@@ -135,58 +135,12 @@ public class ExternalsUtil {
         }
     }
 
-    private static boolean execExternal(String program, String arg, boolean wait) {
-        return execExternal(new String[]{program, arg}, wait);
+    private static boolean execExternal(String... args) {
+        return EnvironmentUtil.runProcess(args, false);
     }
 
-    private static boolean execExternal(String program, boolean wait) {
-        return execExternal(new String[]{program}, wait);
-    }
-
-    private static boolean execExternal(String[] args, boolean wait) {
-        if (EnvironmentUtil.isWindows()) {
-            logger.info("Launching external program " + Arrays.toString(args));
-            try {
-                Process proc = new ProcessBuilder(args).start();
-                if (wait) {
-                    logger.info("(Windows) Waiting for "
-                            + Arrays.toString(args) + " to finish executing");
-                    proc.waitFor();
-                }
-            } catch (Exception e) {
-                logger.error("(Windows) Exception when running external program "
-                        + Arrays.toString(args), e);
-                return false;
-            }
-        } else {
-
-            StringBuilder program = new StringBuilder();
-            for (int i = 0; i < args.length; i++) {
-                program.append(" " + args[i]);
-            }
-            String[] exec = {"sh", "-c", program.toString() + " </dev/tty >/dev/tty"};
-//            exec[0] = "sh";
-//            exec[1] = "-c";
-//            for (int i = 0; i < args.length; i++) {
-//                exec[2 + i] = args[i];
-//            }
-//            exec[args.length + 2] = " </dev/tty >/dev/tty";
-//            exec = {"sh -c "}
-            try {
-                Process proc = Runtime.getRuntime().exec(exec);
-                if (wait) {
-                    logger.info("(Unix) Waiting for "
-                            + Arrays.toString(exec) + " to finish executing");
-                    proc.waitFor();
-                }
-                return proc.exitValue() == 0;
-            } catch (Exception e) {
-                logger.error("(Unix) Exception when running external program "
-                        + Arrays.toString(exec), e);
-                return false;
-            }
-        }
-        return false;
+    private static boolean execExternalAndWait(String... args) {
+        return EnvironmentUtil.runProcess(args, true);
     }
 
     /**

@@ -16,8 +16,11 @@ import org.junit.Test;
 
 public class CliContextTest {
 
+    private TestIo io;
+
     @Before
     public void setUp() {
+        io = new TestIo();
     }
 
     @Test
@@ -35,7 +38,7 @@ public class CliContextTest {
 
     @Test
     public void setAppAndGetIt() {
-        CliContext ctx = new CliContext(null);
+        CliContext ctx = new CliContext(io);
         Application app = new Application(ctx);
         ctx.setApp(app);
         assertEquals(app, ctx.getApp());
@@ -43,14 +46,14 @@ public class CliContextTest {
 
     @Test(expected = RuntimeException.class)
     public void getAppWithoutSettingIt() {
-        CliContext ctx = new CliContext(null);
+        CliContext ctx = new CliContext(io);
         assertNull(ctx.getApp());
     }
 
     @Test
     public void setGetWorkDir() {
         WorkDir workDir = new WorkDir();
-        CliContext ctx = new CliContext(null, null, workDir);
+        CliContext ctx = new CliContext(io, null, workDir);
         assertEquals(workDir, ctx.getWorkDir());
     }
 

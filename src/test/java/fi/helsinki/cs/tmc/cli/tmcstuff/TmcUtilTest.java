@@ -8,8 +8,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
@@ -120,10 +123,14 @@ public class TmcUtilTest {
             }
         };
 
+        Application app = mock(Application.class);
+        ctx.setApp(app);
+        when(app.runAutoUpdate()).thenReturn(true);
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(callable);
         TmcUtil.tryToLogin(ctx, new Settings());
         io.assertContains("Your tmc-cli is outdated");
+        verify(app, times(1)).runAutoUpdate();
     }
 
     @Test
