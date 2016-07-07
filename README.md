@@ -60,7 +60,7 @@ Now that you've installed tmc-cli, you can view all available commands by runnin
 
 ##Uninstallation
 
-Delete 'tmc' from the directory where you downloaded it, .tmc-autocomplete.sh from your home directory and remove 'source $HOME/.tmc-autocomplete' from your shell rc file.
+Delete tmc from the directory where you downloaded it, .tmc-autocomplete.sh from your home directory and remove 'source $HOME/.tmc-autocomplete' from your shell rc file.
 
 ##Manual
 
