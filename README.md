@@ -9,7 +9,7 @@
 
 #tmc-cli
 
-TMC-CLI is the command-line client for University of Helsinki's Test My Code -framework. Test My Code is used by various online programming courses for exercise testing and submission.
+TMC-CLI is the command-line client for University of Helsinki's TestMyCode -framework. TestMyCode is used by various online programming courses for exercise testing and submission.
 
 ![Demonstration](docs/demo.gif)
 
@@ -25,15 +25,15 @@ TMC-CLI is the command-line client for University of Helsinki's Test My Code -fr
 
 ###Using the install script (Linux/OS X only)
 
-Copy and paste the following command in your terminal:
+`cd` into the directory where you wish to install TMC-CLI. Then, copy and paste the following command in your terminal:
 
 ```
-curl -L0 https://raw.githubusercontent.com/tmc-cli/tmc-cli/master/scripts/install.sh | bash
+curl -L0 https://raw.githubusercontent.com/tmc-cli/tmc-cli/master/scripts/install.sh | bash; source ~/.bashrc
 ```
 
-Now try `source ~/.bashrc` or launching a new terminal - `tmc` should work.
+TMC-CLI should now be installed. You can try running it with `tmc`.
 
-###Downloading manually
+###Manual installation
 
 Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases/latest). If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
 
@@ -57,6 +57,10 @@ If you are using Windows and you downloaded the .jar file, you must use tmc-cli 
 Tip: On Windows, use `doskey tmc="java -jar [path_to_tmc-cli.jar] $*"` in cmd.exe or `doskey /exename=powershell.exe tmc="java -jar [path_to_tmc-cli.jar] $*"` in PowerShell to create a convenient alias.
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`. You can also view all available options for commands by running them with the `--help` switch, for example `tmc courses --help`.
+
+##Uninstallation
+
+Delete 'tmc' from the directory where you downloaded it, .tmc-autocomplete.sh from your home directory and remove 'source $HOME/.tmc-autocomplete' from your shell rc file.
 
 ##Manual
 
