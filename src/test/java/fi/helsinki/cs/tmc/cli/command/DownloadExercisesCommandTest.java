@@ -13,6 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
@@ -63,11 +64,12 @@ public class DownloadExercisesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore, workDir);
         app = new Application(ctx);
-        Settings settings = new Settings("http://test.test", "", "");
+        Account account = new Account("server", "user", "password");
+        ctx.useAccount(account);
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
-        when(SettingsIo.getSettingsList()).thenReturn(Arrays.asList(settings));
+        when(SettingsIo.getAccountList()).thenReturn(Arrays.asList(account));
     }
 
     @After
@@ -113,9 +115,6 @@ public class DownloadExercisesCommandTest {
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(exercises);
 
-        Settings settings = new Settings("server", "user", "password");
-        ctx.useSettings(settings);
-
         String[] args = {"download", "course1"};
         app.run(args);
 
@@ -132,6 +131,7 @@ public class DownloadExercisesCommandTest {
         notCompleted.setCompleted(false);
         completed1.setCompleted(true);
         completed2.setCompleted(true);
+        workDir.setWorkdir(tempDir);
 
         List<Exercise> filteredExercises = Arrays.asList(notCompleted);
 
@@ -141,10 +141,6 @@ public class DownloadExercisesCommandTest {
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(filteredExercises);
-
-        Settings settings = new Settings("server", "user", "password");
-        workDir.setWorkdir(tempDir);
-        ctx.useSettings(settings);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -161,6 +157,7 @@ public class DownloadExercisesCommandTest {
         notCompleted.setCompleted(false);
         completed1.setCompleted(true);
         completed2.setCompleted(true);
+        workDir.setWorkdir(tempDir);
 
         List<Exercise> exercises = Arrays.asList(completed1, notCompleted,
                 completed2);
@@ -170,10 +167,6 @@ public class DownloadExercisesCommandTest {
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(exercises);
-
-        Settings settings = new Settings("server", "user", "password");
-        workDir.setWorkdir(tempDir);
-        ctx.useSettings(settings);
 
         String[] args = {"download", "-a", "course1"};
         app.run(args);
@@ -191,14 +184,11 @@ public class DownloadExercisesCommandTest {
         List<Exercise> downloaded = Arrays.asList(exercise1, exercise3);
         Course course = new Course("course1");
         course.setExercises(exercises);
+        workDir.setWorkdir(tempDir);
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(downloaded);
-
-        Settings settings = new Settings("server", "user", "password");
-        workDir.setWorkdir(tempDir);
-        ctx.useSettings(settings);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -210,13 +200,13 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServer() {
-        Settings settings1 = new Settings("http://test.test", "", "");
-        Settings settings2 = new Settings("http://hello.test", "", "");
+        Account account1 = new Account("http://test.test", "", "");
+        Account account2 = new Account("http://hello.test", "", "");
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
                 .thenReturn(new Course("course2"));
-        when(SettingsIo.getSettingsList()).thenReturn(
-                Arrays.asList(settings1, settings2));
+        when(SettingsIo.getAccountList()).thenReturn(
+                Arrays.asList(account1, account2));
 
         String[] args = {"download", "course2"};
         app.run(args);
@@ -224,13 +214,13 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServerWithSameNameWithoutTakingAny() {
-        Settings settings1 = new Settings("http://test.test", "abc", "");
-        Settings settings2 = new Settings("http://hello.test", "def", "");
+        Account account1 = new Account("http://test.test", "abc", "");
+        Account account2 = new Account("http://hello.test", "def", "");
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
                 .thenReturn(new Course("course1"));
-        when(SettingsIo.getSettingsList()).thenReturn(
-                Arrays.asList(settings1, settings2));
+        when(SettingsIo.getAccountList()).thenReturn(
+                Arrays.asList(account1, account2));
 
         List<Exercise> exercises = Arrays.asList();
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
@@ -249,13 +239,13 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServerWithSameNameWithTakingFirst() {
-        Settings settings1 = new Settings("http://test.test", "abc", "");
-        Settings settings2 = new Settings("http://hello.test", "def", "");
+        Account account1 = new Account("http://test.test", "abc", "");
+        Account account2 = new Account("http://hello.test", "def", "");
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
                 .thenReturn(new Course("course1"));
-        when(SettingsIo.getSettingsList()).thenReturn(
-                Arrays.asList(settings1, settings2));
+        when(SettingsIo.getAccountList()).thenReturn(
+                Arrays.asList(account1, account2));
 
         String[] args = {"download", "course1"};
         io.addConfirmationPrompt(true);
@@ -270,6 +260,6 @@ public class DownloadExercisesCommandTest {
                 any(ProgressObserver.class));
 
         Settings usedSettings = Whitebox.getInternalState(ctxCaptor.getValue(), "settings");
-        assertEquals(settings1, usedSettings);
+        assertEquals(account1, usedSettings.getAccount());
     }
 }

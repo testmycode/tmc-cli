@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
@@ -24,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import java.nio.file.Path;
 
@@ -56,6 +58,18 @@ public class CliContextTest {
         Application app = new Application(ctx);
         ctx.setApp(app);
         assertEquals(app, ctx.getApp());
+    }
+
+    @Test
+    public void useDifferentAccount() {
+        CliContext ctx = new CliContext(io);
+        Application app = new Application(ctx);
+        Account account = new Account();
+
+        ctx.useAccount(account);
+        //TODO replace the Whitebox usage somehow
+        Settings usedSettings = Whitebox.getInternalState(ctx, "settings");
+        assertEquals(account, usedSettings.getAccount());
     }
 
     @Test(expected = RuntimeException.class)
@@ -109,7 +123,7 @@ public class CliContextTest {
         Path path = mock(Path.class);
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
-        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Settings());
+        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Account());
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir);
 
@@ -173,7 +187,7 @@ public class CliContextTest {
         Path path = mock(Path.class);
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
-        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Settings());
+        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Account());
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir);
 

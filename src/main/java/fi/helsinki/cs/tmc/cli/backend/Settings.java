@@ -14,72 +14,57 @@ import java.util.Locale;
 
 public class Settings implements TmcSettings {
 
-    private String serverAddress;
-    private String username;
-    private String password;
-
-    private transient WorkDir workDir;
-
-    public Settings(String serverAddress, String username, String password) {
-        this.serverAddress = serverAddress;
-        this.username = username;
-        this.password = password;
-    }
+    private WorkDir workDir;
+    private Account account;
 
     public Settings() {
+        this.account = Account.NULL_ACCOUNT;
+    }
+
+    public Settings(String serverAddress, String username, String password) {
+        this.account = new Account(serverAddress, username, password);
     }
 
     /**
      * This method is used for changing the main settings object.
-     * @param settings settings object where from the new values are copied
+     * @param account account that has the login info
      */
-    public void set(Settings settings) {
-        this.serverAddress = settings.serverAddress;
-        this.username = settings.username;
-        this.password = settings.password;
+    public void setAccount(Account account) {
+        if (account == null) {
+            /* NULL_ACCOUNT is used so that the NullPointerException
+             * is not thrown in the getters.
+             */
+            account = Account.NULL_ACCOUNT;
+        }
+        this.account = account;
+    }
+
+    public Account getAccount() {
+        return account;
     }
 
     public void setWorkDir(WorkDir workDir) {
         this.workDir = workDir;
     }
 
-    public static boolean stringEquals(String str1, String str2) {
-        return (str1 == null ? str2 == null : str1.equals(str2));
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Settings)) {
-            return false;
-        }
-        Settings another = (Settings)obj;
-        return stringEquals(this.serverAddress, another.serverAddress)
-                && stringEquals(this.username, another.username)
-                && stringEquals(this.password, another.password);
-    }
-
     @Override
     public String getServerAddress() {
-        return serverAddress;
+        return account.getServerAddress();
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return account.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return account.getUsername();
     }
 
     @Override
     public boolean userDataExists() {
-        return this.username != null && this.password != null
-                && !this.username.isEmpty() && !this.password.isEmpty();
+        return getUsername() != null && getPassword() != null;
     }
 
     @Override
@@ -107,7 +92,7 @@ public class Settings implements TmcSettings {
         if (!userDataExists()) {
             return "";
         }
-        return this.username + ":" + this.password;
+        return getUsername() + ":" + this.getPassword();
     }
 
     @Override

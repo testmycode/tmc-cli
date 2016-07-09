@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.core;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
@@ -44,14 +45,11 @@ public class CliContext {
         if (!inTest) {
             io = new TerminalIo(System.in);
         }
-        // This is only used when we want to mock the tmc core.
-        if (core != null) {
-            this.settings = new Settings();
-        }
 
         this.io = io;
         this.workDir = workDir;
         this.properties = SettingsIo.loadProperties();
+        this.settings = new Settings();
         this.tmcCore = core;
         this.hasLogin = (core != null);
         this.courseInfo = null;
@@ -216,48 +214,43 @@ public class CliContext {
     /**
      * Copy login info from different settings object and them.
      * TODO: separate settings object and login info.
-     * @param settings login info
+     * @param account login info
      */
-    public void useSettings(Settings settings) {
+    public void useAccount(Account account) {
         if (this.tmcCore == null) {
-            createTmcCore(settings);
+            createTmcCore(account);
         }
-        this.settings.set(settings);
+        this.settings.setAccount(account);
     }
 
-    private void createTmcCore(Settings settings) {
+    private void createTmcCore(Account account) {
         TaskExecutor tmcLangs;
 
         tmcLangs = new TaskExecutorImpl();
-        this.settings = settings;
+        this.settings.setAccount(account);
         this.tmcCore = new TmcCore(settings, tmcLangs);
         settings.setWorkDir(workDir);
     }
 
     private boolean createTmcCore() {
-        Settings cachedSettings = null;
+        Account cachedAccount = null;
 
         if (workDir.getConfigFile() != null) {
             // If we're in a course directory, we load settings matching the course
             // Otherwise we just load the last used settings
             courseInfo = getCourseInfo();
             if (courseInfo != null) {
-                cachedSettings = SettingsIo.load(courseInfo.getUsername(),
+                cachedAccount = SettingsIo.load(courseInfo.getUsername(),
                         courseInfo.getServerAddress());
             }
         } else {
             // Bug: if we are not inside course directory
             // then we may not correctly guess the correct settings.
-            cachedSettings = SettingsIo.load();
+            cachedAccount = SettingsIo.load();
         }
 
-        hasLogin = true;
-        if (cachedSettings == null) {
-            hasLogin = false;
-            cachedSettings = new Settings();
-        }
-
-        createTmcCore(cachedSettings);
+        hasLogin = (cachedAccount != null);
+        createTmcCore(cachedAccount);
         return true;
     }
 }

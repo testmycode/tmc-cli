@@ -9,6 +9,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
@@ -49,7 +50,7 @@ public class LoginCommandTest {
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
-        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
+        when(SettingsIo.save(any(Account.class))).thenReturn(true);
     }
 
     @Test
@@ -64,8 +65,8 @@ public class LoginCommandTest {
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
-        when(SettingsIo.save(any(Settings.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(SettingsIo.save(any(Account.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
         io.assertContains("Login successful.");
@@ -73,8 +74,8 @@ public class LoginCommandTest {
 
     @Test
     public void userGetsErrorMessageIfLoginFails() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
-        when(SettingsIo.save(any(Settings.class))).thenReturn(false);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(SettingsIo.save(any(Account.class))).thenReturn(false);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", "WrongPassword"};
         app.run(args);
         io.assertContains("Failed to write the accounts file.");
@@ -82,7 +83,7 @@ public class LoginCommandTest {
 
     @Test
     public void loginAsksUsernameFromUserIfNotGiven() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-p", PASSWORD};
         io.addLinePrompt(USERNAME);
         app.run(args);
@@ -91,7 +92,7 @@ public class LoginCommandTest {
 
     @Test
     public void loginAsksPasswordFromUserIfNotGiven() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME};
         io.addPasswordPrompt(PASSWORD);
         app.run(args);
@@ -100,7 +101,7 @@ public class LoginCommandTest {
 
     @Test
     public void loginAsksServerFromUserIfNotGiven() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         io.addLinePrompt(SERVER);
         app.run(args);
@@ -111,7 +112,7 @@ public class LoginCommandTest {
     public void serverAndNotAskedAfterLogout() {
         TmcSettings settings = new Settings(SERVER, "username", "pass");
         CourseInfo info = new CourseInfo(settings, null);
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login"};
         io.addPasswordPrompt(PASSWORD);
@@ -123,14 +124,14 @@ public class LoginCommandTest {
     public void courseInfoValuesOverridedByOptions() {
         Settings settings = new Settings(SERVER, "username", "pass");
         CourseInfo info = new CourseInfo(settings, null);
-        when(TmcUtil.tryToLogin(eq(ctx), any(Settings.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         app.run(args);
         io.assertAllPromptsUsed();
 
-        Settings expectedSettings = new Settings(SERVER, USERNAME, PASSWORD);
+        Account expectedAccount = new Account(SERVER, USERNAME, PASSWORD);
         verifyStatic();
-        TmcUtil.tryToLogin(eq(ctx), eq(expectedSettings));
+        TmcUtil.tryToLogin(eq(ctx), eq(expectedAccount));
     }
 }

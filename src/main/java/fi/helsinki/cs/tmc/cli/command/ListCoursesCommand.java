@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.backend.Settings;
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
@@ -38,10 +38,10 @@ public class ListCoursesCommand extends AbstractCommand {
             return;
         }
 
-        List<Settings> accountsList = SettingsIo.getSettingsList();
+        List<Account> accountsList = SettingsIo.getAccountList();
         boolean isFirst = true;
 
-        for (Settings settings : accountsList) {
+        for (Account settings : accountsList) {
             if (!isFirst) {
                 io.println("");
             }
@@ -54,8 +54,8 @@ public class ListCoursesCommand extends AbstractCommand {
         }
     }
 
-    private void printCourseList(Settings settings) {
-        ctx.useSettings(settings);
+    private void printCourseList(Account account) {
+        ctx.useAccount(account);
         List<Course> courses = TmcUtil.listCourses(getContext());
         if (courses.isEmpty()) {
             io.println("No courses found from the server.");

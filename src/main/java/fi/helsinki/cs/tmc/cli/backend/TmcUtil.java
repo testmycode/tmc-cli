@@ -27,9 +27,9 @@ public class TmcUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
 
-    public static boolean tryToLogin(CliContext ctx, Settings settings) {
+    public static boolean tryToLogin(CliContext ctx, Account account) {
         TmcCore core = ctx.getTmcCore();
-        ctx.useSettings(settings);
+        ctx.useAccount(account);
         Callable<List<Course>> callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
         //TODO restore the settings object
 

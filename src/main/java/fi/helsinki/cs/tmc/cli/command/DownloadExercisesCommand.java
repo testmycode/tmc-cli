@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
@@ -90,12 +90,12 @@ public class DownloadExercisesCommand extends AbstractCommand {
     private Course findCourse(String courseName) {
         Io io = ctx.getIo();
 
-        List<Settings> accountsList = SettingsIo.getSettingsList();
+        List<Account> accountsList = SettingsIo.getAccountList();
         // LinkedHashMap is used here to preserve ordering.
-        Map<Settings, Course> matches = new LinkedHashMap<>();
+        Map<Account, Course> matches = new LinkedHashMap<>();
 
-        for (Settings settings : accountsList) {
-            ctx.useSettings(settings);
+        for (Account settings : accountsList) {
+            ctx.useAccount(settings);
             Course course = TmcUtil.findCourse(ctx, courseName);
             if (course != null) {
                 matches.put(settings, course);
@@ -103,8 +103,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         if (matches.size() == 1) {
-            Entry<Settings, Course> firstEntry = matches.entrySet().iterator().next();
-            ctx.useSettings(firstEntry.getKey());
+            Entry<Account, Course> firstEntry = matches.entrySet().iterator().next();
+            ctx.useAccount(firstEntry.getKey());
             return firstEntry.getValue();
         } else if (matches.isEmpty()) {
             io.println("Course doesn't exist.");
@@ -114,14 +114,14 @@ public class DownloadExercisesCommand extends AbstractCommand {
         io.println("There is " + matches.size()
                 + " courses with same name at different servers.");
 
-        for (Entry<Settings, Course> entrySet : matches.entrySet()) {
-            Settings settings = entrySet.getKey();
+        for (Entry<Account, Course> entrySet : matches.entrySet()) {
+            Account settings = entrySet.getKey();
             Course course = entrySet.getValue();
 
             if (io.readConfirmation("Download course from "
                     + settings.getServerAddress() + " with '"
                     + settings.getUsername() + "' account", false)) {
-                ctx.useSettings(settings);
+                ctx.useAccount(settings);
                 return course;
             }
         }

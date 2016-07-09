@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
@@ -48,12 +48,11 @@ public class LoginCommand extends AbstractCommand {
         username = getLoginInfo(args, username, "u", "username: ");
         password = getLoginInfo(args, null, "p", "password: ");
 
-        //TODO don't create new settings object.  
-        Settings settings = new Settings(serverAddress, username, password);
-        if (!TmcUtil.tryToLogin(ctx, settings)) {
+        Account account = new Account(serverAddress, username, password);
+        if (!TmcUtil.tryToLogin(ctx, account)) {
             return;
         }
-        if (!SettingsIo.save(settings)) {
+        if (!SettingsIo.save(account)) {
             io.println("Failed to write the accounts file.");
             return;
         }

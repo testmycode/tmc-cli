@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -41,11 +41,11 @@ public class ListCoursesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
-        Settings settings = new Settings("http://test.test", "", "");
+        Account account = new Account("http://test.test", "", "");
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
-        when(SettingsIo.getSettingsList()).thenReturn(Arrays.asList(settings));
+        when(SettingsIo.getAccountList()).thenReturn(Arrays.asList(account));
     }
 
     @Test
@@ -81,10 +81,10 @@ public class ListCoursesCommandTest {
 
     @Test
     public void listCoursesWorksWithTwoServers() {
-        Settings settings1 = new Settings("http://test.test", "", "");
-        Settings settings2 = new Settings("http://hello.test", "", "");
-        when(SettingsIo.getSettingsList()).thenReturn(
-                Arrays.asList(settings1, settings2));
+        Account account1 = new Account("http://test.test", "", "");
+        Account account2 = new Account("http://hello.test", "", "");
+        when(SettingsIo.getAccountList()).thenReturn(
+                Arrays.asList(account1, account2));
 
         List<Course> list1 = Arrays.asList(new Course("course1"));
         List<Course> list2 = Arrays.asList(new Course("course2"));

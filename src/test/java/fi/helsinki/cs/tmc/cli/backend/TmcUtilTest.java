@@ -110,12 +110,12 @@ public class TmcUtilTest {
     public void failToLogin() throws URISyntaxException {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
-        Settings settings = new Settings();
-        assertFalse(TmcUtil.tryToLogin(ctx, settings));
+        Account account = new Account();
+        assertFalse(TmcUtil.tryToLogin(ctx, account));
     }
 
     @Test
-    public void tryToLoginCatchesObsoleteClientException() {
+    public void loginCatchesObsoleteClientException() {
         Callable<List<Course>> callable = new Callable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
@@ -129,13 +129,13 @@ public class TmcUtilTest {
         when(app.runAutoUpdate()).thenReturn(true);
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(callable);
-        TmcUtil.tryToLogin(ctx, new Settings());
+        TmcUtil.tryToLogin(ctx, new Account());
         io.assertContains("Your tmc-cli is outdated");
         verify(app, times(1)).runAutoUpdate();
     }
 
     @Test
-    public void tryToLoginCatchesFailedHttpResponseException() {
+    public void loginCatchesFailedHttpResponseException() {
         Callable<List<Course>> callable = new Callable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
@@ -146,7 +146,7 @@ public class TmcUtilTest {
 
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(callable);
-        TmcUtil.tryToLogin(ctx, new Settings());
+        TmcUtil.tryToLogin(ctx, new Account());
         io.assertContains("Incorrect username or password");
     }
 

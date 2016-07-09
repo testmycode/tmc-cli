@@ -89,56 +89,56 @@ public class SettingsIo {
         return file;
     }
 
-    public static Boolean save(Settings settings) {
-        return saveTo(settings, getDefaultConfigRoot());
+    public static Boolean save(Account account) {
+        return saveTo(account, getDefaultConfigRoot());
     }
 
-    public static Boolean saveTo(Settings settings, Path configRoot) {
+    public static Boolean saveTo(Account account, Path configRoot) {
         Path file = getAccountsFile(configRoot);
-        SettingsHolder holder;
+        AccountList holder;
         if (!Files.exists(file)) {
-            holder = new SettingsHolder();
+            holder = new AccountList();
         } else {
             holder = getHolderFromJson(file);
         }
-        holder.addSettings(settings);
+        holder.addAccount(account);
         return saveHolderToJson(holder, file);
     }
 
-    public static Settings load(String username, String server) {
+    public static Account load(String username, String server) {
         return loadFrom(username, server, getDefaultConfigRoot());
     }
 
-    public static Settings load() {
-        // Calling the method without parametres returns the last used settings
+    public static Account load() {
+        // Calling the method without parametres returns the last used account
         return load(null, null);
     }
 
-    public static Settings loadFrom(Path configRoot) {
+    public static Account loadFrom(Path configRoot) {
         return loadFrom(null, null, configRoot);
     }
 
-    public static Settings loadFrom(String username, String server, Path configRoot) {
+    public static Account loadFrom(String username, String server, Path configRoot) {
         Path file = getAccountsFile(configRoot);
         if (!Files.exists(file)) {
             return null;
         }
-        SettingsHolder holder = getHolderFromJson(file);
-        Settings ret = holder.getSettings(username, server);
+        AccountList holder = getHolderFromJson(file);
+        Account ret = holder.getAccount(username, server);
         saveHolderToJson(holder, file);
         return ret;
     }
 
-    public static List<Settings> getSettingsList() {
+    public static List<Account> getAccountList() {
         Path file = getAccountsFile(getDefaultConfigRoot());
         if (!Files.exists(file)) {
             return null;
         }
-        SettingsHolder holder = getHolderFromJson(file);
-        return holder.getSettingsList();
+        AccountList holder = getHolderFromJson(file);
+        return holder.getAccountList();
     }
 
-    private static SettingsHolder getHolderFromJson(Path file) {
+    private static AccountList getHolderFromJson(Path file) {
         Gson gson = new Gson();
         Reader reader;
         try {
@@ -147,16 +147,16 @@ public class SettingsIo {
             logger.error("Accounts file located, but failed to read from it", e);
             return null;
         }
-        return gson.fromJson(reader, SettingsHolder.class);
+        return gson.fromJson(reader, AccountList.class);
     }
 
-    private static Boolean saveHolderToJson(SettingsHolder holder, Path file) {
+    private static Boolean saveHolderToJson(AccountList holder, Path file) {
         Gson gson = new Gson();
         byte[] json = gson.toJson(holder).getBytes();
         try {
             Files.write(file, json);
         } catch (IOException e) {
-            logger.error("Could not write settings to accounts file", e);
+            logger.error("Could not write account to accounts file", e);
             return false;
         }
         return true;
