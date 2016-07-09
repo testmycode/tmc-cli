@@ -1,17 +1,18 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
+import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -73,7 +74,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         Color.AnsiColor color1 = ctx.getApp().getColor("progressbar-left");
         Color.AnsiColor color2 = ctx.getApp().getColor("progressbar-right");
-        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
+        CliProgressObserver progobs = new CliProgressObserver(io, color1, color2);
 
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {

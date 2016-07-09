@@ -1,13 +1,14 @@
 package fi.helsinki.cs.tmc.cli;
 
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.CommandFactory;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.ShutdownHandler;
-import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
+import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -169,7 +170,7 @@ public class Application {
     public boolean runAutoUpdate() {
         Map<String, String> properties = context.getProperties();
         Date now = new Date();
-        TmcCliUpdater update = TmcCliUpdater.createUpdater(io,
+        AutoUpdater update = AutoUpdater.createUpdater(io,
                 EnvironmentUtil.getVersion(), EnvironmentUtil.isWindows());
         boolean updated = update.run();
 

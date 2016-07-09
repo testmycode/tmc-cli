@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -12,9 +11,10 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
-import fi.helsinki.cs.tmc.cli.updater.TmcCliUpdater;
+import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +25,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.HashMap;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcCliUpdater.class)
+@PrepareForTest(AutoUpdater.class)
 public class ApplicationTest {
 
     private Application app;
@@ -35,14 +35,14 @@ public class ApplicationTest {
     public void setUp() {
         io = new TestIo();
         app = new Application(new CliContext(io));
-        mockStatic(TmcCliUpdater.class);
+        mockStatic(AutoUpdater.class);
     }
 
     @Test
     public void versionWorksWithRightParameter() {
         String[] args = {"-v", "foo"};
         app.run(args);
-        assertTrue(io.out().contains("TMC-CLI version"));
+        io.assertContains("TMC-CLI version");
         io.assertNotContains("Command foo doesn't exist.");
     }
 
@@ -78,8 +78,8 @@ public class ApplicationTest {
     @Test
     public void runAutoUpdate() {
         String[] args = {"help"};
-        TmcCliUpdater mockUpdater = mock(TmcCliUpdater.class);
-        when(TmcCliUpdater.createUpdater(any(Io.class), anyString(), any(Boolean.class)))
+        AutoUpdater mockUpdater = mock(AutoUpdater.class);
+        when(AutoUpdater.createUpdater(any(Io.class), anyString(), any(Boolean.class)))
                 .thenReturn(mockUpdater);
         when(mockUpdater.run()).thenReturn(true);
 
@@ -90,7 +90,7 @@ public class ApplicationTest {
         app.run(args);
 
         verifyStatic(times(1));
-        TmcCliUpdater.createUpdater(any(Io.class), anyString(), any(Boolean.class));
+        AutoUpdater.createUpdater(any(Io.class), anyString(), any(Boolean.class));
     }
 
     @Test
