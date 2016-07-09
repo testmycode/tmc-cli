@@ -71,7 +71,7 @@ public class CliContextTest {
     }
 
     @Test
-    public void backendInitWithoutCourse() {
+    public void getCourseInfo() {
         mockStatic(CourseInfoIo.class);
 
         CourseInfo info = null;
@@ -80,12 +80,11 @@ public class CliContextTest {
         when(workDir.getConfigFile()).thenReturn(null);
         CliContext ctx = new CliContext(io, null, workDir);
 
-        assertTrue(ctx.loadBackend());
         assertEquals(null, ctx.getCourseInfo());
     }
 
     @Test
-    public void backendInitWithCourse() {
+    public void getCourseInfoWhenItDoesntExist() {
         mockStatic(CourseInfoIo.class);
 
         CourseInfo info = mock(CourseInfo.class);
@@ -96,7 +95,6 @@ public class CliContextTest {
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir);
 
-        assertTrue(ctx.loadBackend());
         assertEquals(info, ctx.getCourseInfo());
     }
 
