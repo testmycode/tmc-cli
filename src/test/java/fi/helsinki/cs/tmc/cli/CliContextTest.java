@@ -70,6 +70,7 @@ public class CliContextTest {
         assertEquals(workDir, ctx.getWorkDir());
     }
 
+    @Test
     public void backendInitWithoutCourse() {
         mockStatic(CourseInfoIo.class);
 
@@ -83,6 +84,7 @@ public class CliContextTest {
         assertEquals(null, ctx.getCourseInfo());
     }
 
+    @Test
     public void backendInitWithCourse() {
         mockStatic(CourseInfoIo.class);
 
@@ -98,6 +100,7 @@ public class CliContextTest {
         assertEquals(info, ctx.getCourseInfo());
     }
 
+    @Test
     public void backendInitWithInternet() {
         mockStatic(CourseInfoIo.class);
         mockStatic(SettingsIo.class);
@@ -115,6 +118,7 @@ public class CliContextTest {
         assertEquals(true, ctx.hasLogin());
     }
 
+    @Test
     public void failBackendInitWithInternetButWithoutCourse() {
         mockStatic(CourseInfoIo.class);
         mockStatic(SettingsIo.class);
@@ -128,6 +132,7 @@ public class CliContextTest {
         io.assertContains("You are not logged in");
     }
 
+    @Test
     public void failBackendInitWithInternetButWithCorruptedCourse() {
         mockStatic(CourseInfoIo.class);
         mockStatic(SettingsIo.class);
@@ -146,6 +151,7 @@ public class CliContextTest {
         io.assertContains("You are not logged in");
     }
 
+    @Test
     public void backendInitWithoutInternet() {
         mockStatic(SettingsIo.class);
 
@@ -158,6 +164,7 @@ public class CliContextTest {
         assertEquals(false, ctx.hasLogin());
     }
 
+    @Test
     public void backendInitWithoutInternetWithCourse() {
         mockStatic(CourseInfoIo.class);
         mockStatic(SettingsIo.class);
