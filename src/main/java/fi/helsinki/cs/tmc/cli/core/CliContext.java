@@ -106,16 +106,6 @@ public class CliContext {
     }
 
     /**
-     * Create local course info file after download.
-     *
-     * @param course local copy of course object
-     * @return cached course data object
-     */
-    public CourseInfo createCourseInfo(Course course) {
-        return new CourseInfo(settings.getAccount(), course);
-    }
-
-    /**
      * Get map of the properties.
      *
      * @return the whole mutable map

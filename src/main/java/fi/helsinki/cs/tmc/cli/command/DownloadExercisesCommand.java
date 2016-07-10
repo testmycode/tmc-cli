@@ -1,10 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.AccountList;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -14,6 +10,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -21,12 +18,8 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
@@ -69,10 +62,11 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         String courseName = stringArgs[0];
-        Course course = findCourse(courseName);
-        if (course == null) {
+        CourseFinder finder = new CourseFinder(ctx);
+        if (!finder.search(courseName)) {
             return;
         }
+        Course course = finder.getCourse();
         List<Exercise> filtered = getFilteredExercises(course);
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
@@ -81,6 +75,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         Color color2 = ctx.getApp().getColor("progressbar-right");
         CliProgressObserver progobs = new CliProgressObserver(io, color1, color2);
 
+        ctx.useAccount(finder.getAccount());
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {
             io.println("Failed to download exercises");
@@ -88,55 +83,9 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         printStatistics(course, filtered.size(), exercises.size());
-        createNewCourse(course);
-    }
 
-    // TODO This method could be moved somewhere else.
-    private Course findCourse(String courseName) {
-        Io io = ctx.getIo();
-
-        AccountList accountsList = SettingsIo.loadAccountList();
-        // LinkedHashMap is used here to preserve ordering.
-        Map<Account, Course> matches = new LinkedHashMap<>();
-
-        if (accountsList.getAccountCount() == 0) {
-            io.println("You haven't logged in on any tmc server.");
-            return null;
-        }
-
-        for (Account settings : accountsList) {
-            ctx.useAccount(settings);
-            Course course = TmcUtil.findCourse(ctx, courseName);
-            if (course != null) {
-                matches.put(settings, course);
-            }
-        }
-
-        if (matches.size() == 1) {
-            Entry<Account, Course> firstEntry = matches.entrySet().iterator().next();
-            ctx.useAccount(firstEntry.getKey());
-            return firstEntry.getValue();
-        } else if (matches.isEmpty()) {
-            io.println("Course doesn't exist.");
-            return null;
-        }
-
-        io.println("There is " + matches.size()
-                + " courses with same name at different servers.");
-
-        for (Entry<Account, Course> entrySet : matches.entrySet()) {
-            Account settings = entrySet.getKey();
-            Course course = entrySet.getValue();
-
-            if (io.readConfirmation("Download course from "
-                    + settings.getServerAddress() + " with '"
-                    + settings.getUsername() + "' account", false)) {
-                ctx.useAccount(settings);
-                return course;
-            }
-        }
-        io.println("The previous course was last that matched.");
-        return null;
+        CourseInfoIo.createNewCourse(course, finder.getAccount(),
+                workDir.getWorkingDirectory());
     }
 
     private List<Exercise> getFilteredExercises(Course course) {
@@ -181,17 +130,5 @@ public class DownloadExercisesCommand extends AbstractCommand {
                 io.println("Use -a/--all to download completed exercises as well.");
             }
         }
-    }
-
-    //TODO this could be moved into CourseInfoIo or ExerciseUpdater
-    private void createNewCourse(Course course) {
-        WorkDir workDir = ctx.getWorkDir();
-        Path configFile = workDir.getWorkingDirectory()
-                .resolve(course.getName())
-                .resolve(CourseInfoIo.COURSE_CONFIG);
-
-        CourseInfo info = ctx.createCourseInfo(course);
-        info.setExercises(course.getExercises());
-        CourseInfoIo.save(info, configFile);
     }
 }

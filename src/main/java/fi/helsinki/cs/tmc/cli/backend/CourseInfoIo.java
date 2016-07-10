@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
+
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,5 +51,15 @@ public class CourseInfoIo {
             return null;
         }
         return gson.fromJson(reader, CourseInfo.class);
+    }
+
+    public static void createNewCourse(Course course, Account account, Path parentDir) {
+        Path configFile = parentDir
+                .resolve(course.getName())
+                .resolve(CourseInfoIo.COURSE_CONFIG);
+
+        CourseInfo info = new CourseInfo(account, course);
+        info.setExercises(course.getExercises());
+        CourseInfoIo.save(info, configFile);
     }
 }
