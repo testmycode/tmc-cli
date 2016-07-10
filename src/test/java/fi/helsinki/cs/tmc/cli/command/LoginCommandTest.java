@@ -10,6 +10,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
@@ -23,7 +24,6 @@ import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -50,7 +50,8 @@ public class LoginCommandTest {
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
-        when(SettingsIo.save(any(Account.class))).thenReturn(true);
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
 
     @Test
@@ -66,7 +67,7 @@ public class LoginCommandTest {
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
-        when(SettingsIo.save(any(Account.class))).thenReturn(true);
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
         io.assertContains("Login successful.");
@@ -75,7 +76,7 @@ public class LoginCommandTest {
     @Test
     public void userGetsErrorMessageIfLoginFails() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
-        when(SettingsIo.save(any(Account.class))).thenReturn(false);
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(false);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", "WrongPassword"};
         app.run(args);
         io.assertContains("Failed to write the accounts file.");
@@ -83,7 +84,8 @@ public class LoginCommandTest {
 
     @Test
     public void loginAsksUsernameFromUserIfNotGiven() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-p", PASSWORD};
         io.addLinePrompt(USERNAME);
         app.run(args);

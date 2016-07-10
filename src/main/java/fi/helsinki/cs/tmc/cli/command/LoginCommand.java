@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
@@ -38,6 +39,8 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
+        //TODO try to login so that user won't type inputs if internet
+        // doesn't work.
         CourseInfo info = ctx.getCourseInfo();
         if (info != null) {
             serverAddress = info.getServerAddress();
@@ -52,7 +55,10 @@ public class LoginCommand extends AbstractCommand {
         if (!TmcUtil.tryToLogin(ctx, account)) {
             return;
         }
-        if (!SettingsIo.save(account)) {
+
+        AccountList list = SettingsIo.loadAccountList();
+        list.addAccount(account);
+        if (!SettingsIo.saveAccountList(list)) {
             io.println("Failed to write the accounts file.");
             return;
         }

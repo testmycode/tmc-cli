@@ -36,11 +36,32 @@ public class SettingsIo {
     //  was last updated. Is located under CONFIG_DIR
     public static final String PROPERTIES_CONFIG = "properties.json";
 
+    public static AccountList loadAccountList() {
+        return loadAccountList(getConfigDirectory());
+    }
+
+    public static AccountList loadAccountList(Path configRoot) {
+        Path file = getAccountsFile(configRoot);
+        if (!Files.exists(file)) {
+            return new AccountList();
+        }
+        return getHolderFromJson(file);
+    }
+
+    public static boolean saveAccountList(AccountList list) {
+        return saveAccountList(list, getConfigDirectory());
+    }
+
+    public static boolean saveAccountList(AccountList list, Path configRoot) {
+        Path file = getAccountsFile(configRoot);
+        return saveHolderToJson(list, file);
+    }
+
     /**
      * Get the correct directory in which our config files go
      * ie. /home/user/.config/tmc-cli/
      */
-    public static Path getDefaultConfigRoot() {
+    protected static Path getConfigDirectory() {
         Path configPath;
         if (EnvironmentUtil.isWindows()) {
             String appdata = System.getenv("APPDATA");
@@ -89,10 +110,7 @@ public class SettingsIo {
         return file;
     }
 
-    public static Boolean save(Account account) {
-        return saveTo(account, getDefaultConfigRoot());
-    }
-
+    @Deprecated
     public static Boolean saveTo(Account account, Path configRoot) {
         Path file = getAccountsFile(configRoot);
         AccountList holder;
@@ -105,19 +123,12 @@ public class SettingsIo {
         return saveHolderToJson(holder, file);
     }
 
+    @Deprecated
     public static Account load(String username, String server) {
-        return loadFrom(username, server, getDefaultConfigRoot());
+        return loadFrom(username, server, getConfigDirectory());
     }
 
-    public static Account load() {
-        // Calling the method without parametres returns the last used account
-        return load(null, null);
-    }
-
-    public static Account loadFrom(Path configRoot) {
-        return loadFrom(null, null, configRoot);
-    }
-
+    @Deprecated
     public static Account loadFrom(String username, String server, Path configRoot) {
         Path file = getAccountsFile(configRoot);
         if (!Files.exists(file)) {
@@ -129,8 +140,9 @@ public class SettingsIo {
         return ret;
     }
 
+    @Deprecated
     public static List<Account> getAccountList() {
-        Path file = getAccountsFile(getDefaultConfigRoot());
+        Path file = getAccountsFile(getConfigDirectory());
         if (!Files.exists(file)) {
             return null;
         }
@@ -189,7 +201,7 @@ public class SettingsIo {
     }
 
     public static Boolean delete() {
-        Path file = getAccountsFile(getDefaultConfigRoot());
+        Path file = getAccountsFile(getConfigDirectory());
         try {
             Files.deleteIfExists(file);
         } catch (IOException e) {
@@ -200,7 +212,7 @@ public class SettingsIo {
     }
 
     public static HashMap<String, String> loadProperties() {
-        return loadPropertiesFrom(getDefaultConfigRoot());
+        return loadPropertiesFrom(getConfigDirectory());
     }
 
     public static HashMap<String, String> loadPropertiesFrom(Path path) {
@@ -214,7 +226,7 @@ public class SettingsIo {
     }
 
     public static Boolean saveProperties(HashMap<String, String> properties) {
-        return savePropertiesTo(properties, getDefaultConfigRoot());
+        return savePropertiesTo(properties, getConfigDirectory());
     }
 
     public static Boolean savePropertiesTo(HashMap<String, String> properties, Path path) {

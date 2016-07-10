@@ -112,7 +112,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public Path getConfigRoot() {
-        return SettingsIo.getDefaultConfigRoot();
+        return SettingsIo.getConfigDirectory();
     }
 
     @Override

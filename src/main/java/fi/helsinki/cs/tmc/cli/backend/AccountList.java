@@ -2,14 +2,15 @@ package fi.helsinki.cs.tmc.cli.backend;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * This is a class for storing all different accounts as a single array.
  */
-public class AccountList {
+public class AccountList implements Iterable<Account> {
 
-    private ArrayList<Account> accountArray;
+    private List<Account> accountArray;
 
     public AccountList() {
         this.accountArray = new ArrayList<>();
@@ -70,11 +71,16 @@ public class AccountList {
         this.accountArray = new ArrayList<>();
     }
 
-    public int accountCount() {
+    public int getAccountCount() {
         return this.accountArray.size();
     }
 
     public List<Account> getAccountList() {
         return Collections.unmodifiableList(this.accountArray);
+    }
+
+    @Override
+    public Iterator<Account> iterator() {
+        return getAccountList().iterator();
     }
 }

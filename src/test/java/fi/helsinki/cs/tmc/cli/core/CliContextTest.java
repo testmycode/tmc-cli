@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -123,12 +124,33 @@ public class CliContextTest {
         Path path = mock(Path.class);
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
-        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Account());
+        when(SettingsIo.load(anyString(), anyString()))
+                .thenReturn(new Account());
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir);
 
         assertTrue(ctx.loadBackend());
         assertEquals(true, ctx.hasLogin());
+    }
+
+    @Test
+    public void failBackendInitWithCourseButWithoutInternet() {
+        mockStatic(CourseInfoIo.class);
+        mockStatic(SettingsIo.class);
+
+        WorkDir workDir = mock(WorkDir.class);
+        Path path = mock(Path.class);
+        CourseInfo info = mock(CourseInfo.class);
+
+        when(info.getUsername()).thenReturn("user");
+        when(CourseInfoIo.load(eq(path))).thenReturn(info);
+        when(workDir.getConfigFile()).thenReturn(path);
+        when(SettingsIo.load(anyString(), anyString())).thenReturn(null);
+        CliContext ctx = new CliContext(io, null, workDir);
+
+        assertFalse(ctx.loadBackend());
+        assertEquals(false, ctx.hasLogin());
+        io.assertContains("You are not logged in as user. Log in using: tmc login");
     }
 
     @Test
@@ -170,7 +192,8 @@ public class CliContextTest {
 
         WorkDir workDir = mock(WorkDir.class);
         when(workDir.getConfigFile()).thenReturn(null);
-        when(SettingsIo.load()).thenReturn(null);
+        when(SettingsIo.loadFrom(anyString(), anyString(), any(Path.class)))
+                .thenReturn(null);
         CliContext ctx = new CliContext(io, null, workDir);
 
         assertTrue(ctx.loadBackendWithoutLogin());

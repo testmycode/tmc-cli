@@ -246,7 +246,7 @@ public class CliContext {
         } else {
             // Bug: if we are not inside course directory
             // then we may not correctly guess the correct settings.
-            cachedAccount = SettingsIo.load();
+            cachedAccount = SettingsIo.load(null, null);
         }
 
         hasLogin = (cachedAccount != null);

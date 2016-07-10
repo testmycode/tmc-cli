@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.cli.backend;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.io.FileUtils;
@@ -17,6 +16,7 @@ import java.util.HashMap;
 
 public class SettingsIoTest {
 
+    private AccountList accountList;
     private Account account;
     private Path tempDir;
 
@@ -24,6 +24,7 @@ public class SettingsIoTest {
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve(SettingsIo.CONFIG_DIR);
         account = new Account("testserver", "testuser", "testpassword");
+        accountList = new AccountList();
         try {
             FileUtils.deleteDirectory(tempDir.toFile());
         } catch (Exception e) { }
@@ -38,7 +39,7 @@ public class SettingsIoTest {
 
     @Test
     public void correctConfigPath() {
-        Path path = SettingsIo.getDefaultConfigRoot();
+        Path path = SettingsIo.getConfigDirectory();
         String fs = System.getProperty("file.separator");
         assertTrue(path.toString().contains(SettingsIo.CONFIG_DIR));
         assertTrue(path.toString().contains(fs));
@@ -47,8 +48,8 @@ public class SettingsIoTest {
     }
 
     @Test
-    public void savingToFileWorks() {
-        Boolean success = SettingsIo.saveTo(account, tempDir);
+    public void saveZeroAccountsToFile() {
+        boolean success = SettingsIo.saveAccountList(accountList, tempDir);
         assertTrue(success);
         Path path = tempDir
                 .resolve(SettingsIo.ACCOUNTS_CONFIG);
@@ -56,11 +57,31 @@ public class SettingsIoTest {
     }
 
     @Test
-    public void loadingFromFileWorks() {
-        SettingsIo.saveTo(account, tempDir);
-        Account loadedAccount;
-        loadedAccount = SettingsIo.loadFrom(tempDir);
-        assertNotNull(loadedAccount);
+    public void saveOneAccountToFile() {
+        accountList.addAccount(account);
+        boolean success = SettingsIo.saveAccountList(accountList, tempDir);
+        assertTrue(success);
+        Path path = tempDir
+                .resolve(SettingsIo.ACCOUNTS_CONFIG);
+        assertTrue(Files.exists(path));
+    }
+
+    @Test
+    public void saveAndLoadZeroAccountsFromFile() {
+        boolean success = SettingsIo.saveAccountList(accountList, tempDir);
+        AccountList loadedList = SettingsIo.loadAccountList(tempDir);
+        assertNotNull(loadedList);
+        assertEquals(0, loadedList.getAccountCount());
+    }
+
+    @Test
+    public void saveAndLoadOneAccountFromFile() {
+        accountList.addAccount(account);
+        boolean success = SettingsIo.saveAccountList(accountList, tempDir);
+        AccountList loadedList = SettingsIo.loadAccountList(tempDir);
+        assertNotNull(loadedList);
+        assertEquals(1, loadedList.getAccountCount());
+        Account loadedAccount = loadedList.iterator().next();
         assertEquals(account.getUsername(), loadedAccount.getUsername());
         assertEquals(account.getPassword(), loadedAccount.getPassword());
         assertEquals(account.getServerAddress(), loadedAccount.getServerAddress());
@@ -69,70 +90,9 @@ public class SettingsIoTest {
     @Test
     public void loadingWhenNoFilePresentReturnsNull() {
         Path path = tempDir.getParent();
-        Account loadedAccount = SettingsIo.loadFrom(path);
-        assertEquals(null, loadedAccount);
-    }
-
-    @Test
-    public void newHolderIsEmpty() {
-        AccountList holder = new AccountList();
-        assertEquals(0, holder.accountCount());
-    }
-
-    @Test
-    public void addingAccountIncreasesHolderCount() {
-        AccountList holder = new AccountList();
-        holder.addAccount(new Account("eee", "aaa", "ooo"));
-        assertEquals(1, holder.accountCount());
-    }
-
-    @Test
-    public void loadingFromHolderWorks() {
-        AccountList holder = new AccountList();
-        holder.addAccount(account);
-        Account loaded = holder.getAccount();
-        assertSame(account, loaded);
-    }
-
-    @Test
-    public void addingMoreThanOneSettingWorks() {
-        AccountList holder = new AccountList();
-        holder.addAccount(account);
-        holder.addAccount(new Account("1", "2", "e"));
-        holder.addAccount(new Account(":", "-", "D"));
-        assertEquals(3, holder.accountCount());
-    }
-
-    @Test
-    public void loadingLatestAccountWorks() {
-        AccountList holder = new AccountList();
-        holder.addAccount(new Account(":", "-", "D"));
-        holder.addAccount(new Account("1", "2", "e"));
-        holder.addAccount(account);
-        Account latest = holder.getAccount();
-        assertSame(account, latest);
-    }
-
-    @Test
-    public void gettingAccountByNameAndServerWorks() {
-        AccountList holder = new AccountList();
-        Account wanted = new Account("1", "2", "e");
-        holder.addAccount(new Account(":", "-", "D"));
-        holder.addAccount(wanted);
-        holder.addAccount(new Account("344", "wc", "fffssshhhh aaahhh"));
-        Account get = holder.getAccount("2", "1");
-        assertSame(wanted, get);
-    }
-
-    @Test
-    public void gettingLatestAccountSetsItToTheTop() {
-        AccountList holder = new AccountList();
-        Account wanted = new Account("1", "2", "e");
-        holder.addAccount(wanted);
-        holder.addAccount(new Account(":", "-", "D"));
-        holder.getAccount("2", "1");
-        Account get = holder.getAccount();
-        assertSame(wanted, get);
+        AccountList loadedList = SettingsIo.loadAccountList(path);
+        assertNotNull(loadedList);
+        assertEquals(0, loadedList.getAccountCount());
     }
 
     @Test
