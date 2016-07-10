@@ -39,8 +39,12 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
-        //TODO try to login so that user won't fill the fields if internet
-        // doesn't work.
+        if (!TmcUtil.hasConnection(ctx)) {
+            io.println("You don't have internet connection currently.");
+            io.println("Check the tmc-cli logs to get exact problem.");
+            return;
+        }
+
         CourseInfo info = ctx.getCourseInfo();
         if (info != null) {
             serverAddress = info.getServerAddress();
@@ -69,12 +73,17 @@ public class LoginCommand extends AbstractCommand {
     private String getLoginInfo(CommandLine line, String oldValue, String option,
             String prompt) {
         String value = oldValue;
+        boolean isPassword = option.equals("p");
 
         if (line.hasOption(option)) {
             value = line.getOptionValue(option);
         }
 
-        if (value == null && option.equals("p")) {
+        if (value != null && !isPassword) {
+            io.println(prompt + value);
+        }
+
+        if (value == null && isPassword) {
             value = io.readPassword(prompt);
         } else if (value == null) {
             value = io.readLine(prompt);

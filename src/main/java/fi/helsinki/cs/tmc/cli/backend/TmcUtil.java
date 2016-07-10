@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
+import java.net.InetAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,27 @@ import java.util.concurrent.Callable;
 public class TmcUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(TmcUtil.class);
+
+    /**
+     * Check if we have internet connection.
+     *
+     * This is done with making dns lookup
+     * for the www.mooc.fi domain. This isn't
+     * 100% exact way to check internet access,
+     * but it's good enough.
+     *
+     * @param ctx context object
+     * @return true if we have internet access.
+     */
+    public static boolean hasConnection(CliContext ctx) {
+        try {
+            InetAddress.getByName("www.mooc.fi");
+        } catch (Exception e) {
+            TmcUtil.logger.warn("No internet", e.getCause());
+            return false;
+        }
+        return true;
+    }
 
     public static boolean tryToLogin(CliContext ctx, Account account) {
         TmcCore core = ctx.getTmcCore();

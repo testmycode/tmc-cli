@@ -64,6 +64,15 @@ public class LoginCommandTest {
     }
 
     @Test
+    public void failIfThereIsNoConnection() {
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(false);
+
+        String[] args = {"login"};
+        app.run(args);
+        io.assertContains("don't have internet connection");
+    }
+
+    @Test
     public void logsInWithCorrectServerUserAndPassword() {
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
