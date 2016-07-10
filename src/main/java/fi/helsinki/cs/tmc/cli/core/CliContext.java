@@ -214,13 +214,9 @@ public class CliContext {
 
     /**
      * Copy login info from different settings object and them.
-     * TODO: separate settings object and login info.
      * @param account login info
      */
     public void useAccount(Account account) {
-        if (this.tmcCore == null) {
-            createTmcCore(account);
-        }
         this.settings.setAccount(account);
     }
 

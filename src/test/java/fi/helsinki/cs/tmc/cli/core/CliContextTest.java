@@ -67,14 +67,22 @@ public class CliContextTest {
 
     @Test
     public void useDifferentAccount() {
-        CliContext ctx = new CliContext(io);
-        Application app = new Application(ctx);
-        Account account = new Account();
+        mockStatic(CourseInfoIo.class);
 
-        ctx.useAccount(account);
+        WorkDir workDir = mock(WorkDir.class);
+        Path path = mock(Path.class);
+        Account newAccount = new Account();
+
+        when(CourseInfoIo.load(eq(path))).thenReturn(mock(CourseInfo.class));
+        when(workDir.getConfigFile()).thenReturn(path);
+        CliContext ctx = new CliContext(io, null, workDir);
+
+        ctx.loadBackend();
+        ctx.useAccount(newAccount);
+
         //TODO replace the Whitebox usage somehow
         Settings usedSettings = Whitebox.getInternalState(ctx, "settings");
-        assertEquals(account, usedSettings.getAccount());
+        assertEquals(newAccount, usedSettings.getAccount());
     }
 
     @Test(expected = RuntimeException.class)
