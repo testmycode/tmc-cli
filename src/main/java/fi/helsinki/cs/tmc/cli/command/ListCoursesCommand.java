@@ -31,11 +31,11 @@ public class ListCoursesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.ctx = getContext();
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
         this.io = ctx.getIo();
 
-        if (! getContext().loadBackendWithoutLogin()) {
+        if (! ctx.loadBackendWithoutLogin()) {
             return;
         }
 
@@ -68,7 +68,7 @@ public class ListCoursesCommand extends AbstractCommand {
 
     private void printCourseList(Account account) {
         ctx.useAccount(account);
-        List<Course> courses = TmcUtil.listCourses(getContext());
+        List<Course> courses = TmcUtil.listCourses(ctx);
         if (courses.isEmpty()) {
             io.println("No courses found from the server.");
             return;

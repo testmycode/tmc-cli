@@ -34,9 +34,9 @@ public class PasteCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.io = io;
-        CliContext ctx = getContext();
+    public void run(CliContext context, CommandLine args) {
+        CliContext ctx = context;
+        this.io = ctx.getIo();
         if (!ctx.loadBackend()) {
             return;
         }

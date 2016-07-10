@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -24,9 +25,9 @@ public class HelpCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        Application app = getContext().getApp();
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        Application app = context.getApp();
+        this.io = context.getIo();
 
         StringBuilder sb = new StringBuilder();
         sb.append("TMC commands:\n");

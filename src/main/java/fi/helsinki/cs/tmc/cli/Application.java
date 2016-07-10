@@ -59,13 +59,13 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        AbstractCommand command = CommandFactory.createCommand(this.context, name);
+        AbstractCommand command = CommandFactory.createCommand(name);
         if (command == null) {
             io.println("Command " + name + " doesn't exist.");
             return false;
         }
 
-        command.execute(args, io);
+        command.execute(context, args);
         return true;
     }
 

@@ -27,10 +27,11 @@ public class PropertiesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.io = io;
-        CliContext ctx = getContext();
-        Boolean unset = args.hasOption("u");
+    public void run(CliContext context, CommandLine args) {
+        CliContext ctx = context;
+        this.io = ctx.getIo();
+
+        boolean unset = args.hasOption("u");
         String[] arguments = args.getArgs();
         HashMap<String, String> props = ctx.getProperties();
         if (arguments.length == 0) {

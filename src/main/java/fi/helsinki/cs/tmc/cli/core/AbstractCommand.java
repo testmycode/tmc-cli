@@ -14,16 +14,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
 
-    private CliContext context;
-
-    protected void setContext(CliContext context) {
-        this.context = context;
-    }
-
-    protected CliContext getContext() {
-        return this.context;
-    }
-
     /**
      * Override this method if you want longer description for the command than
      * the annotation description.
@@ -51,18 +41,18 @@ public abstract class AbstractCommand {
      * TODO io param isn't needed anymore!!!!
      *
      * @param args Command line arguments for this command.
-     * @param io The terminal IO object
+     * @param ctx The context object.
      */
-    public abstract void run(CommandLine args, Io io);
+    public abstract void run(CliContext ctx, CommandLine args);
 
-    public void execute(String[] stringArgs, Io io) {
-        CommandLine args = parseArgs(stringArgs);
+    public void execute(CliContext context, String[] stringArgs) {
+        CommandLine args = parseArgs(context, stringArgs);
         if (args != null) {
-            run(args, io);
+            run(context, args);
         }
     }
 
-    public CommandLine parseArgs(String[] stringArgs) {
+    public CommandLine parseArgs(CliContext context, String[] stringArgs) {
         GnuParser parser = new GnuParser();
         CommandLine args;
         Options options = getOptions();

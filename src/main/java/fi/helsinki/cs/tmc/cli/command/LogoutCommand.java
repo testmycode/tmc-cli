@@ -2,8 +2,8 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
-import fi.helsinki.cs.tmc.cli.io.Io;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -16,8 +16,8 @@ public class LogoutCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
+    public void run(CliContext context, CommandLine args) {
         SettingsIo.delete();
-        io.println("Logged out.");
+        context.getIo().println("Logged out.");
     }
 }

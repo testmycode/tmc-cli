@@ -65,14 +65,13 @@ public class CommandFactory {
      * @param name Name of the command
      * @return A new command instance
      */
-    public static AbstractCommand createCommand(CliContext context, String name) {
+    public static AbstractCommand createCommand(String name) {
         Class commandClass = CommandFactory.commands.get(name);
         if (commandClass == null) {
             return null;
         }
         try {
             AbstractCommand command = (AbstractCommand)commandClass.newInstance();
-            command.setContext(context);
             return command;
         } catch (InstantiationException | IllegalAccessException ex) {
             throw new RuntimeException("getCommand failed", ex);

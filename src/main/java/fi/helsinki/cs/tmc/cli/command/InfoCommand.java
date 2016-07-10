@@ -40,10 +40,10 @@ public class InfoCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.io = io;
-        this.ctx = getContext();
-        workDir = ctx.getWorkDir();
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
+        this.workDir = ctx.getWorkDir();
+        this.io = ctx.getIo();
 
         boolean fetchFromInternet = args.hasOption("i");
 

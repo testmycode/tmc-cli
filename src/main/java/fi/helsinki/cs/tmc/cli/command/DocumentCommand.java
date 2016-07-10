@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
@@ -78,8 +79,8 @@ public class DocumentCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        this.io = context.getIo();
         this.width = EnvironmentUtil.getTerminalWidth();
         this.height = 30;
         this.cursorX = 0;

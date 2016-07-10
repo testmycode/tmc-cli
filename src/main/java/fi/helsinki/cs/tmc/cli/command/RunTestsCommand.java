@@ -39,13 +39,15 @@ public class RunTestsCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
+    public void run(CliContext context, CommandLine args) {
+        CliContext ctx = context;
+        Io io = ctx.getIo();
+
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
-        CliContext ctx = getContext();
         if (!ctx.loadBackendWithoutLogin()) {
             return;
         }

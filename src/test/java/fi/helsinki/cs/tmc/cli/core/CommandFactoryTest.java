@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.cli.CommandLine;
@@ -37,12 +36,12 @@ public class CommandFactoryTest {
 
     @Test
     public void createCommandWorksWithRealCommand() {
-        assertNotNull(CommandFactory.createCommand(ctx, "help"));
+        assertNotNull(CommandFactory.createCommand("help"));
     }
 
     @Test
     public void createCommandWorksWithBadCommand() {
-        assertNull(CommandFactory.createCommand(ctx, "foobar"));
+        assertNull(CommandFactory.createCommand("foobar"));
     }
 
     @Command(name = "good", desc = "test")
@@ -54,7 +53,7 @@ public class CommandFactoryTest {
         }
 
         @Override
-        public void run(CommandLine args, Io io) {
+        public void run(CliContext context, CommandLine args) {
             throw new UnsupportedOperationException();
         }
     }
@@ -63,7 +62,7 @@ public class CommandFactoryTest {
     public void addGoodCommand() {
         CommandFactory.addCommand(GoodCommand.class);
         //TODO check the all the stuff in the command
-        assertNotNull(CommandFactory.createCommand(ctx, "good"));
+        assertNotNull(CommandFactory.createCommand("good"));
     }
 
     public static class BadCommand extends AbstractCommand {
@@ -74,7 +73,7 @@ public class CommandFactoryTest {
         }
 
         @Override
-        public void run(CommandLine args, Io io) {
+        public void run(CliContext context, CommandLine args) {
             throw new UnsupportedOperationException();
         }
     }

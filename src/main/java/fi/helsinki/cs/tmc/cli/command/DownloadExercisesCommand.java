@@ -43,7 +43,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
+    public void run(CliContext context, CommandLine args) {
+        Io io = context.getIo();
+        ctx = context;
+
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
             io.println("You must give a course name as an argument.");
@@ -51,7 +54,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
-        ctx = getContext();
+        ctx = context;
         showAll = args.hasOption("a");
 
         if (!ctx.loadBackend()) {

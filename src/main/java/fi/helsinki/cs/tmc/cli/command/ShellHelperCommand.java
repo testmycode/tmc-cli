@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -18,7 +19,9 @@ public class ShellHelperCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
+    public void run(CliContext context, CommandLine args) {
+        Io io = context.getIo();
+
         if (args.hasOption("c")) {
             for (Class<Command> commandClass : CommandFactory.getCommands()) {
                 Command command = CommandFactory.getCommand(commandClass);

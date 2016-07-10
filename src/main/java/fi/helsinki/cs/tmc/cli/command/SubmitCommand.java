@@ -47,9 +47,9 @@ public class SubmitCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.ctx = getContext();
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
+        this.io = ctx.getIo();
 
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {

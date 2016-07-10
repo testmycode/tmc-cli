@@ -11,8 +11,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import fi.helsinki.cs.tmc.cli.io.Io;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.junit.Test;
@@ -106,7 +104,7 @@ public class CommandAnnotationProcessorTest {
         }
 
         @Override
-        public void run(CommandLine args, Io io) {
+        public void run(CliContext ctx, CommandLine args) {
             throw new UnsupportedOperationException();
         }
     }
@@ -119,7 +117,7 @@ public class CommandAnnotationProcessorTest {
         }
 
         @Override
-        public void run(CommandLine args, Io io) {
+        public void run(CliContext ctx, CommandLine args) {
             throw new UnsupportedOperationException();
         }
     }
