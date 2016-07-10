@@ -35,7 +35,7 @@ public class ListCoursesCommand extends AbstractCommand {
         this.ctx = getContext();
         this.io = ctx.getIo();
 
-        if (! getContext().loadBackend()) {
+        if (! getContext().loadBackendWithoutLogin()) {
             return;
         }
 

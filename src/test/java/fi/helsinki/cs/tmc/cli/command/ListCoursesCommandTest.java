@@ -56,7 +56,7 @@ public class ListCoursesCommandTest {
     public void failIfBackendFails() {
         ctx = spy(ctx);
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
+        doReturn(false).when(ctx).loadBackendWithoutLogin();
 
         String[] args = {"courses", "foo"};
         app.run(args);
