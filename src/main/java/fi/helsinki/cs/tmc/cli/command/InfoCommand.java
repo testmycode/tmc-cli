@@ -1,16 +1,12 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_BLUE;
-import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_GREEN;
-import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_PURPLE;
-import static fi.helsinki.cs.tmc.cli.io.Color.AnsiColor.ANSI_RED;
-
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 
@@ -166,10 +162,10 @@ public class InfoCommand extends AbstractCommand {
         io.println("Deadline: " + getDeadline(exercise));
 
         if (exercise.hasDeadlinePassed() && !exercise.isCompleted()) {
-            io.println(Color.colorString("deadline passed", ANSI_PURPLE));
+            io.println(ColorUtil.colorString("deadline passed", Color.PURPLE));
         } else {
             if (!exercise.isCompleted() && exercise.isAttempted()) {
-                io.println(Color.colorString("attempted", ANSI_BLUE));
+                io.println(ColorUtil.colorString("attempted", Color.BLUE));
             } else {
                 io.println(formatString("completed", exercise.isCompleted()));
             }
@@ -181,9 +177,9 @@ public class InfoCommand extends AbstractCommand {
 
     private String formatString(String string, boolean color) {
         if (color) {
-            return Color.colorString(string, ANSI_GREEN);
+            return ColorUtil.colorString(string, Color.GREEN);
         } else {
-            return Color.colorString("not " + string, ANSI_RED);
+            return ColorUtil.colorString("not " + string, Color.RED);
         }
     }
 

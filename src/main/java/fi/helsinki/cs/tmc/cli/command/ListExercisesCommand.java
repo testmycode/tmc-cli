@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -155,16 +156,16 @@ public class ListExercisesCommand extends AbstractCommand {
         String status;
         if (exercise.isCompleted()) {
             if (exercise.requiresReview() && !exercise.isReviewed()) {
-                status = Color.colorString("  Requires review: ", Color.AnsiColor.ANSI_YELLOW);
+                status = ColorUtil.colorString("  Requires review: ", Color.YELLOW);
             } else {
-                status = Color.colorString("  Completed: ", Color.AnsiColor.ANSI_GREEN);
+                status = ColorUtil.colorString("  Completed: ", Color.GREEN);
             }
         } else if (exercise.hasDeadlinePassed()) {
-            status = Color.colorString("  Deadline passed: ", Color.AnsiColor.ANSI_PURPLE);
+            status = ColorUtil.colorString("  Deadline passed: ", Color.PURPLE);
         } else if (exercise.isAttempted()) {
-            status = Color.colorString("  Attempted: ", Color.AnsiColor.ANSI_BLUE);
+            status = ColorUtil.colorString("  Attempted: ", Color.BLUE);
         } else {
-            status = Color.colorString("  Not completed: ", Color.AnsiColor.ANSI_RED);
+            status = ColorUtil.colorString("  Not completed: ", Color.RED);
         }
 
         status += exercise.getName() + "\n";

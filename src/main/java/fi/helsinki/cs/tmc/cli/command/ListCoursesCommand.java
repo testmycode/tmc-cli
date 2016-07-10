@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -58,8 +59,8 @@ public class ListCoursesCommand extends AbstractCommand {
                 io.println("");
             }
             if (accountsList.getAccountCount() > 1) {
-                io.println(Color.colorString("Server " + settings.getServerAddress(),
-                        Color.AnsiColor.ANSI_YELLOW));
+                io.println(ColorUtil.colorString("Server " + settings.getServerAddress(),
+                        Color.YELLOW));
             }
             printCourseList(settings);
             isFirst = false;

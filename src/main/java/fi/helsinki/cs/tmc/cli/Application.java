@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -182,16 +183,16 @@ public class Application {
     }
 
     //TODO rename this as getColorProperty and move it somewhere else
-    public Color.AnsiColor getColor(String propertyName) {
+    public Color getColor(String propertyName) {
         String propertyValue = context.getProperties().get(propertyName);
-        Color.AnsiColor color = Color.getColor(propertyValue);
+        Color color = ColorUtil.getColor(propertyValue);
         if (color == null) {
             switch (propertyName) {
-                case "progressbar-left":    return Color.AnsiColor.ANSI_CYAN;
-                case "progressbar-right":   return Color.AnsiColor.ANSI_CYAN;
-                case "testresults-left":    return Color.AnsiColor.ANSI_GREEN;
-                case "testresults-right":   return Color.AnsiColor.ANSI_RED;
-                default:    return Color.AnsiColor.ANSI_NONE;
+                case "progressbar-left":    return Color.CYAN;
+                case "progressbar-right":   return Color.CYAN;
+                case "testresults-left":    return Color.GREEN;
+                case "testresults-right":   return Color.RED;
+                default:    return Color.NONE;
             }
         }
         return color;

@@ -67,8 +67,8 @@ public class UpdateCommand extends AbstractCommand {
         printExercises(exerciseUpdater.getUpdatedExercises(), "Modified exercises:");
         io.println("");
 
-        Color.AnsiColor color1 = ctx.getApp().getColor("progressbar-left");
-        Color.AnsiColor color2 = ctx.getApp().getColor("progressbar-right");
+        Color color1 = ctx.getApp().getColor("progressbar-left");
+        Color color2 = ctx.getApp().getColor("progressbar-right");
         List<Exercise> downloaded = exerciseUpdater.downloadUpdates(
                 new CliProgressObserver(io, color1, color2));
         if (downloaded.isEmpty()) {

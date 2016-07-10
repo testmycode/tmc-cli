@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.shared;
 
 import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
@@ -20,14 +21,14 @@ import java.util.Map;
 public class ResultPrinter {
 
     private static final String COMPILE_ERROR_MESSAGE
-            = Color.colorString("Failed to compile project", Color.AnsiColor.ANSI_PURPLE);
+            = ColorUtil.colorString("Failed to compile project", Color.PURPLE);
     private static final String FAIL_MESSAGE = "Failed: ";
     private static final String PASS_MESSAGE = "Passed: ";
     private static final String PADDING = createPaddingString(PASS_MESSAGE.length());
 
     private final Io io;
-    private final Color.AnsiColor passedColor;
-    private final Color.AnsiColor failedColor;
+    private final Color passedColor;
+    private final Color failedColor;
 
     private boolean showDetails;
     private boolean showPassed;
@@ -35,7 +36,7 @@ public class ResultPrinter {
     private int passedExercises;
 
     public ResultPrinter(Io io, boolean showDetails, boolean showPassed,
-            Color.AnsiColor passedColor, Color.AnsiColor failedColor) {
+            Color passedColor, Color failedColor) {
         this.io = io;
         this.passedColor = passedColor;
         this.failedColor = failedColor;
@@ -121,7 +122,7 @@ public class ResultPrinter {
                 }
 
                 if (runResult.status == RunResult.Status.PASSED && validationsPassed) {
-                    io.print(Color.colorString("All tests passed!", Color.AnsiColor.ANSI_GREEN));
+                    io.print(ColorUtil.colorString("All tests passed!", Color.GREEN));
                     io.println(" Submit to server with 'tmc submit'");
                     passedExercises++;
                     return true;
@@ -178,7 +179,7 @@ public class ResultPrinter {
 
     private void printValidationErrors(ValidationResult result) {
         Map<File, List<ValidationError>> errors = result.getValidationErrors();
-        io.println(Color.colorString("Validation error:", failedColor));
+        io.println(ColorUtil.colorString("Validation error:", failedColor));
 
         for (Map.Entry<File, List<ValidationError>> entry : errors.entrySet()) {
             io.println("File: " + entry.getKey());
@@ -203,7 +204,7 @@ public class ResultPrinter {
     }
 
     private void printFailedTest(TestResult testResult) {
-        io.print(Color.colorString(FAIL_MESSAGE, failedColor));
+        io.print(ColorUtil.colorString(FAIL_MESSAGE, failedColor));
         io.println(testResult.getName());
         io.println(PADDING + testResult.getMessage());
 
@@ -225,7 +226,7 @@ public class ResultPrinter {
     }
 
     private void printPassedTest(TestResult testResult) {
-        io.print(Color.colorString(PASS_MESSAGE, passedColor));
+        io.print(ColorUtil.colorString(PASS_MESSAGE, passedColor));
         io.println(testResult.getName());
     }
 
@@ -239,7 +240,7 @@ public class ResultPrinter {
             printResultBar(passedTests, totalTests);
         }
 
-        io.println(Color.colorString("All tests passed on server!", passedColor));
+        io.println(ColorUtil.colorString("All tests passed on server!", passedColor));
         passedExercises++;
 
         if (!submResult.getPoints().isEmpty()) {
@@ -257,7 +258,7 @@ public class ResultPrinter {
 
         String valgrind = submResult.getValgrind();
         if (valgrind != null && !valgrind.isEmpty()) {
-            io.println(Color.colorString("Valgrind error:", failedColor));
+            io.println(ColorUtil.colorString("Valgrind error:", failedColor));
             io.println(valgrind);
             totalTests++;
         }

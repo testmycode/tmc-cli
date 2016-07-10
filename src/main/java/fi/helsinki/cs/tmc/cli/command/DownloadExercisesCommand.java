@@ -11,6 +11,7 @@ import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 
@@ -76,8 +77,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
-        Color.AnsiColor color1 = ctx.getApp().getColor("progressbar-left");
-        Color.AnsiColor color2 = ctx.getApp().getColor("progressbar-right");
+        Color color1 = ctx.getApp().getColor("progressbar-left");
+        Color color2 = ctx.getApp().getColor("progressbar-right");
         CliProgressObserver progobs = new CliProgressObserver(io, color1, color2);
 
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
@@ -169,8 +170,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
             if (failedCount > 0) {
                 io.println("  of which " + (requestCount - failedCount)
                         + " exercises were succesfully downloaded");
-                io.println(Color.colorString("  and of which " + failedCount + " failed.",
-                        Color.AnsiColor.ANSI_RED));
+                io.println(ColorUtil.colorString("  and of which " + failedCount + " failed.",
+                        Color.RED));
                 //TODO we could print the names of the not downloaded exercises here
             } else {
                 io.println("  of which "
@@ -182,6 +183,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
     }
 
+    //TODO this could be moved into CourseInfoIo or ExerciseUpdater
     private void createNewCourse(Course course) {
         WorkDir workDir = ctx.getWorkDir();
         Path configFile = workDir.getWorkingDirectory()

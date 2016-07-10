@@ -11,8 +11,8 @@ public class CliProgressObserver extends ProgressObserver {
     protected Io io;
     private int pips;
     protected int maxline;
-    private Color.AnsiColor color1;
-    private Color.AnsiColor color2;
+    private Color color1;
+    private Color color2;
     protected String lastMessage;
     protected Boolean hasProgressBar;
 
@@ -21,10 +21,10 @@ public class CliProgressObserver extends ProgressObserver {
     }
 
     public CliProgressObserver(Io io) {
-        this(io, Color.AnsiColor.ANSI_CYAN, Color.AnsiColor.ANSI_CYAN);
+        this(io, Color.CYAN, Color.CYAN);
     }
 
-    public CliProgressObserver(Io io, Color.AnsiColor color1, Color.AnsiColor color2) {
+    public CliProgressObserver(Io io, Color color1, Color color2) {
         this.hasProgressBar = false;
         this.io = io;
         this.maxline = EnvironmentUtil.getTerminalWidth();
@@ -97,7 +97,7 @@ public class CliProgressObserver extends ProgressObserver {
     }
 
     public static String progressBar(double progress, int length,
-            Color.AnsiColor color1, Color.AnsiColor color2) {
+            Color color1, Color color2) {
         return progressBar(progress, length, color1, color2,
                 BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
     }
@@ -105,8 +105,8 @@ public class CliProgressObserver extends ProgressObserver {
     public static String progressBar(
             double progress,
             int length,
-            Color.AnsiColor color1,
-            Color.AnsiColor color2,
+            Color color1,
+            Color color2,
             char barLeft,
             char barRight,
             char donePip,
@@ -122,8 +122,8 @@ public class CliProgressObserver extends ProgressObserver {
         }
         return percentage(progress)
                 + barLeft
-                + Color.colorString(sbLeft.toString(), color1)
-                + Color.colorString(sbRight.toString(), color2)
+                + ColorUtil.colorString(sbLeft.toString(), color1)
+                + ColorUtil.colorString(sbRight.toString(), color2)
                 + barRight;
     }
 
@@ -141,7 +141,7 @@ public class CliProgressObserver extends ProgressObserver {
     }
 
     public static String getPassedTestsBar(int passed, int total,
-                                           Color.AnsiColor color1, Color.AnsiColor color2) {
+                                           Color color1, Color color2) {
         return CliProgressObserver.progressBar(
                 (double) passed / total,
                 EnvironmentUtil.getTerminalWidth(),

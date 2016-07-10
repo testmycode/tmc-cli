@@ -50,7 +50,7 @@ public class CliProgressObserverTest {
     @Test
     public void testResultBarWorks() {
         String string = CliProgressObserver.getPassedTestsBar(1, 2,
-                Color.AnsiColor.ANSI_NONE, Color.AnsiColor.ANSI_NONE);
+                Color.NONE, Color.NONE);
         assertTrue("Prints the start of the progress bar", string.contains(
                 " 50%["));
         assertTrue("Prints the first part of the progress bar", string.contains(

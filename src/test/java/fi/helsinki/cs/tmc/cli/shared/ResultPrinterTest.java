@@ -40,7 +40,7 @@ public class ResultPrinterTest {
     public void setUp() {
         io = new TestIo();
         printer = new ResultPrinter(io, true, true,
-                Color.AnsiColor.ANSI_GREEN, Color.AnsiColor.ANSI_RED);
+                Color.GREEN, Color.RED);
         mockSubResult = mock(SubmissionResult.class);
         logs = ImmutableMap.of();
     }
