@@ -1,19 +1,33 @@
 package fi.helsinki.cs.tmc.cli;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
+import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
 import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.nio.file.Path;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({CourseInfoIo.class, SettingsIo.class})
 public class CliContextTest {
 
     private TestIo io;
@@ -25,7 +39,6 @@ public class CliContextTest {
 
     @Test
     public void getIoAfterItsSetInConstructor() {
-        Io io = new TestIo();
         CliContext ctx = new CliContext(io);
         assertEquals(io, ctx.getIo());
     }
@@ -57,36 +70,113 @@ public class CliContextTest {
         assertEquals(workDir, ctx.getWorkDir());
     }
 
-
-    @Ignore
     @Test
-    public void backendInitWithoutCourse() {
-        CliContext ctx = new CliContext(null);
-        assertTrue(ctx.loadBackend());
+    public void getCourseInfo() {
+        mockStatic(CourseInfoIo.class);
+
+        CourseInfo info = null;
+        WorkDir workDir = mock(WorkDir.class);
+
+        when(workDir.getConfigFile()).thenReturn(null);
+        CliContext ctx = new CliContext(io, null, workDir);
+
         assertEquals(null, ctx.getCourseInfo());
     }
 
-    @Ignore
     @Test
-    public void backendInitWithCourse() {
-        CliContext ctx = new CliContext(null);
-        assertTrue(ctx.loadBackend());
-        assertNotSame(null, ctx.getCourseInfo());
+    public void getCourseInfoWhenItDoesntExist() {
+        mockStatic(CourseInfoIo.class);
+
+        CourseInfo info = mock(CourseInfo.class);
+        WorkDir workDir = mock(WorkDir.class);
+        Path path = mock(Path.class);
+
+        when(CourseInfoIo.load(eq(path))).thenReturn(info);
+        when(workDir.getConfigFile()).thenReturn(path);
+        CliContext ctx = new CliContext(io, null, workDir);
+
+        assertEquals(info, ctx.getCourseInfo());
     }
 
-    @Ignore
     @Test
     public void backendInitWithInternet() {
-        CliContext ctx = new CliContext(null);
+        mockStatic(CourseInfoIo.class);
+        mockStatic(SettingsIo.class);
+
+        CourseInfo info = mock(CourseInfo.class);
+        WorkDir workDir = mock(WorkDir.class);
+        Path path = mock(Path.class);
+
+        when(CourseInfoIo.load(eq(path))).thenReturn(info);
+        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Settings());
+        when(workDir.getConfigFile()).thenReturn(path);
+        CliContext ctx = new CliContext(io, null, workDir);
+
         assertTrue(ctx.loadBackend());
         assertEquals(true, ctx.hasLogin());
     }
 
-    @Ignore
+    @Test
+    public void failBackendInitWithInternetButWithoutCourse() {
+        mockStatic(CourseInfoIo.class);
+        mockStatic(SettingsIo.class);
+
+        WorkDir workDir = mock(WorkDir.class);
+        when(workDir.getConfigFile()).thenReturn(null);
+        CliContext ctx = new CliContext(io, null, workDir);
+
+        assertFalse(ctx.loadBackend());
+        assertEquals(false, ctx.hasLogin());
+        io.assertContains("You are not logged in");
+    }
+
+    @Test
+    public void failBackendInitWithInternetButWithCorruptedCourse() {
+        mockStatic(CourseInfoIo.class);
+        mockStatic(SettingsIo.class);
+
+        WorkDir workDir = mock(WorkDir.class);
+        Path path = mock(Path.class);
+
+        when(CourseInfoIo.load(eq(path))).thenReturn(null);
+        when(workDir.getConfigFile()).thenReturn(path);
+        CliContext ctx = new CliContext(io, null, workDir);
+
+        assertFalse(ctx.loadBackend());
+        assertEquals(false, ctx.hasLogin());
+        io.assertContains("Course configuration file");
+        io.assertContains("is invalid.");
+        io.assertContains("You are not logged in");
+    }
+
     @Test
     public void backendInitWithoutInternet() {
-        CliContext ctx = new CliContext(null);
+        mockStatic(SettingsIo.class);
+
+        WorkDir workDir = mock(WorkDir.class);
+        when(workDir.getConfigFile()).thenReturn(null);
+        when(SettingsIo.load()).thenReturn(null);
+        CliContext ctx = new CliContext(io, null, workDir);
+
         assertTrue(ctx.loadBackendWithoutLogin());
         assertEquals(false, ctx.hasLogin());
+    }
+
+    @Test
+    public void backendInitWithoutInternetWithCourse() {
+        mockStatic(CourseInfoIo.class);
+        mockStatic(SettingsIo.class);
+
+        WorkDir workDir = mock(WorkDir.class);
+        CourseInfo info = mock(CourseInfo.class);
+        Path path = mock(Path.class);
+
+        when(CourseInfoIo.load(eq(path))).thenReturn(info);
+        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Settings());
+        when(workDir.getConfigFile()).thenReturn(path);
+        CliContext ctx = new CliContext(io, null, workDir);
+
+        assertTrue(ctx.loadBackendWithoutLogin());
+        assertEquals(true, ctx.hasLogin());
     }
 }
