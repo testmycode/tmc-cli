@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
@@ -90,9 +91,14 @@ public class DownloadExercisesCommand extends AbstractCommand {
     private Course findCourse(String courseName) {
         Io io = ctx.getIo();
 
-        List<Account> accountsList = SettingsIo.getAccountList();
+        AccountList accountsList = SettingsIo.loadAccountList();
         // LinkedHashMap is used here to preserve ordering.
         Map<Account, Course> matches = new LinkedHashMap<>();
+
+        if (accountsList.getAccountCount() == 0) {
+            io.println("You haven't logged in on any tmc server.");
+            return null;
+        }
 
         for (Account settings : accountsList) {
             ctx.useAccount(settings);

@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
@@ -38,14 +39,19 @@ public class ListCoursesCommand extends AbstractCommand {
             return;
         }
 
-        List<Account> accountsList = SettingsIo.getAccountList();
+        AccountList accountsList = SettingsIo.loadAccountList();
         boolean isFirst = true;
+
+        if (accountsList.getAccountCount() == 0) {
+            io.println("You haven't logged in on any tmc server.");
+            return;
+        }
 
         for (Account settings : accountsList) {
             if (!isFirst) {
                 io.println("");
             }
-            if (accountsList.size() > 1) {
+            if (accountsList.getAccountCount() > 1) {
                 io.println(Color.colorString("Server " + settings.getServerAddress(),
                         Color.AnsiColor.ANSI_YELLOW));
             }

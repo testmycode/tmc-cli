@@ -59,7 +59,7 @@ public class SettingsIo {
 
     /**
      * Get the correct directory in which our config files go
-     * ie. /home/user/.config/tmc-cli/
+     * ie /home/user/.config/tmc-cli/.
      */
     protected static Path getConfigDirectory() {
         Path configPath;
@@ -84,6 +84,7 @@ public class SettingsIo {
         return configPath.resolve(CONFIG_DIR);
     }
 
+    //TODO handle exceptions
     private static Path getAccountsFile(Path configRoot) {
         Path file = configRoot.resolve(ACCOUNTS_CONFIG);
         if (!Files.exists(configRoot)) {
@@ -97,6 +98,7 @@ public class SettingsIo {
         return file;
     }
 
+    //TODO handle exceptions
     private static Path getPropertiesFile(Path configRoot) {
         Path file = configRoot.resolve(PROPERTIES_CONFIG);
         if (!Files.exists(configRoot)) {
@@ -108,46 +110,6 @@ public class SettingsIo {
             } catch (Exception e) { }
         }
         return file;
-    }
-
-    @Deprecated
-    public static Boolean saveTo(Account account, Path configRoot) {
-        Path file = getAccountsFile(configRoot);
-        AccountList holder;
-        if (!Files.exists(file)) {
-            holder = new AccountList();
-        } else {
-            holder = getHolderFromJson(file);
-        }
-        holder.addAccount(account);
-        return saveHolderToJson(holder, file);
-    }
-
-    @Deprecated
-    public static Account load(String username, String server) {
-        return loadFrom(username, server, getConfigDirectory());
-    }
-
-    @Deprecated
-    public static Account loadFrom(String username, String server, Path configRoot) {
-        Path file = getAccountsFile(configRoot);
-        if (!Files.exists(file)) {
-            return null;
-        }
-        AccountList holder = getHolderFromJson(file);
-        Account ret = holder.getAccount(username, server);
-        saveHolderToJson(holder, file);
-        return ret;
-    }
-
-    @Deprecated
-    public static List<Account> getAccountList() {
-        Path file = getAccountsFile(getConfigDirectory());
-        if (!Files.exists(file)) {
-            return null;
-        }
-        AccountList holder = getHolderFromJson(file);
-        return holder.getAccountList();
     }
 
     private static AccountList getHolderFromJson(Path file) {
@@ -162,7 +124,7 @@ public class SettingsIo {
         return gson.fromJson(reader, AccountList.class);
     }
 
-    private static Boolean saveHolderToJson(AccountList holder, Path file) {
+    private static boolean saveHolderToJson(AccountList holder, Path file) {
         Gson gson = new Gson();
         byte[] json = gson.toJson(holder).getBytes();
         try {
@@ -188,7 +150,7 @@ public class SettingsIo {
         return map;
     }
 
-    private static Boolean savePropertiesToJson(HashMap<String, String> properties, Path file) {
+    private static boolean savePropertiesToJson(HashMap<String, String> properties, Path file) {
         Gson gson = new Gson();
         byte[] json = gson.toJson(properties).getBytes();
         try {
@@ -200,7 +162,7 @@ public class SettingsIo {
         return true;
     }
 
-    public static Boolean delete() {
+    public static boolean delete() {
         Path file = getAccountsFile(getConfigDirectory());
         try {
             Files.deleteIfExists(file);
@@ -225,11 +187,11 @@ public class SettingsIo {
         }
     }
 
-    public static Boolean saveProperties(HashMap<String, String> properties) {
+    public static boolean saveProperties(HashMap<String, String> properties) {
         return savePropertiesTo(properties, getConfigDirectory());
     }
 
-    public static Boolean savePropertiesTo(HashMap<String, String> properties, Path path) {
+    public static boolean savePropertiesTo(HashMap<String, String> properties, Path path) {
         Path file = getPropertiesFile(path);
         return savePropertiesToJson(properties, file);
     }

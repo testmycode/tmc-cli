@@ -14,6 +14,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
@@ -66,10 +67,12 @@ public class DownloadExercisesCommandTest {
         app = new Application(ctx);
         Account account = new Account("server", "user", "password");
         ctx.useAccount(account);
+        AccountList accountList = new AccountList();
+        accountList.addAccount(account);
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
-        when(SettingsIo.getAccountList()).thenReturn(Arrays.asList(account));
+        when(SettingsIo.loadAccountList()).thenReturn(accountList);
     }
 
     @After
@@ -202,11 +205,13 @@ public class DownloadExercisesCommandTest {
     public void findFromMultipleServer() {
         Account account1 = new Account("http://test.test", "", "");
         Account account2 = new Account("http://hello.test", "", "");
+        AccountList accountList = new AccountList();
+        accountList.addAccount(account1);
+        accountList.addAccount(account2);
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
                 .thenReturn(new Course("course2"));
-        when(SettingsIo.getAccountList()).thenReturn(
-                Arrays.asList(account1, account2));
+        when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
         String[] args = {"download", "course2"};
         app.run(args);
@@ -216,11 +221,13 @@ public class DownloadExercisesCommandTest {
     public void findFromMultipleServerWithSameNameWithoutTakingAny() {
         Account account1 = new Account("http://test.test", "abc", "");
         Account account2 = new Account("http://hello.test", "def", "");
+        AccountList accountList = new AccountList();
+        accountList.addAccount(account1);
+        accountList.addAccount(account2);
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
                 .thenReturn(new Course("course1"));
-        when(SettingsIo.getAccountList()).thenReturn(
-                Arrays.asList(account1, account2));
+        when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
         List<Exercise> exercises = Arrays.asList();
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
@@ -241,11 +248,13 @@ public class DownloadExercisesCommandTest {
     public void findFromMultipleServerWithSameNameWithTakingFirst() {
         Account account1 = new Account("http://test.test", "abc", "");
         Account account2 = new Account("http://hello.test", "def", "");
+        AccountList accountList = new AccountList();
+        accountList.addAccount(account2);
+        accountList.addAccount(account1);
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
                 .thenReturn(new Course("course1"));
-        when(SettingsIo.getAccountList()).thenReturn(
-                Arrays.asList(account1, account2));
+        when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
         String[] args = {"download", "course1"};
         io.addConfirmationPrompt(true);

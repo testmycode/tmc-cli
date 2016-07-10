@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,6 +11,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
@@ -35,10 +34,15 @@ import java.nio.file.Path;
 public class CliContextTest {
 
     private TestIo io;
+    private AccountList list;
 
     @Before
     public void setUp() {
         io = new TestIo();
+        list = new AccountList();
+
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.loadAccountList()).thenReturn(list);
     }
 
     @Test
@@ -117,15 +121,13 @@ public class CliContextTest {
     @Test
     public void backendInitWithInternet() {
         mockStatic(CourseInfoIo.class);
-        mockStatic(SettingsIo.class);
 
         CourseInfo info = mock(CourseInfo.class);
         WorkDir workDir = mock(WorkDir.class);
         Path path = mock(Path.class);
+        list.addAccount(new Account());
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
-        when(SettingsIo.load(anyString(), anyString()))
-                .thenReturn(new Account());
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir);
 
@@ -136,7 +138,6 @@ public class CliContextTest {
     @Test
     public void failBackendInitWithCourseButWithoutInternet() {
         mockStatic(CourseInfoIo.class);
-        mockStatic(SettingsIo.class);
 
         WorkDir workDir = mock(WorkDir.class);
         Path path = mock(Path.class);
@@ -145,7 +146,6 @@ public class CliContextTest {
         when(info.getUsername()).thenReturn("user");
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
         when(workDir.getConfigFile()).thenReturn(path);
-        when(SettingsIo.load(anyString(), anyString())).thenReturn(null);
         CliContext ctx = new CliContext(io, null, workDir);
 
         assertFalse(ctx.loadBackend());
@@ -156,7 +156,6 @@ public class CliContextTest {
     @Test
     public void failBackendInitWithInternetButWithoutCourse() {
         mockStatic(CourseInfoIo.class);
-        mockStatic(SettingsIo.class);
 
         WorkDir workDir = mock(WorkDir.class);
         when(workDir.getConfigFile()).thenReturn(null);
@@ -170,7 +169,6 @@ public class CliContextTest {
     @Test
     public void failBackendInitWithInternetButWithCorruptedCourse() {
         mockStatic(CourseInfoIo.class);
-        mockStatic(SettingsIo.class);
 
         WorkDir workDir = mock(WorkDir.class);
         Path path = mock(Path.class);
@@ -188,12 +186,8 @@ public class CliContextTest {
 
     @Test
     public void backendInitWithoutInternet() {
-        mockStatic(SettingsIo.class);
-
         WorkDir workDir = mock(WorkDir.class);
         when(workDir.getConfigFile()).thenReturn(null);
-        when(SettingsIo.loadFrom(anyString(), anyString(), any(Path.class)))
-                .thenReturn(null);
         CliContext ctx = new CliContext(io, null, workDir);
 
         assertTrue(ctx.loadBackendWithoutLogin());
@@ -203,14 +197,13 @@ public class CliContextTest {
     @Test
     public void backendInitWithoutInternetWithCourse() {
         mockStatic(CourseInfoIo.class);
-        mockStatic(SettingsIo.class);
 
         WorkDir workDir = mock(WorkDir.class);
         CourseInfo info = mock(CourseInfo.class);
         Path path = mock(Path.class);
+        list.addAccount(new Account());
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
-        when(SettingsIo.load(anyString(), anyString())).thenReturn(new Account());
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir);
 

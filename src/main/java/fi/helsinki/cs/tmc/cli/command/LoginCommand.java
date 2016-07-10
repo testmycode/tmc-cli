@@ -39,7 +39,7 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
-        //TODO try to login so that user won't type inputs if internet
+        //TODO try to login so that user won't fill the fields if internet
         // doesn't work.
         CourseInfo info = ctx.getCourseInfo();
         if (info != null) {

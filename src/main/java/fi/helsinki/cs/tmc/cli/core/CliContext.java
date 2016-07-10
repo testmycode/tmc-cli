@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.core;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
@@ -234,19 +235,20 @@ public class CliContext {
 
     private boolean createTmcCore() {
         Account cachedAccount = null;
+        AccountList list = SettingsIo.loadAccountList();
 
         if (workDir.getConfigFile() != null) {
             // If we're in a course directory, we load settings matching the course
             // Otherwise we just load the last used settings
             courseInfo = getCourseInfo();
             if (courseInfo != null) {
-                cachedAccount = SettingsIo.load(courseInfo.getUsername(),
+                cachedAccount = list.getAccount(courseInfo.getUsername(),
                         courseInfo.getServerAddress());
             }
         } else {
             // Bug: if we are not inside course directory
             // then we may not correctly guess the correct settings.
-            cachedAccount = SettingsIo.load(null, null);
+            cachedAccount = list.getAccount();
         }
 
         hasLogin = (cachedAccount != null);
