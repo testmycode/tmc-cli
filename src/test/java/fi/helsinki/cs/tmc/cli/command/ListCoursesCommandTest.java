@@ -53,7 +53,7 @@ public class ListCoursesCommandTest {
 
     @Test
     public void failIfBackendFails() {
-        CliContext ctx = spy(new CliContext(io, mockCore));
+        ctx = spy(ctx);
         app = new Application(ctx);
         doReturn(false).when(ctx).loadBackend();
 

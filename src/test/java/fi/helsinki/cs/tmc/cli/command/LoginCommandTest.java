@@ -12,14 +12,12 @@ import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +48,7 @@ public class LoginCommandTest {
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
         when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
@@ -112,8 +111,8 @@ public class LoginCommandTest {
 
     @Test
     public void serverAndNotAskedAfterLogout() {
-        TmcSettings settings = new Settings(SERVER, "username", "pass");
-        CourseInfo info = new CourseInfo(settings, null);
+        Account account = new Account(SERVER, "username", "pass");
+        CourseInfo info = new CourseInfo(account, null);
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login"};
@@ -124,8 +123,8 @@ public class LoginCommandTest {
 
     @Test
     public void courseInfoValuesOverridedByOptions() {
-        Settings settings = new Settings(SERVER, "username", "pass");
-        CourseInfo info = new CourseInfo(settings, null);
+        Account account = new Account(SERVER, "username", "pass");
+        CourseInfo info = new CourseInfo(account, null);
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};

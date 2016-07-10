@@ -19,7 +19,7 @@ public class CourseInfoTest {
 
     @Before
     public void setUp() {
-        courseInfo = new CourseInfo(new Settings(), new Course("test-course"));
+        courseInfo = new CourseInfo(new Account(), new Course("test-course"));
     }
 
     @Test

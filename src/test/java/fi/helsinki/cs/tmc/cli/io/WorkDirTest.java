@@ -7,9 +7,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -57,7 +57,7 @@ public class WorkDirTest {
         exercises.get(1).setCompleted(true);
         exercises.add(new Exercise("viikko2-teht3"));
         exercises.add(new Exercise("viikko3-nonexistent"));
-        CourseInfo info = new CourseInfo(new Settings(), new Course("dirUtilTest"));
+        CourseInfo info = new CourseInfo(new Account(), new Course("dirUtilTest"));
         info.getLocalCompletedExercises().add("viikko1-teht1");
         info.setExercises(exercises);
         CourseInfoIo.save(info, tempDir.resolve(CourseInfoIo.COURSE_CONFIG));

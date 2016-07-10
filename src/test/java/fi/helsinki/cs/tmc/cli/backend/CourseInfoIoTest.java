@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 
 public class CourseInfoIoTest {
 
-    private Settings settings;
     private CourseInfo course;
     private Path courseFile;
     private String tempDir;
@@ -25,12 +24,7 @@ public class CourseInfoIoTest {
         this.courseFile = Paths.get(tempDir)
                 .resolve("test-course")
                 .resolve(CourseInfoIo.COURSE_CONFIG);
-        this.settings = new Settings();
-        this.course = new CourseInfo(this.settings, new Course("test-course"));
-        try {
-            FileUtils.deleteDirectory(Paths.get(tempDir)
-                    .resolve("test-course").toFile());
-        } catch (Exception e) { }
+        this.course = new CourseInfo(new Account(), new Course("test-course"));
     }
 
     @After

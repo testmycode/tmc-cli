@@ -46,7 +46,7 @@ public class CourseInfo {
         // Check for null pointer in case of old .tmc.json files
         // Remove this when we are sure nobody's using 0.5.1 anymore
         if (this.localCompletedExercises == null) {
-            this.localCompletedExercises = new ArrayList<String>();
+            this.localCompletedExercises = new ArrayList<>();
         }
         return this.localCompletedExercises;
     }
