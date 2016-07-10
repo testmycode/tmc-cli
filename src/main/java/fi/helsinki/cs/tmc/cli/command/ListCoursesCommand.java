@@ -39,6 +39,12 @@ public class ListCoursesCommand extends AbstractCommand {
             return;
         }
 
+        if (!TmcUtil.hasConnection(ctx)) {
+            io.println("You don't have internet connection currently.");
+            io.println("Check the tmc-cli logs to get exact problem.");
+            return;
+        }
+
         AccountList accountsList = SettingsIo.loadAccountList();
         boolean isFirst = true;
 

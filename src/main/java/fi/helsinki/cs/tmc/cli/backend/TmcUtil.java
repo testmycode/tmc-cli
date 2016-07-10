@@ -14,11 +14,12 @@ import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
-import java.net.InetAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +31,12 @@ public class TmcUtil {
 
     /**
      * Check if we have internet connection.
-     *
      * This is done with making dns lookup
      * for the www.mooc.fi domain. This isn't
      * 100% exact way to check internet access,
      * but it's good enough.
+     * TODO the method could be changed into requireConnection(),
+     *      which also would print error message.
      *
      * @param ctx context object
      * @return true if we have internet access.
@@ -227,6 +229,11 @@ public class TmcUtil {
             logger.error("Outdated tmc client");
             io.println("Your tmc-cli is outdated. Please update it.");
             ctx.getApp().runAutoUpdate();
+            return;
+        }
+        if (cause != null && cause.getCause() instanceof UnknownHostException) {
+            logger.error("No internet connection");
+            io.println("You have no internet connection.");
             return;
         }
         logger.error("Command failed in tmc-core", exception);

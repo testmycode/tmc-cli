@@ -42,9 +42,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -121,7 +121,7 @@ public class TmcUtilTest {
     public void hasNoInternetConnection() throws UnknownHostException {
         mockStatic(InetAddress.class);
         when(InetAddress.getByName(anyString())).thenThrow(
-            new UnknownHostException());
+                new UnknownHostException());
         assertFalse(TmcUtil.hasConnection(ctx));
     }
 

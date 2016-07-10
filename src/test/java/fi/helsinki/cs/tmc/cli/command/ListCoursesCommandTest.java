@@ -48,6 +48,7 @@ public class ListCoursesCommandTest {
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
         when(SettingsIo.loadAccountList()).thenReturn(accountList);
     }
 
@@ -60,6 +61,15 @@ public class ListCoursesCommandTest {
         String[] args = {"courses", "foo"};
         app.run(args);
         io.assertNotContains("Course doesn't exist");
+    }
+
+    @Test
+    public void failIfThereIsNoConnection() {
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(false);
+
+        String[] args = {"courses"};
+        app.run(args);
+        io.assertContains("don't have internet connection");
     }
 
     @Test
