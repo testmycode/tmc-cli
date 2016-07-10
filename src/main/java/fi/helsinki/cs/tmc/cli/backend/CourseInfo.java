@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
-import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -19,12 +18,12 @@ public class CourseInfo {
     private List<String> localCompletedExercises;
     private HashMap<String, String> properties;
 
-    public CourseInfo(TmcSettings settings, Course course) {
-        this.username = settings.getUsername();
-        this.serverAddress = settings.getServerAddress();
+    public CourseInfo(Account account, Course course) {
+        this.username = account.getUsername();
+        this.serverAddress = account.getServerAddress();
         this.course = course;
         this.properties = new HashMap<>();
-        this.localCompletedExercises = new ArrayList<String>();
+        this.localCompletedExercises = new ArrayList<>();
     }
 
     public String getUsername() {

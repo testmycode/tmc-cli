@@ -112,7 +112,7 @@ public class CliContext {
      * @return cached course data object
      */
     public CourseInfo createCourseInfo(Course course) {
-        return new CourseInfo(settings, course);
+        return new CourseInfo(settings.getAccount(), course);
     }
 
     /**
