@@ -21,6 +21,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Command(name = "info", desc = "Show info about the current directory")
@@ -241,11 +242,7 @@ public class InfoCommand extends AbstractCommand {
     }
 
     private String getDeadline(Exercise exercise) {
-        String deadline = exercise.getDeadline();
-        if (deadline == null) {
-            return "not available";
-        }
-        deadline = deadline.substring(0, 19);
-        return deadline.replace("T", " at ");
+        Date deadline = exercise.getDeadlineDate();
+        return deadline.toString();
     }
 }
