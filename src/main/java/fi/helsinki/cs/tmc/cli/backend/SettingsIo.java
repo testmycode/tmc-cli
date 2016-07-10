@@ -57,6 +57,40 @@ public class SettingsIo {
         return saveHolderToJson(list, file);
     }
 
+    public static boolean delete() {
+        Path file = getAccountsFile(getConfigDirectory());
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            logger.error("Could not delete config file in " + file.toString(), e);
+            return false;
+        }
+        return true;
+    }
+
+    public static HashMap<String, String> loadProperties() {
+        return loadPropertiesFrom(getConfigDirectory());
+    }
+
+    public static HashMap<String, String> loadPropertiesFrom(Path path) {
+        Path file = getPropertiesFile(path);
+        HashMap<String, String> properties = getPropertiesFromJson(file);
+        if (properties != null) {
+            return properties;
+        } else {
+            return new HashMap<>();
+        }
+    }
+
+    public static boolean saveProperties(HashMap<String, String> properties) {
+        return savePropertiesTo(properties, getConfigDirectory());
+    }
+
+    public static boolean savePropertiesTo(HashMap<String, String> properties, Path path) {
+        Path file = getPropertiesFile(path);
+        return savePropertiesToJson(properties, file);
+    }
+
     /**
      * Get the correct directory in which our config files go
      * ie /home/user/.config/tmc-cli/.
@@ -160,39 +194,5 @@ public class SettingsIo {
             return false;
         }
         return true;
-    }
-
-    public static boolean delete() {
-        Path file = getAccountsFile(getConfigDirectory());
-        try {
-            Files.deleteIfExists(file);
-        } catch (IOException e) {
-            logger.error("Could not delete config file in " + file.toString(), e);
-            return false;
-        }
-        return true;
-    }
-
-    public static HashMap<String, String> loadProperties() {
-        return loadPropertiesFrom(getConfigDirectory());
-    }
-
-    public static HashMap<String, String> loadPropertiesFrom(Path path) {
-        Path file = getPropertiesFile(path);
-        HashMap<String, String> properties = getPropertiesFromJson(file);
-        if (properties != null) {
-            return properties;
-        } else {
-            return new HashMap<>();
-        }
-    }
-
-    public static boolean saveProperties(HashMap<String, String> properties) {
-        return savePropertiesTo(properties, getConfigDirectory());
-    }
-
-    public static boolean savePropertiesTo(HashMap<String, String> properties, Path path) {
-        Path file = getPropertiesFile(path);
-        return savePropertiesToJson(properties, file);
     }
 }
