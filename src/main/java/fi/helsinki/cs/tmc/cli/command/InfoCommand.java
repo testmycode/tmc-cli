@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
@@ -9,6 +8,7 @@ import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -17,18 +17,19 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Command(name = "info", desc = "Show info about the current directory")
 public class InfoCommand extends AbstractCommand {
 
-    private Course course;
-    private Exercise exercise;
     private CourseInfo info;
     private WorkDir workDir;
     private Io io;
     private CliContext ctx;
+
+    private boolean useWorkingDirectory;
+    private boolean fetchFromInternet;
+    private boolean showAll;
 
     @Override
     public void getOptions(Options options) {
@@ -42,148 +43,95 @@ public class InfoCommand extends AbstractCommand {
         this.workDir = ctx.getWorkDir();
         this.io = ctx.getIo();
 
-        boolean fetchFromInternet = args.hasOption("i");
+        String[] stringArgs = args.getArgs();
+        useWorkingDirectory = (stringArgs.length == 0);
+        fetchFromInternet = args.hasOption("i");
+        showAll = args.hasOption("a");
 
         if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
-        if (!fetchFromInternet) {
-            printLocalCourseOrExercise(args);
-            return;
+        if (fetchFromInternet) {
+            if (useWorkingDirectory) {
+                io.println("You must give a course as an argument.");
+                return;
+            }
+            String courseName = stringArgs[0];
+            printInfoFromInternet(courseName);
+        } else {
+            printLocalInfo(args.getArgs());
         }
+    }
 
-        String[] stringArgs = args.getArgs();
-        if (stringArgs.length == 0) {
-            io.println("You must give a course as an argument.");
-            return;
-        }
-
+    private void printInfoFromInternet(String courseName) {
         if (!ctx.hasLogin()) {
             io.println("Loading a course from a server requires login.");
             return;
         }
 
-        course = TmcUtil.findCourse(ctx, stringArgs[0]);
-        if (course == null) {
-            io.println("The course " + stringArgs[0] + " doesn't exist on the server.");
-            return;
+        CourseFinder finder = ctx.createCourseFinder();
+
+        if (finder.search(courseName)) {
+            printCourse(finder.getCourse());
         }
-        printCourse(args.hasOption("a"));
     }
 
-    private void printLocalCourseOrExercise(CommandLine args) {
+    private void printLocalInfo(String[] stringArgs) {
         info = ctx.getCourseInfo();
-        if (info != null) {
-            course = info.getCourse();
-            printCourseOrExercise(args);
-        } else {
-            this.io.println("You have to be in a course directory"
+        if (info == null) {
+            io.println("You have to be in a course directory"
                     + " or use the -i option with the course name "
                     + "to get the information from the server.");
-        }
-    }
-
-    private void printCourseOrExercise(CommandLine args) {
-        String[] stringArgs = args.getArgs();
-        workDir.getExerciseNames(false, false, false);
-
-        // if in exercise directory and no parameters given, print info for that exercise.
-        if (workDir.getExerciseNames(false, false, false).size() == 1 && stringArgs.length == 0) {
-            String currentExercise = workDir.getExerciseNames(false, false, false).get(0);
-            exercise = info.getExercise(currentExercise);
-            printOneExercise(args.hasOption("a"));
             return;
         }
 
-        if (stringArgs.length != 0) {
-            printCourseOrExerciseFromParameters(args);
-            return;
-        }
-        printCourse(args.hasOption("a"));
-    }
-
-    private void printCourseOrExerciseFromParameters(CommandLine args) {
-        String[] stringArgs = args.getArgs();
-        // if parameter is given, check if it is an exercise
-        // or a course. If neither, print an error message.
-        if (info.getExercise(stringArgs[0]) != null) {
-            exercise = info.getExercise(stringArgs[0]);
-            printOneExercise(args.hasOption("a"));
-            return;
-
-        }
-        course = info.getCourse();
-        if (course != null && course.getName().equals(stringArgs[0])) {
-            printCourse(args.hasOption("a"));
-        } else {
-            this.io.println("Wrong course directory."
-                    + " Navigate to the correct course directory or"
-                    + " use the -i option with the course name"
-                    + " to get the information from the server.");
-        }
-    }
-
-    private void printCourse(boolean showAll) {
-        printCourseShort();
-        if (showAll) {
-            printCourseDetails();
-        }
-        printExercises(showAll);
-    }
-
-    private void printCourseShort() {
-        io.println("Course name: " + course.getName());
-        io.println("Number of available exercises: " + course.getExercises().size());
-        io.println("Number of completed exercises: " + completedExercises());
-        io.println("Number of locked exercises: " + course.getUnlockables().size());
-    }
-
-    private void printCourseDetails() {
-        io.println("Unlockables:" + course.getUnlockables().toString());
-        io.println("Course id: " + course.getId());
-        io.println("Details URL: " + course.getDetailsUrl());
-        io.println("Reviews URL: " + course.getReviewsUrl());
-        io.println("Statistics URLs:" + course.getSpywareUrls().toString());
-        io.println("UnlockUrl: " + course.getUnlockUrl());
-        io.println("CometUrl: " + course.getCometUrl());
-    }
-
-    private void printOneExercise(boolean showAll) {
-        if (showAll) {
-            printExercise(exercise);
-        } else {
-            printExerciseShort();
-        }
-    }
-
-    private void printExerciseShort() {
-        io.println("Exercise: " + exercise.getName());
-        io.println("Deadline: " + getDeadline(exercise));
-
-        if (exercise.hasDeadlinePassed() && !exercise.isCompleted()) {
-            io.println(ColorUtil.colorString("deadline passed", Color.PURPLE));
-        } else {
-            if (!exercise.isCompleted() && exercise.isAttempted()) {
-                io.println(ColorUtil.colorString("attempted", Color.BLUE));
+        if (useWorkingDirectory) {
+            // if in exercise directory, print info for that exercise.
+            String exerciseName = getCurrentExercise(workDir);
+            if (exerciseName == null) {
+                printCourse(info.getCourse());
             } else {
-                io.println(formatString("completed", exercise.isCompleted()));
+                printExercise(info.getExercise(exerciseName));
             }
-            if (exercise.requiresReview()) {
-                io.println(formatString("reviewed", exercise.isReviewed()));
-            }
-        }
-    }
-
-    private String formatString(String string, boolean color) {
-        if (color) {
-            return ColorUtil.colorString(string, Color.GREEN);
         } else {
-            return ColorUtil.colorString("not " + string, Color.RED);
+            if (stringArgs.length != 1) {
+                io.println("You can only give one path for this command.");
+                return;
+            }
+            String path = stringArgs[0];
+            printInfoFromParameters(path);
         }
     }
 
-    private void printExercises(boolean showAll) {
+    private void printInfoFromParameters(String pathName) {
+        // Check if path pointed to exercise directory
+        Exercise exercise = info.getExercise(pathName);
+        if (exercise != null) {
+            printExercise(exercise);
+            return;
+        }
+
+        // Check if path pointed to course directory
+        Course course = info.getCourse();
+        if (course != null) {
+            printCourse(course);
+        } else {
+            io.println("Not a course directory. ");
+            io.println("Use the -i option to get course from "
+                    + "server.");
+        }
+    }
+
+    private void printCourse(Course course) {
+        printCourseShort(course);
+        if (showAll) {
+            printCourseDetails(course);
+        }
+        printExerciseList(course);
+    }
+
+    private void printExerciseList(Course course) {
         List<Exercise> exercises = course.getExercises();
         if (exercises == null || exercises.isEmpty()) {
             io.println("Exercises: -");
@@ -193,14 +141,57 @@ public class InfoCommand extends AbstractCommand {
         io.println("Exercises: ");
         for (Exercise exercise : exercises) {
             if (showAll) {
-                printExercise(exercise);
+                printExerciseFull(exercise);
             } else {
                 io.println("    " + exercise.getName());
             }
         }
     }
 
-    private int completedExercises() {
+    private void printCourseShort(Course course) {
+        io.println("Course name: " + course.getName());
+        io.println("Number of available exercises: " + course.getExercises().size());
+        io.println("Number of completed exercises: " + getCompletedExerciseCount(course));
+        io.println("Number of locked exercises: " + course.getUnlockables().size());
+    }
+
+    private void printCourseDetails(Course course) {
+        io.println("Unlockables:" + course.getUnlockables().toString());
+        io.println("Course id: " + course.getId());
+        io.println("Details URL: " + course.getDetailsUrl());
+        io.println("Reviews URL: " + course.getReviewsUrl());
+        io.println("Statistics URLs:" + course.getSpywareUrls().toString());
+        io.println("UnlockUrl: " + course.getUnlockUrl());
+        io.println("CometUrl: " + course.getCometUrl());
+    }
+
+    private void printExercise(Exercise exercise) {
+        if (showAll) {
+            printExerciseFull(exercise);
+        } else {
+            printExerciseShort(exercise);
+        }
+    }
+
+    private void printExerciseShort(Exercise exercise) {
+        io.println("Exercise: " + exercise.getName());
+        io.println("Deadline: " + exercise.getDeadlineDate());
+
+        if (exercise.hasDeadlinePassed() && !exercise.isCompleted()) {
+            io.println(ColorUtil.colorString("deadline passed", Color.PURPLE));
+        } else {
+            if (!exercise.isCompleted() && exercise.isAttempted()) {
+                io.println(ColorUtil.colorString("attempted", Color.BLUE));
+            } else {
+                printFlag("completed", exercise.isCompleted());
+            }
+            if (exercise.requiresReview()) {
+                printFlag("reviewed", exercise.isReviewed());
+            }
+        }
+    }
+
+    private int getCompletedExerciseCount(Course course) {
         int completed = 0;
         for (Exercise exercise : course.getExercises()) {
             if (exercise.isCompleted()) {
@@ -210,13 +201,31 @@ public class InfoCommand extends AbstractCommand {
         return completed;
     }
 
-    private void printExercise(Exercise exercise) {
+    private String getCurrentExercise(WorkDir workDir) {
+        List<String> exercises = workDir.getExerciseNames(false, false, false);
+        if (exercises.size() == 1) {
+            return exercises.get(0);
+        }
+        return null;
+    }
+
+    private void printFlag(String string, boolean setting) {
+        Color color;
+        if (setting) {
+            color = Color.GREEN;
+        } else {
+            color = Color.RED;
+            string = "not " + string;
+        }
+        io.println(ColorUtil.colorString(string, color));
+    }
+
+    private void printExerciseFull(Exercise exercise) {
         io.println("    Exercise name: " + exercise.getName());
         io.println("    Exercise id: " + exercise.getId());
         io.println("    Is locked: " + exercise.isLocked());
         io.println("    Deadline description: " + exercise.getDeadlineDescription());
-        io.println("    Deadline: " + exercise.getDeadline());
-        io.println("    Deadline date: " + exercise.getDeadlineDate());
+        io.println("    Deadline: " + exercise.getDeadlineDate());
         io.println("    Deadline passed: " + exercise.hasDeadlinePassed());
         io.println("    Is returnable: " + exercise.isReturnable());
         io.println("    Review required: " + exercise.requiresReview());
@@ -235,10 +244,5 @@ public class InfoCommand extends AbstractCommand {
         io.println("    Solution download URL: " + exercise.getSolutionDownloadUrl());
         io.println("    Checksum: " + exercise.getChecksum());
         io.println("");
-    }
-
-    private String getDeadline(Exercise exercise) {
-        Date deadline = exercise.getDeadlineDate();
-        return deadline.toString();
     }
 }

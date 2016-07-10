@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * This class is used for searching courses from tmc servers.
  * TODO move some of the test from DownloadExercisesCommand to CourseFinder
  */
 public class CourseFinder {

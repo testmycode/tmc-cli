@@ -10,9 +10,9 @@ import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
@@ -105,6 +105,15 @@ public class CliContext {
         return workDir;
     }
 
+    /**
+     * Create new instance of course finder.
+     * This is used so that it's easy to mock out the course finder.
+     *
+     * @return new instance of CourseFinder
+     */
+    public CourseFinder createCourseFinder() {
+        return new CourseFinder(this);
+    }
     /**
      * Get map of the properties.
      *

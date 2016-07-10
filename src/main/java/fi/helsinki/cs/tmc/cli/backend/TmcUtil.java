@@ -105,6 +105,7 @@ public class TmcUtil {
         return null;
     }
 
+    //TODO This is exactly same method as CourseInfo.getExercise(course, name)
     public static Exercise findExercise(Course course, String name) {
         List<Exercise> exercises;
         exercises = course.getExercises();

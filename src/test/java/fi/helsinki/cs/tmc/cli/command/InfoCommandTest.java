@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -99,17 +101,28 @@ public class InfoCommandTest {
         io.assertContains("You must give a course");
     }
 
+    //TODO we should test this in CourseFinder not here.
     @Test
-    public void showMessageIfCourseDoesNotExistOnTheServer() {
-        when(TmcUtil.findCourse(eq(ctx), eq("foo"))).thenReturn(null);
+    public void dontShowCourseInfoIfTheCourseDoesntExist() {
+        ctx = spy(ctx);
+        app = new Application(ctx);
+        CourseFinder mockCourseFinder = mock(CourseFinder.class);
+        doReturn(mockCourseFinder).when(ctx).createCourseFinder();
+        when(mockCourseFinder.search(eq("foo"))).thenReturn(false);
         String[] args = {"info", "foo", "-i"};
         app.run(args);
-        io.assertContains("course foo doesn't exist");
+        io.assertNotContains("Course name:");
     }
 
     @Test
-    public void printCourseWithOptionI() {
-        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
+    public void printCourseWithInternet() {
+        ctx = spy(ctx);
+        app = new Application(ctx);
+        CourseFinder mockCourseFinder = mock(CourseFinder.class);
+        doReturn(mockCourseFinder).when(ctx).createCourseFinder();
+        when(mockCourseFinder.search(eq("test-course123"))).thenReturn(true);
+        when(mockCourseFinder.getCourse()).thenReturn(course);
+        when(mockCourseFinder.getAccount()).thenReturn(new Account());
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
@@ -118,8 +131,14 @@ public class InfoCommandTest {
     }
 
     @Test
-    public void printCourseWithOptionsIAndA() {
-        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
+    public void printAllCourseExercisesWithInternet() {
+        ctx = spy(ctx);
+        app = new Application(ctx);
+        CourseFinder mockCourseFinder = mock(CourseFinder.class);
+        doReturn(mockCourseFinder).when(ctx).createCourseFinder();
+        when(mockCourseFinder.search(eq("test-course123"))).thenReturn(true);
+        when(mockCourseFinder.getCourse()).thenReturn(course);
+        when(mockCourseFinder.getAccount()).thenReturn(new Account());
 
         String[] args = {"info", "test-course123", "-a", "-i"};
         app.run(args);
@@ -128,8 +147,15 @@ public class InfoCommandTest {
 
     @Test
     public void printCourseWithNoExercisesFromTheServer() {
+        ctx = spy(ctx);
+        app = new Application(ctx);
+        CourseFinder mockCourseFinder = mock(CourseFinder.class);
+        doReturn(mockCourseFinder).when(ctx).createCourseFinder();
+        when(mockCourseFinder.search(eq("test-course123"))).thenReturn(true);
+        when(mockCourseFinder.getCourse()).thenReturn(course);
+        when(mockCourseFinder.getAccount()).thenReturn(new Account());
+
         course.setExercises(new ArrayList<Exercise>());
-        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
@@ -173,8 +199,14 @@ public class InfoCommandTest {
     public void printGivenCourseFromTheServerIfInCourseDirectoryAndGivenCourseName() {
         workDir.setWorkdir(pathToDummyCourse);
 
+        ctx = spy(ctx);
+        app = new Application(ctx);
+        CourseFinder mockCourseFinder = mock(CourseFinder.class);
+        doReturn(mockCourseFinder).when(ctx).createCourseFinder();
+        when(mockCourseFinder.search(eq("test-course123"))).thenReturn(true);
+        when(mockCourseFinder.getCourse()).thenReturn(course);
+        when(mockCourseFinder.getAccount()).thenReturn(new Account());
         course.setExercises(new ArrayList<Exercise>());
-        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
 
         String[] args = {"info", "test-course123", "-i"};
         app.run(args);
@@ -185,11 +217,15 @@ public class InfoCommandTest {
     public void printsErrorIfInCourseDirectoryAndGivenCourseNameThatDoesntExistOnTheServer() {
         workDir.setWorkdir(pathToDummyCourse);
 
-        when(TmcUtil.findCourse(eq(ctx), eq("test-course123"))).thenReturn(course);
+        ctx = spy(ctx);
+        app = new Application(ctx);
+        CourseFinder mockCourseFinder = mock(CourseFinder.class);
+        doReturn(mockCourseFinder).when(ctx).createCourseFinder();
+        when(mockCourseFinder.search(eq("test-course123"))).thenReturn(false);
 
         String[] args = {"info", "notacourse", "-i"};
         app.run(args);
-        io.assertContains("doesn't exist on the server.");
+        io.assertNotContains("Course name:");
     }
 
     @Test
