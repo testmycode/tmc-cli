@@ -1,29 +1,25 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
+import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
+
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 @Command(name = "download", desc = "Download exercises for a specific course")
 public class DownloadExercisesCommand extends AbstractCommand {
@@ -41,7 +37,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
+    public void run(CliContext context, CommandLine args) {
+        Io io = context.getIo();
+        ctx = context;
+
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
             io.println("You must give a course name as an argument.");
@@ -49,7 +48,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
 
-        ctx = getContext();
+        ctx = context;
         showAll = args.hasOption("a");
 
         if (!ctx.loadBackend()) {
@@ -63,18 +62,20 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         String courseName = stringArgs[0];
-        Course course = findCourse(courseName);
-        if (course == null) {
+        CourseFinder finder = new CourseFinder(ctx);
+        if (!finder.search(courseName)) {
             return;
         }
+        Course course = finder.getCourse();
         List<Exercise> filtered = getFilteredExercises(course);
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
-        Color.AnsiColor color1 = ctx.getApp().getColor("progressbar-left");
-        Color.AnsiColor color2 = ctx.getApp().getColor("progressbar-right");
-        TmcCliProgressObserver progobs = new TmcCliProgressObserver(io, color1, color2);
+        Color color1 = ctx.getApp().getColor("progressbar-left");
+        Color color2 = ctx.getApp().getColor("progressbar-right");
+        CliProgressObserver progobs = new CliProgressObserver(io, color1, color2);
 
+        ctx.useAccount(finder.getAccount());
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {
             io.println("Failed to download exercises");
@@ -82,50 +83,9 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         printStatistics(course, filtered.size(), exercises.size());
-        createNewCourse(course);
-    }
 
-    // TODO This method could be moved somewhere else.
-    private Course findCourse(String courseName) {
-        Io io = ctx.getIo();
-
-        List<Settings> accountsList = SettingsIo.getSettingsList();
-        // LinkedHashMap is used here to preserve ordering.
-        Map<Settings, Course> matches = new LinkedHashMap<>();
-
-        for (Settings settings : accountsList) {
-            ctx.useSettings(settings);
-            Course course = TmcUtil.findCourse(ctx, courseName);
-            if (course != null) {
-                matches.put(settings, course);
-            }
-        }
-
-        if (matches.size() == 1) {
-            Entry<Settings, Course> firstEntry = matches.entrySet().iterator().next();
-            ctx.useSettings(firstEntry.getKey());
-            return firstEntry.getValue();
-        } else if (matches.isEmpty()) {
-            io.println("Course doesn't exist.");
-            return null;
-        }
-
-        io.println("There is " + matches.size()
-                + " courses with same name at different servers.");
-
-        for (Entry<Settings, Course> entrySet : matches.entrySet()) {
-            Settings settings = entrySet.getKey();
-            Course course = entrySet.getValue();
-
-            if (io.readConfirmation("Download course from "
-                    + settings.getServerAddress() + " with '"
-                    + settings.getUsername() + "' account", false)) {
-                ctx.useSettings(settings);
-                return course;
-            }
-        }
-        io.println("The previous course was last that matched.");
-        return null;
+        CourseInfoIo.createNewCourse(course, finder.getAccount(),
+                workDir.getWorkingDirectory());
     }
 
     private List<Exercise> getFilteredExercises(Course course) {
@@ -159,8 +119,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
             if (failedCount > 0) {
                 io.println("  of which " + (requestCount - failedCount)
                         + " exercises were succesfully downloaded");
-                io.println(Color.colorString("  and of which " + failedCount + " failed.",
-                        Color.AnsiColor.ANSI_RED));
+                io.println(ColorUtil.colorString("  and of which " + failedCount + " failed.",
+                        Color.RED));
                 //TODO we could print the names of the not downloaded exercises here
             } else {
                 io.println("  of which "
@@ -170,16 +130,5 @@ public class DownloadExercisesCommand extends AbstractCommand {
                 io.println("Use -a/--all to download completed exercises as well.");
             }
         }
-    }
-
-    private void createNewCourse(Course course) {
-        WorkDir workDir = ctx.getWorkDir();
-        Path configFile = workDir.getWorkingDirectory()
-                .resolve(course.getName())
-                .resolve(CourseInfoIo.COURSE_CONFIG);
-
-        CourseInfo info = ctx.createCourseInfo(course);
-        info.setExercises(course.getExercises());
-        CourseInfoIo.save(info, configFile);
     }
 }

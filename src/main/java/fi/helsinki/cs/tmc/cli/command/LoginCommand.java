@@ -1,13 +1,14 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -30,11 +31,17 @@ public class LoginCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.ctx = getContext();
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
+        this.io = ctx.getIo();
 
         if (!ctx.loadBackendWithoutLogin()) {
+            return;
+        }
+
+        if (!TmcUtil.hasConnection(ctx)) {
+            io.println("You don't have internet connection currently.");
+            io.println("Check the tmc-cli logs to get exact problem.");
             return;
         }
 
@@ -48,12 +55,14 @@ public class LoginCommand extends AbstractCommand {
         username = getLoginInfo(args, username, "u", "username: ");
         password = getLoginInfo(args, null, "p", "password: ");
 
-        //TODO don't create new settings object.  
-        Settings settings = new Settings(serverAddress, username, password);
-        if (!TmcUtil.tryToLogin(ctx, settings)) {
+        Account account = new Account(serverAddress, username, password);
+        if (!TmcUtil.tryToLogin(ctx, account)) {
             return;
         }
-        if (!SettingsIo.save(settings)) {
+
+        AccountList list = SettingsIo.loadAccountList();
+        list.addAccount(account);
+        if (!SettingsIo.saveAccountList(list)) {
             io.println("Failed to write the accounts file.");
             return;
         }
@@ -64,12 +73,17 @@ public class LoginCommand extends AbstractCommand {
     private String getLoginInfo(CommandLine line, String oldValue, String option,
             String prompt) {
         String value = oldValue;
+        boolean isPassword = option.equals("p");
 
         if (line.hasOption(option)) {
             value = line.getOptionValue(option);
         }
 
-        if (value == null && option.equals("p")) {
+        if (value != null && !isPassword) {
+            io.println(prompt + value);
+        }
+
+        if (value == null && isPassword) {
             value = io.readPassword(prompt);
         } else if (value == null) {
             value = io.readLine(prompt);

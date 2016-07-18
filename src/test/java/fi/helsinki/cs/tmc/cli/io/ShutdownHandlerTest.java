@@ -33,7 +33,7 @@ public class ShutdownHandlerTest {
     @Test
     public void printsAnsiResetAtRun() {
         shutdownHandler.run();
-        io.assertEquals(Color.AnsiColor.ANSI_RESET.toString() + "\n");
+        io.assertEquals(Color.RESET.toString() + "\n");
     }
 
     @Test

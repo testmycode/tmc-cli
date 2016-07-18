@@ -140,7 +140,7 @@
                         </goals>
                         <configuration>
                             <annotationProcessors>
-                                <arg>fi.helsinki.cs.tmc.cli.command.core.CommandAnnotationProcessor</arg>
+                                <arg>fi.helsinki.cs.tmc.cli.core.CommandAnnotationProcessor</arg>
                             </annotationProcessors>
                             <fork>true</fork> <!-- bug; non-forked compiler has basedir set to user.dir or sth -->
                             <excludes>

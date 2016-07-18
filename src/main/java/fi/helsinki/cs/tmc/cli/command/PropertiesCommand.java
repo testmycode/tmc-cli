@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import org.apache.commons.cli.CommandLine;
@@ -27,10 +27,11 @@ public class PropertiesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.io = io;
-        CliContext ctx = getContext();
-        Boolean unset = args.hasOption("u");
+    public void run(CliContext context, CommandLine args) {
+        CliContext ctx = context;
+        this.io = ctx.getIo();
+
+        boolean unset = args.hasOption("u");
         String[] arguments = args.getArgs();
         HashMap<String, String> props = ctx.getProperties();
         if (arguments.length == 0) {

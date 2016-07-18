@@ -9,12 +9,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.CliContext;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.ExerciseUpdater;
+
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -132,7 +133,7 @@ public class UpdateCommandTest {
         List<Exercise> newAndChanged = new ArrayList<>();
         newAndChanged.addAll(newExercises);
         newAndChanged.addAll(changedExercises);
-        when(exerciseUpdater.downloadUpdates(any(TmcCliProgressObserver.class)))
+        when(exerciseUpdater.downloadUpdates(any(CliProgressObserver.class)))
                 .thenReturn(newAndChanged);
         when(exerciseUpdater.updateCourseJson(any(CourseInfo.class), any(Path.class)))
                 .thenReturn(true);
