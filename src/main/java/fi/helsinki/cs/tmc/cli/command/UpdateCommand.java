@@ -1,16 +1,15 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
+import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.Color;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TmcCliProgressObserver;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
-import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.ExerciseUpdater;
+
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import org.apache.commons.cli.CommandLine;
@@ -31,9 +30,9 @@ public class UpdateCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.ctx = getContext();
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
+        this.io = ctx.getIo();
         String[] stringArgs = args.getArgs();
 
         //TODO: Do this in all commands
@@ -68,10 +67,10 @@ public class UpdateCommand extends AbstractCommand {
         printExercises(exerciseUpdater.getUpdatedExercises(), "Modified exercises:");
         io.println("");
 
-        Color.AnsiColor color1 = getContext().getApp().getColor("progressbar-left");
-        Color.AnsiColor color2 = getContext().getApp().getColor("progressbar-right");
+        Color color1 = ctx.getApp().getColor("progressbar-left");
+        Color color2 = ctx.getApp().getColor("progressbar-right");
         List<Exercise> downloaded = exerciseUpdater.downloadUpdates(
-                new TmcCliProgressObserver(io, color1, color2));
+                new CliProgressObserver(io, color1, color2));
         if (downloaded.isEmpty()) {
             io.println("Failed to download exercises");
             return;

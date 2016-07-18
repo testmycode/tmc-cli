@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.mockito.Mockito.mock;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.CliContext;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
 

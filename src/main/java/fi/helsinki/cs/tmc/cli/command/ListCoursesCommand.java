@@ -1,13 +1,15 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 
@@ -30,33 +32,44 @@ public class ListCoursesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.ctx = getContext();
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
         this.io = ctx.getIo();
 
-        if (! getContext().loadBackend()) {
+        if (! ctx.loadBackendWithoutLogin()) {
             return;
         }
 
-        List<Settings> accountsList = SettingsIo.getSettingsList();
+        if (!TmcUtil.hasConnection(ctx)) {
+            io.println("You don't have internet connection currently.");
+            io.println("Check the tmc-cli logs to get exact problem.");
+            return;
+        }
+
+        AccountList accountsList = SettingsIo.loadAccountList();
         boolean isFirst = true;
 
-        for (Settings settings : accountsList) {
+        if (accountsList.getAccountCount() == 0) {
+            io.println("You haven't logged in on any tmc server.");
+            return;
+        }
+
+        for (Account settings : accountsList) {
             if (!isFirst) {
                 io.println("");
             }
-            if (accountsList.size() > 1) {
-                io.println(Color.colorString("Server " + settings.getServerAddress(),
-                        Color.AnsiColor.ANSI_YELLOW));
+            if (accountsList.getAccountCount() > 1) {
+                io.println(ColorUtil.colorString("Server " + settings.getServerAddress(),
+                        Color.YELLOW));
             }
             printCourseList(settings);
             isFirst = false;
         }
     }
 
-    private void printCourseList(Settings settings) {
-        ctx.useSettings(settings);
-        List<Course> courses = TmcUtil.listCourses(getContext());
+    private void printCourseList(Account account) {
+        ctx.useAccount(account);
+        List<Course> courses = TmcUtil.listCourses(ctx);
         if (courses.isEmpty()) {
             io.println("No courses found from the server.");
             return;

@@ -8,11 +8,13 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.CliContext;
+import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.Settings;
-import fi.helsinki.cs.tmc.cli.tmcstuff.SettingsIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
+
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
@@ -40,22 +42,34 @@ public class ListCoursesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
-        Settings settings = new Settings("http://test.test", "", "");
+        Account account = new Account("http://test.test", "", "");
+        AccountList accountList = new AccountList();
+        accountList.addAccount(account);
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
-        when(SettingsIo.getSettingsList()).thenReturn(Arrays.asList(settings));
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
+        when(SettingsIo.loadAccountList()).thenReturn(accountList);
     }
 
     @Test
     public void failIfBackendFails() {
-        CliContext ctx = spy(new CliContext(io, mockCore));
+        ctx = spy(ctx);
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
+        doReturn(false).when(ctx).loadBackendWithoutLogin();
 
         String[] args = {"courses", "foo"};
         app.run(args);
         io.assertNotContains("Course doesn't exist");
+    }
+
+    @Test
+    public void failIfThereIsNoConnection() {
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(false);
+
+        String[] args = {"courses"};
+        app.run(args);
+        io.assertContains("don't have internet connection");
     }
 
     @Test
@@ -80,10 +94,13 @@ public class ListCoursesCommandTest {
 
     @Test
     public void listCoursesWorksWithTwoServers() {
-        Settings settings1 = new Settings("http://test.test", "", "");
-        Settings settings2 = new Settings("http://hello.test", "", "");
-        when(SettingsIo.getSettingsList()).thenReturn(
-                Arrays.asList(settings1, settings2));
+        Account account1 = new Account("http://test.test", "", "");
+        Account account2 = new Account("http://hello.test", "", "");
+
+        AccountList accountList = new AccountList();
+        accountList.addAccount(account1);
+        accountList.addAccount(account2);
+        when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
         List<Course> list1 = Arrays.asList(new Course("course1"));
         List<Course> list2 = Arrays.asList(new Course("course2"));

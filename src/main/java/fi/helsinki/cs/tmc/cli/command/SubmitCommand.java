@@ -1,17 +1,19 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.ExerciseUpdater;
-import fi.helsinki.cs.tmc.cli.tmcstuff.FeedbackHandler;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.ExerciseUpdater;
+import fi.helsinki.cs.tmc.cli.shared.FeedbackHandler;
+import fi.helsinki.cs.tmc.cli.shared.ResultPrinter;
+
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
@@ -46,9 +48,9 @@ public class SubmitCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.ctx = getContext();
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
+        this.io = ctx.getIo();
 
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
@@ -90,8 +92,8 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        Color.AnsiColor color1 = ctx.getApp().getColor("testresults-left");
-        Color.AnsiColor color2 = ctx.getApp().getColor("testresults-right");
+        Color color1 = ctx.getApp().getColor("testresults-left");
+        Color color2 = ctx.getApp().getColor("testresults-right");
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll,
                 color1, color2);
 
@@ -103,8 +105,8 @@ public class SubmitCommand extends AbstractCommand {
         List<URI> feedbackUris = new ArrayList<>();
 
         for (Exercise exercise : submitExercises) {
-            io.println(Color.colorString("Submitting: " + exercise.getName(),
-                    Color.AnsiColor.ANSI_YELLOW));
+            io.println(ColorUtil.colorString("Submitting: " + exercise.getName(),
+                    Color.YELLOW));
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
                 io.println("Submission failed.");
@@ -201,7 +203,7 @@ public class SubmitCommand extends AbstractCommand {
         msg += "Use 'tmc update' to download " + (total > 1 ? "them." : "it.");
 
         io.println("");
-        io.println(Color.colorString(msg, Color.AnsiColor.ANSI_YELLOW));
+        io.println(ColorUtil.colorString(msg, Color.YELLOW));
     }
 
     private String[] parseArgs(CommandLine args) {

@@ -1,8 +1,10 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
@@ -78,8 +80,8 @@ public class DocumentCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        this.io = context.getIo();
         this.width = EnvironmentUtil.getTerminalWidth();
         this.height = 30;
         this.cursorX = 0;
@@ -139,7 +141,7 @@ public class DocumentCommand extends AbstractCommand {
         setCursor(0, 0);
         io.print("\u001B[0J");
 
-        blitter(Color.colorString("Original dev team", Color.AnsiColor.ANSI_BLUE),
+        blitter(ColorUtil.colorString("Original dev team", Color.BLUE),
                 Math.max(centerX - 10, 0), centerY - 2);
         blitter("Johannes L. (jclc)", centerX, centerY++);
         centerY++;
@@ -156,7 +158,7 @@ public class DocumentCommand extends AbstractCommand {
         io.print("\u001B[0J");
 
         centerY = height / 2 - 3;
-        blitter(Color.colorString("Special thanks for", Color.AnsiColor.ANSI_CYAN),
+        blitter(ColorUtil.colorString("Special thanks for", Color.CYAN),
                 Math.max(centerX - 10, 0), centerY - 2);
         blitter("Jarmo Isotalo (Jamo)", centerX, centerY++);
         centerY++;

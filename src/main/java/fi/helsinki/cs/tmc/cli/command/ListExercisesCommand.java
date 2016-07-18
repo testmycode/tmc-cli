@@ -1,16 +1,16 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -33,9 +33,9 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
-        this.ctx = getContext();
-        this.io = io;
+    public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
+        this.io = ctx.getIo();
 
         String courseName = getCourseName(args);
         if (courseName == null) {
@@ -156,16 +156,16 @@ public class ListExercisesCommand extends AbstractCommand {
         String status;
         if (exercise.isCompleted()) {
             if (exercise.requiresReview() && !exercise.isReviewed()) {
-                status = Color.colorString("  Requires review: ", Color.AnsiColor.ANSI_YELLOW);
+                status = ColorUtil.colorString("  Requires review: ", Color.YELLOW);
             } else {
-                status = Color.colorString("  Completed: ", Color.AnsiColor.ANSI_GREEN);
+                status = ColorUtil.colorString("  Completed: ", Color.GREEN);
             }
         } else if (exercise.hasDeadlinePassed()) {
-            status = Color.colorString("  Deadline passed: ", Color.AnsiColor.ANSI_PURPLE);
+            status = ColorUtil.colorString("  Deadline passed: ", Color.PURPLE);
         } else if (exercise.isAttempted()) {
-            status = Color.colorString("  Attempted: ", Color.AnsiColor.ANSI_BLUE);
+            status = ColorUtil.colorString("  Attempted: ", Color.BLUE);
         } else {
-            status = Color.colorString("  Not completed: ", Color.AnsiColor.ANSI_RED);
+            status = ColorUtil.colorString("  Not completed: ", Color.RED);
         }
 
         status += exercise.getName() + "\n";

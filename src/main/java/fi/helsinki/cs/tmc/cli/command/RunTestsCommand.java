@@ -1,15 +1,16 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.CliContext;
-import fi.helsinki.cs.tmc.cli.command.core.AbstractCommand;
-import fi.helsinki.cs.tmc.cli.command.core.Command;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
+import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Color;
+import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.ResultPrinter;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.tmcstuff.TmcUtil;
-import fi.helsinki.cs.tmc.cli.tmcstuff.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.shared.ResultPrinter;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
@@ -39,13 +40,15 @@ public class RunTestsCommand extends AbstractCommand {
     }
 
     @Override
-    public void run(CommandLine args, Io io) {
+    public void run(CliContext context, CommandLine args) {
+        CliContext ctx = context;
+        Io io = ctx.getIo();
+
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
-        CliContext ctx = getContext();
         if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
@@ -66,15 +69,15 @@ public class RunTestsCommand extends AbstractCommand {
 
         CourseInfo info = ctx.getCourseInfo();
 
-        Color.AnsiColor passedColor = ctx.getApp().getColor("testresults-left");
-        Color.AnsiColor failedColor = ctx.getApp().getColor("testresults-right");
+        Color passedColor = ctx.getApp().getColor("testresults-left");
+        Color failedColor = ctx.getApp().getColor("testresults-right");
         ResultPrinter resultPrinter = new ResultPrinter(io, showDetails, showPassed,
                 passedColor, failedColor);
 
         boolean isOnlyExercise = (exerciseNames.size() == 1);
 
         for (String name : exerciseNames) {
-            io.println(Color.colorString("Testing: " + name, Color.AnsiColor.ANSI_YELLOW));
+            io.println(ColorUtil.colorString("Testing: " + name, Color.YELLOW));
             Exercise exercise = info.getExercise(name);
 
             RunResult runResult = TmcUtil.runLocalTests(ctx, exercise);
