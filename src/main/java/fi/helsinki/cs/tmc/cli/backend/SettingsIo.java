@@ -117,32 +117,37 @@ public class SettingsIo {
         return configPath.resolve(CONFIG_DIR);
     }
 
-    //TODO handle exceptions
     private static Path getAccountsFile(Path configRoot) {
         Path file = configRoot.resolve(ACCOUNTS_CONFIG);
-        if (!Files.exists(configRoot)) {
-            try {
-                Files.createDirectories(configRoot).getParent();
-            } catch (Exception e) { }
-            try {
-                Files.createFile(configRoot);
-            } catch (Exception e) { }
+        if (!requireConfigDirectory(configRoot)) {
+            return null;
         }
         return file;
     }
 
-    //TODO handle exceptions
     private static Path getPropertiesFile(Path configRoot) {
         Path file = configRoot.resolve(PROPERTIES_CONFIG);
-        if (!Files.exists(configRoot)) {
-            try {
-                Files.createDirectories(configRoot).getParent();
-            } catch (Exception e) { }
-            try {
-                Files.createFile(configRoot);
-            } catch (Exception e) { }
+        if (!requireConfigDirectory(configRoot)) {
+            return null;
         }
         return file;
+    }
+
+    /**
+     * Create the config directory if it doesn't already exist.
+     * @param configRoot config directory
+     * @return false if directory can't be created.
+     */
+    private static boolean requireConfigDirectory(Path configRoot) {
+        if (!Files.exists(configRoot)) {
+            try {
+                Files.createDirectories(configRoot);
+            } catch (Exception e) {
+                logger.error("Could not create config directory", e);
+                return false;
+            }
+        }
+        return true;
     }
 
     private static AccountList getHolderFromJson(Path file) {
