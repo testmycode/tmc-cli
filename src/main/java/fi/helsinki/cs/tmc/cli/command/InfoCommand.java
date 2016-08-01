@@ -54,7 +54,7 @@ public class InfoCommand extends AbstractCommand {
 
         if (fetchFromInternet) {
             if (useWorkingDirectory) {
-                io.println("You must give a course as an argument.");
+                io.errorln("You must give a course as an argument.");
                 return;
             }
             String courseName = stringArgs[0];
@@ -66,7 +66,7 @@ public class InfoCommand extends AbstractCommand {
 
     private void printInfoFromInternet(String courseName) {
         if (!ctx.hasLogin()) {
-            io.println("Loading a course from a server requires login.");
+            io.errorln("Loading a course from a server requires login.");
             return;
         }
 
@@ -80,7 +80,7 @@ public class InfoCommand extends AbstractCommand {
     private void printLocalInfo(String[] stringArgs) {
         info = ctx.getCourseInfo();
         if (info == null) {
-            io.println("You have to be in a course directory"
+            io.errorln("You have to be in a course directory"
                     + " or use the -i option with the course name "
                     + "to get the information from the server.");
             return;
@@ -96,7 +96,7 @@ public class InfoCommand extends AbstractCommand {
             }
         } else {
             if (stringArgs.length != 1) {
-                io.println("You can only give one path for this command.");
+                io.errorln("You can only give one path for this command.");
                 return;
             }
             String path = stringArgs[0];
@@ -117,8 +117,8 @@ public class InfoCommand extends AbstractCommand {
         if (course != null) {
             printCourse(course);
         } else {
-            io.println("Not a course directory. ");
-            io.println("Use the -i option to get course from "
+            io.errorln("Not a course directory. ");
+            io.errorln("Use the -i option to get course from "
                     + "server.");
         }
     }
@@ -243,6 +243,6 @@ public class InfoCommand extends AbstractCommand {
         io.println("    Download URL: " + exercise.getDownloadUrl());
         io.println("    Solution download URL: " + exercise.getSolutionDownloadUrl());
         io.println("    Checksum: " + exercise.getChecksum());
-        io.println("");
+        io.println();
     }
 }

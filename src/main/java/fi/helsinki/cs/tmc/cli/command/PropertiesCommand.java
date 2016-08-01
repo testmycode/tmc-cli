@@ -40,7 +40,7 @@ public class PropertiesCommand extends AbstractCommand {
         }
 
         if (arguments.length % 2 == 1 && !unset) {
-            io.println("Invalid argument count. Usage: tmc prop KEY VALUE ...");
+            io.errorln("Invalid argument count. Usage: tmc prop KEY VALUE ...");
             return;
         }
 
@@ -50,7 +50,7 @@ public class PropertiesCommand extends AbstractCommand {
                 for (String arg : arguments) {
                     io.print(" " + arg);
                 }
-                io.println("");
+                io.println();
                 if (!io.readConfirmation("Are you sure?", true)) {
                     return;
                 }
@@ -64,7 +64,7 @@ public class PropertiesCommand extends AbstractCommand {
                 for (int i = 0; i < arguments.length; i = i + 2) {
                     io.print(" " + arguments[i] + "=>" + arguments[i + 1]);
                 }
-                io.println("");
+                io.println();
                 if (!io.readConfirmation("Are you sure?", true)) {
                     return;
                 }

@@ -62,7 +62,7 @@ public class Application {
     private boolean runCommand(String name, String[] args) {
         AbstractCommand command = CommandFactory.createCommand(name);
         if (command == null) {
-            io.println("Command " + name + " doesn't exist.");
+            io.errorln("Command " + name + " doesn't exist.");
             return false;
         }
 
@@ -87,7 +87,7 @@ public class Application {
         }
 
         if (commandName.startsWith("-")) {
-            io.println("Unrecognized option: " + commandName);
+            io.errorln("Unrecognized option: " + commandName);
             return null;
         }
 
@@ -153,7 +153,7 @@ public class Application {
             try {
                 time = Long.parseLong(previousTimestamp);
             } catch (NumberFormatException ex) {
-                io.println("The previous update date isn't number.");
+                io.errorln("The previous update date isn't number.");
                 logger.warn("The previous update date isn't number.", ex);
                 return false;
             }

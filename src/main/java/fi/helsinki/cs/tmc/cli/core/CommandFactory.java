@@ -61,7 +61,6 @@ public class CommandFactory {
     /**
      * Create new instance of the command.
      *
-     * @param context Execution context given to the created command
      * @param name Name of the command
      * @return A new command instance
      */

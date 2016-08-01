@@ -44,7 +44,7 @@ public class CourseFinder {
         Map<Account, Course> matches = new LinkedHashMap<>();
 
         if (accountsList.getAccountCount() == 0) {
-            io.println("You haven't logged in on any tmc server.");
+            io.errorln("You haven't logged in on any tmc server.");
             return false;
         }
 
@@ -58,7 +58,7 @@ public class CourseFinder {
 
         if (matches.isEmpty()) {
             //TODO we could search here for similar courses.
-            io.println("Course doesn't exist.");
+            io.errorln("Course doesn't exist.");
             return false;
         } else if (matches.size() == 1) {
             return handleSingleMatchingCourses(matches);

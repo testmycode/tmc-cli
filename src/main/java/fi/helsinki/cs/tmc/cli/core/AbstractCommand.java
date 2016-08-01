@@ -63,8 +63,8 @@ public abstract class AbstractCommand {
             args = parser.parse(options, stringArgs);
         } catch (ParseException e) {
             logger.warn("Invalid command line arguments.", e);
-            io.println("Invalid command line arguments.");
-            io.println(e.getMessage());
+            io.errorln("Invalid command line arguments.");
+            io.errorln(e.getMessage());
             return null;
         }
 

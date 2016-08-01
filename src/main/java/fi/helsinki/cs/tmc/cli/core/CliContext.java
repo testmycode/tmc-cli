@@ -148,7 +148,7 @@ public class CliContext {
         }
         courseInfo = CourseInfoIo.load(workDir.getConfigFile());
         if (courseInfo == null) {
-            io.println("Course configuration file "
+            io.errorln("Course configuration file "
                     + workDir.getConfigFile().toString()
                     + "is invalid.");
             //TODO add a way to rewrite the corrupted course config file.
@@ -188,9 +188,9 @@ public class CliContext {
         if (!hasLogin) {
             if (courseInfo == null) {
                 // if user is not in course folder.
-                io.println("You are not logged in. Log in using: tmc login");
+                io.errorln("You are not logged in. Log in using: tmc login");
             } else {
-                io.println("You are not logged in as " + courseInfo.getUsername()
+                io.errorln("You are not logged in as " + courseInfo.getUsername()
                         + ". Log in using: tmc login");
             }
             return false;

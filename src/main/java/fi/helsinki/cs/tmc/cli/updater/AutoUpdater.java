@@ -76,7 +76,7 @@ public class AutoUpdater {
         String dlUrl = binAsset.get("browser_download_url").getAsString();
         String currentBinLocation = getJarLocation();
         if (currentBinLocation == null) {
-            io.println("Unable to find current program location, aborting update.");
+            io.errorln("Unable to find current program location, aborting update.");
             return false;
         }
         File destination = new File(currentBinLocation + binName);
@@ -110,7 +110,7 @@ public class AutoUpdater {
             inputStream = connection.getInputStream();
         } catch (IOException ex) {
             logger.warn("Failed to fetch page", ex);
-            io.println("Failed to create https connection to github.");
+            io.errorln("Failed to create https connection to github.");
             return null;
         }
 
@@ -148,7 +148,7 @@ public class AutoUpdater {
     protected boolean fetchTmcCliBinary(String downloadUrl, File destination) {
         byte[] content = fetchHttpEntity(downloadUrl);
         if (content == null) {
-            io.println("Failed to download tmc-cli.");
+            io.errorln("Failed to download tmc-cli.");
             return false;
         }
         try {

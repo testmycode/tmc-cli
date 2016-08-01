@@ -109,9 +109,9 @@ public class SubmitCommand extends AbstractCommand {
                     Color.YELLOW));
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
-                io.println("Submission failed.");
+                io.errorln("Submission failed.");
                 if (!isOnlyExercise) {
-                    io.println("Try to submit exercises one by one.");
+                    io.errorln("Try to submit exercises one by one.");
                 }
                 return;
                 //resultPrinter.addFailedExercise();
@@ -126,7 +126,7 @@ public class SubmitCommand extends AbstractCommand {
                 exercisesWithFeedback.add(exercise.getName());
                 feedbackUris.add(URI.create(result.getFeedbackAnswerUrl()));
             }
-            io.println("");
+            io.println();
         }
         if (!isOnlyExercise) {
             resultPrinter.printTotalExerciseResults();
@@ -143,7 +143,7 @@ public class SubmitCommand extends AbstractCommand {
                 if (success) {
                     io.println("Feedback sent.");
                 } else {
-                    io.println("Failed to send feedback.");
+                    io.errorln("Failed to send feedback.");
                 }
             }
         }
@@ -157,14 +157,14 @@ public class SubmitCommand extends AbstractCommand {
 
         Course updatedCourse = TmcUtil.findCourse(ctx, courseInfo.getCourseName());
         if (updatedCourse == null) {
-            io.println("Failed to update config file for course " + courseInfo.getCourseName());
+            io.errorln("Failed to update config file for course " + courseInfo.getCourseName());
             return;
         }
 
         for (Exercise submitted : submittedExercises) {
             Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
             if (updatedEx == null) {
-                io.println("Failed to update config file for exercise " + submitted.getName()
+                io.errorln("Failed to update config file for exercise " + submitted.getName()
                         + ". The exercise doesn't exist in server anymore.");
                 continue;
             }
@@ -202,7 +202,7 @@ public class SubmitCommand extends AbstractCommand {
         }
         msg += "Use 'tmc update' to download " + (total > 1 ? "them." : "it.");
 
-        io.println("");
+        io.println();
         io.println(ColorUtil.colorString(msg, Color.YELLOW));
     }
 

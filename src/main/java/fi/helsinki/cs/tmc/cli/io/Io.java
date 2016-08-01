@@ -16,6 +16,20 @@ public abstract class Io extends Writer {
         print(str + "\n");
     }
 
+    public void println() {
+        print("\n");
+    }
+
+    public abstract void error(String str);
+
+    public void error(Object obj) {
+        print(String.valueOf(obj));
+    }
+
+    public void errorln(String str) {
+        print(str + "\n");
+    }
+
     public abstract String readLine(String prompt);
 
     public abstract String readPassword(String prompt);

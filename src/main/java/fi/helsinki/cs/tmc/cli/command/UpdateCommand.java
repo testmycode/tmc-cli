@@ -35,9 +35,8 @@ public class UpdateCommand extends AbstractCommand {
         this.io = ctx.getIo();
         String[] stringArgs = args.getArgs();
 
-        //TODO: Do this in all commands
         if (stringArgs.length > 0) {
-            io.println("Use in the course directory");
+            io.errorln("Use in the course directory");
             return;
         }
 
@@ -48,7 +47,7 @@ public class UpdateCommand extends AbstractCommand {
         WorkDir workDir = ctx.getWorkDir();
 
         if (workDir.getCourseDirectory() == null) {
-            io.println("Not a course directory");
+            io.errorln("Not a course directory");
             return;
         }
 
@@ -65,19 +64,19 @@ public class UpdateCommand extends AbstractCommand {
 
         printExercises(exerciseUpdater.getNewExercises(), "New exercises:");
         printExercises(exerciseUpdater.getUpdatedExercises(), "Modified exercises:");
-        io.println("");
+        io.println();
 
         Color color1 = ctx.getApp().getColor("progressbar-left");
         Color color2 = ctx.getApp().getColor("progressbar-right");
         List<Exercise> downloaded = exerciseUpdater.downloadUpdates(
                 new CliProgressObserver(io, color1, color2));
         if (downloaded.isEmpty()) {
-            io.println("Failed to download exercises");
+            io.errorln("Failed to download exercises");
             return;
         }
 
         if (!exerciseUpdater.updateCourseJson(info, configFile)) {
-            io.println("Failed to update course config file");
+            io.errorln("Failed to update course config file");
         }
     }
 

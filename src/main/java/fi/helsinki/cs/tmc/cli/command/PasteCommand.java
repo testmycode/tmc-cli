@@ -49,18 +49,18 @@ public class PasteCommand extends AbstractCommand {
         } else if (stringArgs.length == 1) {
             valid = workdir.addPath(stringArgs[0]);
         } else {
-            io.println("Error: Too many arguments. Expected 1, got " + stringArgs.length);
+            io.errorln("Error: Too many arguments. Expected 1, got " + stringArgs.length);
             return;
         }
         if (!valid) {
-            io.println("The command can be used in an exercise directory without the exercise name"
+            io.errorln("The command can be used in an exercise directory without the exercise name"
                     + " or in a course directory with the name as an argument.");
             return;
         }
         
         List<String> exercisenames = workdir.getExerciseNames();
         if (exercisenames.size() != 1) {
-            io.println("Error: Matched too many exercises.");
+            io.errorln("Error: Matched too many exercises.");
             return;
         }
 
@@ -89,12 +89,12 @@ public class PasteCommand extends AbstractCommand {
         Exercise exercise = info.getExercise(exerciseName);
         URI uri = TmcUtil.sendPaste(ctx, exercise, message);
         if (uri == null && exercise.hasDeadlinePassed()) {
-            io.println("Unable to send the paste."
+            io.errorln("Unable to send the paste."
                     + " The deadline for submitting this exercise has passed");
             return;
         }
         if (uri == null) {
-            io.println("Unable to send the paste");
+            io.errorln("Unable to send the paste");
             return;
         }
 

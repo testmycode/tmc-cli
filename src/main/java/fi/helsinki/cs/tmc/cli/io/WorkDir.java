@@ -106,7 +106,6 @@ public class WorkDir {
         }
 
         for (Path dir : directories) {
-
             // convert path to a string relative to the course dir
             String exDir = getCourseDirectory().relativize(dir).toString();
             for (Exercise exercise : allExercises) {
@@ -117,6 +116,7 @@ public class WorkDir {
                 }
             }
         }
+
         for (Exercise exercise : exercises) {
             if (filterExercise(exercise, locallyTested, exists, onlyTested, filterCompleted)) {
                 filteredExerciseNames.add(exercise.getName());

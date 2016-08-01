@@ -56,14 +56,14 @@ public class RunTestsCommand extends AbstractCommand {
         WorkDir workDir = ctx.getWorkDir();
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
-                io.println("Error: " + exercise + " is not a valid exercise.");
+                io.errorln("The argument \"" + exercise + "\" is not a valid exercise.");
                 return;
             }
         }
 
         List<String> exerciseNames = workDir.getExerciseNames();
         if (exerciseNames.isEmpty()) {
-            io.println("You have to be in a course directory to run tests");
+            io.errorln("You have to be in a course directory to run tests.");
             return;
         }
 
@@ -82,7 +82,7 @@ public class RunTestsCommand extends AbstractCommand {
 
             RunResult runResult = TmcUtil.runLocalTests(ctx, exercise);
             if (runResult == null) {
-                io.println("Failed to run test");
+                io.errorln("Failed to run test");
                 resultPrinter.addFailedExercise();
                 continue;
             }
@@ -92,7 +92,7 @@ public class RunTestsCommand extends AbstractCommand {
                     runResult, valResult, isOnlyExercise);
 
             updateCourseInfo(info, exercise, testsPassed);
-            io.println("");
+            io.println();
         }
         CourseInfoIo.save(info, workDir.getConfigFile());
 

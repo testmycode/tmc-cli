@@ -40,8 +40,8 @@ public class LoginCommand extends AbstractCommand {
         }
 
         if (!TmcUtil.hasConnection(ctx)) {
-            io.println("You don't have internet connection currently.");
-            io.println("Check the tmc-cli logs to get exact problem.");
+            io.errorln("You don't have internet connection currently.");
+            io.errorln("Check the tmc-cli logs if you disagree.");
             return;
         }
 
@@ -63,7 +63,7 @@ public class LoginCommand extends AbstractCommand {
         AccountList list = SettingsIo.loadAccountList();
         list.addAccount(account);
         if (!SettingsIo.saveAccountList(list)) {
-            io.println("Failed to write the accounts file.");
+            io.errorln("Failed to write the accounts file.");
             return;
         }
 

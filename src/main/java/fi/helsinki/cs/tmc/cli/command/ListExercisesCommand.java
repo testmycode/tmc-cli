@@ -69,7 +69,7 @@ public class ListExercisesCommand extends AbstractCommand {
     private String getCourseNameFromCurrentDirectory() {
         CourseInfo info = getCourseInfoFromCurrentDirectory();
         if (info == null) {
-            this.io.println("No course specified. Either run the command in a course"
+            this.io.errorln("No course specified. Either run the command in a course"
                     + " directory or enter the course as a parameter.");
             return null;
         }
@@ -89,13 +89,13 @@ public class ListExercisesCommand extends AbstractCommand {
 
         Course course = TmcUtil.findCourse(ctx, courseName);
         if (course == null) {
-            this.io.println("Course '" + courseName + "' doesn't exist on the server.");
+            this.io.errorln("Course '" + courseName + "' doesn't exist on the server.");
             return null;
         }
 
         List<Exercise> exercises = course.getExercises();
         if (exercises == null || exercises.isEmpty()) {
-            this.io.println("Course '" + courseName + "' doesn't have any exercises.");
+            this.io.errorln("Course '" + courseName + "' doesn't have any exercises.");
             return null;
         }
         return exercises;
@@ -104,14 +104,14 @@ public class ListExercisesCommand extends AbstractCommand {
     private List<Exercise> getLocalExercises(String courseName) {
         CourseInfo info = getCourseInfoFromCurrentDirectory();
         if (info == null || !info.getCourseName().equals(courseName)) {
-            this.io.println("You have to be in a course directory or use the -i option "
+            this.io.errorln("You have to be in a course directory or use the -i option "
                     + "to get the exercises from the server.");
             return null;
         }
 
         List<Exercise> exercises = info.getExercises();
         if (exercises == null || exercises.isEmpty()) {
-            this.io.println("Course '" + courseName + "' doesn't have any exercises.");
+            this.io.errorln("Course '" + courseName + "' doesn't have any exercises.");
             return null;
         }
         return exercises;
