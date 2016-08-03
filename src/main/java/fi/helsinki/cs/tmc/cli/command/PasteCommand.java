@@ -64,7 +64,7 @@ public class PasteCommand extends AbstractCommand {
             return;
         }
 
-        String message;
+        String message = "";
         if (!args.hasOption("n")) {
             if (args.hasOption("m")) {
                 message = args.getOptionValue("m");
@@ -77,11 +77,7 @@ public class PasteCommand extends AbstractCommand {
                                 + "#   Lines beginning with # are comments and will be ignored.",
                         "tmc-paste-message",
                         true);
-            } else {
-                message = "";
             }
-        } else {
-            message = "";
         }
 
         String exerciseName = exercisenames.get(0);

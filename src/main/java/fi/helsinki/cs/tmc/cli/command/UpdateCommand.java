@@ -37,6 +37,7 @@ public class UpdateCommand extends AbstractCommand {
 
         if (stringArgs.length > 0) {
             io.errorln("Use in the course directory");
+            printUsage(ctx);
             return;
         }
 

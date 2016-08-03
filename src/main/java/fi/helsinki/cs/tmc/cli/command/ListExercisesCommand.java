@@ -27,6 +27,11 @@ public class ListExercisesCommand extends AbstractCommand {
     private Io io;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-n] [-i] COURSE"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("n", "no-pager", false, "Don't use a pager to list the exercises");
         options.addOption("i", "internet", false, "Get the list of exercises from the server");
@@ -141,6 +146,7 @@ public class ListExercisesCommand extends AbstractCommand {
         return sb.toString();
     }
 
+    //TODO duplicate code existed in info command!!!!!!!
     private String getDeadline(Exercise exercise) {
         String deadline = exercise.getDeadline();
         if (deadline == null) {

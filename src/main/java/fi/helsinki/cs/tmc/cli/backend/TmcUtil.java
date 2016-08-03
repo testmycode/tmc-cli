@@ -172,7 +172,6 @@ public class TmcUtil {
         } catch (Exception e) {
             TmcUtil.handleTmcExceptions(ctx, e);
             logger.error("Failed to send paste", e);
-            ctx.getIo().println(e.toString());
             return null;
         }
     }
@@ -238,6 +237,7 @@ public class TmcUtil {
             return;
         }
         logger.error("Command failed in tmc-core", exception);
+        //TODO we seem to write twice error message; here and in the commands.
         io.errorln("Command failed in tmc-core, check tmc-cli.log file for more info");
     }
 

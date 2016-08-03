@@ -24,6 +24,31 @@ public class AbstractCommandTest {
         @Override
         public void getOptions(Options options) {
         }
+
+        public void runMethodPrintUsage(CliContext context) {
+            printUsage(context);
+        }
+    }
+
+    @Command(name = "usage-command", desc = "Description")
+    private class CommandWithUsage extends AbstractCommand {
+
+        @Override
+        public String[] getUsages() {
+            return new String[]{"OPTION"};
+        }
+
+        @Override
+        public void run(CliContext context, CommandLine args) {
+        }
+
+        @Override
+        public void getOptions(Options options) {
+        }
+
+        public void runMethodPrintUsage(CliContext context) {
+            printUsage(context);
+        }
     }
 
     public AbstractCommandTest() {
@@ -51,5 +76,20 @@ public class AbstractCommandTest {
         String[] args = {"-a34t3"};
         emptyCommand.execute(ctx, args);
         io.assertContains("Invalid command");
+    }
+
+    @Test
+    public void verifyUsageOfEmptyCommand() {
+        String[] args = {};
+        ((EmptyCommand)emptyCommand).runMethodPrintUsage(ctx);
+        io.assertContains("tmc empty");
+    }
+
+    @Test
+    public void verifyUsageOfCommandWithCustomUsage() {
+        String[] args = {};
+        CommandWithUsage usageCommand = new CommandWithUsage();
+        usageCommand.runMethodPrintUsage(ctx);
+        io.assertContains("tmc usage-command OPTION");
     }
 }

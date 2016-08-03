@@ -32,6 +32,11 @@ public class InfoCommand extends AbstractCommand {
     private boolean showAll;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-a] [-i] COURSE-OR-EXERSICE"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all information for a specific course");
         options.addOption("i", "internet", false, "Get the information from the server");
@@ -55,6 +60,7 @@ public class InfoCommand extends AbstractCommand {
         if (fetchFromInternet) {
             if (useWorkingDirectory) {
                 io.errorln("You must give a course as an argument.");
+                printUsage(ctx);
                 return;
             }
             String courseName = stringArgs[0];
@@ -83,6 +89,7 @@ public class InfoCommand extends AbstractCommand {
             io.errorln("You have to be in a course directory"
                     + " or use the -i option with the course name "
                     + "to get the information from the server.");
+            printUsage(ctx);
             return;
         }
 
@@ -97,6 +104,7 @@ public class InfoCommand extends AbstractCommand {
         } else {
             if (stringArgs.length != 1) {
                 io.errorln("You can only give one path for this command.");
+                printUsage(ctx);
                 return;
             }
             String path = stringArgs[0];
@@ -120,6 +128,7 @@ public class InfoCommand extends AbstractCommand {
             io.errorln("Not a course directory. ");
             io.errorln("Use the -i option to get course from "
                     + "server.");
+            printUsage(ctx);
         }
     }
 

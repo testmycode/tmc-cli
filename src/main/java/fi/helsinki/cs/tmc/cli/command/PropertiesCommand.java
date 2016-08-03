@@ -22,6 +22,11 @@ public class PropertiesCommand extends AbstractCommand {
     private Io io;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"KEY VALUE ..."};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("u", "unset", false, "Unset given property keys");
     }
@@ -40,7 +45,8 @@ public class PropertiesCommand extends AbstractCommand {
         }
 
         if (arguments.length % 2 == 1 && !unset) {
-            io.errorln("Invalid argument count. Usage: tmc prop KEY VALUE ...");
+            io.errorln("Invalid argument count.");
+            printUsage(ctx);
             return;
         }
 

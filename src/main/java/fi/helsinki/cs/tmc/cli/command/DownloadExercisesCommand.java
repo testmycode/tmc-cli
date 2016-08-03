@@ -28,6 +28,11 @@ public class DownloadExercisesCommand extends AbstractCommand {
     private boolean showAll;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-a] COURSE"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("a", "all", false,
                 "Download all available exercises, including previously completed");
@@ -44,7 +49,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
             io.errorln("You must give a course name as an argument.");
-            io.errorln("Usage: tmc download COURSE");
+            printUsage(ctx);
             return;
         }
 

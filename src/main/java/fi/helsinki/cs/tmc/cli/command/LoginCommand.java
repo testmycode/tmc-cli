@@ -24,6 +24,11 @@ public class LoginCommand extends AbstractCommand {
     private String password;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-u=USERNAME] [-p=PASSWORD] [-s=SERVER_ADDRESS]"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("u", "user", true, "TMC username");
         options.addOption("p", "password", true, "Password for the user");
@@ -34,6 +39,12 @@ public class LoginCommand extends AbstractCommand {
     public void run(CliContext context, CommandLine args) {
         this.ctx = context;
         this.io = ctx.getIo();
+
+        if(args.getArgs().length > 0) {
+            io.errorln("Login doesn't take any arguments.");
+            printUsage(context);
+            return;
+        }
 
         if (!ctx.loadBackendWithoutLogin()) {
             return;
