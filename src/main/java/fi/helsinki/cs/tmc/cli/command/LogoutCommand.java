@@ -19,7 +19,7 @@ public class LogoutCommand extends AbstractCommand {
     @Override
     public void run(CliContext context, CommandLine args) {
         Io io = context.getIo();
-        if(args.getArgs().length > 0) {
+        if (args.getArgs().length > 0) {
             io.errorln("Logout doesn't take any arguments.");
             printUsage(context);
             return;

@@ -40,6 +40,7 @@ public class Application {
     private final Options options;
     private final GnuParser parser;
     private String commandName;
+    private boolean noAutoUpdate;
 
     public Application(CliContext context) {
         this.parser = new GnuParser();
@@ -51,6 +52,7 @@ public class Application {
         options.addOption("h", "help", false, "Display help information about tmc-cli");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         options.addOption("u", "force-update", false, "Force the auto-update");
+        options.addOption("d", "no-update", false, "Disable temporarily the auto-update");
 
         //TODO implement the inTests as context.property
         if (!context.inTests()) {
@@ -94,6 +96,12 @@ public class Application {
         boolean showHelp = line.hasOption("h");
         boolean showVersion = line.hasOption("v");
         boolean forceUpdate = line.hasOption("u");
+        this.noAutoUpdate = line.hasOption("d");
+
+        if (forceUpdate && this.noAutoUpdate) {
+            io.errorln("You can't use --force-update and --no-update at same time.");
+            return null;
+        }
 
         if (showHelp) {
             // don't run the help sub-command with -h switch
@@ -127,7 +135,7 @@ public class Application {
             return;
         }
 
-        if (!context.inTests() && versionCheck()) {
+        if (!context.inTests() && !noAutoUpdate && versionCheck()) {
             return;
         }
 

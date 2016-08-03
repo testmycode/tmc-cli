@@ -94,7 +94,7 @@ public abstract class AbstractCommand {
     }
 
     private Command getCommand() {
-        if(this.command == null) {
+        if (this.command == null) {
             Class<Command> klass;
             klass = CommandFactory.castToCommandClass(this.getClass());
             this.command = CommandFactory.getCommand(klass);
@@ -121,14 +121,14 @@ public abstract class AbstractCommand {
     private String getUsageString() {
         String prefix = "tmc " + getCommand().name() + " ";
         String[] usages = getUsages();
-        if(usages == null) {
+        if (usages == null) {
             return prefix;
         }
 
         StringBuilder builder = new StringBuilder();
         boolean first = true;
-        for(String line : usages) {
-            if(!first) {
+        for (String line : usages) {
+            if (!first) {
                 builder.append("\n");
             }
             builder.append(prefix);

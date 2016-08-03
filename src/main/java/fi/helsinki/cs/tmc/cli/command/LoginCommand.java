@@ -40,7 +40,7 @@ public class LoginCommand extends AbstractCommand {
         this.ctx = context;
         this.io = ctx.getIo();
 
-        if(args.getArgs().length > 0) {
+        if (args.getArgs().length > 0) {
             io.errorln("Login doesn't take any arguments.");
             printUsage(context);
             return;
