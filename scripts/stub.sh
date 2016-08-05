@@ -103,6 +103,7 @@ EOM
 	PROFILE_FILE=$(tmc_detect_profile)
 
 	# get the aliases
+	#TODO remove this and use global variables
 	set +euo pipefail
 	source $PROFILE_FILE
 	set -euo pipefail

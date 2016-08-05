@@ -136,7 +136,7 @@ public class ListExercisesCommand extends AbstractCommand {
         String prevDeadline = "";
 
         for (Exercise exercise : exercises) {
-            String deadline = getDeadline(exercise);
+            String deadline = CourseInfo.getExerciseDeadline(exercise);
             if (!deadline.equals(prevDeadline)) {
                 sb.append("\nDeadline: " + deadline + "\n");
                 prevDeadline = deadline;
@@ -144,16 +144,6 @@ public class ListExercisesCommand extends AbstractCommand {
             sb.append(getExerciseStatus(exercise));
         }
         return sb.toString();
-    }
-
-    //TODO duplicate code existed in info command!!!!!!!
-    private String getDeadline(Exercise exercise) {
-        String deadline = exercise.getDeadline();
-        if (deadline == null) {
-            return "not available";
-        }
-        deadline = deadline.substring(0, 19);
-        return deadline.replace("T", " at ");
     }
 
     private String getExerciseStatus(Exercise exercise) {

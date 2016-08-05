@@ -184,7 +184,9 @@ public class InfoCommand extends AbstractCommand {
 
     private void printExerciseShort(Exercise exercise) {
         io.println("Exercise: " + exercise.getName());
-        io.println("Deadline: " + exercise.getDeadlineDate());
+        if (exercise.getDeadline() != null) {
+            io.println("Deadline: " + exercise.getDeadlineDate());
+        }
 
         if (exercise.hasDeadlinePassed() && !exercise.isCompleted()) {
             io.println(ColorUtil.colorString("deadline passed", Color.PURPLE));
@@ -234,7 +236,7 @@ public class InfoCommand extends AbstractCommand {
         io.println("    Exercise id: " + exercise.getId());
         io.println("    Is locked: " + exercise.isLocked());
         io.println("    Deadline description: " + exercise.getDeadlineDescription());
-        io.println("    Deadline: " + exercise.getDeadlineDate());
+        io.println("    Deadline: " + CourseInfo.getExerciseDeadline(exercise));
         io.println("    Deadline passed: " + exercise.hasDeadlinePassed());
         io.println("    Is returnable: " + exercise.isReturnable());
         io.println("    Review required: " + exercise.requiresReview());
