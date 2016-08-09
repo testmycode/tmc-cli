@@ -44,8 +44,8 @@ public class RunTestsCommand extends AbstractCommand {
         CliContext ctx = context;
         Io io = ctx.getIo();
 
-        String[] exercisesFromArgs = parseArgs(args);
-        if (exercisesFromArgs == null) {
+        String[] paths = parseArgs(args);
+        if (paths == null) {
             return;
         }
 
@@ -54,9 +54,9 @@ public class RunTestsCommand extends AbstractCommand {
         }
 
         WorkDir workDir = ctx.getWorkDir();
-        for (String exercise : exercisesFromArgs) {
-            if (!workDir.addPath(exercise)) {
-                io.errorln("The argument \"" + exercise + "\" is not a valid exercise.");
+        for (String path : paths) {
+            if (!workDir.addPath(path)) {
+                io.errorln("The path \"" + path + "\" is not a valid exercise.");
                 return;
             }
         }

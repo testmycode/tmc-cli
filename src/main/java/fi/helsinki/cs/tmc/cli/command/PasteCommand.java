@@ -24,7 +24,17 @@ import java.util.List;
 public class PasteCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
 
+    private CliContext ctx;
     private Io io;
+
+    String message;
+    boolean noMessage;
+    boolean openInBrowser;
+
+    @Override
+    public String[] getUsages() {
+        return new String[] {"tmc paste [-o] [-n] [-m MESSAGE] [EXERCISE]"};
+    }
 
     @Override
     public void getOptions(Options options) {
@@ -35,40 +45,52 @@ public class PasteCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
-        CliContext ctx = context;
+        this.ctx = context;
         this.io = ctx.getIo();
-        if (!ctx.loadBackend()) {
-            return;
-        }
+
+        this.message = args.getOptionValue("m");
+        this.noMessage = args.hasOption("n");
+        this.openInBrowser = args.hasOption("o");
         WorkDir workdir = ctx.getWorkDir();
         String[] stringArgs = args.getArgs();
 
-        Boolean valid;
-        if (stringArgs.length == 0) {
-            valid = workdir.addPath();
-        } else if (stringArgs.length == 1) {
-            valid = workdir.addPath(stringArgs[0]);
-        } else {
-            io.errorln("Error: Too many arguments. Expected 1, got " + stringArgs.length);
+        if (noMessage && message != null) {
+            io.errorln("You can't have the no-message flag and message set at the same time.");
+            printUsage(context);
             return;
         }
-        if (!valid) {
-            io.errorln("The command can be used in an exercise directory without the exercise name"
-                    + " or in a course directory with the name as an argument.");
-            return;
-        }
-        
-        List<String> exercisenames = workdir.getExerciseNames();
-        if (exercisenames.size() != 1) {
-            io.errorln("Error: Matched too many exercises.");
+        if (stringArgs.length > 1) {
+            io.errorln("Error: Too many arguments.");
+            printUsage(context);
             return;
         }
 
-        String message = "";
-        if (!args.hasOption("n")) {
-            if (args.hasOption("m")) {
-                message = args.getOptionValue("m");
-            } else if (io.readConfirmation("Attach a message to your paste?", true)) {
+        if (stringArgs.length == 1) {
+            if (!workdir.addPath(stringArgs[0])) {
+                io.errorln("The path '" + stringArgs[0] + "' is not valid exercise.");
+                return;
+            }
+        } else {
+            //TODO replace the following call with workdir.getCurrentExercise()
+            if (!workdir.addPath()) {
+                io.errorln("You are not in exercise directory.");
+                return;
+            }
+        }
+
+        if (!ctx.loadBackend()) {
+            return;
+        }
+        
+        List<String> exerciseNames = workdir.getExerciseNames();
+        if (exerciseNames.size() != 1) {
+            io.errorln("Error: Matched too many exercises.");
+            printUsage(context);
+            return;
+        }
+
+        if (!noMessage && message == null) {
+            if (io.readConfirmation("Attach a message to your paste?", true)) {
                 message = ExternalsUtil.getUserEditedMessage(
                         "\n"
                                 + "#   Write a message for your paste in this file and save it.\n"
@@ -79,10 +101,17 @@ public class PasteCommand extends AbstractCommand {
                         true);
             }
         }
+        sendPaste(message, exerciseNames.get(0));
+    }
 
-        String exerciseName = exercisenames.get(0);
+    private void sendPaste(String message, String exerciseName) {
+        if (message == null) {
+            message = "";
+        }
+
         CourseInfo info = ctx.getCourseInfo();
         Exercise exercise = info.getExercise(exerciseName);
+
         URI uri = TmcUtil.sendPaste(ctx, exercise, message);
         if (uri == null && exercise.hasDeadlinePassed()) {
             io.errorln("Unable to send the paste."
@@ -96,7 +125,7 @@ public class PasteCommand extends AbstractCommand {
 
         io.println("Paste sent for exercise " + exercise.getName());
         io.println(uri.toString());
-        if (args.hasOption("o")) {
+        if (openInBrowser) {
             ExternalsUtil.openInBrowser(uri);
         }
     }
