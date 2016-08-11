@@ -151,16 +151,10 @@ public class WorkDir {
     }
 
     /**
-     * This can be used for operations which only use a single path.
-     * If only one path has been added, return that. If no paths are added,
-     * return the current working directory.
+     * Get the working directory.
      */
     public Path getWorkingDirectory() {
-        if (this.courseDirectory != null) {
-            return this.courseDirectory;
-        } else {
-            return workdir;
-        }
+        return workdir;
     }
 
     public List<Path> getDirectories() {
