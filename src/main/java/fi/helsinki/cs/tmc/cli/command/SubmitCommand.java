@@ -72,7 +72,7 @@ public class SubmitCommand extends AbstractCommand {
         List<String> exerciseNames;
         if (args.hasOption("c")) {
             workDir.addPath(workDir.getCourseDirectory());
-            exerciseNames = workDir.getExerciseNames(true, true, false);
+            exerciseNames = workDir.getExerciseNames(true, true);
         } else {
             exerciseNames = workDir.getExerciseNames();
         }
@@ -97,7 +97,7 @@ public class SubmitCommand extends AbstractCommand {
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll,
                 color1, color2);
 
-        Boolean isOnlyExercise = exerciseNames.size() == 1;
+        boolean isOnlyExercise = exerciseNames.size() == 1;
         List<Exercise> submitExercises = info.getExercises(exerciseNames);
         List<List<FeedbackQuestion>> feedbackLists
                 = new ArrayList<>();

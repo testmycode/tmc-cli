@@ -68,18 +68,17 @@ public class WorkDir {
     }
 
     public List<String> getExerciseNames() {
-        return getExerciseNames(true, false, false);
+        return getExerciseNames(true, false);
     }
 
     /**
      * Go through directories and return matching exercises.
      * @param exists Returns only exercises that aren't removed
      * @param onlyTested Return only exercises that are already tested
-     * @param filterCompleted Remove the ones that are already completed
      * @return: return names of exercises as List
      */
     public List<String> getExerciseNames(
-            boolean exists, boolean onlyTested, boolean filterCompleted) {
+            boolean exists, boolean onlyTested) {
         if (this.directories.isEmpty() && getConfigFile() == null) {
             return new ArrayList<>();
         }
@@ -121,7 +120,7 @@ public class WorkDir {
         }
 
         for (Exercise exercise : exercises) {
-            if (filterExercise(exercise, locallyTested, exists, onlyTested, filterCompleted)) {
+            if (filterExercise(exercise, locallyTested, exists, onlyTested)) {
                 filteredExerciseNames.add(exercise.getName());
             }
         }
@@ -130,11 +129,8 @@ public class WorkDir {
     }
 
     private boolean filterExercise(Exercise exercise, List<String> tested,
-            boolean exists, boolean onlyTested, boolean filterCompleted) {
+            boolean exists, boolean onlyTested) {
         if (onlyTested && !tested.contains(exercise.getName())) {
-            return false;
-        }
-        if (filterCompleted && exercise.isCompleted()) {
             return false;
         }
         if (exists && !Files.exists(getCourseDirectory().resolve(exercise.getName()))) {

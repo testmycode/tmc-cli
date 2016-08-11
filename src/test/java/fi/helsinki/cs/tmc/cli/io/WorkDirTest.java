@@ -128,7 +128,7 @@ public class WorkDirTest {
         workDir.setWorkdir(TEST_DIR);
         assertEquals(TEST_DIR.resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
+        List<String> exercises = workDir.getExerciseNames(true, false);
         assertEquals(3, exercises.size());
         assertTrue(exercises.contains("viikko1-teht1"));
         assertTrue(exercises.contains("viikko2-teht2"));
@@ -148,7 +148,7 @@ public class WorkDirTest {
         workDir.setWorkdir(TEST_DIR.resolve("viikko2-teht2"));
         assertEquals(TEST_DIR.resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
+        List<String> exercises = workDir.getExerciseNames(true, false);
         assertEquals(1, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));
         assertTrue(exercises.contains("viikko2-teht2"));
@@ -162,7 +162,7 @@ public class WorkDirTest {
         workDir.setWorkdir(TEST_DIR.resolve("viikko2").resolve("subdir"));
         assertEquals(TEST_DIR.resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
+        List<String> exercises = workDir.getExerciseNames(true, false);
         assertEquals(1, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));
         assertFalse(exercises.contains("viikko2-teht2"));
@@ -185,7 +185,7 @@ public class WorkDirTest {
         workDir = new WorkDir();
         workDir.setWorkdir(TEST_DIR);
         workDir.addPath("teht1");
-        exercises = workDir.getExerciseNames(true, false, false);
+        exercises = workDir.getExerciseNames(true, false);
         assertEquals(0, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));
         assertFalse(exercises.contains("viikko2-teht2"));
@@ -200,7 +200,7 @@ public class WorkDirTest {
         assertEquals(TEST_DIR.resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
         workDir.addPath("teht2");
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
+        List<String> exercises = workDir.getExerciseNames(true, false);
         assertEquals(1, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));
         assertTrue(exercises.contains("viikko2-teht2"));
@@ -217,7 +217,7 @@ public class WorkDirTest {
                         .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
         workDir.addPath("teht3");
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
+        List<String> exercises = workDir.getExerciseNames(true, false);
         assertEquals(1, exercises.size());
         assertFalse(exercises.contains("viikko1-teht1"));
         assertFalse(exercises.contains("viikko2-teht2"));
@@ -229,7 +229,7 @@ public class WorkDirTest {
         Path path = TEST_DIR.resolve("viikko1-teht1").resolve("src");
         WorkDir workDir = new WorkDir();
         workDir.addPath(path);
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
+        List<String> exercises = workDir.getExerciseNames(true, false);
         assertEquals(1, exercises.size());
         assertTrue(exercises.contains("viikko1-teht1"));
         assertFalse(exercises.contains("viikko2-teht2"));
@@ -240,35 +240,11 @@ public class WorkDirTest {
     public void worksWhenDeletedExercisesAreNotFiltered() {
         WorkDir workDir = new WorkDir();
         workDir.addPath(TEST_DIR);
-        List<String> exercises = workDir.getExerciseNames(false, false, false);
+        List<String> exercises = workDir.getExerciseNames(false, false);
         assertEquals(4, exercises.size());
         assertTrue(exercises.contains("viikko1-teht1"));
         assertTrue(exercises.contains("viikko2-teht2"));
         assertTrue(exercises.contains("viikko2-teht3"));
         assertTrue(exercises.contains("viikko3-nonexistent"));
-    }
-
-    @Test
-    public void filteringCompletedExercisesWorks() {
-        WorkDir workDir = new WorkDir();
-        workDir.addPath(TEST_DIR);
-        List<String> exercises = workDir.getExerciseNames(false, false, true);
-        assertEquals(3, exercises.size());
-        assertTrue(exercises.contains("viikko1-teht1"));
-        assertFalse(exercises.contains("viikko2-teht2"));
-        assertTrue(exercises.contains("viikko2-teht3"));
-        assertTrue(exercises.contains("viikko3-nonexistent"));
-    }
-
-    @Test
-    public void filteringOnlyTestedExercisesWorks() {
-        WorkDir workDir = new WorkDir();
-        workDir.addPath(TEST_DIR);
-        List<String> exercises = workDir.getExerciseNames(false, true, false);
-        assertEquals(1, exercises.size());
-        assertTrue(exercises.contains("viikko1-teht1"));
-        assertFalse(exercises.contains("viikko2-teht2"));
-        assertFalse(exercises.contains("viikko2-teht3"));
-        assertFalse(exercises.contains("viikko3-nonexistent"));
     }
 }

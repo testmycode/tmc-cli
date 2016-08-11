@@ -213,7 +213,7 @@ public class InfoCommand extends AbstractCommand {
     }
 
     private String getCurrentExercise(WorkDir workDir) {
-        List<String> exercises = workDir.getExerciseNames(false, false, false);
+        List<String> exercises = workDir.getExerciseNames(false, false);
         if (exercises.size() == 1) {
             return exercises.get(0);
         }
