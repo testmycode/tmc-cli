@@ -127,7 +127,7 @@ public class PasteCommandTest {
     @Test
     public void pasteRunsRightwithTooManyArguments() {
         app.run(new String[] {"paste", "paste-exercise", "secondArgument"});
-        io.assertContains("Error: Too many arguments. Expected 1, got");
+        io.assertContains("Error: Too many arguments.");
     }
     
     @Test
@@ -202,7 +202,7 @@ public class PasteCommandTest {
         Mockito.when(workDir.addPath(anyString())).thenReturn(false);
         app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
 
-        io.assertContains("The command can be used in an exercise directory");
+        io.assertContains("You are not in exercise directory.");
 
         verifyStatic(Mockito.never());
         TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString());

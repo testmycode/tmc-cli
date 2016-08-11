@@ -47,35 +47,10 @@ public class PasteCommand extends AbstractCommand {
     public void run(CliContext context, CommandLine args) {
         this.ctx = context;
         this.io = ctx.getIo();
-
-        this.message = args.getOptionValue("m");
-        this.noMessage = args.hasOption("n");
-        this.openInBrowser = args.hasOption("o");
         WorkDir workdir = ctx.getWorkDir();
-        String[] stringArgs = args.getArgs();
 
-        if (noMessage && message != null) {
-            io.errorln("You can't have the no-message flag and message set at the same time.");
-            printUsage(context);
+        if(!parseArgs(args)) {
             return;
-        }
-        if (stringArgs.length > 1) {
-            io.errorln("Error: Too many arguments.");
-            printUsage(context);
-            return;
-        }
-
-        if (stringArgs.length == 1) {
-            if (!workdir.addPath(stringArgs[0])) {
-                io.errorln("The path '" + stringArgs[0] + "' is not valid exercise.");
-                return;
-            }
-        } else {
-            //TODO replace the following call with workdir.getCurrentExercise()
-            if (!workdir.addPath()) {
-                io.errorln("You are not in exercise directory.");
-                return;
-            }
         }
 
         if (!ctx.loadBackend()) {
@@ -102,6 +77,40 @@ public class PasteCommand extends AbstractCommand {
             }
         }
         sendPaste(message, exerciseNames.get(0));
+    }
+
+    private boolean parseArgs(CommandLine args) {
+        WorkDir workdir = ctx.getWorkDir();
+        String[] stringArgs = args.getArgs();
+
+        this.message = args.getOptionValue("m");
+        this.noMessage = args.hasOption("n");
+        this.openInBrowser = args.hasOption("o");
+
+        if (noMessage && message != null) {
+            io.errorln("You can't have the no-message flag and message set at the same time.");
+            printUsage(ctx);
+            return false;
+        }
+        if (stringArgs.length > 1) {
+            io.errorln("Error: Too many arguments.");
+            printUsage(ctx);
+            return false;
+        }
+
+        if (stringArgs.length == 1) {
+            if (!workdir.addPath(stringArgs[0])) {
+                io.errorln("The path '" + stringArgs[0] + "' is not valid exercise.");
+                return false;
+            }
+        } else {
+            //TODO replace the following call with workdir.getCurrentExercise()
+            if (!workdir.addPath()) {
+                io.errorln("You are not in exercise directory.");
+                return false;
+            }
+        }
+        return true;
     }
 
     private void sendPaste(String message, String exerciseName) {
