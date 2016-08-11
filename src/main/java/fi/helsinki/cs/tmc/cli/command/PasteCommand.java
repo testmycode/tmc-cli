@@ -49,7 +49,7 @@ public class PasteCommand extends AbstractCommand {
         this.io = ctx.getIo();
         WorkDir workdir = ctx.getWorkDir();
 
-        if(!parseArgs(args)) {
+        if (!parseArgs(args)) {
             return;
         }
 

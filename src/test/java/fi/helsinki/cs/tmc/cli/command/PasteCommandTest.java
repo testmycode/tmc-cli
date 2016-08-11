@@ -106,6 +106,17 @@ public class PasteCommandTest {
     }
 
     @Test
+    public void setMessageAndNoMessageOption() {
+        ctx = spy(new CliContext(io, mockCore, workDir));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
+
+        String[] args = {"paste", "-m", "Message", "-n"};
+        app.run(args);
+        io.assertContains("You can't have the no-message flag and message set");
+    }
+
+    @Test
     public void pasteRunsRightWithoutArguments() throws URISyntaxException {
         when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
                 .thenReturn(pasteUri);
