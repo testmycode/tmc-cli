@@ -73,10 +73,13 @@ public class WorkDir {
 
     /**
      * Go through directories and return matching exercises.
+     * @param exists Returns only exercises that aren't removed
+     * @param onlyTested Return only exercises that are already tested
+     * @param filterCompleted Remove the ones that are already completed
      * @return: return names of exercises as List
      */
     public List<String> getExerciseNames(
-            Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
+            boolean exists, boolean onlyTested, boolean filterCompleted) {
         if (this.directories.isEmpty() && getConfigFile() == null) {
             return new ArrayList<>();
         }
@@ -126,16 +129,25 @@ public class WorkDir {
         return filteredExerciseNames;
     }
 
-    private Boolean filterExercise(Exercise exercise, List<String> tested,
-            Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
-        if (!onlyTested || tested.contains(exercise.getName())) {
-            if (!filterCompleted || !exercise.isCompleted()) {
-                if (!exists || Files.exists(getCourseDirectory().resolve(exercise.getName()))) {
-                    return true;
-                }
-            }
+    private boolean filterExercise(Exercise exercise, List<String> tested,
+            boolean exists, boolean onlyTested, boolean filterCompleted) {
+        if (onlyTested && !tested.contains(exercise.getName())) {
+            return false;
         }
-        return false;
+        if (filterCompleted && exercise.isCompleted()) {
+            return false;
+        }
+        if (exists && !Files.exists(getCourseDirectory().resolve(exercise.getName()))) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * THIS IS ONLY FOR TESTS. DO NOT USE THIS OUTSIDE OF TESTS.
+     */
+    public void setWorkdir(Path path) {
+        this.workdir = path;
     }
 
     /**
@@ -152,7 +164,7 @@ public class WorkDir {
     }
 
     public List<Path> getDirectories() {
-        return new ArrayList<Path>(this.directories);
+        return new ArrayList<>(this.directories);
     }
 
     /**
@@ -202,7 +214,7 @@ public class WorkDir {
 
     private Path findCourseDir(Path dir) {
         while (dir != null && Files.exists(dir)) {
-            if (Files.exists(dir.resolve(CourseInfoIo.COURSE_CONFIG))) {
+            if (isCourseDirectory(dir)) {
                 return dir;
             }
             dir = dir.getParent();
@@ -218,10 +230,7 @@ public class WorkDir {
         }
     }
 
-    /**
-     * THIS IS ONLY FOR TESTS. DO NOT USE THIS OUTSIDE OF TESTS.
-     */
-    public void setWorkdir(Path path) {
-        this.workdir = path;
+    private boolean isCourseDirectory(Path dir) {
+        return Files.exists(dir.resolve(CourseInfoIo.COURSE_CONFIG));
     }
 }
