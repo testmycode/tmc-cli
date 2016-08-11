@@ -38,6 +38,7 @@ public class SubmitCommand extends AbstractCommand {
     private Io io;
     private boolean showAll;
     private boolean showDetails;
+    private boolean filterUncompleted;
 
     @Override
     public void getOptions(Options options) {
@@ -70,7 +71,7 @@ public class SubmitCommand extends AbstractCommand {
         }
 
         List<String> exerciseNames;
-        if (args.hasOption("c")) {
+        if (filterUncompleted) {
             workDir.addPath(workDir.getCourseDirectory());
             exerciseNames = workDir.getExerciseNames(true, true);
         } else {
@@ -78,7 +79,7 @@ public class SubmitCommand extends AbstractCommand {
         }
 
         if (exerciseNames.isEmpty()) {
-            if (args.hasOption("c") && workDir.getCourseDirectory() != null) {
+            if (filterUncompleted && workDir.getCourseDirectory() != null) {
                 io.println("No locally tested exercises.");
                 return;
             }
@@ -209,6 +210,7 @@ public class SubmitCommand extends AbstractCommand {
     private String[] parseArgs(CommandLine args) {
         this.showAll = args.hasOption("a");
         this.showDetails = args.hasOption("d");
+        this.filterUncompleted = args.hasOption("c");
         return args.getArgs();
     }
 }
