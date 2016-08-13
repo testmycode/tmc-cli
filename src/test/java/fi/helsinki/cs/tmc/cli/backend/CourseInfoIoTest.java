@@ -28,8 +28,12 @@ public class CourseInfoIoTest {
     }
 
     @After
-    public void cleanUp() throws IOException {
-        FileUtils.deleteDirectory(Paths.get(tempDir).resolve("test-course").toFile());
+    public void cleanUp() {
+        try {
+            FileUtils.deleteDirectory(Paths.get(tempDir).resolve("test-course").toFile());
+        } catch (IOException e) {
+            // NOP
+        }
     }
 
     @Test
