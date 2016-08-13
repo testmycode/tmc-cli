@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.shared;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -66,7 +67,10 @@ public class FeedbackHandlerTest {
     @Test
     public void sendingFeedbackWorks() {
         PowerMockito.when(
-                TmcUtil.sendFeedback(any(CliContext.class), any(List.class), any(URI.class)))
+                        TmcUtil.sendFeedback(
+                                any(CliContext.class),
+                                anyListOf(FeedbackAnswer.class),
+                                any(URI.class)))
                 .thenReturn(true);
         io.addLinePrompt("1");
         io.addLinePrompt("who cars");
@@ -77,17 +81,17 @@ public class FeedbackHandlerTest {
         verifyStatic();
         TmcUtil.sendFeedback(any(CliContext.class), answerCaptor.capture(), any(URI.class));
         List<FeedbackAnswer> answers = answerCaptor.getValue();
-        assertThat(answers.get(0).getQuestion().getQuestion()).isEqualTo(
-                "What's your opinion on TMC-CLI?");
+        assertThat(answers.get(0).getQuestion().getQuestion())
+                .isEqualTo("What's your opinion on TMC-CLI?");
         assertThat(answers.get(0).getAnswer()).isEqualTo("you're programm sucks");
         io.assertContains("Please rate this program.");
-        assertThat(answers.get(1).getQuestion().getQuestion()).isEqualTo(
-                "Please rate this program.");
+        assertThat(answers.get(1).getQuestion().getQuestion())
+                .isEqualTo("Please rate this program.");
         assertThat(answers.get(1).getAnswer()).isEqualTo("1");
         io.assertContains(
                 "Feedback question: This type of question doesn't really exist but whatever");
-        assertThat(answers.get(2).getQuestion().getQuestion()).isEqualTo(
-                "This type of question doesn't really exist but whatever");
+        assertThat(answers.get(2).getQuestion().getQuestion())
+                .isEqualTo("This type of question doesn't really exist but whatever");
         assertThat(answers.get(2).getAnswer()).isEqualTo("who cars");
     }
 }

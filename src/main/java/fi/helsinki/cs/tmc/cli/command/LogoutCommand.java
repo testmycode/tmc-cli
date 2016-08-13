@@ -13,8 +13,7 @@ import org.apache.commons.cli.Options;
 public class LogoutCommand extends AbstractCommand {
 
     @Override
-    public void getOptions(Options options) {
-    }
+    public void getOptions(Options options) {}
 
     @Override
     public void run(CliContext context, CommandLine args) {

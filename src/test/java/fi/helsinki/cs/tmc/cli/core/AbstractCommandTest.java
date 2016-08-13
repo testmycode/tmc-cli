@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.core;
 
-import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.cli.CommandLine;
@@ -10,20 +9,18 @@ import org.junit.Test;
 
 public class AbstractCommandTest {
 
-    AbstractCommand emptyCommand;
-    CliContext ctx;
-    TestIo io;
+    private AbstractCommand emptyCommand;
+    private CliContext ctx;
+    private TestIo io;
 
     @Command(name = "empty", desc = "Long description")
     private class EmptyCommand extends AbstractCommand {
 
         @Override
-        public void run(CliContext context, CommandLine args) {
-        }
+        public void run(CliContext context, CommandLine args) {}
 
         @Override
-        public void getOptions(Options options) {
-        }
+        public void getOptions(Options options) {}
 
         public void runMethodPrintUsage(CliContext context) {
             printUsage(context);
@@ -39,12 +36,10 @@ public class AbstractCommandTest {
         }
 
         @Override
-        public void run(CliContext context, CommandLine args) {
-        }
+        public void run(CliContext context, CommandLine args) {}
 
         @Override
-        public void getOptions(Options options) {
-        }
+        public void getOptions(Options options) {}
 
         public void runMethodPrintUsage(CliContext context) {
             printUsage(context);

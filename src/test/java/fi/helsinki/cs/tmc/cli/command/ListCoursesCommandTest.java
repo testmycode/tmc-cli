@@ -25,6 +25,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
@@ -74,7 +75,7 @@ public class ListCoursesCommandTest {
 
     @Test
     public void listCoursesWorksWithNoCourses() {
-        List<Course> list = Arrays.asList();
+        List<Course> list = Collections.emptyList();
         when(TmcUtil.listCourses(eq(ctx))).thenReturn(list);
 
         String[] args = {"courses"};
@@ -102,8 +103,8 @@ public class ListCoursesCommandTest {
         accountList.addAccount(account2);
         when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
-        List<Course> list1 = Arrays.asList(new Course("course1"));
-        List<Course> list2 = Arrays.asList(new Course("course2"));
+        List<Course> list1 = Collections.singletonList(new Course("course1"));
+        List<Course> list2 = Collections.singletonList(new Course("course2"));
         when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
 
         String[] args = {"courses"};

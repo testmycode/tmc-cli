@@ -44,7 +44,7 @@ public class CourseInfoIo {
             //Return null if file is not found, this is normal behaviour
             return null;
         }
-        Reader reader = null;
+        Reader reader;
         try {
             reader = Files.newBufferedReader(courseInfoFile, Charset.forName("UTF-8"));
         } catch (IOException e) {
@@ -56,9 +56,7 @@ public class CourseInfoIo {
     }
 
     public static void createNewCourse(Course course, Account account, Path parentDir) {
-        Path configFile = parentDir
-                .resolve(course.getName())
-                .resolve(CourseInfoIo.COURSE_CONFIG);
+        Path configFile = parentDir.resolve(course.getName()).resolve(CourseInfoIo.COURSE_CONFIG);
 
         CourseInfo info = new CourseInfo(account, course);
         info.setExercises(course.getExercises());

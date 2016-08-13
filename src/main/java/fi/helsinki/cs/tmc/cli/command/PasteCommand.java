@@ -46,7 +46,7 @@ public class PasteCommand extends AbstractCommand {
     @Override
     public void run(CliContext context, CommandLine args) {
         this.ctx = context;
-        this.io = ctx.getIo();
+        this.io = context.getIo();
         WorkDir workdir = ctx.getWorkDir();
 
         if (!parseArgs(args)) {
@@ -59,19 +59,20 @@ public class PasteCommand extends AbstractCommand {
         
         List<Exercise> exercises = workdir.getExercises();
         if (exercises.size() != 1) {
-            io.errorln("Error: Matched too many exercises.");
+            io.errorln("Matched too many exercises.");
             printUsage(context);
             return;
         }
 
         if (!noMessage && message == null) {
             if (io.readConfirmation("Attach a message to your paste?", true)) {
-                message = ExternalsUtil.getUserEditedMessage(
-                        "\n"
-                                + "#   Write a message for your paste in this file and save it.\n"
-                                + "#   If you don't want to send a message with your paste, "
-                                + "use the '-n' switch.\n"
-                                + "#   Lines beginning with # are comments and will be ignored.",
+                message =
+                        ExternalsUtil.getUserEditedMessage(
+                            "\n"
+                            + "#   Write a message for your paste in this file and save it.\n"
+                            + "#   If you don't want to send a message with your paste, "
+                            + "use the '-n' switch.\n"
+                            + "#   Lines beginning with # are comments and will be ignored.",
                         "tmc-paste-message",
                         true);
             }
@@ -118,8 +119,9 @@ public class PasteCommand extends AbstractCommand {
 
         URI uri = TmcUtil.sendPaste(ctx, exercise, message);
         if (uri == null && exercise.hasDeadlinePassed()) {
-            io.errorln("Unable to send the paste."
-                    + " The deadline for submitting this exercise has passed");
+            io.errorln(
+                    "Unable to send the paste."
+                            + " The deadline for submitting this exercise has passed");
             return;
         }
         if (uri == null) {

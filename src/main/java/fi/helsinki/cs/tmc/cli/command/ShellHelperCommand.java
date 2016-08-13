@@ -31,5 +31,4 @@ public class ShellHelperCommand extends AbstractCommand {
             io.println("This is only for internal usage.");
         }
     }
-    
 }

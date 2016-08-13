@@ -25,11 +25,10 @@ public class AutoUpdater {
     /**
      * URL to a JSON that contains information about the latest tmc-cli release.
      */
-    private static final String LATEST_RELEASE_URL
-            = "https://api.github.com/repos/tmc-cli/tmc-cli/releases/latest";
+    private static final String LATEST_RELEASE_URL =
+            "https://api.github.com/repos/tmc-cli/tmc-cli/releases/latest";
 
-    private static final Logger logger
-            = LoggerFactory.getLogger(AutoUpdater.class);
+    private static final Logger logger = LoggerFactory.getLogger(AutoUpdater.class);
 
     private final Io io;
     private final boolean isWindows;
@@ -68,7 +67,7 @@ public class AutoUpdater {
             return true;
         }
 
-        if (! io.readConfirmation("Do you want to download it?", true)) {
+        if (!io.readConfirmation("Do you want to download it?", true)) {
             return false;
         }
 
@@ -93,7 +92,7 @@ public class AutoUpdater {
         return runNewTmcCliBinary(destination.getAbsolutePath());
     }
 
-    protected byte[] fetchHttpEntity(String urlAddress) {
+    private byte[] fetchHttpEntity(String urlAddress) {
         URL url;
 
         try {
@@ -106,7 +105,8 @@ public class AutoUpdater {
         InputStream inputStream;
         try {
             URLConnection connection = url.openConnection();
-            connection.setRequestProperty("User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
+            connection.setRequestProperty(
+                    "User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
             inputStream = connection.getInputStream();
         } catch (IOException ex) {
             logger.warn("Failed to fetch page", ex);
@@ -128,7 +128,7 @@ public class AutoUpdater {
      * Downloads a JSON string that contains information about the latest
      * tmc-cli release.
      */
-    protected String fetchLatestReleaseJson() {
+    String fetchLatestReleaseJson() {
         byte[] content = fetchHttpEntity(LATEST_RELEASE_URL);
         if (content == null) {
             return null;
@@ -145,7 +145,7 @@ public class AutoUpdater {
      * Downloads a binary file from downloadUrl and saves it to destination
      * file.
      */
-    protected boolean fetchTmcCliBinary(String downloadUrl, File destination) {
+    boolean fetchTmcCliBinary(String downloadUrl, File destination) {
         byte[] content = fetchHttpEntity(downloadUrl);
         if (content == null) {
             io.errorln("Failed to download tmc-cli.");
@@ -163,7 +163,7 @@ public class AutoUpdater {
     /**
      * Finish the update by running downloaded binary.
      */
-    protected boolean runNewTmcCliBinary(String pathToNewBinary) {
+    boolean runNewTmcCliBinary(String pathToNewBinary) {
         return ExternalsUtil.runUpdater(io, pathToNewBinary);
     }
 
@@ -229,8 +229,13 @@ public class AutoUpdater {
 
     private static String getJarLocation() {
         try {
-            return new File(AutoUpdater.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI()).getParent()
+            return new File(
+                                    AutoUpdater.class
+                                            .getProtectionDomain()
+                                            .getCodeSource()
+                                            .getLocation()
+                                            .toURI())
+                            .getParent()
                     + File.separator;
         } catch (Exception ex) {
             logger.warn("Unable to get current jar folder.", ex);

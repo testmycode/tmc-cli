@@ -58,8 +58,7 @@ public class EnvironmentUtilTest {
     @Test
     public void constructorInitializesFields() throws Exception {
         Properties mockProperties = mock(Properties.class);
-        PowerMockito.whenNew(Properties.class)
-                .withAnyArguments().thenReturn(mockProperties);
+        PowerMockito.whenNew(Properties.class).withAnyArguments().thenReturn(mockProperties);
         when(mockProperties.get(eq("version"))).thenReturn("0.1.0");
         assertEquals("0.1.0", EnvironmentUtil.getVersion());
     }

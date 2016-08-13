@@ -31,7 +31,7 @@ if [ -f $HOME/.tmc-autocomplete.sh ]; then
 	fi
 fi
 echo "Fetching latest release URL"
-URL=$(curl -s https://api.github.com/repos/tmc-cli/tmc-cli/releases/latest | grep '"browser_download_url"' | grep '/tmc"' | head -n 1 | cut -d '"' -f 4)
+URL=$(curl -s https://api.github.com/repos/testmycode/tmc-cli/releases/latest | grep '"browser_download_url"' | grep '/tmc"' | head -n 1 | cut -d '"' -f 4)
 echo "Downloading TMC-CLI"
 curl -LO $URL > ./tmc
 if [ ! -f ./tmc ]; then

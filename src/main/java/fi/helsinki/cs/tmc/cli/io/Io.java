@@ -42,10 +42,8 @@ public abstract class Io extends Writer {
     }
 
     @Override
-    public void flush() throws IOException {
-    }
+    public void flush() throws IOException {}
 
     @Override
-    public void close() throws IOException {
-    }
+    public void close() throws IOException {}
 }

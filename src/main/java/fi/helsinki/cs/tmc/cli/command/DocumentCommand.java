@@ -19,17 +19,18 @@ import java.nio.charset.StandardCharsets;
 @Command(name = "document", desc = "Show lots of boring info about tmc-cli")
 public class DocumentCommand extends AbstractCommand {
 
-    private static final String ERROR_MESSAGE = ""
-            + "Exception in thread \"main\" java.lang.NullPointerException\n"
-            + "\tat fi.helsinki.cs.tmc.cli.command.EasterEggCommand.run("
-            + "DocumentCommand.java:78)\n"
-            + "\tat fi.helsinki.cs.tmc.cli.command.core.AbstractCommand.execute("
-            + "AbstractCommand.java:63)\n"
-            + "\tat fi.helsinki.cs.tmc.cli.Application.runCommand(Application.java:71)\n"
-            + "\tat fi.helsinki.cs.tmc.cli.Application.run(Application.java:129)\n"
-            + "\tat fi.helsinki.cs.tmc.cli.Application.main(Application.java:138)\n"
-            + "Exception in thread \"Thread-0\" java.lang.NullPointerException\n"
-            + "\tat fi.helsinki.cs.tmc.cli.io.ShutdownHandler.run(ShutdownHandler.java:18)";
+    private static final String ERROR_MESSAGE =
+            ""
+                    + "Exception in thread \"main\" java.lang.NullPointerException\n"
+                    + "\tat fi.helsinki.cs.tmc.cli.command.EasterEggCommand.run("
+                    + "DocumentCommand.java:78)\n"
+                    + "\tat fi.helsinki.cs.tmc.cli.command.core.AbstractCommand.execute("
+                    + "AbstractCommand.java:63)\n"
+                    + "\tat fi.helsinki.cs.tmc.cli.Application.runCommand(Application.java:71)\n"
+                    + "\tat fi.helsinki.cs.tmc.cli.Application.run(Application.java:129)\n"
+                    + "\tat fi.helsinki.cs.tmc.cli.Application.main(Application.java:138)\n"
+                    + "Exception in thread \"Thread-0\" java.lang.NullPointerException\n"
+                    + "\tat fi.helsinki.cs.tmc.cli.io.ShutdownHandler.run(ShutdownHandler.java:18)";
     private Io io;
     private int width;
     private int height;
@@ -141,8 +142,10 @@ public class DocumentCommand extends AbstractCommand {
         setCursor(0, 0);
         io.print("\u001B[0J");
 
-        blitter(ColorUtil.colorString("Original dev team", Color.BLUE),
-                Math.max(centerX - 10, 0), centerY - 2);
+        blitter(
+                ColorUtil.colorString("Original dev team", Color.BLUE),
+                Math.max(centerX - 10, 0),
+                centerY - 2);
         blitter("Johannes L. (jclc)", centerX, centerY++);
         centerY++;
         blitter("Juha V. (juvester)", centerX, centerY++);
@@ -158,8 +161,10 @@ public class DocumentCommand extends AbstractCommand {
         io.print("\u001B[0J");
 
         centerY = height / 2 - 3;
-        blitter(ColorUtil.colorString("Special thanks for", Color.CYAN),
-                Math.max(centerX - 10, 0), centerY - 2);
+        blitter(
+                ColorUtil.colorString("Special thanks for", Color.CYAN),
+                Math.max(centerX - 10, 0),
+                centerY - 2);
         blitter("Jarmo Isotalo (Jamo)", centerX, centerY++);
         centerY++;
         blitter("Kati Kyllönen (kxkyll)", centerX, centerY++);
@@ -324,8 +329,7 @@ public class DocumentCommand extends AbstractCommand {
             }
             for (i++; i < line.length(); i++) {
                 char lineChar = line.charAt(i);
-                if ((lineChar >= 'a' && lineChar <= 'z')
-                        || (lineChar >= 'A' && lineChar <= 'Z')) {
+                if ((lineChar >= 'a' && lineChar <= 'z') || (lineChar >= 'A' && lineChar <= 'Z')) {
                     break;
                 }
             }

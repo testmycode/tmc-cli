@@ -53,40 +53,38 @@ public class EnvironmentUtil {
             try {
                 Process proc = new ProcessBuilder(args).start();
                 if (wait) {
-                    logger.info("(Windows) Waiting for "
-                            + Arrays.toString(args) + " to finish executing");
+                    logger.info(
+                            "(Windows) Waiting for "
+                                    + Arrays.toString(args)
+                                    + " to finish executing");
                     proc.waitFor();
                 }
             } catch (Exception e) {
-                logger.error("(Windows) Exception when running external program "
-                        + Arrays.toString(args), e);
+                logger.error(
+                        "(Windows) Exception when running external program "
+                                + Arrays.toString(args),
+                        e);
                 return false;
             }
         } else {
 
             StringBuilder program = new StringBuilder();
-            for (int i = 0; i < args.length; i++) {
-                program.append(" " + args[i]);
+            for (String arg : args) {
+                program.append(" ").append(arg);
             }
             String[] exec = {"sh", "-c", program.toString() + " </dev/tty >/dev/tty"};
-//            exec[0] = "sh";
-//            exec[1] = "-c";
-//            for (int i = 0; i < args.length; i++) {
-//                exec[2 + i] = args[i];
-//            }
-//            exec[args.length + 2] = " </dev/tty >/dev/tty";
-//            exec = {"sh -c "}
             try {
                 Process proc = Runtime.getRuntime().exec(exec);
                 if (wait) {
-                    logger.info("(Unix) Waiting for "
-                            + Arrays.toString(exec) + " to finish executing");
+                    logger.info(
+                            "(Unix) Waiting for " + Arrays.toString(exec) + " to finish executing");
                     proc.waitFor();
                 }
                 return proc.exitValue() == 0;
             } catch (Exception e) {
-                logger.error("(Unix) Exception when running external program "
-                        + Arrays.toString(exec), e);
+                logger.error(
+                        "(Unix) Exception when running external program " + Arrays.toString(exec),
+                        e);
                 return false;
             }
         }

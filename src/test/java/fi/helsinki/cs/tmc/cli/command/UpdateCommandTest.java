@@ -53,8 +53,12 @@ public class UpdateCommandTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/" + COURSE_NAME).toURI());
+        pathToDummyCourse =
+                Paths.get(
+                        SubmitCommandTest.class
+                                .getClassLoader()
+                                .getResource("dummy-courses/" + COURSE_NAME)
+                                .toURI());
         assertNotNull(pathToDummyCourse);
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);

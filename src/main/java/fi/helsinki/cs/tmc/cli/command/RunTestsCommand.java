@@ -27,8 +27,7 @@ import java.util.List;
 @Command(name = "test", desc = "Run local exercise tests")
 public class RunTestsCommand extends AbstractCommand {
 
-    private static final Logger logger
-            = LoggerFactory.getLogger(RunTestsCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(RunTestsCommand.class);
 
     private boolean showPassed;
     private boolean showDetails;
@@ -41,19 +40,18 @@ public class RunTestsCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
-        CliContext ctx = context;
-        Io io = ctx.getIo();
+        Io io = context.getIo();
 
         String[] paths = parseArgs(args);
         if (paths == null) {
             return;
         }
 
-        if (!ctx.loadBackendWithoutLogin()) {
+        if (!context.loadBackendWithoutLogin()) {
             return;
         }
 
-        WorkDir workDir = ctx.getWorkDir();
+        WorkDir workDir = context.getWorkDir();
         for (String path : paths) {
             if (!workDir.addPath(path)) {
                 io.errorln("The path \"" + path + "\" is not a valid exercise.");
@@ -67,28 +65,28 @@ public class RunTestsCommand extends AbstractCommand {
             return;
         }
 
-        CourseInfo info = ctx.getCourseInfo();
+        CourseInfo info = context.getCourseInfo();
 
-        Color passedColor = ctx.getApp().getColor("testresults-left");
-        Color failedColor = ctx.getApp().getColor("testresults-right");
-        ResultPrinter resultPrinter = new ResultPrinter(io, showDetails, showPassed,
-                passedColor, failedColor);
+        Color passedColor = context.getApp().getColor("testresults-left");
+        Color failedColor = context.getApp().getColor("testresults-right");
+        ResultPrinter resultPrinter =
+                new ResultPrinter(io, showDetails, showPassed, passedColor, failedColor);
 
         boolean isOnlyExercise = (exercises.size() == 1);
 
         for (Exercise exercise : exercises) {
             io.println(ColorUtil.colorString("Testing: " + exercise.getName(), Color.YELLOW));
 
-            RunResult runResult = TmcUtil.runLocalTests(ctx, exercise);
+            RunResult runResult = TmcUtil.runLocalTests(context, exercise);
             if (runResult == null) {
                 io.errorln("Failed to run test");
                 resultPrinter.addFailedExercise();
                 continue;
             }
 
-            ValidationResult valResult = TmcUtil.runCheckStyle(ctx, exercise);
-            boolean testsPassed = resultPrinter.printLocalTestResult(
-                    runResult, valResult, isOnlyExercise);
+            ValidationResult valResult = TmcUtil.runCheckStyle(context, exercise);
+            boolean testsPassed =
+                    resultPrinter.printLocalTestResult(runResult, valResult, isOnlyExercise);
 
             updateCourseInfo(info, exercise, testsPassed);
             io.println();

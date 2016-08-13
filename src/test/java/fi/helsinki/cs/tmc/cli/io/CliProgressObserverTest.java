@@ -28,8 +28,9 @@ public class CliProgressObserverTest {
     public void progressMessageWorks() {
         CliProgressObserver progobs = new CliProgressObserver(io);
         progobs.progress(0, "Hello, world!");
-        assertTrue("Prints message", io.out().contains(
-                "Hello, world!                                     "));
+        assertTrue(
+                "Prints message",
+                io.out().contains("Hello, world!                                     "));
     }
 
     @Test
@@ -37,39 +38,36 @@ public class CliProgressObserverTest {
         CliProgressObserver progobs = new CliProgressObserver(io);
         progobs.progress(0, 0.5, "Hello, world!");
         assertTrue("Prints message", io.out().contains("Hello, world!"));
-        assertTrue("Prints the start of the progress bar", io.out().contains(
-                " 50%["));
-        assertTrue("Prints the first part of the progress bar", io.out().contains(
-                "██████████████████████"));
-        assertTrue("Prints the second of the progress bar", io.out().contains(
-                "░░░░░░░░░░░░░░░░░░░░░░"));
-        assertTrue("Prints the end of the progress bar", io.out().contains(
-                "]"));
+        assertTrue("Prints the start of the progress bar", io.out().contains(" 50%["));
+        assertTrue(
+                "Prints the first part of the progress bar",
+                io.out().contains("██████████████████████"));
+        assertTrue(
+                "Prints the second of the progress bar",
+                io.out().contains("░░░░░░░░░░░░░░░░░░░░░░"));
+        assertTrue("Prints the end of the progress bar", io.out().contains("]"));
     }
 
     @Test
     public void testResultBarWorks() {
-        String string = CliProgressObserver.getPassedTestsBar(1, 2,
-                Color.NONE, Color.NONE);
-        assertTrue("Prints the start of the progress bar", string.contains(
-                " 50%["));
-        assertTrue("Prints the first part of the progress bar", string.contains(
-                "██████████████████████"));
-        assertTrue("Prints the second of the progress bar", string.contains(
-                "░░░░░░░░░░░░░░░░░░░░░░"));
-        assertTrue("Prints the end of the progress bar", string.contains(
-                "]"));
+        String string = CliProgressObserver.getPassedTestsBar(1, 2, Color.NONE, Color.NONE);
+        assertTrue("Prints the start of the progress bar", string.contains(" 50%["));
+        assertTrue(
+                "Prints the first part of the progress bar",
+                string.contains("██████████████████████"));
+        assertTrue(
+                "Prints the second of the progress bar", string.contains("░░░░░░░░░░░░░░░░░░░░░░"));
+        assertTrue("Prints the end of the progress bar", string.contains("]"));
     }
 
     @Test
     public void shortensLongMessages() {
         CliProgressObserver progobs = new CliProgressObserver(io);
-        progobs.progress(0,
-                "fooooooooooooooooooooooooooooooooooooooooooooooooobar");
-        assertTrue("Prints what it's supposed to",
+        progobs.progress(0, "fooooooooooooooooooooooooooooooooooooooooooooooooobar");
+        assertTrue(
+                "Prints what it's supposed to",
                 io.out().contains("foooooooooooooooooooooooooooooooooooooooooooooo..."));
-        assertTrue("Doesn't print what it's not supposed to",
-                !io.out().contains("bar"));
+        assertTrue("Doesn't print what it's not supposed to", !io.out().contains("bar"));
     }
 
     @Test

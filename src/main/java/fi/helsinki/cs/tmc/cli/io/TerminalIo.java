@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 public class TerminalIo extends Io {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TerminalIo.class);
     private final Scanner scanner;
 

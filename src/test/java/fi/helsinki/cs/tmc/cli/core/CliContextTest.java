@@ -102,7 +102,6 @@ public class CliContextTest {
     public void getCourseInfo() {
         mockStatic(CourseInfoIo.class);
 
-        CourseInfo info = null;
         WorkDir workDir = mock(WorkDir.class);
 
         when(workDir.getConfigFile()).thenReturn(null);

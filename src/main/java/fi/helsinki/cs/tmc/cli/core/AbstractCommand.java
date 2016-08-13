@@ -22,7 +22,7 @@ public abstract class AbstractCommand {
      *
      * @return Description text
      */
-    public String getDescription() {
+    protected String getDescription() {
         return null;
     }
 
@@ -65,7 +65,7 @@ public abstract class AbstractCommand {
         }
     }
 
-    public CommandLine parseArgs(CliContext context, String[] stringArgs) {
+    protected CommandLine parseArgs(CliContext context, String[] stringArgs) {
         GnuParser parser = new GnuParser();
         CommandLine args;
         Options options = getOptions();

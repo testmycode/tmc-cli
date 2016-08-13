@@ -82,7 +82,7 @@ public class TmcUtil {
         return new ArrayList<>();
     }
 
-    public static Course getDetails(CliContext ctx, Course course) {
+    private static Course getDetails(CliContext ctx, Course course) {
         try {
             TmcCore core = ctx.getTmcCore();
             return core.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
@@ -118,8 +118,8 @@ public class TmcUtil {
         return null;
     }
 
-    public static List<Exercise> downloadExercises(CliContext ctx, List<Exercise> exercises,
-            ProgressObserver progobs) {
+    public static List<Exercise> downloadExercises(
+            CliContext ctx, List<Exercise> exercises, ProgressObserver progobs) {
         try {
             TmcCore core = ctx.getTmcCore();
             return core.downloadOrUpdateExercises(progobs, exercises).call();
@@ -130,8 +130,8 @@ public class TmcUtil {
         }
     }
 
-    public static List<Exercise> downloadAllExercises(CliContext ctx, Course course,
-            ProgressObserver progobs) {
+    public static List<Exercise> downloadAllExercises(
+            CliContext ctx, Course course, ProgressObserver progobs) {
         if (!course.isExercisesLoaded()) {
             course = getDetails(ctx, course);
         }
@@ -150,12 +150,10 @@ public class TmcUtil {
         }
     }
 
-    public static UpdateResult getUpdatableExercises(
-            CliContext ctx, Course course) {
+    public static UpdateResult getUpdatableExercises(CliContext ctx, Course course) {
         try {
             TmcCore core = ctx.getTmcCore();
-            return core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course)
-                    .call();
+            return core.getExerciseUpdates(ProgressObserver.NULL_OBSERVER, course).call();
         } catch (Exception e) {
             TmcUtil.handleTmcExceptions(ctx, e);
             logger.warn("Failed to get exercise updates.", e);
@@ -166,8 +164,7 @@ public class TmcUtil {
     public static URI sendPaste(CliContext ctx, Exercise exercise, String message) {
         try {
             TmcCore core = ctx.getTmcCore();
-            return core.pasteWithComment(ProgressObserver.NULL_OBSERVER,
-                    exercise, message).call();
+            return core.pasteWithComment(ProgressObserver.NULL_OBSERVER, exercise, message).call();
 
         } catch (Exception e) {
             TmcUtil.handleTmcExceptions(ctx, e);
@@ -198,12 +195,11 @@ public class TmcUtil {
         }
     }
 
-    public static boolean sendFeedback(CliContext ctx, List<FeedbackAnswer> answers,
-            URI feedbackUri) {
+    public static boolean sendFeedback(
+            CliContext ctx, List<FeedbackAnswer> answers, URI feedbackUri) {
         try {
             TmcCore core = ctx.getTmcCore();
-            return core.sendFeedback(ProgressObserver.NULL_OBSERVER, answers,
-                    feedbackUri).call();
+            return core.sendFeedback(ProgressObserver.NULL_OBSERVER, answers, feedbackUri).call();
 
         } catch (Exception e) {
             TmcUtil.handleTmcExceptions(ctx, e);
@@ -212,7 +208,7 @@ public class TmcUtil {
         }
     }
 
-    protected static void handleTmcExceptions(CliContext ctx, Exception exception) {
+    private static void handleTmcExceptions(CliContext ctx, Exception exception) {
         Io io = ctx.getIo();
         Throwable cause = exception.getCause();
 
@@ -244,8 +240,7 @@ public class TmcUtil {
     private static boolean isAuthenticationError(Exception exception) {
         Throwable cause = exception.getCause();
         if (cause instanceof FailedHttpResponseException) {
-            FailedHttpResponseException httpEx
-                    = (FailedHttpResponseException) cause;
+            FailedHttpResponseException httpEx = (FailedHttpResponseException) cause;
             if (httpEx.getStatusCode() == 401) {
                 return true;
             }

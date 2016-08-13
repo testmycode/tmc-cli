@@ -109,7 +109,7 @@ public class Application {
                 runCommand("help", new String[0]);
                 return null;
             }
-            runCommand(commandName, new String[]{"-h"});
+            runCommand(commandName, new String[] {"-h"});
             return null;
         }
         if (showVersion) {
@@ -169,18 +169,16 @@ public class Application {
         }
 
         Date now = new Date();
-        if (previous != null && previous.getTime() + defaultUpdateInterval > now.getTime()) {
-            return false;
-        }
-
-        return runAutoUpdate();
+        return !(previous != null && previous.getTime() + defaultUpdateInterval > now.getTime())
+                && runAutoUpdate();
     }
 
     public boolean runAutoUpdate() {
         Map<String, String> properties = context.getProperties();
         Date now = new Date();
-        AutoUpdater update = AutoUpdater.createUpdater(io,
-                EnvironmentUtil.getVersion(), EnvironmentUtil.isWindows());
+        AutoUpdater update =
+                AutoUpdater.createUpdater(
+                        io, EnvironmentUtil.getVersion(), EnvironmentUtil.isWindows());
         boolean updated = update.run();
 
         long timestamp = now.getTime();
@@ -196,11 +194,16 @@ public class Application {
         Color color = ColorUtil.getColor(propertyValue);
         if (color == null) {
             switch (propertyName) {
-                case "progressbar-left":    return Color.CYAN;
-                case "progressbar-right":   return Color.CYAN;
-                case "testresults-left":    return Color.GREEN;
-                case "testresults-right":   return Color.RED;
-                default:    return Color.NONE;
+                case "progressbar-left":
+                    return Color.CYAN;
+                case "progressbar-right":
+                    return Color.CYAN;
+                case "testresults-left":
+                    return Color.GREEN;
+                case "testresults-right":
+                    return Color.RED;
+                default:
+                    return Color.NONE;
             }
         }
         return color;

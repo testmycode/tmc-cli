@@ -19,10 +19,9 @@ public class CommandFactoryTest {
 
     Application app;
 
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
+    @Rule public ExpectedException exception = ExpectedException.none();
 
-    CliContext ctx;
+    private CliContext ctx;
 
     @Before
     public void setUp() {
@@ -86,8 +85,7 @@ public class CommandFactoryTest {
         CommandFactory.addCommand(BadCommand.class);
     }
 
-    public static class ReallyBadCommand {
-    }
+    private static class ReallyBadCommand {}
 
     @Test(expected = RuntimeException.class)
     public void addCommandThatDoesntExtendInterface() {
@@ -97,4 +95,3 @@ public class CommandFactoryTest {
         CommandFactory.addCommand(ReallyBadCommand.class);
     }
 }
-

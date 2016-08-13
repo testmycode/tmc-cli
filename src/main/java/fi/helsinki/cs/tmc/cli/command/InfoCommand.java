@@ -86,9 +86,10 @@ public class InfoCommand extends AbstractCommand {
     private void printLocalInfo(String[] stringArgs) {
         info = ctx.getCourseInfo();
         if (info == null) {
-            io.errorln("You have to be in a course directory"
-                    + " or use the -i option with the course name "
-                    + "to get the information from the server.");
+            io.println(
+                    "You have to be in a course directory"
+                            + " or use the -i option with the course name "
+                            + "to get the information from the server.");
             printUsage(ctx);
             return;
         }
@@ -125,9 +126,8 @@ public class InfoCommand extends AbstractCommand {
         if (course != null) {
             printCourse(course);
         } else {
-            io.errorln("Not a course directory. ");
-            io.errorln("Use the -i option to get course from "
-                    + "server.");
+            io.errorln("Not a course directory.");
+            io.errorln("Use the -i option to get course from server.");
             printUsage(ctx);
         }
     }

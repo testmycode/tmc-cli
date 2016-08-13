@@ -80,17 +80,12 @@ public class PasteCommandTest {
 
         mockStatic(TmcUtil.class);
         mockStatic(ExternalsUtil.class);
-        when(ExternalsUtil
-                .getUserEditedMessage(anyString(), anyString(), anyBoolean()))
+        when(ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean()))
                 .thenReturn("This is my paste message!");
 
         mockStatic(CourseInfoIo.class);
-        when(CourseInfoIo
-                .load(any(Path.class)))
-                .thenReturn(mockCourseInfo);
-        when(CourseInfoIo
-                .save(any(CourseInfo.class), any(Path.class)))
-                .thenReturn(true);
+        when(CourseInfoIo.load(any(Path.class))).thenReturn(mockCourseInfo);
+        when(CourseInfoIo.save(any(CourseInfo.class), any(Path.class))).thenReturn(true);
     }
 
     @Test
@@ -117,14 +112,12 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithoutArguments() throws URISyntaxException {
-        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
-                .thenReturn(pasteUri);
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString())).thenReturn(pasteUri);
         io.addConfirmationPrompt(true);
         app.run(new String[] {"paste", "paste-exercise"});
 
         io.assertContains("Paste sent for exercise paste-exercise");
-        assertTrue("Prints the paste URI",
-                io.out().contains(pasteUri.toString()));
+        assertTrue("Prints the paste URI", io.out().contains(pasteUri.toString()));
         io.assertAllPromptsUsed();
 
         verifyStatic(times(1));
@@ -133,38 +126,36 @@ public class PasteCommandTest {
         verifyStatic(times(1));
         TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString());
     }
-    
+
     @Test
     public void pasteRunsRightwithTooManyArguments() {
         app.run(new String[] {"paste", "paste-exercise", "secondArgument"});
         io.assertContains("Error: Too many arguments.");
     }
-    
+
     @Test
     public void pasteRunsRightWithMessageSwitchWithMessage() {
-        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
-                .thenReturn(pasteUri);
-        app.run(new String[] {"paste", "-m", "This is a message given as an argument",
-                "paste-exercise"});
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString())).thenReturn(pasteUri);
+        app.run(
+                new String[] {
+                    "paste", "-m", "This is a message given as an argument", "paste-exercise"
+                });
 
         io.assertContains("Paste sent for exercise paste-exercise");
-        assertTrue("Prints the paste URI",
-                io.out().contains(pasteUri.toString()));
+        assertTrue("Prints the paste URI", io.out().contains(pasteUri.toString()));
 
         verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verifyStatic(Mockito.times(1));
-        TmcUtil.sendPaste(eq(ctx), eq(exercise),
-                eq("This is a message given as an argument"));
+        TmcUtil.sendPaste(eq(ctx), eq(exercise), eq("This is a message given as an argument"));
     }
 
     @Test
     public void pasteFailsWithMessageSwitchWithoutMessage() {
-        app.run(new String[]{"paste", "-m"});
+        app.run(new String[] {"paste", "-m"});
 
-        assertTrue("Prints to IO when failing to parse",
-                io.out().contains("Invalid"));
+        assertTrue("Prints to IO when failing to parse", io.out().contains("Invalid"));
 
         verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
@@ -172,27 +163,23 @@ public class PasteCommandTest {
 
     @Test
     public void pasteRunsRightWithNoMessageSwitch() {
-        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
-                .thenReturn(pasteUri);
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString())).thenReturn(pasteUri);
         app.run(new String[] {"paste", "-n", "paste-exercise"});
 
         io.assertContains("Paste sent for exercise paste-exercise");
-        assertTrue("Prints the paste URI",
-                io.out().contains(pasteUri.toString()));
+        assertTrue("Prints the paste URI", io.out().contains(pasteUri.toString()));
 
         verifyStatic(Mockito.never());
         ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean());
 
         verifyStatic(Mockito.times(1));
-        TmcUtil.sendPaste(eq(ctx), eq(exercise),
-                eq(""));
+        TmcUtil.sendPaste(eq(ctx), eq(exercise), eq(""));
     }
 
     @Test
     public void handlesExceptionWhenCallableFails() {
         io.addConfirmationPrompt(true);
-        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString()))
-                .thenReturn(null);
+        when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString())).thenReturn(null);
         app.run(new String[] {"paste", "paste-exercise"});
 
         io.assertContains("Unable to send the paste");

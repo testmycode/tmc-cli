@@ -75,7 +75,7 @@ public class WorkDir {
      * Go through directories and return matching exercises.
      * @param exists Returns only exercises that aren't removed
      * @param onlyTested Return only exercises that are already tested
-     * @return: return names of exercises as List
+     * @return return exercises as List
      */
     public List<Exercise> getExercises(boolean exists, boolean onlyTested) {
         if (this.directories.isEmpty() && getConfigFile() == null) {
@@ -119,8 +119,11 @@ public class WorkDir {
         return exercises;
     }
 
-    private boolean filterExercise(Exercise exercise, List<String> tested,
-            boolean exists, boolean onlyTested) {
+    private boolean filterExercise(
+            Exercise exercise,
+            List<String> tested,
+            boolean exists,
+            boolean onlyTested) {
         if (onlyTested && !tested.contains(exercise.getName())) {
             return false;
         }
@@ -153,7 +156,7 @@ public class WorkDir {
      * Return true if and only if the path is in the same course directory
      * as all other directories.
      * @param path: given path
-     * @return: whether the path given is in the course directory
+     * @return whether the path given is in the course directory
      */
     public boolean addPath(Path path) {
         path = makeAbsolute(path);

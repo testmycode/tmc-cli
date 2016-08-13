@@ -17,8 +17,7 @@ import java.util.HashMap;
 @Command(name = "prop", desc = "Set/unset TMC-CLI properties")
 public class PropertiesCommand extends AbstractCommand {
 
-    private static final Logger logger
-            = LoggerFactory.getLogger(PropertiesCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesCommand.class);
     private Io io;
 
     @Override
@@ -33,12 +32,11 @@ public class PropertiesCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
-        CliContext ctx = context;
-        this.io = ctx.getIo();
+        this.io = context.getIo();
 
         boolean unset = args.hasOption("u");
         String[] arguments = args.getArgs();
-        HashMap<String, String> props = ctx.getProperties();
+        HashMap<String, String> props = context.getProperties();
         if (arguments.length == 0) {
             printAllProps(props);
             return;
@@ -46,7 +44,7 @@ public class PropertiesCommand extends AbstractCommand {
 
         if (arguments.length % 2 == 1 && !unset) {
             io.errorln("Invalid argument count.");
-            printUsage(ctx);
+            printUsage(context);
             return;
         }
 
@@ -77,11 +75,10 @@ public class PropertiesCommand extends AbstractCommand {
             }
             for (int i = 0; i < arguments.length; i = i + 2) {
                 String last = props.put(arguments[i], arguments[i + 1]);
-                io.println("Set " + arguments[i] + "=>" + arguments[i + 1]
-                        + ", was " + last);
+                io.println("Set " + arguments[i] + "=>" + arguments[i + 1] + ", was " + last);
             }
         }
-        ctx.saveProperties();
+        context.saveProperties();
     }
 
     private void printAllProps(HashMap<String, String> props) {
@@ -100,7 +97,7 @@ public class PropertiesCommand extends AbstractCommand {
 
         for (String key : array) {
             sb = new StringBuilder();
-            sb.append(key + ":");
+            sb.append(key).append(":");
             for (int i = key.length() + 1; i < Math.max(longest + 1, 7); i++) {
                 sb.append(" ");
             }

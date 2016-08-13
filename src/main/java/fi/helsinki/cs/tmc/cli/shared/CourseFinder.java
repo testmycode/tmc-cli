@@ -78,16 +78,19 @@ public class CourseFinder {
 
     private boolean handleMultipleMatchingCourses(Map<Account, Course> matches) {
         Io io = ctx.getIo();
-        io.println("There is " + matches.size()
-                + " courses with same name at different servers.");
+        io.println("There is " + matches.size() + " courses with same name at different servers.");
 
         for (Map.Entry<Account, Course> entrySet : matches.entrySet()) {
             Account entryAccount = entrySet.getKey();
             Course entryCourse = entrySet.getValue();
 
-            if (io.readConfirmation("Download course from "
-                    + entryAccount.getServerAddress() + " with '"
-                    + entryAccount.getUsername() + "' account", false)) {
+            if (io.readConfirmation(
+                    "Download course from "
+                            + entryAccount.getServerAddress()
+                            + " with '"
+                            + entryAccount.getUsername()
+                            + "' account",
+                    false)) {
                 this.account = entryAccount;
                 this.course = entryCourse;
                 return true;

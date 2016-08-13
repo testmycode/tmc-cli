@@ -75,7 +75,7 @@ public class AccountList implements Iterable<Account> {
         return this.accountArray.size();
     }
 
-    public List<Account> getAccountList() {
+    private List<Account> getAccountList() {
         return Collections.unmodifiableList(this.accountArray);
     }
 

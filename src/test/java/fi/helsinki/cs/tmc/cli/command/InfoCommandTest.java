@@ -39,8 +39,8 @@ public class InfoCommandTest {
     private static final String COURSE_NAME = "2016-aalto-c";
     private static final String EXERCISE1_NAME = "Module_1-02_intro";
 
-    static Path pathToDummyCourse;
-    static Path pathToDummyExercise;
+    private static Path pathToDummyCourse;
+    private static Path pathToDummyExercise;
 
     private Application app;
     private CliContext ctx;
@@ -51,8 +51,12 @@ public class InfoCommandTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/" + COURSE_NAME).toURI());
+        pathToDummyCourse =
+                Paths.get(
+                        SubmitCommandTest.class
+                                .getClassLoader()
+                                .getResource("dummy-courses/" + COURSE_NAME)
+                                .toURI());
         assertNotNull(pathToDummyCourse);
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);

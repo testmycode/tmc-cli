@@ -1,11 +1,11 @@
 
-[![Build Status](https://travis-ci.org/tmc-cli/tmc-cli.svg?branch=master)](https://travis-ci.org/tmc-cli/tmc-cli)
-[![GitHub release](https://img.shields.io/badge/release-latest-brightgreen.svg?style=flat)](https://github.com/tmc-cli/tmc-cli/releases/latest)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tmc-cli/tmc-cli/master/LICENSE)
-[![Coverage Status](https://coveralls.io/repos/github/tmc-cli/tmc-cli/badge.svg?branch=master)](https://coveralls.io/github/tmc-cli/tmc-cli?branch=master)
-[![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/mikkomaa/tmc-cli)
+[![Build Status](https://travis-ci.org/testmycode/tmc-cli.svg?branch=master)](https://travis-ci.org/testmycode/tmc-cli)
+[![GitHub release](https://img.shields.io/badge/release-latest-brightgreen.svg?style=flat)](https://github.com/testmycode/tmc-cli/releases/latest)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/testmycode/tmc-cli/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/tmc-cli/tmc-cli/badge.svg?branch=master)](https://coveralls.io/github/testmycode/tmc-cli?branch=master)
+[![Build status](https://ci.appveyor.com/api/projects/status/js9jr4ef4o7dnama?svg=true)](https://ci.appveyor.com/project/jamox/tmc-cli-08d2u)
 
-![tmc-cli logo](https://rawgit.com/tmc-cli/tmc-cli/master/docs/logo_plain.svg)
+![tmc-cli logo](https://rawgit.com/testmycode/tmc-cli/master/docs/logo_plain.svg)
 
 #tmc-cli
 
@@ -28,14 +28,14 @@ TMC-CLI is the command-line client for University of Helsinki's TestMyCode -fram
 `cd` into the directory where you wish to install TMC-CLI. Then, copy and paste the following command in your terminal:
 
 ```
-curl -0 https://raw.githubusercontent.com/tmc-cli/tmc-cli/master/scripts/install.sh | bash; source ~/.bashrc
+curl -0 https://raw.githubusercontent.com/testmycode/tmc-cli/master/scripts/install.sh | bash; source ~/.bashrc
 ```
 
 TMC-CLI should now be installed. You can try running it with `tmc`.
 
 ###Manual installation
 
-Download the latest [release](https://github.com/tmc-cli/tmc-cli/releases/latest). If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
+Download the latest [release](https://github.com/testmycode/tmc-cli/releases/latest). If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
 
 If you downloaded "tmc", navigate to the download directory on your terminal and make it executable with `chmod u+x ./tmc`.
 
@@ -173,8 +173,19 @@ https://link.to.paste/bin
 
 You cannot submit exercises that you have completed.
 
+# Contribute
+
+1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository to your own GitHub account and then [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device
+2. Install the dependencies: `mvn dependency:go-offline`
+3. Build the code : `mvn package`
+4. Run the tests : `mvn test`
+5. Run the checkstyle : `mvn checkstyle:check`
+
+## Crafting a release
+Releases are automatically built in Travis and pushed to GitHub releases. Once ready to release, update version in pom.xml and gat the commit accordingly. Once tests have passed a new release is uploaded to travis. Note: only travis runs with tag set are used for releases.
+
 ##Disclaimer
 
-This software is licensed under [the MIT license](https://raw.githubusercontent.com/tmc-cli/tmc-cli/instructions/LICENSE).
+This software is licensed under [the MIT license](https://raw.githubusercontent.com/testmycode/tmc-cli/instructions/LICENSE).
 
 This software comes with no warranty. University of Helsinki and the tmc-cli developers are not responsible for any damages caused by misuse or misbehaviour of this software.

@@ -57,8 +57,12 @@ public class RunTestsCommandTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/" + COURSE_NAME).toURI());
+        pathToDummyCourse =
+                Paths.get(
+                        SubmitCommandTest.class
+                                .getClassLoader()
+                                .getResource("dummy-courses/" + COURSE_NAME)
+                                .toURI());
         assertNotNull(pathToDummyCourse);
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
@@ -105,8 +109,7 @@ public class RunTestsCommandTest {
 
     @Test
     public void worksInCourseDirectory() {
-        when(TmcUtil.runLocalTests(eq(ctx), any(Exercise.class)))
-                .thenReturn(runResult);
+        when(TmcUtil.runLocalTests(eq(ctx), any(Exercise.class))).thenReturn(runResult);
 
         workDir.setWorkdir(pathToDummyCourse);
 
@@ -118,8 +121,7 @@ public class RunTestsCommandTest {
 
     @Test
     public void worksInCourseDirectoryIfExerciseIsGiven() {
-        when(TmcUtil.runLocalTests(eq(ctx), any(Exercise.class)))
-                .thenReturn(runResult);
+        when(TmcUtil.runLocalTests(eq(ctx), any(Exercise.class))).thenReturn(runResult);
 
         workDir.setWorkdir(pathToDummyCourse);
 

@@ -12,7 +12,7 @@ public class Account {
     private String password;
 
     // for gson
-    public Account() { }
+    public Account() {}
 
     public Account(String serverAddress, String username, String password) {
         this.serverAddress = serverAddress;

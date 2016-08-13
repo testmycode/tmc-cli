@@ -52,10 +52,9 @@ public class ListExercisesCommand extends AbstractCommand {
             return;
         }
 
-        printExercises(courseName, exercises, !args.hasOption("n")
-                && !EnvironmentUtil.isWindows());
+        printExercises(courseName, exercises, !args.hasOption("n") && !EnvironmentUtil.isWindows());
     }
-    
+
     private String getCourseName(CommandLine args) {
         String[] stringArgs = args.getArgs();
         if (stringArgs.length != 0) {
@@ -63,7 +62,7 @@ public class ListExercisesCommand extends AbstractCommand {
         }
         return getCourseNameFromCurrentDirectory();
     }
-    
+
     private List<Exercise> getExercises(CommandLine args, String courseName) {
         if (args.hasOption("i")) {
             return getExercisesFromServer(courseName);
@@ -74,8 +73,9 @@ public class ListExercisesCommand extends AbstractCommand {
     private String getCourseNameFromCurrentDirectory() {
         CourseInfo info = getCourseInfoFromCurrentDirectory();
         if (info == null) {
-            this.io.errorln("No course specified. Either run the command in a course"
-                    + " directory or enter the course as a parameter.");
+            this.io.errorln(
+                    "No course specified. Either run the command in a course"
+                            + " directory or enter the course as a parameter.");
             return null;
         }
         return info.getCourseName();
@@ -107,8 +107,9 @@ public class ListExercisesCommand extends AbstractCommand {
     private List<Exercise> getLocalExercises(String courseName) {
         CourseInfo info = getCourseInfoFromCurrentDirectory();
         if (info == null || !info.getCourseName().equals(courseName)) {
-            this.io.errorln("You have to be in a course directory or use the -i option "
-                    + "to get the exercises from the server.");
+            this.io.errorln(
+                    "You have to be in a course directory or use the -i option "
+                            + "to get the exercises from the server.");
             return null;
         }
 
@@ -128,7 +129,7 @@ public class ListExercisesCommand extends AbstractCommand {
             io.print(str);
         }
     }
-    
+
     private String getExercisesAsString(String courseName, List<Exercise> exercises) {
         StringBuilder sb = new StringBuilder("Course name: " + courseName);
         String prevDeadline = "";
@@ -136,7 +137,7 @@ public class ListExercisesCommand extends AbstractCommand {
         for (Exercise exercise : exercises) {
             String deadline = CourseInfo.getExerciseDeadline(exercise);
             if (!deadline.equals(prevDeadline)) {
-                sb.append("\nDeadline: " + deadline + "\n");
+                sb.append("\nDeadline: ").append(deadline).append("\n");
                 prevDeadline = deadline;
             }
             sb.append(getExerciseStatus(exercise));

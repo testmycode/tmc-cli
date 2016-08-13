@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ResultPrinterTest {
@@ -39,8 +40,7 @@ public class ResultPrinterTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        printer = new ResultPrinter(io, true, true,
-                Color.GREEN, Color.RED);
+        printer = new ResultPrinter(io, true, true, Color.GREEN, Color.RED);
         mockSubResult = mock(SubmissionResult.class);
         logs = ImmutableMap.of();
     }
@@ -74,9 +74,10 @@ public class ResultPrinterTest {
 
     @Test
     public void printSubmissionResultWorksIfSomeTestsFail() {
-        testResults = ImmutableList.of(
-                new TestResult("test1", false, "Not good."),
-                new TestResult("test2", true, "Was good."));
+        testResults =
+                ImmutableList.of(
+                        new TestResult("test1", false, "Not good."),
+                        new TestResult("test2", true, "Was good."));
         when(mockSubResult.getStatus()).thenReturn(SubmissionResult.Status.FAIL);
         when(mockSubResult.getTestResultStatus()).thenReturn(TestResultStatus.SOME_FAILED);
         when(mockSubResult.getTestCases()).thenReturn(testResults);
@@ -111,8 +112,8 @@ public class ResultPrinterTest {
 
     @Test
     public void printLocalTestResultWorksIfTestsFail() {
-        testResults = ImmutableList.of(new TestResult("test1", false, "Not good.",
-                "Try harder", true));
+        testResults =
+                ImmutableList.of(new TestResult("test1", false, "Not good.", "Try harder", true));
         runResult = new RunResult(Status.TESTS_FAILED, testResults, logs);
         printer.printLocalTestResult(runResult, null, false);
         io.assertContains("Failed:");
@@ -124,8 +125,8 @@ public class ResultPrinterTest {
     public void printLocalTestResultWorksIfTestsFailWithException() {
         ImmutableList<String> points = ImmutableList.of("1");
         ImmutableList<String> exceptions = ImmutableList.of("Some exceptional condition");
-        testResults = ImmutableList.of(new TestResult("test1", false, points,
-                "Not good.", exceptions));
+        testResults =
+                ImmutableList.of(new TestResult("test1", false, points, "Not good.", exceptions));
         runResult = new RunResult(Status.TESTS_FAILED, testResults, logs);
         printer.printLocalTestResult(runResult, null, false);
         io.assertContains("Failed:");
@@ -150,7 +151,7 @@ public class ResultPrinterTest {
         error.setMessage("validation error");
         validationErrors = ImmutableList.of((ValidationError) error);
         File file = new File("");
-        Map map = new HashMap<>();
+        Map<File, List<ValidationError>> map = new HashMap<>();
         map.put(file, validationErrors);
         valResult.setValidationErrors(map);
 
@@ -164,7 +165,7 @@ public class ResultPrinterTest {
         error.setMessage("Incorrect indentation");
 
         File file = new File("Test.java");
-        Map valErrors = new HashMap<>();
+        Map<File, List<ValidationError>> valErrors = new HashMap<>();
         valErrors.put(file, ImmutableList.of((ValidationError) error));
 
         ValidationResultImpl valResult = new ValidationResultImpl();

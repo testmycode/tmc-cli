@@ -27,14 +27,16 @@ public class SettingsIoTest {
         accountList = new AccountList();
         try {
             FileUtils.deleteDirectory(tempDir.toFile());
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
     }
 
     @After
     public void cleanUp() {
         try {
             FileUtils.deleteDirectory(tempDir.toFile());
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
     }
 
     @Test
@@ -51,8 +53,7 @@ public class SettingsIoTest {
     public void saveZeroAccountsToFile() {
         boolean success = SettingsIo.saveAccountList(accountList, tempDir);
         assertTrue(success);
-        Path path = tempDir
-                .resolve(SettingsIo.ACCOUNTS_CONFIG);
+        Path path = tempDir.resolve(SettingsIo.ACCOUNTS_CONFIG);
         assertTrue(Files.exists(path));
     }
 
@@ -61,14 +62,14 @@ public class SettingsIoTest {
         accountList.addAccount(account);
         boolean success = SettingsIo.saveAccountList(accountList, tempDir);
         assertTrue(success);
-        Path path = tempDir
-                .resolve(SettingsIo.ACCOUNTS_CONFIG);
+        Path path = tempDir.resolve(SettingsIo.ACCOUNTS_CONFIG);
         assertTrue(Files.exists(path));
     }
 
     @Test
     public void saveAndLoadZeroAccountsFromFile() {
         boolean success = SettingsIo.saveAccountList(accountList, tempDir);
+        assertTrue(success);
         AccountList loadedList = SettingsIo.loadAccountList(tempDir);
         assertNotNull(loadedList);
         assertEquals(0, loadedList.getAccountCount());
@@ -78,6 +79,7 @@ public class SettingsIoTest {
     public void saveAndLoadOneAccountFromFile() {
         accountList.addAccount(account);
         boolean success = SettingsIo.saveAccountList(accountList, tempDir);
+        assertTrue(success);
         AccountList loadedList = SettingsIo.loadAccountList(tempDir);
         assertNotNull(loadedList);
         assertEquals(1, loadedList.getAccountCount());
@@ -101,7 +103,8 @@ public class SettingsIoTest {
         props.put("lastupdated", "1970-01-01");
         props.put("nextupdate", "2038-01-20");
         SettingsIo.savePropertiesTo(props, tempDir);
-        assertTrue("Properties file exists",
+        assertTrue(
+                "Properties file exists",
                 Files.exists(tempDir.resolve(SettingsIo.PROPERTIES_CONFIG)));
     }
 

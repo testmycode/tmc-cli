@@ -105,8 +105,7 @@ public class TerminalIoTest {
         writeString("password");
         when(System.console()).thenReturn(mockConsole);
         assertEquals("password", io.readPassword("abc "));
-        assertThat(os.toString(),
-                containsString("Unable to read password"));
+        assertThat(os.toString(), containsString("Unable to read password"));
     }
 
     @Test
@@ -114,8 +113,7 @@ public class TerminalIoTest {
         when(System.console()).thenReturn(null);
         writeString("password");
         assertEquals("password", io.readPassword("abc "));
-        assertThat(os.toString(),
-                containsString("Unable to read password"));
+        assertThat(os.toString(), containsString("Unable to read password"));
     }
 
     @Test

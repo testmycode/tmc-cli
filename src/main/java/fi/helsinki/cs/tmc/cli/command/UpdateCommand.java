@@ -69,8 +69,8 @@ public class UpdateCommand extends AbstractCommand {
 
         Color color1 = ctx.getApp().getColor("progressbar-left");
         Color color2 = ctx.getApp().getColor("progressbar-right");
-        List<Exercise> downloaded = exerciseUpdater.downloadUpdates(
-                new CliProgressObserver(io, color1, color2));
+        List<Exercise> downloaded =
+                exerciseUpdater.downloadUpdates(new CliProgressObserver(io, color1, color2));
         if (downloaded.isEmpty()) {
             io.errorln("Failed to download exercises");
             return;

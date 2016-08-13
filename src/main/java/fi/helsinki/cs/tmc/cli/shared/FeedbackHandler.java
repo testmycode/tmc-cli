@@ -29,8 +29,7 @@ public class FeedbackHandler {
         this.io = context.getIo();
     }
 
-    public boolean sendFeedback(List<FeedbackQuestion> questions,
-                             URI feedbackUri) {
+    public boolean sendFeedback(List<FeedbackQuestion> questions, URI feedbackUri) {
         this.questions = questions;
         List<FeedbackAnswer> answers = new ArrayList<>();
 
@@ -43,21 +42,30 @@ public class FeedbackHandler {
     private FeedbackAnswer getAnswer(FeedbackQuestion question) {
         if (question.isText()) {
             String wrappedQuestion =
-                    "\n# " + WordUtils.wrap("Feedback question: "
-                            + question.getQuestion(), 77, "\n# ", true)
-                    + "\n#\n# Write your feedback in this file and save it."
-                    + "\n# Lines beginning with # are comments and will be ignored.";
-            String answer = ExternalsUtil.getUserEditedMessage(wrappedQuestion,
-                    "tmc-feedback", true);
+                    "\n# "
+                            + WordUtils.wrap(
+                                    "Feedback question: " + question.getQuestion(),
+                                    77,
+                                    "\n# ",
+                                    true)
+                            + "\n#\n# Write your feedback in this file and save it."
+                            + "\n# Lines beginning with # are comments and will be ignored.";
+            String answer =
+                    ExternalsUtil.getUserEditedMessage(wrappedQuestion, "tmc-feedback", true);
             return new FeedbackAnswer(question, answer);
         } else if (question.isIntRange()) {
             io.println("Feedback question: " + question.getQuestion());
             int answer = Integer.MIN_VALUE;
             while (!(question.getIntRangeMin() <= answer && question.getIntRangeMax() >= answer)) {
                 try {
-                    answer = Integer.parseInt(io.readLine(
-                            "[" + question.getIntRangeMin()
-                            + "-" + question.getIntRangeMax() + "] "));
+                    answer =
+                            Integer.parseInt(
+                                    io.readLine(
+                                            "["
+                                                    + question.getIntRangeMin()
+                                                    + "-"
+                                                    + question.getIntRangeMax()
+                                                    + "] "));
                 } catch (Exception e) {
                     logger.warn("Couldn't parse string as integer", e);
                 }

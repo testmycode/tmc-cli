@@ -21,8 +21,7 @@ public class HelpCommand extends AbstractCommand {
     private Io io;
 
     @Override
-    public void getOptions(Options options) {
-    }
+    public void getOptions(Options options) {}
 
     @Override
     public void run(CliContext context, CommandLine args) {
@@ -57,7 +56,7 @@ public class HelpCommand extends AbstractCommand {
 
     @SuppressWarnings("unchecked")
     private Class<Command> castToCommandClass(Class klass) {
-        return (Class<Command>)klass;
+        return (Class<Command>) klass;
     }
 
     private String createCommandString(Command command) {
