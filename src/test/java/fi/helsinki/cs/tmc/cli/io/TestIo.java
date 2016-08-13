@@ -13,7 +13,7 @@ import java.util.LinkedList;
  */
 public class TestIo extends Io {
 
-    private static enum PromptType {
+    private enum PromptType {
         TEXT_PROMPT,
         PASSWORD_PROMPT,
         CONFIRM_PROMPT
