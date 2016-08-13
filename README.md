@@ -173,6 +173,17 @@ https://link.to.paste/bin
 
 You cannot submit exercises that you have completed.
 
+# Contribute
+
+1. [Fork](https://help.github.com/articles/fork-a-repo/) this repository to your own GitHub account and then [clone](https://help.github.com/articles/cloning-a-repository/) it to your local device
+2. Install the dependencies: `mvn dependency:go-offline`
+3. Build the code : `mvn package`
+4. Run the tests : `mvn test`
+5. Run the checkstyle : `mvn checkstyle:check`
+
+## Crafting a release
+Releases are automatically built in Travis and pushed to GitHub releases. Once ready to release, update version in pom.xml and gat the commit accordingly. Once tests have passed a new release is uploaded to travis. Note: only travis runs with tag set are used for releases.
+
 ##Disclaimer
 
 This software is licensed under [the MIT license](https://raw.githubusercontent.com/testmycode/tmc-cli/instructions/LICENSE).
