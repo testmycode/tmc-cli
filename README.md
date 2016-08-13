@@ -3,7 +3,7 @@
 [![GitHub release](https://img.shields.io/badge/release-latest-brightgreen.svg?style=flat)](https://github.com/testmycode/tmc-cli/releases/latest)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/testmycode/tmc-cli/master/LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/tmc-cli/tmc-cli/badge.svg?branch=master)](https://coveralls.io/github/testmycode/tmc-cli?branch=master)
-[![Build status](https://ci.appveyor.com/api/projects/status/np29sxc72y2f7d57?svg=true)](https://ci.appveyor.com/project/testmycode/tmc-cli)
+[![Build status](https://ci.appveyor.com/api/projects/status/js9jr4ef4o7dnama?svg=true)](https://ci.appveyor.com/project/jamox/tmc-cli-08d2u)
 
 ![tmc-cli logo](https://rawgit.com/testmycode/tmc-cli/master/docs/logo_plain.svg)
 
