@@ -69,6 +69,7 @@ public class SettingsIoTest {
     @Test
     public void saveAndLoadZeroAccountsFromFile() {
         boolean success = SettingsIo.saveAccountList(accountList, tempDir);
+        assertTrue(success);
         AccountList loadedList = SettingsIo.loadAccountList(tempDir);
         assertNotNull(loadedList);
         assertEquals(0, loadedList.getAccountCount());
@@ -78,6 +79,7 @@ public class SettingsIoTest {
     public void saveAndLoadOneAccountFromFile() {
         accountList.addAccount(account);
         boolean success = SettingsIo.saveAccountList(accountList, tempDir);
+        assertTrue(success);
         AccountList loadedList = SettingsIo.loadAccountList(tempDir);
         assertNotNull(loadedList);
         assertEquals(1, loadedList.getAccountCount());

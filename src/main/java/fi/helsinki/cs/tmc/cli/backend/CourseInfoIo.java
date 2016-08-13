@@ -43,7 +43,7 @@ public class CourseInfoIo {
             //Return null if file is not found, this is normal behaviour
             return null;
         }
-        Reader reader = null;
+        Reader reader;
         try {
             reader = Files.newBufferedReader(courseInfoFile, Charset.forName("UTF-8"));
         } catch (IOException e) {

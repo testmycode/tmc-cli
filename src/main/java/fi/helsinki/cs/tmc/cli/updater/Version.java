@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.cli.updater;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Version implements Comparable<Version> {
+class Version implements Comparable<Version> {
 
     private static final String MATCH_REGEX
             = "^(\\d+)\\.(\\d+)\\.(\\d+)(?:-(.*))?$";

@@ -176,24 +176,6 @@ public class WorkDirTest {
         assertFalse(exercises.contains("viikko2-teht3"));
     }
 
-    @Ignore // Obsolete functionality
-    @Test
-    public void worksIfInSubSubDirectoryWithNoParams() {
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
-                .resolve("viikko2").resolve("subdir");
-        WorkDir workDir = new WorkDir();
-        workDir.setWorkdir(tempDir);
-        assertEquals(
-                Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
-                workDir.getConfigFile());
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
-        assertEquals(1, exercises.size());
-        assertFalse(exercises.contains("viikko1-teht1"));
-        assertFalse(exercises.contains("viikko2-teht2"));
-        assertTrue(exercises.contains("viikko2-subdir-teht3"));
-    }
-
     @Test
     public void worksIfInCourseDirectoryWithParams() {
         Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest");
@@ -218,44 +200,6 @@ public class WorkDirTest {
         assertFalse(exercises.contains("viikko1-teht1"));
         assertFalse(exercises.contains("viikko2-teht2"));
         assertFalse(exercises.contains("viikko2-teht3"));
-    }
-
-    @Ignore // Obsolete functionality
-    @Test
-    public void worksIfInSubDirectoryWithParams() {
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
-                .resolve("viikko2");
-        WorkDir workDir = new WorkDir();
-        workDir.setWorkdir(tempDir);
-        assertEquals(
-                Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
-                workDir.getConfigFile());
-        workDir.addPath("teht2");
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
-        assertEquals(1, exercises.size());
-        assertFalse(exercises.contains("viikko1-teht1"));
-        assertTrue(exercises.contains("viikko2-teht2"));
-        assertFalse(exercises.contains("viikko2-subdir-teht3"));
-    }
-
-    @Ignore // Obsolete functionality
-    @Test
-    public void worksIfInSubSubDirectoryWithParams() {
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
-                .resolve("viikko2").resolve("subdir");
-        WorkDir workDir = new WorkDir();
-        workDir.setWorkdir(tempDir);
-        assertEquals(
-                Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
-                workDir.getConfigFile());
-        workDir.addPath("teht3");
-        List<String> exercises = workDir.getExerciseNames(true, false, false);
-        assertEquals(1, exercises.size());
-        assertFalse(exercises.contains("viikko1-teht1"));
-        assertFalse(exercises.contains("viikko2-teht2"));
-        assertTrue(exercises.contains("viikko2-subdir-teht3"));
     }
 
     @Test

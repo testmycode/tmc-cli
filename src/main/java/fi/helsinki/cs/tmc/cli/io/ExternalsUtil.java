@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 /** Utility class for using external programs.
@@ -24,10 +23,12 @@ public class ExternalsUtil {
      * Create a temp file with a template and open an editor for the user.
      * Editor can be specified with the EDITOR env var.
      * The default editor is nano for Linux/Unix and notepad for Windows.
+     *
      * @param template Line(s) to add to the end of the file
      * @param filename Descriptive name for the temp file - not the full path
      * @param escapeComments True if lines beginning with # should be ignored
-     * @return: User created message
+     *
+     * @return User created message
      */
     public static String getUserEditedMessage(
             String template, String filename, boolean escapeComments) {
@@ -53,8 +54,8 @@ public class ExternalsUtil {
         StringBuilder sb = new StringBuilder();
         for (String messageLine : messageLines) {
             if (messageLine.length() == 0
-                    || (messageLine.charAt(0) != '#' || escapeComments == false)) {
-                sb.append(messageLine + "\n");
+                    || (messageLine.charAt(0) != '#' || !escapeComments)) {
+                sb.append(messageLine).append("\n");
             }
         }
         return sb.toString().trim();
@@ -147,7 +148,7 @@ public class ExternalsUtil {
      * Write something to a file. Warning: clobbers existing files.
      * @param path: Path to the file, use a path in temp
      * @param string: Text to write to the file
-     * @return: Whether or not writing was successful
+     * @return Whether or not writing was successful
      */
     private static boolean writeToFile(Path path, String string) {
         if (EnvironmentUtil.isWindows()) {

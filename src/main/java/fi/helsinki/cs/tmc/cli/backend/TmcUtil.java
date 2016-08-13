@@ -82,7 +82,7 @@ public class TmcUtil {
         return new ArrayList<>();
     }
 
-    public static Course getDetails(CliContext ctx, Course course) {
+    private static Course getDetails(CliContext ctx, Course course) {
         try {
             TmcCore core = ctx.getTmcCore();
             return core.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
@@ -213,7 +213,7 @@ public class TmcUtil {
         }
     }
 
-    protected static void handleTmcExceptions(CliContext ctx, Exception exception) {
+    private static void handleTmcExceptions(CliContext ctx, Exception exception) {
         Io io = ctx.getIo();
         Throwable cause = exception.getCause();
 

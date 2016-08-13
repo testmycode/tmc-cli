@@ -28,12 +28,11 @@ public class PropertiesCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
-        CliContext ctx = context;
-        this.io = ctx.getIo();
+        this.io = context.getIo();
 
         boolean unset = args.hasOption("u");
         String[] arguments = args.getArgs();
-        HashMap<String, String> props = ctx.getProperties();
+        HashMap<String, String> props = context.getProperties();
         if (arguments.length == 0) {
             printAllProps(props);
             return;
@@ -75,7 +74,7 @@ public class PropertiesCommand extends AbstractCommand {
                         + ", was " + last);
             }
         }
-        ctx.saveProperties();
+        context.saveProperties();
     }
 
     private void printAllProps(HashMap<String, String> props) {
@@ -94,7 +93,7 @@ public class PropertiesCommand extends AbstractCommand {
 
         for (String key : array) {
             sb = new StringBuilder();
-            sb.append(key + ":");
+            sb.append(key).append(":");
             for (int i = key.length() + 1; i < Math.max(longest + 1, 7); i++) {
                 sb.append(" ");
             }

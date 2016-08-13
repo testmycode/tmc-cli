@@ -94,7 +94,7 @@ public class SettingsIo {
      * Get the correct directory in which our config files go
      * ie /home/user/.config/tmc-cli/.
      */
-    protected static Path getConfigDirectory() {
+    static Path getConfigDirectory() {
         Path configPath;
         if (EnvironmentUtil.isWindows()) {
             String appdata = System.getenv("APPDATA");
@@ -123,7 +123,8 @@ public class SettingsIo {
         if (!Files.exists(configRoot)) {
             try {
                 Files.createDirectories(configRoot).getParent();
-            } catch (Exception e) { }
+            } catch (IOException e) {
+            }
             try {
                 Files.createFile(configRoot);
             } catch (Exception e) { }

@@ -41,19 +41,18 @@ public class RunTestsCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
-        CliContext ctx = context;
-        Io io = ctx.getIo();
+        Io io = context.getIo();
 
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
-        if (!ctx.loadBackendWithoutLogin()) {
+        if (!context.loadBackendWithoutLogin()) {
             return;
         }
 
-        WorkDir workDir = ctx.getWorkDir();
+        WorkDir workDir = context.getWorkDir();
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
                 io.println("Error: " + exercise + " is not a valid exercise.");
@@ -67,10 +66,10 @@ public class RunTestsCommand extends AbstractCommand {
             return;
         }
 
-        CourseInfo info = ctx.getCourseInfo();
+        CourseInfo info = context.getCourseInfo();
 
-        Color passedColor = ctx.getApp().getColor("testresults-left");
-        Color failedColor = ctx.getApp().getColor("testresults-right");
+        Color passedColor = context.getApp().getColor("testresults-left");
+        Color failedColor = context.getApp().getColor("testresults-right");
         ResultPrinter resultPrinter = new ResultPrinter(io, showDetails, showPassed,
                 passedColor, failedColor);
 
@@ -80,14 +79,14 @@ public class RunTestsCommand extends AbstractCommand {
             io.println(ColorUtil.colorString("Testing: " + name, Color.YELLOW));
             Exercise exercise = info.getExercise(name);
 
-            RunResult runResult = TmcUtil.runLocalTests(ctx, exercise);
+            RunResult runResult = TmcUtil.runLocalTests(context, exercise);
             if (runResult == null) {
                 io.println("Failed to run test");
                 resultPrinter.addFailedExercise();
                 continue;
             }
 
-            ValidationResult valResult = TmcUtil.runCheckStyle(ctx, exercise);
+            ValidationResult valResult = TmcUtil.runCheckStyle(context, exercise);
             boolean testsPassed = resultPrinter.printLocalTestResult(
                     runResult, valResult, isOnlyExercise);
 

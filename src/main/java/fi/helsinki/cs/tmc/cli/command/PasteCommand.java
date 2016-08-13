@@ -35,12 +35,11 @@ public class PasteCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
-        CliContext ctx = context;
-        this.io = ctx.getIo();
-        if (!ctx.loadBackend()) {
+        this.io = context.getIo();
+        if (!context.loadBackend()) {
             return;
         }
-        WorkDir workdir = ctx.getWorkDir();
+        WorkDir workdir = context.getWorkDir();
         String[] stringArgs = args.getArgs();
 
         Boolean valid;
@@ -85,9 +84,9 @@ public class PasteCommand extends AbstractCommand {
         }
 
         String exerciseName = exercisenames.get(0);
-        CourseInfo info = ctx.getCourseInfo();
+        CourseInfo info = context.getCourseInfo();
         Exercise exercise = info.getExercise(exerciseName);
-        URI uri = TmcUtil.sendPaste(ctx, exercise, message);
+        URI uri = TmcUtil.sendPaste(context, exercise, message);
         if (uri == null && exercise.hasDeadlinePassed()) {
             io.println("Unable to send the paste."
                     + " The deadline for submitting this exercise has passed");

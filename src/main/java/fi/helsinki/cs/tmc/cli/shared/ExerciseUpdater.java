@@ -50,11 +50,11 @@ public class ExerciseUpdater {
         return list;
     }
 
-    protected void setNewExercises(List<Exercise> newExercises) {
+    void setNewExercises(List<Exercise> newExercises) {
         this.newExercises = newExercises;
     }
 
-    protected void setUpdatedExercises(List<Exercise> updatedExercises) {
+    void setUpdatedExercises(List<Exercise> updatedExercises) {
         this.updatedExercises = updatedExercises;
     }
 

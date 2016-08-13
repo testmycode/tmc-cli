@@ -12,7 +12,6 @@ import fi.helsinki.cs.tmc.core.domain.submission.ValidationErrorImpl;
 import fi.helsinki.cs.tmc.core.domain.submission.ValidationResultImpl;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
-import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;

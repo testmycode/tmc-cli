@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -40,10 +41,10 @@ import javax.tools.JavaFileObject;
 
 public class CommandAnnotationProcessorTest {
 
-    CommandAnnotationProcessor processor;
-    RoundEnvironment roundEnv;
-    StringWriter stringWriter;
-    Elements mockedElementUtils;
+    private CommandAnnotationProcessor processor;
+    private RoundEnvironment roundEnv;
+    private StringWriter stringWriter;
+    private Elements mockedElementUtils;
 
     public CommandAnnotationProcessorTest() throws IOException {
         final JavaFileObject fileObject = mock(JavaFileObject.class);
@@ -126,7 +127,7 @@ public class CommandAnnotationProcessorTest {
     public void warnsAboutInvalidElementWithCommandAnnotation() {
         final Element classElement = mock(Element.class);
         when(classElement.getKind()).thenReturn(ElementKind.FIELD);
-        doReturn(new HashSet<>(Arrays.asList(classElement))).when(roundEnv)
+        doReturn(new HashSet<>(Collections.singletonList(classElement))).when(roundEnv)
                 .getElementsAnnotatedWith(Command.class);
 
         Set<TypeElement> annotations = new HashSet<>();
@@ -135,7 +136,7 @@ public class CommandAnnotationProcessorTest {
 
     @Test
     public void worksWithoutCommands() {
-        doReturn(new HashSet<>(Arrays.asList())).when(roundEnv)
+        doReturn(new HashSet<>(Collections.emptyList())).when(roundEnv)
                 .getElementsAnnotatedWith((Class<Annotation>)any(Class.class));
 
         Set<TypeElement> annotations = new HashSet<>();
@@ -149,7 +150,7 @@ public class CommandAnnotationProcessorTest {
         when(classElement.getKind()).thenReturn(ElementKind.CLASS);
         Command annotation = CommandAnnotationExample1.class.getAnnotation(Command.class);
         doReturn(annotation).when(classElement).getAnnotation(Command.class);
-        doReturn(new HashSet<>(Arrays.asList(classElement))).when(roundEnv)
+        doReturn(new HashSet<>(Collections.singletonList(classElement))).when(roundEnv)
                 .getElementsAnnotatedWith(any(Class.class));
 
         Name mockedName = mock(Name.class);

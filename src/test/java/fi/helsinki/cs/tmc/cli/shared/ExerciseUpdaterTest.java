@@ -17,7 +17,6 @@ import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +25,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
@@ -44,10 +44,6 @@ public class ExerciseUpdaterTest {
         mockStatic(TmcUtil.class);
     }
 
-    @After
-    public void tearDown() {
-    }
-
     @Test
     public void noUpdatesAfterConstructor() {
         exerciseUpdater = new ExerciseUpdater(ctx, new Course());
@@ -64,8 +60,8 @@ public class ExerciseUpdaterTest {
 
     @Test
     public void updatesAvailableAfterSetters() {
-        List<Exercise> newExercises = Arrays.asList(new Exercise("new"));
-        List<Exercise> updatedExercises = Arrays.asList(new Exercise("updated"));
+        List<Exercise> newExercises = Collections.singletonList(new Exercise("new"));
+        List<Exercise> updatedExercises = Collections.singletonList(new Exercise("updated"));
 
         exerciseUpdater = new ExerciseUpdater(ctx, new Course());
         exerciseUpdater.setNewExercises(newExercises);

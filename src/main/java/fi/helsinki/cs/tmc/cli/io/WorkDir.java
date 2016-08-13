@@ -73,7 +73,7 @@ public class WorkDir {
 
     /**
      * Go through directories and return matching exercises.
-     * @return: return names of exercises as List
+     * @return return names of exercises as List
      */
     public List<String> getExerciseNames(
             Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
@@ -152,7 +152,7 @@ public class WorkDir {
     }
 
     public List<Path> getDirectories() {
-        return new ArrayList<Path>(this.directories);
+        return new ArrayList<>(this.directories);
     }
 
     /**
@@ -160,7 +160,7 @@ public class WorkDir {
      * Return true if and only if the path is in the same course directory
      * as all other directories.
      * @param path: given path
-     * @return: whether the path given is in the course directory
+     * @return whether the path given is in the course directory
      */
     public boolean addPath(Path path) {
         path = makeAbsolute(path);
@@ -177,10 +177,7 @@ public class WorkDir {
         if (!this.directories.contains(path)) {
             this.directories.add(path);
         }
-        if (path.startsWith(this.courseDirectory)) {
-            return true;
-        }
-        return false;
+        return path.startsWith(this.courseDirectory);
     }
 
     public boolean addPath(String path) {

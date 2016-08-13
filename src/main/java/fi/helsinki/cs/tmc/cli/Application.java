@@ -161,11 +161,8 @@ public class Application {
         }
 
         Date now = new Date();
-        if (previous != null && previous.getTime() + defaultUpdateInterval > now.getTime()) {
-            return false;
-        }
+        return !(previous != null && previous.getTime() + defaultUpdateInterval > now.getTime()) && runAutoUpdate();
 
-        return runAutoUpdate();
     }
 
     public boolean runAutoUpdate() {

@@ -89,14 +89,14 @@ public class TestIo extends Io {
     @Override
     public String readLine(String prompt) {
         usePrompt(PromptType.TEXT_PROMPT);
-        this.printedText.append(prompt + "\n");
+        this.printedText.append(prompt).append("\n");
         return textPrompts.pop();
     }
 
     @Override
     public String readPassword(String prompt) {
         usePrompt(PromptType.PASSWORD_PROMPT);
-        this.printedText.append(prompt + "\n");
+        this.printedText.append(prompt).append("\n");
         return passwordPrompts.pop();
     }
 
@@ -104,8 +104,8 @@ public class TestIo extends Io {
     public boolean readConfirmation(String prompt, boolean defaultToYes) {
         usePrompt(PromptType.CONFIRM_PROMPT);
         String yesNo = (defaultToYes) ? " [Y/n] " : " [y/N] ";
-        this.printedText.append(prompt + yesNo);
-        return (boolean) confirmationPrompts.pop();
+        this.printedText.append(prompt).append(yesNo);
+        return confirmationPrompts.pop();
     }
 
     private <T> void addPrompt(PromptType type, T value) {

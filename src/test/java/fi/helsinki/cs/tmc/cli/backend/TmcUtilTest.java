@@ -47,6 +47,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -56,9 +57,9 @@ public class TmcUtilTest {
 
     static Path workDir;
 
-    CliContext ctx;
-    TestIo io;
-    TmcCore mockCore;
+    private CliContext ctx;
+    private TestIo io;
+    private TmcCore mockCore;
 
     @Before
     public void setUp() {
@@ -183,7 +184,7 @@ public class TmcUtilTest {
     @Test
     public void findCourseWhenItExists() {
         Course expectedResult = new Course("test-course");
-        List<Course> courses = Arrays.asList(new Course("test-course"));
+        List<Course> courses = Collections.singletonList(new Course("test-course"));
 
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createReturningCallback(courses));
@@ -235,7 +236,7 @@ public class TmcUtilTest {
 
     @Test
     public void failToDownloadCourses() throws Exception {
-        List<Exercise> exercises = Arrays.asList(new Exercise("first"));
+        List<Exercise> exercises = Collections.singletonList(new Exercise("first"));
         Callable<List<Exercise>> callable = createThrowingCallbackOfList(Exercise.class,
                 "failed");
         when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class),

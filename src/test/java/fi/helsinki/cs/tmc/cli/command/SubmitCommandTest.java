@@ -33,6 +33,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
@@ -218,8 +219,8 @@ public class SubmitCommandTest {
     public void showsMessageIfNewExercisesAreAvailable() {
         UpdateResult updateResult = mock(UpdateResult.class);
 
-        List<Exercise> newExercises = Arrays.asList(new Exercise("new_exercise"));
-        List<Exercise> updatedExercises = Arrays.asList(new Exercise("updated_exercise"));
+        List<Exercise> newExercises = Collections.singletonList(new Exercise("new_exercise"));
+        List<Exercise> updatedExercises = Collections.singletonList(new Exercise("updated_exercise"));
 
         when(updateResult.getNewExercises()).thenReturn(newExercises);
         when(updateResult.getUpdatedExercises()).thenReturn(updatedExercises);

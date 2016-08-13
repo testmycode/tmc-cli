@@ -133,7 +133,7 @@ public class ListExercisesCommand extends AbstractCommand {
         for (Exercise exercise : exercises) {
             String deadline = getDeadline(exercise);
             if (!deadline.equals(prevDeadline)) {
-                sb.append("\nDeadline: " + deadline + "\n");
+                sb.append("\nDeadline: ").append(deadline).append("\n");
                 prevDeadline = deadline;
             }
             sb.append(getExerciseStatus(exercise));

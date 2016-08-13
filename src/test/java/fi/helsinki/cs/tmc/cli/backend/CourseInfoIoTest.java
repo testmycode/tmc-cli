@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,11 +29,9 @@ public class CourseInfoIoTest {
     }
 
     @After
-    public void cleanUp() {
-        try {
-            FileUtils.deleteDirectory(Paths.get(tempDir)
-                    .resolve("test-course").toFile());
-        } catch (Exception e) { }
+    public void cleanUp() throws IOException {
+        FileUtils.deleteDirectory(Paths.get(tempDir)
+            .resolve("test-course").toFile());
     }
 
     @Test

@@ -204,11 +204,8 @@ public class CliContext {
      * @return true if success
      */
     public boolean loadBackendWithoutLogin() {
-        if (this.tmcCore != null) {
-            return true;
-        }
+        return this.tmcCore != null || createTmcCore();
 
-        return createTmcCore();
     }
 
     /**

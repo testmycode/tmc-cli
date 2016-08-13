@@ -3,18 +3,18 @@ package fi.helsinki.cs.tmc.cli.io;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 public class CliProgressObserver extends ProgressObserver {
-    protected static final char PIPCHAR = '█';
-    protected static final char EMPTYCHAR = '░';
-    protected static final char BARLEFT = '[';
-    protected static final char BARRIGHT = ']';
+    private static final char PIPCHAR = '█';
+    private static final char EMPTYCHAR = '░';
+    private static final char BARLEFT = '[';
+    private static final char BARRIGHT = ']';
 
-    protected Io io;
+    private Io io;
     private int pips;
-    protected int maxline;
+    private int maxline;
     private Color color1;
     private Color color2;
-    protected String lastMessage;
-    protected Boolean hasProgressBar;
+    private String lastMessage;
+    private Boolean hasProgressBar;
 
     public CliProgressObserver() {
         this(new TerminalIo(System.in));
@@ -49,10 +49,10 @@ public class CliProgressObserver extends ProgressObserver {
             lastMessage = message;
             io.println("");
         }
-        this.io.print("\r" + this.progressBar(progress, this.maxline, this.color1, this.color2));
+        this.io.print("\r" + progressBar(progress, this.maxline, this.color1, this.color2));
     }
 
-    protected void printMessage(String message) {
+    private void printMessage(String message) {
         message = shorten(message, maxline);
         io.print("\r" + message);
         flush(maxline - message.length());
@@ -76,7 +76,7 @@ public class CliProgressObserver extends ProgressObserver {
         }
     }
 
-    protected String shorten(String str, int length) {
+    private String shorten(String str, int length) {
         if (str.length() <= length) {
             return str;
         } else {
@@ -84,7 +84,7 @@ public class CliProgressObserver extends ProgressObserver {
         }
     }
 
-    protected void flush(int length) {
+    private void flush(int length) {
         // "Flush" the rest of the line if the next message is shorter than the last
         if (length == 0) {
             return;
@@ -96,13 +96,13 @@ public class CliProgressObserver extends ProgressObserver {
         io.print(sb);
     }
 
-    public static String progressBar(double progress, int length,
-            Color color1, Color color2) {
+    private static String progressBar(double progress, int length,
+                                      Color color1, Color color2) {
         return progressBar(progress, length, color1, color2,
                 BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
     }
 
-    public static String progressBar(
+    private static String progressBar(
             double progress,
             int length,
             Color color1,
@@ -127,7 +127,7 @@ public class CliProgressObserver extends ProgressObserver {
                 + barRight;
     }
 
-    protected static String percentage(double progress) {
+    static String percentage(double progress) {
         int percent = (int) (progress * 100);
         String percentage;
         if (percent < 10) {

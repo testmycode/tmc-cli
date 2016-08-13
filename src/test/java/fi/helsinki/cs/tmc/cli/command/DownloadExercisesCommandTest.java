@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
@@ -76,10 +77,8 @@ public class DownloadExercisesCommandTest {
     }
 
     @After
-    public void tearDown() {
-        try {
-            FileUtils.deleteDirectory(tempDir.toFile());
-        } catch (Exception e) { }
+    public void tearDown() throws IOException {
+        FileUtils.deleteDirectory(tempDir.toFile());
     }
 
     @Test
@@ -111,8 +110,8 @@ public class DownloadExercisesCommandTest {
     @Test
     public void worksRightIfCourseIsFound() throws IOException {
         Course course = new Course("course1");
-        course.setExercises(Arrays.asList(new Exercise("exercise")));
-        List<Exercise> exercises = Arrays.asList(new Exercise("exerciseName"));
+        course.setExercises(Collections.singletonList(new Exercise("exercise")));
+        List<Exercise> exercises = Collections.singletonList(new Exercise("exerciseName"));
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
@@ -136,7 +135,7 @@ public class DownloadExercisesCommandTest {
         completed2.setCompleted(true);
         workDir.setWorkdir(tempDir);
 
-        List<Exercise> filteredExercises = Arrays.asList(notCompleted);
+        List<Exercise> filteredExercises = Collections.singletonList(notCompleted);
 
         Course course = new Course("course1");
         course.setExercises(Arrays.asList(completed1, notCompleted, completed2));
@@ -229,7 +228,7 @@ public class DownloadExercisesCommandTest {
                 .thenReturn(new Course("course1"));
         when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
-        List<Exercise> exercises = Arrays.asList();
+        List<Exercise> exercises = Collections.emptyList();
         when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
                 any(ProgressObserver.class))).thenReturn(exercises);
 

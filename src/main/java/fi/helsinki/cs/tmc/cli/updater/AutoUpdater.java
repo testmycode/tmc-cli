@@ -93,7 +93,7 @@ public class AutoUpdater {
         return runNewTmcCliBinary(destination.getAbsolutePath());
     }
 
-    protected byte[] fetchHttpEntity(String urlAddress) {
+    private byte[] fetchHttpEntity(String urlAddress) {
         URL url;
 
         try {
@@ -128,7 +128,7 @@ public class AutoUpdater {
      * Downloads a JSON string that contains information about the latest
      * tmc-cli release.
      */
-    protected String fetchLatestReleaseJson() {
+    String fetchLatestReleaseJson() {
         byte[] content = fetchHttpEntity(LATEST_RELEASE_URL);
         if (content == null) {
             return null;
@@ -145,7 +145,7 @@ public class AutoUpdater {
      * Downloads a binary file from downloadUrl and saves it to destination
      * file.
      */
-    protected boolean fetchTmcCliBinary(String downloadUrl, File destination) {
+    boolean fetchTmcCliBinary(String downloadUrl, File destination) {
         byte[] content = fetchHttpEntity(downloadUrl);
         if (content == null) {
             io.println("Failed to download tmc-cli.");
@@ -163,7 +163,7 @@ public class AutoUpdater {
     /**
      * Finish the update by running downloaded binary.
      */
-    protected boolean runNewTmcCliBinary(String pathToNewBinary) {
+    boolean runNewTmcCliBinary(String pathToNewBinary) {
         return ExternalsUtil.runUpdater(io, pathToNewBinary);
     }
 

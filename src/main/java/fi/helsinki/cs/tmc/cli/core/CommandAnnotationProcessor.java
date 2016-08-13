@@ -41,7 +41,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             // import the command classes
             bwriter.append("//CHECKSTYLE:OFF\n");
             for (Entry<String, String> entry : map.entrySet()) {
-                bwriter.append("import " + entry.getValue() + ";\n");
+                bwriter.append("import ").append(entry.getValue()).append(";\n");
             }
             bwriter.append("//CHECKSTYLE:ON\n");
 
@@ -54,9 +54,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
                 }
                 // print out the lines that add the commands to the command factory.
                 String className = parts[parts.length - 1];
-                bwriter.append(TAB + TAB + "CommandFactory.addCommand(\""
-                        + entry.getKey() + "\", "
-                        + className + ".class);\n");
+                bwriter.append(TAB + TAB + "CommandFactory.addCommand(\"").append(entry.getKey()).append("\", ").append(className).append(".class);\n");
             }
             bwriter.append(TAB + "}\n");
             bwriter.append("}\n");
