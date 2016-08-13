@@ -1,7 +1,16 @@
 language: java
 
 script:
-- mvn checkstyle:check cobertura:cobertura test
+  - mvn -Dsurefire.rerunFailingTestsCount=3 cobertura:cobertura test
+  - mvn checkstyle:check
 
 after_success:
-- mvn coveralls:report
+  - mvn coveralls:report
+
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  
+cache:
+  directories:
+    - "$HOME/.m2"
