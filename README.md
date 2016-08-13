@@ -1,5 +1,5 @@
 
-[![Build Status](https://travis-ci.org/testmycode/tmc-cli.svg?branch=master)](https://travis-ci.org/tmc-cli/tmc-cli)
+[![Build Status](https://travis-ci.org/testmycode/tmc-cli.svg?branch=master)](https://travis-ci.org/testmycode/tmc-cli)
 [![GitHub release](https://img.shields.io/badge/release-latest-brightgreen.svg?style=flat)](https://github.com/testmycode/tmc-cli/releases/latest)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/testmycode/tmc-cli/master/LICENSE)
 [![Coverage Status](https://coveralls.io/repos/github/tmc-cli/tmc-cli/badge.svg?branch=master)](https://coveralls.io/github/testmycode/tmc-cli?branch=master)
