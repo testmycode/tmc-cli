@@ -82,8 +82,6 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     private CourseInfo getCourseInfoFromCurrentDirectory() {
-        WorkDir workDir = ctx.getWorkDir();
-        workDir.addPath();
         return ctx.getCourseInfo();
     }
 

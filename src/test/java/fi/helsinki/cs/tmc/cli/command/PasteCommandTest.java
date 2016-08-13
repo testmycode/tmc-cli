@@ -47,7 +47,7 @@ public class PasteCommandTest {
     private TestIo io;
     private TmcCore mockCore;
     private WorkDir workDir;
-    private ArrayList<String> exerciseNames;
+    private ArrayList<Exercise> exercises;
     private Exercise exercise;
 
     private final URI pasteUri;
@@ -64,10 +64,10 @@ public class PasteCommandTest {
         workDir = mock(WorkDir.class);
         when(workDir.getCourseDirectory()).thenReturn(tempDir);
         when(workDir.getConfigFile()).thenReturn((tempDir.resolve(CourseInfoIo.COURSE_CONFIG)));
-        exerciseNames = new ArrayList<>();
-        exerciseNames.add("paste-exercise");
-        when(workDir.getExerciseNames()).thenReturn(exerciseNames);
-        when(workDir.addPath()).thenReturn(true);
+        exercise = new Exercise("paste-exercise");
+        exercises = new ArrayList<>();
+        exercises.add(exercise);
+        when(workDir.getExercises()).thenReturn(exercises);
         when(workDir.addPath(anyString())).thenReturn(true);
 
         mockCore = mock(TmcCore.class);
@@ -76,7 +76,6 @@ public class PasteCommandTest {
         app = new Application(ctx);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
-        exercise = new Exercise("paste-exercise");
         when(mockCourseInfo.getExercise("paste-exercise")).thenReturn(exercise);
 
         mockStatic(TmcUtil.class);
@@ -208,8 +207,7 @@ public class PasteCommandTest {
 
     @Test
     public void failsWithNoExercise() {
-        Mockito.when(workDir.getExerciseNames()).thenReturn(new ArrayList<String>());
-        Mockito.when(workDir.addPath()).thenReturn(false);
+        Mockito.when(workDir.getExercises()).thenReturn(new ArrayList<Exercise>());
         Mockito.when(workDir.addPath(anyString())).thenReturn(false);
         app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
 

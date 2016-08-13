@@ -95,11 +95,11 @@ public class InfoCommand extends AbstractCommand {
 
         if (useWorkingDirectory) {
             // if in exercise directory, print info for that exercise.
-            String exerciseName = getCurrentExercise(workDir);
-            if (exerciseName == null) {
+            Exercise exercise = getCurrentExercise(workDir);
+            if (exercise == null) {
                 printCourse(info.getCourse());
             } else {
-                printExercise(info.getExercise(exerciseName));
+                printExercise(exercise);
             }
         } else {
             if (stringArgs.length != 1) {
@@ -212,8 +212,8 @@ public class InfoCommand extends AbstractCommand {
         return completed;
     }
 
-    private String getCurrentExercise(WorkDir workDir) {
-        List<String> exercises = workDir.getExerciseNames(false, false);
+    private Exercise getCurrentExercise(WorkDir workDir) {
+        List<Exercise> exercises = workDir.getExercises(false, false);
         if (exercises.size() == 1) {
             return exercises.get(0);
         }

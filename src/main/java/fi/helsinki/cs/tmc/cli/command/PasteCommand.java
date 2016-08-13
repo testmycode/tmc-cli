@@ -57,8 +57,8 @@ public class PasteCommand extends AbstractCommand {
             return;
         }
         
-        List<String> exerciseNames = workdir.getExerciseNames();
-        if (exerciseNames.size() != 1) {
+        List<Exercise> exercises = workdir.getExercises();
+        if (exercises.size() != 1) {
             io.errorln("Error: Matched too many exercises.");
             printUsage(context);
             return;
@@ -76,7 +76,7 @@ public class PasteCommand extends AbstractCommand {
                         true);
             }
         }
-        sendPaste(message, exerciseNames.get(0));
+        sendPaste(message, exercises.get(0));
     }
 
     private boolean parseArgs(CommandLine args) {
@@ -103,23 +103,18 @@ public class PasteCommand extends AbstractCommand {
                 io.errorln("The path '" + stringArgs[0] + "' is not valid exercise.");
                 return false;
             }
-        } else {
-            //TODO replace the following call with workdir.getCurrentExercise()
-            if (!workdir.addPath()) {
-                io.errorln("You are not in exercise directory.");
-                return false;
-            }
+        }
+        if (workdir.getExercises().size() != 1) {
+            io.errorln("You are not in exercise directory.");
+            return false;
         }
         return true;
     }
 
-    private void sendPaste(String message, String exerciseName) {
+    private void sendPaste(String message, Exercise exercise) {
         if (message == null) {
             message = "";
         }
-
-        CourseInfo info = ctx.getCourseInfo();
-        Exercise exercise = info.getExercise(exerciseName);
 
         URI uri = TmcUtil.sendPaste(ctx, exercise, message);
         if (uri == null && exercise.hasDeadlinePassed()) {

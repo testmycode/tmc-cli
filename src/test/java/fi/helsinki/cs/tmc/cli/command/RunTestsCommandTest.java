@@ -100,7 +100,7 @@ public class RunTestsCommandTest {
         workDir.setWorkdir(Paths.get(System.getProperty("java.io.tmpdir")));
         String[] args = {"test"};
         app.run(args);
-        io.assertContains("You have to be in a course directory");
+        io.assertContains("No exercises specified");
     }
 
     @Test

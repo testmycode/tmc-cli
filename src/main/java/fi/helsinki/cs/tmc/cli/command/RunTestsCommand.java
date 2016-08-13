@@ -61,9 +61,9 @@ public class RunTestsCommand extends AbstractCommand {
             }
         }
 
-        List<String> exerciseNames = workDir.getExerciseNames();
-        if (exerciseNames.isEmpty()) {
-            io.errorln("You have to be in a course directory to run tests.");
+        List<Exercise> exercises = workDir.getExercises();
+        if (exercises.isEmpty()) {
+            io.errorln("No exercises specified.");
             return;
         }
 
@@ -74,11 +74,10 @@ public class RunTestsCommand extends AbstractCommand {
         ResultPrinter resultPrinter = new ResultPrinter(io, showDetails, showPassed,
                 passedColor, failedColor);
 
-        boolean isOnlyExercise = (exerciseNames.size() == 1);
+        boolean isOnlyExercise = (exercises.size() == 1);
 
-        for (String name : exerciseNames) {
-            io.println(ColorUtil.colorString("Testing: " + name, Color.YELLOW));
-            Exercise exercise = info.getExercise(name);
+        for (Exercise exercise : exercises) {
+            io.println(ColorUtil.colorString("Testing: " + exercise.getName(), Color.YELLOW));
 
             RunResult runResult = TmcUtil.runLocalTests(ctx, exercise);
             if (runResult == null) {

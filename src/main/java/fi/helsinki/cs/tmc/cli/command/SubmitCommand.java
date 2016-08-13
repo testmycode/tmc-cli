@@ -70,15 +70,15 @@ public class SubmitCommand extends AbstractCommand {
             }
         }
 
-        List<String> exerciseNames;
+        List<Exercise> exercises;
         if (filterUncompleted) {
             workDir.addPath(workDir.getCourseDirectory());
-            exerciseNames = workDir.getExerciseNames(true, true);
+            exercises = workDir.getExercises(true, true);
         } else {
-            exerciseNames = workDir.getExerciseNames();
+            exercises = workDir.getExercises();
         }
 
-        if (exerciseNames.isEmpty()) {
+        if (exercises.isEmpty()) {
             if (filterUncompleted && workDir.getCourseDirectory() != null) {
                 io.println("No locally tested exercises.");
                 return;
@@ -98,8 +98,8 @@ public class SubmitCommand extends AbstractCommand {
         ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll,
                 color1, color2);
 
-        boolean isOnlyExercise = exerciseNames.size() == 1;
-        List<Exercise> submitExercises = info.getExercises(exerciseNames);
+        boolean isOnlyExercise = (exercises.size() == 1);
+        List<Exercise> submitExercises = exercises;
         List<List<FeedbackQuestion>> feedbackLists
                 = new ArrayList<>();
         List<String> exercisesWithFeedback = new ArrayList<>();
