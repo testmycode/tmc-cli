@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.ValidationErrorImpl;
 import fi.helsinki.cs.tmc.core.domain.submission.ValidationResultImpl;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ResultPrinterTest {
@@ -150,7 +152,7 @@ public class ResultPrinterTest {
         error.setMessage("validation error");
         validationErrors = ImmutableList.of((ValidationError) error);
         File file = new File("");
-        Map map = new HashMap<>();
+        Map<File, List<ValidationError>> map = new HashMap<>();
         map.put(file, validationErrors);
         valResult.setValidationErrors(map);
 
@@ -164,7 +166,7 @@ public class ResultPrinterTest {
         error.setMessage("Incorrect indentation");
 
         File file = new File("Test.java");
-        Map valErrors = new HashMap<>();
+        Map<File, List<ValidationError>> valErrors = new HashMap<>();
         valErrors.put(file, ImmutableList.of((ValidationError) error));
 
         ValidationResultImpl valResult = new ValidationResultImpl();

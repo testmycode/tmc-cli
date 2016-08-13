@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.shared;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -66,7 +67,7 @@ public class FeedbackHandlerTest {
     @Test
     public void sendingFeedbackWorks() {
         PowerMockito.when(
-                TmcUtil.sendFeedback(any(CliContext.class), any(List.class), any(URI.class)))
+                TmcUtil.sendFeedback(any(CliContext.class), anyListOf(FeedbackAnswer.class), any(URI.class)))
                 .thenReturn(true);
         io.addLinePrompt("1");
         io.addLinePrompt("who cars");
