@@ -110,8 +110,7 @@ public class SettingsIo {
             if (configEnv != null && configEnv.length() > 0) {
                 configPath = Paths.get(configEnv);
             } else {
-                configPath = Paths.get(System.getProperty("user.home"))
-                        .resolve(".config");
+                configPath = Paths.get(System.getProperty("user.home")).resolve(".config");
             }
         }
         return configPath.resolve(CONFIG_DIR);
@@ -127,7 +126,8 @@ public class SettingsIo {
             }
             try {
                 Files.createFile(configRoot);
-            } catch (Exception e) { }
+            } catch (Exception e) {
+            }
         }
         return file;
     }
@@ -138,10 +138,12 @@ public class SettingsIo {
         if (!Files.exists(configRoot)) {
             try {
                 Files.createDirectories(configRoot).getParent();
-            } catch (Exception e) { }
+            } catch (Exception e) {
+            }
             try {
                 Files.createFile(configRoot);
-            } catch (Exception e) { }
+            } catch (Exception e) {
+            }
         }
         return file;
     }

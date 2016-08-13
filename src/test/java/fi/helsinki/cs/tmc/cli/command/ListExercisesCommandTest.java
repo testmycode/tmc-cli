@@ -32,7 +32,7 @@ import java.util.Arrays;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(TmcUtil.class)
 public class ListExercisesCommandTest {
-    
+
     private static final String COURSE_NAME = "2016-aalto-c";
     private static Path pathToDummyCourse;
     private static Path pathToNonCourseDir;
@@ -45,14 +45,18 @@ public class ListExercisesCommandTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/" + COURSE_NAME).toURI());
+        pathToDummyCourse =
+                Paths.get(
+                        SubmitCommandTest.class
+                                .getClassLoader()
+                                .getResource("dummy-courses/" + COURSE_NAME)
+                                .toURI());
         assertNotNull(pathToDummyCourse);
 
         pathToNonCourseDir = pathToDummyCourse.getParent();
         assertNotNull(pathToNonCourseDir);
     }
-    
+
     @Before
     public void setUp() {
         io = new TestIo();
@@ -82,7 +86,7 @@ public class ListExercisesCommandTest {
         app.run(args);
         io.assertContains("You have to be in a course directory or use the -i");
     }
-    
+
     @Test
     public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
@@ -90,7 +94,7 @@ public class ListExercisesCommandTest {
         app.run(args);
         io.assertContains("Deadline:");
     }
-    
+
     @Test
     public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
@@ -146,8 +150,7 @@ public class ListExercisesCommandTest {
         exercise.setCompleted(true);
 
         Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(exercise,
-                new Exercise("second-exercise")));
+        course.setExercises(Arrays.asList(exercise, new Exercise("second-exercise")));
         when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
@@ -163,8 +166,7 @@ public class ListExercisesCommandTest {
         exercise.setCompleted(true);
 
         Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(exercise,
-                new Exercise("second-exercise")));
+        course.setExercises(Arrays.asList(exercise, new Exercise("second-exercise")));
         when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
@@ -179,8 +181,7 @@ public class ListExercisesCommandTest {
         exercise.setCompleted(true);
 
         Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(exercise,
-                new Exercise("second-exercise")));
+        course.setExercises(Arrays.asList(exercise, new Exercise("second-exercise")));
         when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
@@ -191,9 +192,8 @@ public class ListExercisesCommandTest {
     @Test
     public void exerciseIsNotCompleted() {
         Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(
-                new Exercise("first-exercise"),
-                new Exercise("second-exercise")));
+        course.setExercises(
+                Arrays.asList(new Exercise("first-exercise"), new Exercise("second-exercise")));
         when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
@@ -207,8 +207,7 @@ public class ListExercisesCommandTest {
         exercise.setAttempted(true);
 
         Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(exercise,
-                new Exercise("second-exercise")));
+        course.setExercises(Arrays.asList(exercise, new Exercise("second-exercise")));
         when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};
@@ -222,8 +221,7 @@ public class ListExercisesCommandTest {
         exercise.setDeadline("2014-09-10T14:00:00.000+03:00");
 
         Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(exercise,
-                new Exercise("second-exercise")));
+        course.setExercises(Arrays.asList(exercise, new Exercise("second-exercise")));
         when(TmcUtil.findCourse(eq(ctx), eq("test-course"))).thenReturn(course);
 
         String[] args = {"exercises", "-n", "test-course", "-i"};

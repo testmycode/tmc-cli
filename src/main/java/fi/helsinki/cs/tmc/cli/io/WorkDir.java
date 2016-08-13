@@ -111,7 +111,8 @@ public class WorkDir {
             String exDir = getCourseDirectory().relativize(dir).toString();
             for (Exercise exercise : allExercises) {
                 if ((exercise.getName().startsWith(exDir.replace(File.separator, "-"))
-                        || exDir.replace(File.separator, "-").startsWith(exercise.getName()))
+                                || exDir.replace(File.separator, "-")
+                                        .startsWith(exercise.getName()))
                         && !exercises.contains(exercise)) {
                     exercises.add(exercise);
                 }
@@ -126,8 +127,12 @@ public class WorkDir {
         return filteredExerciseNames;
     }
 
-    private Boolean filterExercise(Exercise exercise, List<String> tested,
-            Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
+    private Boolean filterExercise(
+            Exercise exercise,
+            List<String> tested,
+            Boolean exists,
+            Boolean onlyTested,
+            Boolean filterCompleted) {
         if (!onlyTested || tested.contains(exercise.getName())) {
             if (!filterCompleted || !exercise.isCompleted()) {
                 if (!exists || Files.exists(getCourseDirectory().resolve(exercise.getName()))) {

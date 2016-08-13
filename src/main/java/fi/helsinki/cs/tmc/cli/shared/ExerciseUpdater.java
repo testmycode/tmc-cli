@@ -86,7 +86,7 @@ public class ExerciseUpdater {
 
     public List<Exercise> downloadUpdates(CliProgressObserver progobs) {
         List<Exercise> newAndUpdated = getNewAndUpdatedExercises();
-        for (Iterator<Exercise> iterator = newAndUpdated.iterator(); iterator.hasNext();) {
+        for (Iterator<Exercise> iterator = newAndUpdated.iterator(); iterator.hasNext(); ) {
             Exercise next = iterator.next();
             if (next.isCompleted()) {
                 iterator.remove();

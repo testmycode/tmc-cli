@@ -43,8 +43,8 @@ public class SubmitCommand extends AbstractCommand {
     public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all test results");
         options.addOption("d", "details", false, "Show detailed error message");
-        options.addOption("c", "completed", false,
-                "Filter out exercises that haven't been locally tested");
+        options.addOption(
+                "c", "completed", false, "Filter out exercises that haven't been locally tested");
     }
 
     @Override
@@ -94,19 +94,17 @@ public class SubmitCommand extends AbstractCommand {
 
         Color color1 = ctx.getApp().getColor("testresults-left");
         Color color2 = ctx.getApp().getColor("testresults-right");
-        ResultPrinter resultPrinter = new ResultPrinter(io, this.showDetails, this.showAll,
-                color1, color2);
+        ResultPrinter resultPrinter =
+                new ResultPrinter(io, this.showDetails, this.showAll, color1, color2);
 
         Boolean isOnlyExercise = exerciseNames.size() == 1;
         List<Exercise> submitExercises = info.getExercises(exerciseNames);
-        List<List<FeedbackQuestion>> feedbackLists
-                = new ArrayList<>();
+        List<List<FeedbackQuestion>> feedbackLists = new ArrayList<>();
         List<String> exercisesWithFeedback = new ArrayList<>();
         List<URI> feedbackUris = new ArrayList<>();
 
         for (Exercise exercise : submitExercises) {
-            io.println(ColorUtil.colorString("Submitting: " + exercise.getName(),
-                    Color.YELLOW));
+            io.println(ColorUtil.colorString("Submitting: " + exercise.getName(), Color.YELLOW));
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
                 io.println("Submission failed.");
@@ -138,8 +136,7 @@ public class SubmitCommand extends AbstractCommand {
             if (io.readConfirmation(
                     "Send feedback for " + exercisesWithFeedback.get(i) + "?", true)) {
                 FeedbackHandler fbh = new FeedbackHandler(ctx);
-                boolean success = fbh.sendFeedback(
-                        feedbackLists.get(i), feedbackUris.get(i));
+                boolean success = fbh.sendFeedback(feedbackLists.get(i), feedbackUris.get(i));
                 if (success) {
                     io.println("Feedback sent.");
                 } else {
@@ -152,8 +149,8 @@ public class SubmitCommand extends AbstractCommand {
     /**
      * Fetch updated exercise statuses from server and update course JSON file accordingly.
      */
-    private void updateCourseJson(List<Exercise> submittedExercises,
-            CourseInfo courseInfo, Path courseInfoFile) {
+    private void updateCourseJson(
+            List<Exercise> submittedExercises, CourseInfo courseInfo, Path courseInfoFile) {
 
         Course updatedCourse = TmcUtil.findCourse(ctx, courseInfo.getCourseName());
         if (updatedCourse == null) {
@@ -164,8 +161,10 @@ public class SubmitCommand extends AbstractCommand {
         for (Exercise submitted : submittedExercises) {
             Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
             if (updatedEx == null) {
-                io.println("Failed to update config file for exercise " + submitted.getName()
-                        + ". The exercise doesn't exist in server anymore.");
+                io.println(
+                        "Failed to update config file for exercise "
+                                + submitted.getName()
+                                + ". The exercise doesn't exist in server anymore.");
                 continue;
             }
 

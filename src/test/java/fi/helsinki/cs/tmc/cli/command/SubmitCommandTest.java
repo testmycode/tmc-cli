@@ -61,8 +61,12 @@ public class SubmitCommandTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        pathToDummyCourse = Paths.get(SubmitCommandTest.class.getClassLoader()
-                .getResource("dummy-courses/" + COURSE_NAME).toURI());
+        pathToDummyCourse =
+                Paths.get(
+                        SubmitCommandTest.class
+                                .getClassLoader()
+                                .getResource("dummy-courses/" + COURSE_NAME)
+                                .toURI());
         assertNotNull(pathToDummyCourse);
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
@@ -90,7 +94,8 @@ public class SubmitCommandTest {
         mockStatic(TmcUtil.class);
         when(TmcUtil.findCourse(any(CliContext.class), any(String.class))).thenReturn(course);
         when(TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class)))
-                .thenReturn(result).thenReturn(result2);
+                .thenReturn(result)
+                .thenReturn(result2);
 
         mockStatic(CourseInfoIo.class);
         when(CourseInfoIo.load(any(Path.class))).thenCallRealMethod();
@@ -100,7 +105,7 @@ public class SubmitCommandTest {
     @Test
     public void testSuccessInExerciseRoot() {
         workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[]{"submit"});
+        app.run(new String[] {"submit"});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
 
         verifyStatic(times(1));
@@ -110,7 +115,7 @@ public class SubmitCommandTest {
     @Test
     public void canSubmitFromCourseDirIfExerciseNameIsGiven() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[]{"submit", EXERCISE1_NAME});
+        app.run(new String[] {"submit", EXERCISE1_NAME});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
 
         verifyStatic(times(1));
@@ -120,7 +125,7 @@ public class SubmitCommandTest {
     @Test
     public void canSubmitMultipleExercisesIfNamesAreGiven() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[]{"submit", EXERCISE1_NAME, EXERCISE2_NAME});
+        app.run(new String[] {"submit", EXERCISE1_NAME, EXERCISE2_NAME});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         io.assertContains("Submitting: " + EXERCISE2_NAME);
 
@@ -131,7 +136,7 @@ public class SubmitCommandTest {
     @Test
     public void submitsAllExercisesFromCourseDirIfNoNameIsGiven() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[]{"submit"});
+        app.run(new String[] {"submit"});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         io.assertContains("Submitting: " + EXERCISE2_NAME);
         assertEquals(2, countSubstring("Submitting: ", io.out()));
@@ -143,21 +148,21 @@ public class SubmitCommandTest {
     @Test
     public void doesNotSubmitExtraExercisesFromExerciseRoot() {
         workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[]{"submit"});
+        app.run(new String[] {"submit"});
         assertEquals(1, countSubstring("Submitting: ", io.out()));
     }
 
     @Test
     public void doesNotSubmitExtraExercisesFromCourseDir() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[]{"submit", EXERCISE1_NAME});
+        app.run(new String[] {"submit", EXERCISE1_NAME});
         assertEquals(1, countSubstring("Submitting: ", io.out()));
     }
 
     @Test
     public void abortIfInvalidCmdLineArgumentIsGiven() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[]{"submit", EXERCISE1_NAME, "-foo"});
+        app.run(new String[] {"submit", EXERCISE1_NAME, "-foo"});
         io.assertContains("Invalid command line argument");
 
         verifyStatic(times(0));
@@ -167,7 +172,7 @@ public class SubmitCommandTest {
     @Test
     public void abortIfInvalidExerciseNameIsGivenAsArgument() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[]{"submit", "foo"});
+        app.run(new String[] {"submit", "foo"});
         io.assertContains("Error: foo is not a valid exercise.");
         assertEquals(0, countSubstring("Submitting: ", io.out()));
     }
@@ -175,7 +180,7 @@ public class SubmitCommandTest {
     @Test
     public void abortGracefullyIfNotInCourseDir() {
         workDir.setWorkdir(pathToNonCourseDir);
-        app.run(new String[]{"submit"});
+        app.run(new String[] {"submit"});
         io.assertContains("No exercises specified.");
 
         verifyStatic(times(0));
@@ -186,7 +191,7 @@ public class SubmitCommandTest {
     public void showFailMsgIfSubmissionFailsInCore() {
         when(TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class))).thenReturn(null);
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[]{"submit", EXERCISE1_NAME});
+        app.run(new String[] {"submit", EXERCISE1_NAME});
 
         assertEquals(1, countSubstring("Submitting: ", io.out()));
         assertEquals(1, countSubstring("Submission failed.", io.out()));
@@ -198,7 +203,7 @@ public class SubmitCommandTest {
     @Test
     public void canSubmitFromExerciseSubdirs() {
         workDir.setWorkdir(pathToDummyExerciseSrc);
-        app.run(new String[]{"submit"});
+        app.run(new String[] {"submit"});
 
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         verifyStatic(times(1));
@@ -208,7 +213,7 @@ public class SubmitCommandTest {
     @Test
     public void doesNotShowUpdateMessageIfNoUpdatesAvailable() {
         workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[]{"submit"});
+        app.run(new String[] {"submit"});
 
         io.assertNotContains("available");
         io.assertNotContains("been changed on TMC server");
@@ -220,7 +225,8 @@ public class SubmitCommandTest {
         UpdateResult updateResult = mock(UpdateResult.class);
 
         List<Exercise> newExercises = Collections.singletonList(new Exercise("new_exercise"));
-        List<Exercise> updatedExercises = Collections.singletonList(new Exercise("updated_exercise"));
+        List<Exercise> updatedExercises =
+                Collections.singletonList(new Exercise("updated_exercise"));
 
         when(updateResult.getNewExercises()).thenReturn(newExercises);
         when(updateResult.getUpdatedExercises()).thenReturn(updatedExercises);
@@ -229,7 +235,7 @@ public class SubmitCommandTest {
                 .thenReturn(updateResult);
 
         workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[]{"submit"});
+        app.run(new String[] {"submit"});
 
         io.assertContains("1 new exercise available");
         io.assertContains("1 exercise has been changed on TMC server");

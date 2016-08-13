@@ -53,9 +53,12 @@ public class TestIo extends Io {
 
     public void assertAllPromptsUsed() {
         if (!allPromptsUsed()) {
-            fail("Program should have created " + expectedPromptCount
-                    + " prompts instead of " + promptOrder.size()
-                    + " prompts.");
+            fail(
+                    "Program should have created "
+                            + expectedPromptCount
+                            + " prompts instead of "
+                            + promptOrder.size()
+                            + " prompts.");
         }
     }
 
@@ -111,13 +114,13 @@ public class TestIo extends Io {
     private <T> void addPrompt(PromptType type, T value) {
         switch (type) {
             case TEXT_PROMPT:
-                textPrompts.add((String)value);
+                textPrompts.add((String) value);
                 break;
             case PASSWORD_PROMPT:
-                passwordPrompts.add((String)value);
+                passwordPrompts.add((String) value);
                 break;
             case CONFIRM_PROMPT:
-                confirmationPrompts.add((Boolean)value);
+                confirmationPrompts.add((Boolean) value);
                 break;
             default:
                 break;
@@ -133,13 +136,12 @@ public class TestIo extends Io {
 
         PromptType expected = promptOrder.pop();
         if (expected != type) {
-            throw new AssertionError("Wrong prompt type expected " + expected.name()
-                    + ", got " + type);
+            throw new AssertionError(
+                    "Wrong prompt type expected " + expected.name() + ", got " + type);
         }
     }
 
     private boolean allPromptsUsed() {
-        return textPrompts.isEmpty() && passwordPrompts.isEmpty()
-                && confirmationPrompts.isEmpty();
+        return textPrompts.isEmpty() && passwordPrompts.isEmpty() && confirmationPrompts.isEmpty();
     }
 }

@@ -70,8 +70,7 @@ public class LoginCommand extends AbstractCommand {
         io.println("Login successful.");
     }
 
-    private String getLoginInfo(CommandLine line, String oldValue, String option,
-            String prompt) {
+    private String getLoginInfo(CommandLine line, String oldValue, String option, String prompt) {
         String value = oldValue;
         boolean isPassword = option.equals("p");
 

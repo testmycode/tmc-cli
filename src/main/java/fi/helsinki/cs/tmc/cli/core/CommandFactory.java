@@ -70,7 +70,7 @@ public class CommandFactory {
             return null;
         }
         try {
-            return (AbstractCommand)commandClass.newInstance();
+            return (AbstractCommand) commandClass.newInstance();
         } catch (InstantiationException | IllegalAccessException ex) {
             throw new RuntimeException("getCommand failed", ex);
         }
@@ -85,7 +85,7 @@ public class CommandFactory {
      */
     public static Command getCommand(Class<Command> commandClass) {
         Annotation annotation = commandClass.getAnnotation(Command.class);
-        return (Command)annotation;
+        return (Command) annotation;
     }
 
     /**

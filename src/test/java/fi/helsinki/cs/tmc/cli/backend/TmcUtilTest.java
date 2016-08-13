@@ -67,18 +67,19 @@ public class TmcUtilTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
 
-        Answer<Callable<Course>> answer = new Answer<Callable<Course>>() {
-            @Override
-            public Callable<Course> answer(InvocationOnMock invocation) throws Throwable {
-                final Course course = (Course) invocation.getArguments()[1];
-                return new Callable<Course>() {
+        Answer<Callable<Course>> answer =
+                new Answer<Callable<Course>>() {
                     @Override
-                    public Course call() throws Exception {
-                        return course;
+                    public Callable<Course> answer(InvocationOnMock invocation) throws Throwable {
+                        final Course course = (Course) invocation.getArguments()[1];
+                        return new Callable<Course>() {
+                            @Override
+                            public Course call() throws Exception {
+                                return course;
+                            }
+                        };
                     }
                 };
-            }
-        };
         when(mockCore.getCourseDetails(any(ProgressObserver.class), any(Course.class)))
                 .then(answer);
     }
@@ -101,8 +102,8 @@ public class TmcUtilTest {
         };
     }
 
-    public <T> Callable<List<T>> createThrowingCallbackOfList(Class<T> type,
-            final String errorMsg) {
+    public <T> Callable<List<T>> createThrowingCallbackOfList(
+            Class<T> type, final String errorMsg) {
         return new Callable<List<T>>() {
             @Override
             public List<T> call() throws Exception {
@@ -121,8 +122,7 @@ public class TmcUtilTest {
     @Test
     public void hasNoInternetConnection() throws UnknownHostException {
         mockStatic(InetAddress.class);
-        when(InetAddress.getByName(anyString())).thenThrow(
-                new UnknownHostException());
+        when(InetAddress.getByName(anyString())).thenThrow(new UnknownHostException());
         assertFalse(TmcUtil.hasConnection(ctx));
     }
 
@@ -136,19 +136,19 @@ public class TmcUtilTest {
 
     @Test
     public void loginCatchesObsoleteClientException() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                Exception exception = new ObsoleteClientException();
-                throw new Exception(exception);
-            }
-        };
+        Callable<List<Course>> callable =
+                new Callable<List<Course>>() {
+                    @Override
+                    public List<Course> call() throws Exception {
+                        Exception exception = new ObsoleteClientException();
+                        throw new Exception(exception);
+                    }
+                };
 
         Application app = mock(Application.class);
         ctx.setApp(app);
         when(app.runAutoUpdate()).thenReturn(true);
-        when(mockCore.listCourses(any(ProgressObserver.class)))
-                .thenReturn(callable);
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         TmcUtil.tryToLogin(ctx, new Account());
         io.assertContains("Your tmc-cli is outdated");
         verify(app, times(1)).runAutoUpdate();
@@ -156,24 +156,25 @@ public class TmcUtilTest {
 
     @Test
     public void loginCatchesFailedHttpResponseException() {
-        Callable<List<Course>> callable = new Callable<List<Course>>() {
-            @Override
-            public List<Course> call() throws Exception {
-                Exception exception = new FailedHttpResponseException(401, new BasicHttpEntity());
-                throw new Exception(exception);
-            }
-        };
+        Callable<List<Course>> callable =
+                new Callable<List<Course>>() {
+                    @Override
+                    public List<Course> call() throws Exception {
+                        Exception exception =
+                                new FailedHttpResponseException(401, new BasicHttpEntity());
+                        throw new Exception(exception);
+                    }
+                };
 
-        when(mockCore.listCourses(any(ProgressObserver.class)))
-                .thenReturn(callable);
+        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
         TmcUtil.tryToLogin(ctx, new Account());
         io.assertContains("Incorrect username or password");
     }
 
     @Test
     public void listCourses() {
-        List<Course> expectedResult = Arrays.asList(new Course("test-course"),
-                new Course("test-course2"));
+        List<Course> expectedResult =
+                Arrays.asList(new Course("test-course"), new Course("test-course2"));
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createReturningCallback(expectedResult));
 
@@ -195,8 +196,7 @@ public class TmcUtilTest {
 
     @Test
     public void returnNullWhenCourseWontExist() {
-        List<Course> courses = Arrays.asList(new Course("course"),
-                new Course("another"));
+        List<Course> courses = Arrays.asList(new Course("course"), new Course("another"));
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createReturningCallback(courses));
         assertNull(TmcUtil.findCourse(ctx, "not-existing-course"));
@@ -222,28 +222,27 @@ public class TmcUtilTest {
 
     @Test
     public void downloadSomeExercises() {
-        List<Exercise> expectedResult = Arrays.asList(new Exercise("first"),
-                new Exercise("second"));
+        List<Exercise> expectedResult =
+                Arrays.asList(new Exercise("first"), new Exercise("second"));
 
-        when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class),
-                anyListOf(Exercise.class)))
+        when(
+                        mockCore.downloadOrUpdateExercises(
+                                any(ProgressObserver.class), anyListOf(Exercise.class)))
                 .thenReturn(createReturningCallback(expectedResult));
 
-        List<Exercise> result = TmcUtil.downloadExercises(ctx, expectedResult,
-                new CliProgressObserver(io));
+        List<Exercise> result =
+                TmcUtil.downloadExercises(ctx, expectedResult, new CliProgressObserver(io));
         assertEquals(expectedResult, result);
     }
 
     @Test
     public void failToDownloadCourses() throws Exception {
         List<Exercise> exercises = Collections.singletonList(new Exercise("first"));
-        Callable<List<Exercise>> callable = createThrowingCallbackOfList(Exercise.class,
-                "failed");
-        when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class),
-                eq(exercises))).thenReturn(callable);
+        Callable<List<Exercise>> callable = createThrowingCallbackOfList(Exercise.class, "failed");
+        when(mockCore.downloadOrUpdateExercises(any(ProgressObserver.class), eq(exercises)))
+                .thenReturn(callable);
 
-        assertNull(TmcUtil.downloadExercises(ctx, exercises,
-                new CliProgressObserver(io)));
+        assertNull(TmcUtil.downloadExercises(ctx, exercises, new CliProgressObserver(io)));
     }
 
     @Test
@@ -296,8 +295,8 @@ public class TmcUtilTest {
         final URI expectedResult = new URI("www.abc.org");
         Exercise exercise = new Exercise("test-course");
 
-        when(mockCore.pasteWithComment(any(ProgressObserver.class), eq(exercise),
-                eq("message"))).thenReturn(createReturningCallback(expectedResult));
+        when(mockCore.pasteWithComment(any(ProgressObserver.class), eq(exercise), eq("message")))
+                .thenReturn(createReturningCallback(expectedResult));
 
         URI result = TmcUtil.sendPaste(ctx, exercise, "message");
         assertEquals(expectedResult, result);
@@ -306,8 +305,8 @@ public class TmcUtilTest {
     @Test
     public void failToSendPaste() {
         Exercise exercise = new Exercise("test-course");
-        when(mockCore.pasteWithComment(any(ProgressObserver.class), eq(exercise),
-                eq("message"))).thenReturn(createThrowingCallback(URI.class, "failed"));
+        when(mockCore.pasteWithComment(any(ProgressObserver.class), eq(exercise), eq("message")))
+                .thenReturn(createThrowingCallback(URI.class, "failed"));
         assertNull(TmcUtil.sendPaste(ctx, exercise, "message"));
     }
 
@@ -356,8 +355,8 @@ public class TmcUtilTest {
         List<FeedbackAnswer> answers = null;
         URI feedbackUri = new URI("www.abc.org");
 
-        when(mockCore.sendFeedback(any(ProgressObserver.class), eq(answers),
-                eq(feedbackUri))).thenReturn(createReturningCallback(true));
+        when(mockCore.sendFeedback(any(ProgressObserver.class), eq(answers), eq(feedbackUri)))
+                .thenReturn(createReturningCallback(true));
 
         assertTrue(TmcUtil.sendFeedback(ctx, answers, feedbackUri));
     }
@@ -368,8 +367,8 @@ public class TmcUtilTest {
         URI feedbackUri = new URI("www.abc.org");
 
         Callable<Boolean> callable = createThrowingCallback(Boolean.class, "failed");
-        when(mockCore.sendFeedback(any(ProgressObserver.class), eq(answers),
-                eq(feedbackUri))).thenReturn(callable);
+        when(mockCore.sendFeedback(any(ProgressObserver.class), eq(answers), eq(feedbackUri)))
+                .thenReturn(callable);
 
         assertFalse(TmcUtil.sendFeedback(ctx, answers, feedbackUri));
     }

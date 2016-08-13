@@ -149,8 +149,8 @@ public class AutoUpdaterTest {
     }
 
     private static String readResource(String resourceName) throws IOException {
-        InputStream inputStream = AutoUpdaterTest.class.getClassLoader()
-                .getResourceAsStream(resourceName);
+        InputStream inputStream =
+                AutoUpdaterTest.class.getClassLoader().getResourceAsStream(resourceName);
         if (inputStream == null) {
             return null;
         }

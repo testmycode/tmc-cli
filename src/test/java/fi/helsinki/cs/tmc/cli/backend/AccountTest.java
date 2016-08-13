@@ -31,5 +31,4 @@ public class AccountTest {
         Account compared = new Account("xyz", "testuser", "testpassword");
         assertEquals(false, account.equals(compared));
     }
-
 }

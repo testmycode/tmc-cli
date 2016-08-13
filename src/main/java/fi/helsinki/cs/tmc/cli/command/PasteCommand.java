@@ -52,11 +52,12 @@ public class PasteCommand extends AbstractCommand {
             return;
         }
         if (!valid) {
-            io.println("The command can be used in an exercise directory without the exercise name"
-                    + " or in a course directory with the name as an argument.");
+            io.println(
+                    "The command can be used in an exercise directory without the exercise name"
+                            + " or in a course directory with the name as an argument.");
             return;
         }
-        
+
         List<String> exercisenames = workdir.getExerciseNames();
         if (exercisenames.size() != 1) {
             io.println("Error: Matched too many exercises.");
@@ -68,14 +69,15 @@ public class PasteCommand extends AbstractCommand {
             if (args.hasOption("m")) {
                 message = args.getOptionValue("m");
             } else if (io.readConfirmation("Attach a message to your paste?", true)) {
-                message = ExternalsUtil.getUserEditedMessage(
-                        "\n"
+                message =
+                        ExternalsUtil.getUserEditedMessage(
+                                "\n"
                                 + "#   Write a message for your paste in this file and save it.\n"
                                 + "#   If you don't want to send a message with your paste, "
                                 + "use the '-n' switch.\n"
                                 + "#   Lines beginning with # are comments and will be ignored.",
-                        "tmc-paste-message",
-                        true);
+                                "tmc-paste-message",
+                                true);
             } else {
                 message = "";
             }
@@ -88,8 +90,9 @@ public class PasteCommand extends AbstractCommand {
         Exercise exercise = info.getExercise(exerciseName);
         URI uri = TmcUtil.sendPaste(context, exercise, message);
         if (uri == null && exercise.hasDeadlinePassed()) {
-            io.println("Unable to send the paste."
-                    + " The deadline for submitting this exercise has passed");
+            io.println(
+                    "Unable to send the paste."
+                            + " The deadline for submitting this exercise has passed");
             return;
         }
         if (uri == null) {

@@ -34,8 +34,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Runtime.class, EnvironmentUtil.class,
-        Desktop.class, ExternalsUtil.class})
+@PrepareForTest({Runtime.class, EnvironmentUtil.class, Desktop.class, ExternalsUtil.class})
 public class ExternalUtilTest {
 
     //TODO add more test cases

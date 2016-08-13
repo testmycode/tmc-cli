@@ -17,8 +17,7 @@ import java.util.HashMap;
 @Command(name = "prop", desc = "Set/unset TMC-CLI properties")
 public class PropertiesCommand extends AbstractCommand {
 
-    private static final Logger logger
-            = LoggerFactory.getLogger(PropertiesCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesCommand.class);
     private Io io;
 
     @Override
@@ -70,8 +69,7 @@ public class PropertiesCommand extends AbstractCommand {
             }
             for (int i = 0; i < arguments.length; i = i + 2) {
                 String last = props.put(arguments[i], arguments[i + 1]);
-                io.println("Set " + arguments[i] + "=>" + arguments[i + 1]
-                        + ", was " + last);
+                io.println("Set " + arguments[i] + "=>" + arguments[i + 1] + ", was " + last);
             }
         }
         context.saveProperties();

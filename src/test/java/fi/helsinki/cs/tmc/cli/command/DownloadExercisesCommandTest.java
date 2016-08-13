@@ -114,8 +114,10 @@ public class DownloadExercisesCommandTest {
         List<Exercise> exercises = Collections.singletonList(new Exercise("exerciseName"));
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
-        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
-                any(ProgressObserver.class))).thenReturn(exercises);
+        when(
+                        TmcUtil.downloadExercises(
+                                eq(ctx), anyListOf(Exercise.class), any(ProgressObserver.class)))
+                .thenReturn(exercises);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -141,8 +143,10 @@ public class DownloadExercisesCommandTest {
         course.setExercises(Arrays.asList(completed1, notCompleted, completed2));
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
-        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
-                any(ProgressObserver.class))).thenReturn(filteredExercises);
+        when(
+                        TmcUtil.downloadExercises(
+                                eq(ctx), anyListOf(Exercise.class), any(ProgressObserver.class)))
+                .thenReturn(filteredExercises);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -161,14 +165,15 @@ public class DownloadExercisesCommandTest {
         completed2.setCompleted(true);
         workDir.setWorkdir(tempDir);
 
-        List<Exercise> exercises = Arrays.asList(completed1, notCompleted,
-                completed2);
+        List<Exercise> exercises = Arrays.asList(completed1, notCompleted, completed2);
         Course course = new Course("course1");
         course.setExercises(exercises);
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
-        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
-                any(ProgressObserver.class))).thenReturn(exercises);
+        when(
+                        TmcUtil.downloadExercises(
+                                eq(ctx), anyListOf(Exercise.class), any(ProgressObserver.class)))
+                .thenReturn(exercises);
 
         String[] args = {"download", "-a", "course1"};
         app.run(args);
@@ -189,8 +194,10 @@ public class DownloadExercisesCommandTest {
         workDir.setWorkdir(tempDir);
 
         when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(course);
-        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
-                any(ProgressObserver.class))).thenReturn(downloaded);
+        when(
+                        TmcUtil.downloadExercises(
+                                eq(ctx), anyListOf(Exercise.class), any(ProgressObserver.class)))
+                .thenReturn(downloaded);
 
         String[] args = {"download", "course1"};
         app.run(args);
@@ -208,7 +215,8 @@ public class DownloadExercisesCommandTest {
         accountList.addAccount(account1);
         accountList.addAccount(account2);
 
-        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
+        when(TmcUtil.findCourse(eq(ctx), eq("course1")))
+                .thenReturn(new Course("course1"))
                 .thenReturn(new Course("course2"));
         when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
@@ -224,13 +232,16 @@ public class DownloadExercisesCommandTest {
         accountList.addAccount(account1);
         accountList.addAccount(account2);
 
-        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
+        when(TmcUtil.findCourse(eq(ctx), eq("course1")))
+                .thenReturn(new Course("course1"))
                 .thenReturn(new Course("course1"));
         when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
         List<Exercise> exercises = Collections.emptyList();
-        when(TmcUtil.downloadExercises(eq(ctx), anyListOf(Exercise.class),
-                any(ProgressObserver.class))).thenReturn(exercises);
+        when(
+                        TmcUtil.downloadExercises(
+                                eq(ctx), anyListOf(Exercise.class), any(ProgressObserver.class)))
+                .thenReturn(exercises);
 
         String[] args = {"download", "course1"};
         io.addConfirmationPrompt(false);
@@ -251,7 +262,8 @@ public class DownloadExercisesCommandTest {
         accountList.addAccount(account2);
         accountList.addAccount(account1);
 
-        when(TmcUtil.findCourse(eq(ctx), eq("course1"))).thenReturn(new Course("course1"))
+        when(TmcUtil.findCourse(eq(ctx), eq("course1")))
+                .thenReturn(new Course("course1"))
                 .thenReturn(new Course("course1"));
         when(SettingsIo.loadAccountList()).thenReturn(accountList);
 
@@ -264,8 +276,8 @@ public class DownloadExercisesCommandTest {
 
         ArgumentCaptor<CliContext> ctxCaptor = ArgumentCaptor.forClass(CliContext.class);
         verifyStatic();
-        TmcUtil.downloadExercises(ctxCaptor.capture(), anyListOf(Exercise.class),
-                any(ProgressObserver.class));
+        TmcUtil.downloadExercises(
+                ctxCaptor.capture(), anyListOf(Exercise.class), any(ProgressObserver.class));
 
         Settings usedSettings = Whitebox.getInternalState(ctxCaptor.getValue(), "settings");
         assertEquals(account1, usedSettings.getAccount());

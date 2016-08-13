@@ -70,10 +70,8 @@ public class ExerciseUpdaterTest {
         assertTrue(exerciseUpdater.newExercisesAvailable());
         assertTrue(exerciseUpdater.updatedExercisesAvailable());
 
-        assertTrue(exerciseUpdater.getNewAndUpdatedExercises().contains(
-                newExercises.get(0)));
-        assertTrue(exerciseUpdater.getNewAndUpdatedExercises().contains(
-                updatedExercises.get(0)));
+        assertTrue(exerciseUpdater.getNewAndUpdatedExercises().contains(newExercises.get(0)));
+        assertTrue(exerciseUpdater.getNewAndUpdatedExercises().contains(updatedExercises.get(0)));
     }
 
     @Test
@@ -84,8 +82,7 @@ public class ExerciseUpdaterTest {
 
         when(result.getNewExercises()).thenReturn(exercises);
         when(result.getUpdatedExercises()).thenReturn(exercises);
-        when(TmcUtil.getUpdatableExercises(eq(ctx), any(Course.class)))
-                .thenReturn(result);
+        when(TmcUtil.getUpdatableExercises(eq(ctx), any(Course.class))).thenReturn(result);
 
         exerciseUpdater = new ExerciseUpdater(ctx, new Course());
         assertTrue(exerciseUpdater.updatesAvailable());

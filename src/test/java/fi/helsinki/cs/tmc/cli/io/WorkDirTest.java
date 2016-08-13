@@ -68,23 +68,23 @@ public class WorkDirTest {
         String tempDir = System.getProperty("java.io.tmpdir");
         try {
             FileUtils.deleteDirectory(Paths.get(tempDir).resolve("dirUtilTest").toFile());
-        } catch (Exception e) { }
+        } catch (Exception e) {
+        }
     }
 
     @Test
     public void getsCorrectWorkingDirectory() {
         WorkDir workDir = new WorkDir();
         assertNotNull(workDir.getWorkingDirectory());
-        assertEquals(Paths.get(System.getProperty("user.dir")),
-                workDir.getWorkingDirectory());
+        assertEquals(Paths.get(System.getProperty("user.dir")), workDir.getWorkingDirectory());
     }
 
     @Test
     public void overridingWorkingDirectoryWorks() {
         WorkDir workDir = new WorkDir();
         workDir.setWorkdir(Paths.get(System.getProperty("java.io.tmpdir")));
-        assertEquals(Paths.get(System.getProperty("java.io.tmpdir")),
-                workDir.getWorkingDirectory());
+        assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")), workDir.getWorkingDirectory());
     }
 
     @Test
@@ -100,10 +100,13 @@ public class WorkDirTest {
     public void absolutePathsWork() {
         WorkDir workDir = new WorkDir();
         workDir.addPath(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"));
-        assertEquals(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
+        assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 workDir.getCourseDirectory());
-        assertEquals(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
-                .resolve(CourseInfoIo.COURSE_CONFIG),
+        assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve("dirUtilTest")
+                        .resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
     }
 
@@ -111,10 +114,12 @@ public class WorkDirTest {
     public void returnsCorrectValuesInCourseDirectory() {
         WorkDir workDir = new WorkDir();
         workDir.setWorkdir(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"));
-        assertEquals("Course dir is correct",
+        assertEquals(
+                "Course dir is correct",
                 Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 workDir.getCourseDirectory());
-        assertEquals("Working dir is correct",
+        assertEquals(
+                "Working dir is correct",
                 Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 workDir.getWorkingDirectory());
     }
@@ -128,7 +133,8 @@ public class WorkDirTest {
                 Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 workDir.getCourseDirectory());
         assertEquals(
-                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
+                Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve("dirUtilTest")
                         .resolve("viikko1-teht1"),
                 workDir.getWorkingDirectory());
     }
@@ -140,7 +146,8 @@ public class WorkDirTest {
         workDir.setWorkdir(tempDir);
         assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
+                        .resolve("dirUtilTest")
+                        .resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
         List<String> exercises = workDir.getExerciseNames(true, false, false);
         assertEquals(3, exercises.size());
@@ -153,21 +160,26 @@ public class WorkDirTest {
     public void worksIfCourseDirectoryIsGivenAsAParameter() {
         WorkDir workDir = new WorkDir();
         workDir.addPath(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"));
-        assertEquals(Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
+        assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
                 workDir.getCourseDirectory());
-        assertEquals(Paths.get(System.getProperty("java.io.tmpdir"))
-                .resolve("dirUtilTest"), workDir.getWorkingDirectory());
+        assertEquals(
+                Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest"),
+                workDir.getWorkingDirectory());
     }
 
     @Test
     public void worksIfInExerciseDirectoryWithNoParams() {
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
-                .resolve("viikko2-teht2");
+        Path tempDir =
+                Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve("dirUtilTest")
+                        .resolve("viikko2-teht2");
         WorkDir workDir = new WorkDir();
         workDir.setWorkdir(tempDir);
         assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
+                        .resolve("dirUtilTest")
+                        .resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
         List<String> exercises = workDir.getExerciseNames(true, false, false);
         assertEquals(1, exercises.size());
@@ -185,7 +197,8 @@ public class WorkDirTest {
         workDir.addPath("viikko2-teht3");
         assertEquals(
                 Paths.get(System.getProperty("java.io.tmpdir"))
-                        .resolve("dirUtilTest").resolve(CourseInfoIo.COURSE_CONFIG),
+                        .resolve("dirUtilTest")
+                        .resolve(CourseInfoIo.COURSE_CONFIG),
                 workDir.getConfigFile());
         List<String> exercises = workDir.getExerciseNames();
         assertEquals(2, exercises.size());
@@ -204,8 +217,11 @@ public class WorkDirTest {
 
     @Test
     public void worksInSubDirectoryOfAnExercise() {
-        Path path = Paths.get(System.getProperty("java.io.tmpdir")).resolve("dirUtilTest")
-                .resolve("viikko1-teht1").resolve("src");
+        Path path =
+                Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve("dirUtilTest")
+                        .resolve("viikko1-teht1")
+                        .resolve("src");
         WorkDir workDir = new WorkDir();
         workDir.addPath(path);
         List<String> exercises = workDir.getExerciseNames(true, false, false);

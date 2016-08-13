@@ -59,8 +59,7 @@ public class CliProgressObserver extends ProgressObserver {
     }
 
     @Override
-    public void start(long id) {
-    }
+    public void start(long id) {}
 
     @Override
     public void end(long id) {
@@ -69,8 +68,8 @@ public class CliProgressObserver extends ProgressObserver {
             this.io.print("\r");
             flush(this.maxline);
             this.io.print("\r");
-//            this.io.println("\r" + this.percentage(1.0)
-//                    + this.progressBar(1.0, this.pips, this.color1, this.color2));
+            //            this.io.println("\r" + this.percentage(1.0)
+            //                    + this.progressBar(1.0, this.pips, this.color1, this.color2));
         } else {
             this.io.println("");
         }
@@ -96,10 +95,8 @@ public class CliProgressObserver extends ProgressObserver {
         io.print(sb);
     }
 
-    private static String progressBar(double progress, int length,
-                                      Color color1, Color color2) {
-        return progressBar(progress, length, color1, color2,
-                BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
+    private static String progressBar(double progress, int length, Color color1, Color color2) {
+        return progressBar(progress, length, color1, color2, BARLEFT, BARRIGHT, PIPCHAR, EMPTYCHAR);
     }
 
     private static String progressBar(
@@ -140,13 +137,15 @@ public class CliProgressObserver extends ProgressObserver {
         return percentage + percent + "%";
     }
 
-    public static String getPassedTestsBar(int passed, int total,
-                                           Color color1, Color color2) {
+    public static String getPassedTestsBar(int passed, int total, Color color1, Color color2) {
         return CliProgressObserver.progressBar(
                 (double) passed / total,
                 EnvironmentUtil.getTerminalWidth(),
-                color1, color2,
-                '[', ']', '█', '░'
-        );
+                color1,
+                color2,
+                '[',
+                ']',
+                '█',
+                '░');
     }
 }

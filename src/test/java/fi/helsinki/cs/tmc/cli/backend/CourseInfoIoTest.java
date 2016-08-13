@@ -22,16 +22,14 @@ public class CourseInfoIoTest {
     @Before
     public void setup() {
         tempDir = System.getProperty("java.io.tmpdir");
-        this.courseFile = Paths.get(tempDir)
-                .resolve("test-course")
-                .resolve(CourseInfoIo.COURSE_CONFIG);
+        this.courseFile =
+                Paths.get(tempDir).resolve("test-course").resolve(CourseInfoIo.COURSE_CONFIG);
         this.course = new CourseInfo(new Account(), new Course("test-course"));
     }
 
     @After
     public void cleanUp() throws IOException {
-        FileUtils.deleteDirectory(Paths.get(tempDir)
-            .resolve("test-course").toFile());
+        FileUtils.deleteDirectory(Paths.get(tempDir).resolve("test-course").toFile());
     }
 
     @Test
@@ -51,5 +49,4 @@ public class CourseInfoIoTest {
         Assert.assertEquals(this.course.getUsername(), loadedInfo.getUsername());
         Assert.assertEquals(this.course.getCourseName(), loadedInfo.getCourseName());
     }
-
 }

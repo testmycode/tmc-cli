@@ -17,12 +17,10 @@ public class AbstractCommandTest {
     private class EmptyCommand extends AbstractCommand {
 
         @Override
-        public void run(CliContext context, CommandLine args) {
-        }
+        public void run(CliContext context, CommandLine args) {}
 
         @Override
-        public void getOptions(Options options) {
-        }
+        public void getOptions(Options options) {}
     }
 
     public AbstractCommandTest() {

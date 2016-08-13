@@ -28,15 +28,14 @@ public class ListCoursesCommand extends AbstractCommand {
     private Io io;
 
     @Override
-    public void getOptions(Options options) {
-    }
+    public void getOptions(Options options) {}
 
     @Override
     public void run(CliContext context, CommandLine args) {
         this.ctx = context;
         this.io = ctx.getIo();
 
-        if (! ctx.loadBackendWithoutLogin()) {
+        if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
@@ -59,8 +58,9 @@ public class ListCoursesCommand extends AbstractCommand {
                 io.println("");
             }
             if (accountsList.getAccountCount() > 1) {
-                io.println(ColorUtil.colorString("Server " + settings.getServerAddress(),
-                        Color.YELLOW));
+                io.println(
+                        ColorUtil.colorString(
+                                "Server " + settings.getServerAddress(), Color.YELLOW));
             }
             printCourseList(settings);
             isFirst = false;

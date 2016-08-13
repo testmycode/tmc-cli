@@ -53,13 +53,17 @@ public class EnvironmentUtil {
             try {
                 Process proc = new ProcessBuilder(args).start();
                 if (wait) {
-                    logger.info("(Windows) Waiting for "
-                            + Arrays.toString(args) + " to finish executing");
+                    logger.info(
+                            "(Windows) Waiting for "
+                                    + Arrays.toString(args)
+                                    + " to finish executing");
                     proc.waitFor();
                 }
             } catch (Exception e) {
-                logger.error("(Windows) Exception when running external program "
-                        + Arrays.toString(args), e);
+                logger.error(
+                        "(Windows) Exception when running external program "
+                                + Arrays.toString(args),
+                        e);
                 return false;
             }
         } else {
@@ -72,14 +76,15 @@ public class EnvironmentUtil {
             try {
                 Process proc = Runtime.getRuntime().exec(exec);
                 if (wait) {
-                    logger.info("(Unix) Waiting for "
-                            + Arrays.toString(exec) + " to finish executing");
+                    logger.info(
+                            "(Unix) Waiting for " + Arrays.toString(exec) + " to finish executing");
                     proc.waitFor();
                 }
                 return proc.exitValue() == 0;
             } catch (Exception e) {
-                logger.error("(Unix) Exception when running external program "
-                        + Arrays.toString(exec), e);
+                logger.error(
+                        "(Unix) Exception when running external program " + Arrays.toString(exec),
+                        e);
                 return false;
             }
         }

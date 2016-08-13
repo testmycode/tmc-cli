@@ -148,9 +148,10 @@ public class CliContext {
         }
         courseInfo = CourseInfoIo.load(workDir.getConfigFile());
         if (courseInfo == null) {
-            io.println("Course configuration file "
-                    + workDir.getConfigFile().toString()
-                    + "is invalid.");
+            io.println(
+                    "Course configuration file "
+                            + workDir.getConfigFile().toString()
+                            + "is invalid.");
             //TODO add a way to rewrite the corrupted course config file.
             return null;
         }
@@ -180,7 +181,7 @@ public class CliContext {
             return true;
         }
 
-        if (! createTmcCore()) {
+        if (!createTmcCore()) {
             return false;
         }
 
@@ -190,8 +191,10 @@ public class CliContext {
                 // if user is not in course folder.
                 io.println("You are not logged in. Log in using: tmc login");
             } else {
-                io.println("You are not logged in as " + courseInfo.getUsername()
-                        + ". Log in using: tmc login");
+                io.println(
+                        "You are not logged in as "
+                                + courseInfo.getUsername()
+                                + ". Log in using: tmc login");
             }
             return false;
         }
@@ -205,7 +208,6 @@ public class CliContext {
      */
     public boolean loadBackendWithoutLogin() {
         return this.tmcCore != null || createTmcCore();
-
     }
 
     /**
@@ -234,8 +236,8 @@ public class CliContext {
             // Otherwise we just load the last used settings
             courseInfo = getCourseInfo();
             if (courseInfo != null) {
-                cachedAccount = list.getAccount(courseInfo.getUsername(),
-                        courseInfo.getServerAddress());
+                cachedAccount =
+                        list.getAccount(courseInfo.getUsername(), courseInfo.getServerAddress());
             }
         } else {
             // Bug: if we are not inside course directory

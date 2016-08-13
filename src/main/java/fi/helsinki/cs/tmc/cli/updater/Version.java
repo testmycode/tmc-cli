@@ -5,8 +5,7 @@ import java.util.regex.Pattern;
 
 class Version implements Comparable<Version> {
 
-    private static final String MATCH_REGEX
-            = "^(\\d+)\\.(\\d+)\\.(\\d+)(?:-(.*))?$";
+    private static final String MATCH_REGEX = "^(\\d+)\\.(\\d+)\\.(\\d+)(?:-(.*))?$";
 
     private final int major;
     private final int minor;
@@ -16,8 +15,8 @@ class Version implements Comparable<Version> {
     public Version(String versionString) {
         Matcher matcher = Pattern.compile(MATCH_REGEX).matcher(versionString);
         if (!matcher.find()) {
-            throw new IllegalArgumentException("Illegal version string "
-                    + "'" + versionString + "'");
+            throw new IllegalArgumentException(
+                    "Illegal version string " + "'" + versionString + "'");
         }
 
         this.major = Integer.parseInt(matcher.group(1));
@@ -74,8 +73,6 @@ class Version implements Comparable<Version> {
 
     @Override
     public String toString() {
-        return major + "." + minor + "." + patch
-                + (metadata == null ? "" : "-" + metadata);
+        return major + "." + minor + "." + patch + (metadata == null ? "" : "-" + metadata);
     }
-
 }

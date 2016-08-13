@@ -25,11 +25,10 @@ public class AutoUpdater {
     /**
      * URL to a JSON that contains information about the latest tmc-cli release.
      */
-    private static final String LATEST_RELEASE_URL
-            = "https://api.github.com/repos/tmc-cli/tmc-cli/releases/latest";
+    private static final String LATEST_RELEASE_URL =
+            "https://api.github.com/repos/tmc-cli/tmc-cli/releases/latest";
 
-    private static final Logger logger
-            = LoggerFactory.getLogger(AutoUpdater.class);
+    private static final Logger logger = LoggerFactory.getLogger(AutoUpdater.class);
 
     private final Io io;
     private final boolean isWindows;
@@ -68,7 +67,7 @@ public class AutoUpdater {
             return true;
         }
 
-        if (! io.readConfirmation("Do you want to download it?", true)) {
+        if (!io.readConfirmation("Do you want to download it?", true)) {
             return false;
         }
 
@@ -106,7 +105,8 @@ public class AutoUpdater {
         InputStream inputStream;
         try {
             URLConnection connection = url.openConnection();
-            connection.setRequestProperty("User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
+            connection.setRequestProperty(
+                    "User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
             inputStream = connection.getInputStream();
         } catch (IOException ex) {
             logger.warn("Failed to fetch page", ex);
@@ -229,8 +229,13 @@ public class AutoUpdater {
 
     private static String getJarLocation() {
         try {
-            return new File(AutoUpdater.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI()).getParent()
+            return new File(
+                                    AutoUpdater.class
+                                            .getProtectionDomain()
+                                            .getCodeSource()
+                                            .getLocation()
+                                            .toURI())
+                            .getParent()
                     + File.separator;
         } catch (Exception ex) {
             logger.warn("Unable to get current jar folder.", ex);

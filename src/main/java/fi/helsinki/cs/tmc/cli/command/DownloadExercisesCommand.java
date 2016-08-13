@@ -29,7 +29,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
     @Override
     public void getOptions(Options options) {
-        options.addOption("a", "all", false,
+        options.addOption(
+                "a",
+                "all",
+                false,
                 "Download all available exercises, including previously completed");
 
         // Download old submissions. Not implemented in tmc-core yet
@@ -84,8 +87,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         printStatistics(course, filtered.size(), exercises.size());
 
-        CourseInfoIo.createNewCourse(course, finder.getAccount(),
-                workDir.getWorkingDirectory());
+        CourseInfoIo.createNewCourse(course, finder.getAccount(), workDir.getWorkingDirectory());
     }
 
     private List<Exercise> getFilteredExercises(Course course) {
@@ -112,19 +114,21 @@ public class DownloadExercisesCommand extends AbstractCommand {
             io.println("The '" + courseName + "' course doesn't have any exercises.");
         } else {
             int totalCount = course.getExercises().size();
-            io.println("The '" + courseName + "' course has "
-                    + totalCount + " exercises available");
+            io.println(
+                    "The '" + courseName + "' course has " + totalCount + " exercises available");
 
             int failedCount = (requestCount - downloadCount);
             if (failedCount > 0) {
-                io.println("  of which " + (requestCount - failedCount)
-                        + " exercises were succesfully downloaded");
-                io.println(ColorUtil.colorString("  and of which " + failedCount + " failed.",
-                        Color.RED));
+                io.println(
+                        "  of which "
+                                + (requestCount - failedCount)
+                                + " exercises were succesfully downloaded");
+                io.println(
+                        ColorUtil.colorString(
+                                "  and of which " + failedCount + " failed.", Color.RED));
                 //TODO we could print the names of the not downloaded exercises here
             } else {
-                io.println("  of which "
-                        + downloadCount + " exercises were downloaded.");
+                io.println("  of which " + downloadCount + " exercises were downloaded.");
             }
             if (!showAll && totalCount != downloadCount) {
                 io.println("Use -a/--all to download completed exercises as well.");

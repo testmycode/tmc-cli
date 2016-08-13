@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 
 import java.util.HashMap;
 
-
 public class PropertiesCommandTest {
 
     private Application app;

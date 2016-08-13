@@ -27,8 +27,7 @@ import java.util.List;
 @Command(name = "test", desc = "Run local exercise tests")
 public class RunTestsCommand extends AbstractCommand {
 
-    private static final Logger logger
-            = LoggerFactory.getLogger(RunTestsCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(RunTestsCommand.class);
 
     private boolean showPassed;
     private boolean showDetails;
@@ -70,8 +69,8 @@ public class RunTestsCommand extends AbstractCommand {
 
         Color passedColor = context.getApp().getColor("testresults-left");
         Color failedColor = context.getApp().getColor("testresults-right");
-        ResultPrinter resultPrinter = new ResultPrinter(io, showDetails, showPassed,
-                passedColor, failedColor);
+        ResultPrinter resultPrinter =
+                new ResultPrinter(io, showDetails, showPassed, passedColor, failedColor);
 
         boolean isOnlyExercise = (exerciseNames.size() == 1);
 
@@ -87,8 +86,8 @@ public class RunTestsCommand extends AbstractCommand {
             }
 
             ValidationResult valResult = TmcUtil.runCheckStyle(context, exercise);
-            boolean testsPassed = resultPrinter.printLocalTestResult(
-                    runResult, valResult, isOnlyExercise);
+            boolean testsPassed =
+                    resultPrinter.printLocalTestResult(runResult, valResult, isOnlyExercise);
 
             updateCourseInfo(info, exercise, testsPassed);
             io.println("");

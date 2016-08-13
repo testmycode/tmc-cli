@@ -16,8 +16,7 @@ import java.util.List;
  */
 public class ExternalsUtil {
 
-    private static final Logger logger
-            = LoggerFactory.getLogger(ExternalsUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExternalsUtil.class);
 
     /**
      * Create a temp file with a template and open an editor for the user.
@@ -32,8 +31,10 @@ public class ExternalsUtil {
      */
     public static String getUserEditedMessage(
             String template, String filename, boolean escapeComments) {
-        Path tempFile = Paths.get(System.getProperty("java.io.tmpdir")).resolve("tmc-cli")
-                .resolve(filename + "-" + System.currentTimeMillis() + ".txt");
+        Path tempFile =
+                Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve("tmc-cli")
+                        .resolve(filename + "-" + System.currentTimeMillis() + ".txt");
         if (!writeToFile(tempFile, template)) {
             return null;
         }
@@ -53,8 +54,7 @@ public class ExternalsUtil {
         }
         StringBuilder sb = new StringBuilder();
         for (String messageLine : messageLines) {
-            if (messageLine.length() == 0
-                    || (messageLine.charAt(0) != '#' || !escapeComments)) {
+            if (messageLine.length() == 0 || (messageLine.charAt(0) != '#' || !escapeComments)) {
                 sb.append(messageLine).append("\n");
             }
         }
@@ -68,8 +68,10 @@ public class ExternalsUtil {
      * @param string String to be shown to the user
      */
     public static void showStringInPager(String string, String filename) {
-        Path tempFile = Paths.get(System.getProperty("java.io.tmpdir")).resolve("tmc-cli")
-                .resolve(filename + "-" + System.currentTimeMillis() + ".txt");
+        Path tempFile =
+                Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve("tmc-cli")
+                        .resolve(filename + "-" + System.currentTimeMillis() + ".txt");
         if (!writeToFile(tempFile, string)) {
             return;
         }

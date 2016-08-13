@@ -54,9 +54,7 @@ public class CourseInfoIo {
     }
 
     public static void createNewCourse(Course course, Account account, Path parentDir) {
-        Path configFile = parentDir
-                .resolve(course.getName())
-                .resolve(CourseInfoIo.COURSE_CONFIG);
+        Path configFile = parentDir.resolve(course.getName()).resolve(CourseInfoIo.COURSE_CONFIG);
 
         CourseInfo info = new CourseInfo(account, course);
         info.setExercises(course.getExercises());

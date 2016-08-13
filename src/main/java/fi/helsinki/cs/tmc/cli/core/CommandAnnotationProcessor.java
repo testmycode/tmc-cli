@@ -31,8 +31,8 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
     private static final String TAB = "    ";
 
     private void generateSourceFile(Map<String, String> map) throws IOException {
-        JavaFileObject jfo = processingEnv.getFiler().createSourceFile(
-                PACKAGE_NAME + "." + CLASS_NAME);
+        JavaFileObject jfo =
+                processingEnv.getFiler().createSourceFile(PACKAGE_NAME + "." + CLASS_NAME);
 
         try (Writer writer = jfo.openWriter()) {
             BufferedWriter bwriter = new BufferedWriter(writer);
@@ -54,7 +54,11 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
                 }
                 // print out the lines that add the commands to the command factory.
                 String className = parts[parts.length - 1];
-                bwriter.append(TAB + TAB + "CommandFactory.addCommand(\"").append(entry.getKey()).append("\", ").append(className).append(".class);\n");
+                bwriter.append(TAB + TAB + "CommandFactory.addCommand(\"")
+                        .append(entry.getKey())
+                        .append("\", ")
+                        .append(className)
+                        .append(".class);\n");
             }
             bwriter.append(TAB + "}\n");
             bwriter.append("}\n");
@@ -76,8 +80,9 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             logger.info("Element name with annotation: " + elem.getClass().getCanonicalName());
 
             TypeElement classElement = (TypeElement) elem;
-            map.put(command.name(), processingEnv.getElementUtils()
-                    .getBinaryName(classElement).toString());
+            map.put(
+                    command.name(),
+                    processingEnv.getElementUtils().getBinaryName(classElement).toString());
         }
 
         try {

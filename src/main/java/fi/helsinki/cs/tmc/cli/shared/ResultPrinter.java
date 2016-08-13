@@ -20,8 +20,8 @@ import java.util.Map;
 
 public class ResultPrinter {
 
-    private static final String COMPILE_ERROR_MESSAGE
-            = ColorUtil.colorString("Failed to compile project", Color.PURPLE);
+    private static final String COMPILE_ERROR_MESSAGE =
+            ColorUtil.colorString("Failed to compile project", Color.PURPLE);
     private static final String FAIL_MESSAGE = "Failed: ";
     private static final String PASS_MESSAGE = "Passed: ";
     private static final String PADDING = createPaddingString(PASS_MESSAGE.length());
@@ -35,8 +35,8 @@ public class ResultPrinter {
     private int totalExercises;
     private int passedExercises;
 
-    public ResultPrinter(Io io, boolean showDetails, boolean showPassed,
-            Color passedColor, Color failedColor) {
+    public ResultPrinter(
+            Io io, boolean showDetails, boolean showPassed, Color passedColor, Color failedColor) {
         this.io = io;
         this.passedColor = passedColor;
         this.failedColor = failedColor;
@@ -95,8 +95,8 @@ public class ResultPrinter {
         }
     }
 
-    public boolean printLocalTestResult(RunResult runResult, ValidationResult valResult,
-            boolean printResultBar) {
+    public boolean printLocalTestResult(
+            RunResult runResult, ValidationResult valResult, boolean printResultBar) {
         if (runResult == null) {
             return false;
         }
@@ -154,9 +154,8 @@ public class ResultPrinter {
         if (totalExercises == 0) {
             return;
         }
-        io.println("Total results: "
-                + passedExercises + "/" + totalExercises
-                + " exercises passed");
+        io.println(
+                "Total results: " + passedExercises + "/" + totalExercises + " exercises passed");
         printResultBar(passedExercises, totalExercises);
     }
 
@@ -164,9 +163,7 @@ public class ResultPrinter {
         if (total == 0) {
             return;
         }
-        io.println(
-                CliProgressObserver.getPassedTestsBar(passed, total, passedColor, failedColor)
-        );
+        io.println(CliProgressObserver.getPassedTestsBar(passed, total, passedColor, failedColor));
     }
 
     private boolean validationsPassed(ValidationResult result) {

@@ -116,10 +116,8 @@ public class Settings implements TmcSettings {
     }
 
     @Override
-    public void setCourse(Course course) {
-    }
+    public void setCourse(Course course) {}
 
     @Override
-    public void setConfigRoot(Path path) {
-    }
+    public void setConfigRoot(Path path) {}
 }
