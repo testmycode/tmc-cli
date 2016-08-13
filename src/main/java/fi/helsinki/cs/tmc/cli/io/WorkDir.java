@@ -104,6 +104,9 @@ public class WorkDir {
             exDir = exDir.replace(File.separator, "-");
 
             for (Exercise exercise : allExercises) {
+                if (exercises.contains(exercise)) {
+                    continue;
+                }
                 if ((exercise.getName().startsWith(exDir)
                         || exDir.startsWith(exercise.getName()))) {
                     if (filterExercise(exercise, locallyTested, exists, onlyTested)) {

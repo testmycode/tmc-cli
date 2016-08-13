@@ -179,7 +179,16 @@ public class WorkDirTest {
     }
 
     @Test
-    public void worksIfInCourseDirectoryWithParams() {
+    public void addInvalidPath() {
+        WorkDir workDir = new WorkDir();
+        workDir.setWorkdir(TEST_DIR);
+        workDir.addPath("teht1");
+        List<Exercise> exercises = workDir.getExercises();
+        assertEquals(0, exercises.size());
+    }
+
+    @Test
+    public void addTwoExercises() {
         WorkDir workDir = new WorkDir();
         workDir.setWorkdir(TEST_DIR);
         workDir.addPath("viikko2-teht2");
@@ -191,13 +200,20 @@ public class WorkDirTest {
         assertFalse(exercises.contains(exercise1));
         assertTrue(exercises.contains(exercise2));
         assertTrue(exercises.contains(exercise3));
-        workDir = new WorkDir();
+    }
+
+    @Test
+    public void addSamePathTwice() {
+        WorkDir workDir = new WorkDir();
         workDir.setWorkdir(TEST_DIR);
-        workDir.addPath("teht1");
-        exercises = workDir.getExercises(true, false);
-        assertEquals(0, exercises.size());
+        workDir.addPath("viikko2-teht2");
+        workDir.addPath("viikko2-teht2");
+        assertEquals(TEST_DIR.resolve(CourseInfoIo.COURSE_CONFIG),
+                workDir.getConfigFile());
+        List<Exercise> exercises = workDir.getExercises();
+        assertEquals(1, exercises.size());
         assertFalse(exercises.contains(exercise1));
-        assertFalse(exercises.contains(exercise2));
+        assertTrue(exercises.contains(exercise2));
         assertFalse(exercises.contains(exercise3));
     }
 
