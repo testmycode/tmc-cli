@@ -53,8 +53,12 @@ public class ExternalUtilTest {
     }
 
     @After
-    public void tearDown() throws IOException {
-        FileUtils.deleteDirectory(tempDir.toFile());
+    public void tearDown() {
+        try {
+            FileUtils.deleteDirectory(tempDir.toFile());
+        } catch (IOException e) {
+            // NOP
+        }
     }
 
     @Test
