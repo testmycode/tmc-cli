@@ -27,6 +27,11 @@ public class ListExercisesCommand extends AbstractCommand {
     private Io io;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-n] [-i] COURSE"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("n", "no-pager", false, "Don't use a pager to list the exercises");
         options.addOption("i", "internet", false, "Get the list of exercises from the server");
@@ -68,7 +73,7 @@ public class ListExercisesCommand extends AbstractCommand {
     private String getCourseNameFromCurrentDirectory() {
         CourseInfo info = getCourseInfoFromCurrentDirectory();
         if (info == null) {
-            this.io.println(
+            this.io.errorln(
                     "No course specified. Either run the command in a course"
                             + " directory or enter the course as a parameter.");
             return null;
@@ -77,8 +82,6 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     private CourseInfo getCourseInfoFromCurrentDirectory() {
-        WorkDir workDir = ctx.getWorkDir();
-        workDir.addPath();
         return ctx.getCourseInfo();
     }
 
@@ -89,13 +92,13 @@ public class ListExercisesCommand extends AbstractCommand {
 
         Course course = TmcUtil.findCourse(ctx, courseName);
         if (course == null) {
-            this.io.println("Course '" + courseName + "' doesn't exist on the server.");
+            this.io.errorln("Course '" + courseName + "' doesn't exist on the server.");
             return null;
         }
 
         List<Exercise> exercises = course.getExercises();
         if (exercises == null || exercises.isEmpty()) {
-            this.io.println("Course '" + courseName + "' doesn't have any exercises.");
+            this.io.errorln("Course '" + courseName + "' doesn't have any exercises.");
             return null;
         }
         return exercises;
@@ -104,7 +107,7 @@ public class ListExercisesCommand extends AbstractCommand {
     private List<Exercise> getLocalExercises(String courseName) {
         CourseInfo info = getCourseInfoFromCurrentDirectory();
         if (info == null || !info.getCourseName().equals(courseName)) {
-            this.io.println(
+            this.io.errorln(
                     "You have to be in a course directory or use the -i option "
                             + "to get the exercises from the server.");
             return null;
@@ -112,7 +115,7 @@ public class ListExercisesCommand extends AbstractCommand {
 
         List<Exercise> exercises = info.getExercises();
         if (exercises == null || exercises.isEmpty()) {
-            this.io.println("Course '" + courseName + "' doesn't have any exercises.");
+            this.io.errorln("Course '" + courseName + "' doesn't have any exercises.");
             return null;
         }
         return exercises;
@@ -132,7 +135,7 @@ public class ListExercisesCommand extends AbstractCommand {
         String prevDeadline = "";
 
         for (Exercise exercise : exercises) {
-            String deadline = getDeadline(exercise);
+            String deadline = CourseInfo.getExerciseDeadline(exercise);
             if (!deadline.equals(prevDeadline)) {
                 sb.append("\nDeadline: ").append(deadline).append("\n");
                 prevDeadline = deadline;
@@ -140,15 +143,6 @@ public class ListExercisesCommand extends AbstractCommand {
             sb.append(getExerciseStatus(exercise));
         }
         return sb.toString();
-    }
-
-    private String getDeadline(Exercise exercise) {
-        String deadline = exercise.getDeadline();
-        if (deadline == null) {
-            return "not available";
-        }
-        deadline = deadline.substring(0, 19);
-        return deadline.replace("T", " at ");
     }
 
     private String getExerciseStatus(Exercise exercise) {

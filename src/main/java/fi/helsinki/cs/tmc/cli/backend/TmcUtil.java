@@ -169,7 +169,6 @@ public class TmcUtil {
         } catch (Exception e) {
             TmcUtil.handleTmcExceptions(ctx, e);
             logger.error("Failed to send paste", e);
-            ctx.getIo().println(e.toString());
             return null;
         }
     }
@@ -214,27 +213,28 @@ public class TmcUtil {
         Throwable cause = exception.getCause();
 
         if (isAuthenticationError(exception)) {
-            io.println("Your username or password is not valid anymore.");
+            io.errorln("Your username or password is not valid anymore.");
             return;
         }
         if (cause instanceof FailedHttpResponseException) {
             logger.error("Unable to connect to server", exception);
-            io.println("Unable to connect to server.");
+            io.errorln("Unable to connect to server.");
             return;
         }
         if (cause instanceof ObsoleteClientException) {
             logger.error("Outdated tmc client");
-            io.println("Your tmc-cli is outdated. Please update it.");
+            io.errorln("Your tmc-cli is outdated. Please update it.");
             ctx.getApp().runAutoUpdate();
             return;
         }
         if (cause != null && cause.getCause() instanceof UnknownHostException) {
             logger.error("No internet connection");
-            io.println("You have no internet connection.");
+            io.errorln("You have no internet connection.");
             return;
         }
         logger.error("Command failed in tmc-core", exception);
-        io.println("Command failed in tmc-core, check tmc-cli.log file for more info");
+        //TODO we seem to write twice error message; here and in the commands.
+        io.errorln("Command failed in tmc-core, check tmc-cli.log file for more info");
     }
 
     private static boolean isAuthenticationError(Exception exception) {

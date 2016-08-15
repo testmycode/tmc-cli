@@ -40,8 +40,8 @@ public class ListCoursesCommand extends AbstractCommand {
         }
 
         if (!TmcUtil.hasConnection(ctx)) {
-            io.println("You don't have internet connection currently.");
-            io.println("Check the tmc-cli logs to get exact problem.");
+            io.errorln("You don't have internet connection currently.");
+            io.errorln("Check the tmc-cli logs if you disagree.");
             return;
         }
 
@@ -49,13 +49,13 @@ public class ListCoursesCommand extends AbstractCommand {
         boolean isFirst = true;
 
         if (accountsList.getAccountCount() == 0) {
-            io.println("You haven't logged in on any tmc server.");
+            io.errorln("You haven't logged in on any tmc server.");
             return;
         }
 
         for (Account settings : accountsList) {
             if (!isFirst) {
-                io.println("");
+                io.println();
             }
             if (accountsList.getAccountCount() > 1) {
                 io.println(
@@ -71,7 +71,7 @@ public class ListCoursesCommand extends AbstractCommand {
         ctx.useAccount(account);
         List<Course> courses = TmcUtil.listCourses(ctx);
         if (courses.isEmpty()) {
-            io.println("No courses found from the server.");
+            io.errorln("No courses found from the server.");
             return;
         }
         for (Course course : courses) {

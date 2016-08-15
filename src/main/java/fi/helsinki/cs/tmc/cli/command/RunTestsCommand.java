@@ -42,8 +42,8 @@ public class RunTestsCommand extends AbstractCommand {
     public void run(CliContext context, CommandLine args) {
         Io io = context.getIo();
 
-        String[] exercisesFromArgs = parseArgs(args);
-        if (exercisesFromArgs == null) {
+        String[] paths = parseArgs(args);
+        if (paths == null) {
             return;
         }
 
@@ -52,16 +52,16 @@ public class RunTestsCommand extends AbstractCommand {
         }
 
         WorkDir workDir = context.getWorkDir();
-        for (String exercise : exercisesFromArgs) {
-            if (!workDir.addPath(exercise)) {
-                io.println("Error: " + exercise + " is not a valid exercise.");
+        for (String path : paths) {
+            if (!workDir.addPath(path)) {
+                io.errorln("The path \"" + path + "\" is not a valid exercise.");
                 return;
             }
         }
 
-        List<String> exerciseNames = workDir.getExerciseNames();
-        if (exerciseNames.isEmpty()) {
-            io.println("You have to be in a course directory to run tests");
+        List<Exercise> exercises = workDir.getExercises();
+        if (exercises.isEmpty()) {
+            io.errorln("No exercises specified.");
             return;
         }
 
@@ -72,15 +72,14 @@ public class RunTestsCommand extends AbstractCommand {
         ResultPrinter resultPrinter =
                 new ResultPrinter(io, showDetails, showPassed, passedColor, failedColor);
 
-        boolean isOnlyExercise = (exerciseNames.size() == 1);
+        boolean isOnlyExercise = (exercises.size() == 1);
 
-        for (String name : exerciseNames) {
-            io.println(ColorUtil.colorString("Testing: " + name, Color.YELLOW));
-            Exercise exercise = info.getExercise(name);
+        for (Exercise exercise : exercises) {
+            io.println(ColorUtil.colorString("Testing: " + exercise.getName(), Color.YELLOW));
 
             RunResult runResult = TmcUtil.runLocalTests(context, exercise);
             if (runResult == null) {
-                io.println("Failed to run test");
+                io.errorln("Failed to run test");
                 resultPrinter.addFailedExercise();
                 continue;
             }
@@ -90,7 +89,7 @@ public class RunTestsCommand extends AbstractCommand {
                     resultPrinter.printLocalTestResult(runResult, valResult, isOnlyExercise);
 
             updateCourseInfo(info, exercise, testsPassed);
-            io.println("");
+            io.println();
         }
         CourseInfoIo.save(info, workDir.getConfigFile());
 

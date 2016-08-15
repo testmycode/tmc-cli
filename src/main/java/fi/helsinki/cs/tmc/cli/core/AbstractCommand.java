@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractCommand {
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractCommand.class);
+    private Command command;
 
     /**
      * Override this method if you want longer description for the command than
@@ -21,6 +23,17 @@ public abstract class AbstractCommand {
      * @return Description text
      */
     protected String getDescription() {
+        return null;
+    }
+
+    /**
+     * Override this method if you want to give usage description.
+     * Dont't add the 'tmc-cli COMMAND' prefix, because it is added
+     * automatically to every line.
+     *
+     * @return Description text
+     */
+    public String[] getUsages() {
         return null;
     }
 
@@ -63,24 +76,65 @@ public abstract class AbstractCommand {
             args = parser.parse(options, stringArgs);
         } catch (ParseException e) {
             logger.warn("Invalid command line arguments.", e);
-            io.println("Invalid command line arguments.");
-            io.println(e.getMessage());
+            io.errorln("Invalid command line arguments.");
+            io.errorln(e.getMessage());
             return null;
         }
 
         if (args.hasOption("h")) {
-            Class<Command> klass;
-            klass = CommandFactory.castToCommandClass(this.getClass());
-            Command command = CommandFactory.getCommand(klass);
-
-            String usage = "tmc " + command.name();
-            String desc = getDescription();
-            if (desc == null) {
-                desc = command.desc();
-            }
-            HelpGenerator.run(io, usage, desc, options);
+            printHelp(context);
             return null;
         }
         return args;
+    }
+
+    protected void printUsage(CliContext context) {
+        Io io = context.getIo();
+        io.println(getUsageString());
+    }
+
+    private Command getCommand() {
+        if (this.command == null) {
+            Class<Command> klass;
+            klass = CommandFactory.castToCommandClass(this.getClass());
+            this.command = CommandFactory.getCommand(klass);
+        }
+        return this.command;
+    }
+
+    private void printHelp(CliContext context) {
+        Io io = context.getIo();
+        Options options = getOptions();
+
+        String usage = getUsageString();
+        String desc = getDescription();
+        if (desc == null) {
+            desc = getCommand().desc();
+        }
+        HelpGenerator.run(io, usage, desc, options);
+    }
+
+    /**
+     * TODO print the "Usage:" and "Or:" prefixes to every line.
+     * @return The printable usage string.
+     */
+    private String getUsageString() {
+        String prefix = "tmc " + getCommand().name() + " ";
+        String[] usages = getUsages();
+        if (usages == null) {
+            return prefix;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        boolean first = true;
+        for (String line : usages) {
+            if (!first) {
+                builder.append("\n");
+            }
+            builder.append(prefix);
+            builder.append(line);
+            first = false;
+        }
+        return builder.toString();
     }
 }

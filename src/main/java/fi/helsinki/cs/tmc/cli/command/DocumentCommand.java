@@ -93,7 +93,7 @@ public class DocumentCommand extends AbstractCommand {
             try {
                 this.height = Integer.parseInt(args.getOptionValue('h'));
             } catch (NumberFormatException e) {
-                io.println("Height must be integer");
+                io.errorln("Height must be integer");
                 return;
             }
         }
@@ -101,12 +101,12 @@ public class DocumentCommand extends AbstractCommand {
             try {
                 this.speed = Integer.parseInt(args.getOptionValue('s'));
             } catch (NumberFormatException e) {
-                io.println("Speed must be integer");
+                io.errorln("Speed must be integer");
                 return;
             }
         }
         if (EnvironmentUtil.isWindows()) {
-            io.println("Command document doesn't exist. ;)");
+            io.errorln("Command document doesn't exist. ;)");
             return;
         }
 
@@ -118,7 +118,7 @@ public class DocumentCommand extends AbstractCommand {
             if (cursorY == height / 2) {
                 io.println("Just kidding :)");
             }
-            io.println("");
+            io.println();
             wait(50);
         }
         fadeOut();
@@ -238,7 +238,7 @@ public class DocumentCommand extends AbstractCommand {
         try {
             return IOUtils.toString(stream, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            io.println("Encoding failure... REALLY???");
+            io.errorln("Encoding failure... REALLY???");
             return null;
         }
     }

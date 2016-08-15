@@ -28,6 +28,11 @@ public class DownloadExercisesCommand extends AbstractCommand {
     private boolean showAll;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-a] COURSE"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption(
                 "a",
@@ -46,8 +51,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
-            io.println("You must give a course name as an argument.");
-            io.println("Usage: tmc download COURSE");
+            io.errorln("You must give a course name as an argument.");
+            printUsage(ctx);
             return;
         }
 
@@ -60,7 +65,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         WorkDir workDir = ctx.getWorkDir();
         if (workDir.getConfigFile() != null) {
-            io.println("Can't download a course inside a course directory.");
+            io.errorln("Can't download a course inside a course directory.");
             return;
         }
 
@@ -81,7 +86,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         ctx.useAccount(finder.getAccount());
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {
-            io.println("Failed to download exercises");
+            io.errorln("Failed to download exercises");
             return;
         }
 

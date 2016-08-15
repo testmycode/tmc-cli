@@ -24,7 +24,17 @@ import java.util.List;
 public class PasteCommand extends AbstractCommand {
     private static final Logger logger = LoggerFactory.getLogger(SubmitCommand.class);
 
+    private CliContext ctx;
     private Io io;
+
+    String message;
+    boolean noMessage;
+    boolean openInBrowser;
+
+    @Override
+    public String[] getUsages() {
+        return new String[] {"tmc paste [-o] [-n] [-m MESSAGE] [EXERCISE]"};
+    }
 
     @Override
     public void getOptions(Options options) {
@@ -35,74 +45,93 @@ public class PasteCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
+        this.ctx = context;
         this.io = context.getIo();
-        if (!context.loadBackend()) {
-            return;
-        }
-        WorkDir workdir = context.getWorkDir();
-        String[] stringArgs = args.getArgs();
+        WorkDir workdir = ctx.getWorkDir();
 
-        Boolean valid;
-        if (stringArgs.length == 0) {
-            valid = workdir.addPath();
-        } else if (stringArgs.length == 1) {
-            valid = workdir.addPath(stringArgs[0]);
-        } else {
-            io.println("Error: Too many arguments. Expected 1, got " + stringArgs.length);
-            return;
-        }
-        if (!valid) {
-            io.println(
-                    "The command can be used in an exercise directory without the exercise name"
-                            + " or in a course directory with the name as an argument.");
+        if (!parseArgs(args)) {
             return;
         }
 
-        List<String> exercisenames = workdir.getExerciseNames();
-        if (exercisenames.size() != 1) {
-            io.println("Error: Matched too many exercises.");
+        if (!ctx.loadBackend()) {
+            return;
+        }
+        
+        List<Exercise> exercises = workdir.getExercises();
+        if (exercises.size() != 1) {
+            io.errorln("Matched too many exercises.");
+            printUsage(context);
             return;
         }
 
-        String message;
-        if (!args.hasOption("n")) {
-            if (args.hasOption("m")) {
-                message = args.getOptionValue("m");
-            } else if (io.readConfirmation("Attach a message to your paste?", true)) {
+        if (!noMessage && message == null) {
+            if (io.readConfirmation("Attach a message to your paste?", true)) {
                 message =
                         ExternalsUtil.getUserEditedMessage(
-                                "\n"
-                                + "#   Write a message for your paste in this file and save it.\n"
-                                + "#   If you don't want to send a message with your paste, "
-                                + "use the '-n' switch.\n"
-                                + "#   Lines beginning with # are comments and will be ignored.",
-                                "tmc-paste-message",
-                                true);
-            } else {
-                message = "";
+                            "\n"
+                            + "#   Write a message for your paste in this file and save it.\n"
+                            + "#   If you don't want to send a message with your paste, "
+                            + "use the '-n' switch.\n"
+                            + "#   Lines beginning with # are comments and will be ignored.",
+                        "tmc-paste-message",
+                        true);
             }
-        } else {
+        }
+        sendPaste(message, exercises.get(0));
+    }
+
+    private boolean parseArgs(CommandLine args) {
+        WorkDir workdir = ctx.getWorkDir();
+        String[] stringArgs = args.getArgs();
+
+        this.message = args.getOptionValue("m");
+        this.noMessage = args.hasOption("n");
+        this.openInBrowser = args.hasOption("o");
+
+        if (noMessage && message != null) {
+            io.errorln("You can't have the no-message flag and message set at the same time.");
+            printUsage(ctx);
+            return false;
+        }
+        if (stringArgs.length > 1) {
+            io.errorln("Error: Too many arguments.");
+            printUsage(ctx);
+            return false;
+        }
+
+        if (stringArgs.length == 1) {
+            if (!workdir.addPath(stringArgs[0])) {
+                io.errorln("The path '" + stringArgs[0] + "' is not valid exercise.");
+                return false;
+            }
+        }
+        if (workdir.getExercises().size() != 1) {
+            io.errorln("You are not in exercise directory.");
+            return false;
+        }
+        return true;
+    }
+
+    private void sendPaste(String message, Exercise exercise) {
+        if (message == null) {
             message = "";
         }
 
-        String exerciseName = exercisenames.get(0);
-        CourseInfo info = context.getCourseInfo();
-        Exercise exercise = info.getExercise(exerciseName);
-        URI uri = TmcUtil.sendPaste(context, exercise, message);
+        URI uri = TmcUtil.sendPaste(ctx, exercise, message);
         if (uri == null && exercise.hasDeadlinePassed()) {
-            io.println(
+            io.errorln(
                     "Unable to send the paste."
                             + " The deadline for submitting this exercise has passed");
             return;
         }
         if (uri == null) {
-            io.println("Unable to send the paste");
+            io.errorln("Unable to send the paste");
             return;
         }
 
         io.println("Paste sent for exercise " + exercise.getName());
         io.println(uri.toString());
-        if (args.hasOption("o")) {
+        if (openInBrowser) {
             ExternalsUtil.openInBrowser(uri);
         }
     }

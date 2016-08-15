@@ -90,6 +90,12 @@ public class TestIo extends Io {
     }
 
     @Override
+    public void error(String str) {
+        //TODO we should append the string to another buffer
+        printedText.append(str);
+    }
+
+    @Override
     public String readLine(String prompt) {
         usePrompt(PromptType.TEXT_PROMPT);
         this.printedText.append(prompt).append("\n");

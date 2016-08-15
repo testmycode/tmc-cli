@@ -67,93 +67,84 @@ public class WorkDir {
         }
     }
 
-    public List<String> getExerciseNames() {
-        return getExerciseNames(true, false, false);
+    public List<Exercise> getExercises() {
+        return getExercises(true, false);
     }
 
     /**
      * Go through directories and return matching exercises.
-     * @return return names of exercises as List
+     * @param exists Returns only exercises that aren't removed
+     * @param onlyTested Return only exercises that are already tested
+     * @return return exercises as List
      */
-    public List<String> getExerciseNames(
-            Boolean exists, Boolean onlyTested, Boolean filterCompleted) {
+    public List<Exercise> getExercises(boolean exists, boolean onlyTested) {
         if (this.directories.isEmpty() && getConfigFile() == null) {
             return new ArrayList<>();
+        }
+        if (this.directories.isEmpty()) {
+            addPath(workdir);
         }
         /*TODO somehow use the ctx.getCourseInfo */
         CourseInfo courseinfo = CourseInfoIo.load(getConfigFile());
         if (courseinfo == null) {
             return new ArrayList<>();
         }
-        List<Exercise> allExercises = courseinfo.getExercises();
-        List<Exercise> exercises = new ArrayList<>();
-        List<String> filteredExerciseNames = new ArrayList<>();
-        List<String> locallyTested = courseinfo.getLocalCompletedExercises();
-
-        // Conditions for adding all exercises:
-        //   course dir given as parameter
-        //   working dir is course dir and no parameters
-        if (directories.contains(getCourseDirectory())
-                || (getCourseDirectory().equals(workdir) && directories.size() == 0)) {
-            exercises.addAll(allExercises);
-        } else if (workdir.startsWith(getCourseDirectory())
-                && !workdir.equals(getCourseDirectory())) {
-            // if workdir is an exercise directory, add it to directories
-            directories.add(workdir);
-        } else if (getCourseDirectory() == null) {
+        if (getCourseDirectory() == null) {
             // if we still don't have a course directory, return an empty list
             return new ArrayList<>();
         }
 
-        for (Path dir : directories) {
+        List<Exercise> allExercises = courseinfo.getExercises();
+        List<Exercise> exercises = new ArrayList<>();
+        List<String> locallyTested = courseinfo.getLocalCompletedExercises();
 
+        for (Path dir : directories) {
             // convert path to a string relative to the course dir
             String exDir = getCourseDirectory().relativize(dir).toString();
+            exDir = exDir.replace(File.separator, "-");
+
             for (Exercise exercise : allExercises) {
-                if ((exercise.getName().startsWith(exDir.replace(File.separator, "-"))
-                                || exDir.replace(File.separator, "-")
-                                        .startsWith(exercise.getName()))
-                        && !exercises.contains(exercise)) {
-                    exercises.add(exercise);
+                if (exercises.contains(exercise)) {
+                    continue;
+                }
+                if ((exercise.getName().startsWith(exDir)
+                        || exDir.startsWith(exercise.getName()))) {
+                    if (filterExercise(exercise, locallyTested, exists, onlyTested)) {
+                        exercises.add(exercise);
+                    }
                 }
             }
         }
-        for (Exercise exercise : exercises) {
-            if (filterExercise(exercise, locallyTested, exists, onlyTested, filterCompleted)) {
-                filteredExerciseNames.add(exercise.getName());
-            }
-        }
 
-        return filteredExerciseNames;
+        return exercises;
     }
 
-    private Boolean filterExercise(
+    private boolean filterExercise(
             Exercise exercise,
             List<String> tested,
-            Boolean exists,
-            Boolean onlyTested,
-            Boolean filterCompleted) {
-        if (!onlyTested || tested.contains(exercise.getName())) {
-            if (!filterCompleted || !exercise.isCompleted()) {
-                if (!exists || Files.exists(getCourseDirectory().resolve(exercise.getName()))) {
-                    return true;
-                }
-            }
+            boolean exists,
+            boolean onlyTested) {
+        if (onlyTested && !tested.contains(exercise.getName())) {
+            return false;
         }
-        return false;
+        if (exists && !Files.exists(getCourseDirectory().resolve(exercise.getName()))) {
+            return false;
+        }
+        return true;
     }
 
     /**
-     * This can be used for operations which only use a single path.
-     * If only one path has been added, return that. If no paths are added,
-     * return the current working directory.
+     * THIS IS ONLY FOR TESTS. DO NOT USE THIS OUTSIDE OF TESTS.
+     */
+    public void setWorkdir(Path path) {
+        this.workdir = path;
+    }
+
+    /**
+     * Get the working directory.
      */
     public Path getWorkingDirectory() {
-        if (this.courseDirectory != null) {
-            return this.courseDirectory;
-        } else {
-            return workdir;
-        }
+        return workdir;
     }
 
     public List<Path> getDirectories() {
@@ -175,9 +166,8 @@ public class WorkDir {
             if (this.courseDirectory != null) {
                 this.configFile = this.courseDirectory.resolve(CourseInfoIo.COURSE_CONFIG);
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
         if (!this.directories.contains(path)) {
             this.directories.add(path);
@@ -189,22 +179,13 @@ public class WorkDir {
         return addPath(Paths.get(path));
     }
 
-    /**
-     * Same as addPath(Path path), but adds the current working directory.
-     * Note that workdir should ONLY be overridden in tests
-     * Actually this is kind of useless. Remove if it remains unused.
-     */
-    public boolean addPath() {
-        return addPath(workdir);
-    }
-
     public int directoryCount() {
         return this.directories.size();
     }
 
     private Path findCourseDir(Path dir) {
         while (dir != null && Files.exists(dir)) {
-            if (Files.exists(dir.resolve(CourseInfoIo.COURSE_CONFIG))) {
+            if (isCourseDirectory(dir)) {
                 return dir;
             }
             dir = dir.getParent();
@@ -220,10 +201,7 @@ public class WorkDir {
         }
     }
 
-    /**
-     * THIS IS ONLY FOR TESTS. DO NOT USE THIS OUTSIDE OF TESTS.
-     */
-    public void setWorkdir(Path path) {
-        this.workdir = path;
+    private boolean isCourseDirectory(Path dir) {
+        return Files.exists(dir.resolve(CourseInfoIo.COURSE_CONFIG));
     }
 }

@@ -24,6 +24,11 @@ public class LoginCommand extends AbstractCommand {
     private String password;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-u=USERNAME] [-p=PASSWORD] [-s=SERVER_ADDRESS]"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("u", "user", true, "TMC username");
         options.addOption("p", "password", true, "Password for the user");
@@ -35,13 +40,19 @@ public class LoginCommand extends AbstractCommand {
         this.ctx = context;
         this.io = ctx.getIo();
 
+        if (args.getArgs().length > 0) {
+            io.errorln("Login doesn't take any arguments.");
+            printUsage(context);
+            return;
+        }
+
         if (!ctx.loadBackendWithoutLogin()) {
             return;
         }
 
         if (!TmcUtil.hasConnection(ctx)) {
-            io.println("You don't have internet connection currently.");
-            io.println("Check the tmc-cli logs to get exact problem.");
+            io.errorln("You don't have internet connection currently.");
+            io.errorln("Check the tmc-cli logs if you disagree.");
             return;
         }
 
@@ -63,7 +74,7 @@ public class LoginCommand extends AbstractCommand {
         AccountList list = SettingsIo.loadAccountList();
         list.addAccount(account);
         if (!SettingsIo.saveAccountList(list)) {
-            io.println("Failed to write the accounts file.");
+            io.errorln("Failed to write the accounts file.");
             return;
         }
 

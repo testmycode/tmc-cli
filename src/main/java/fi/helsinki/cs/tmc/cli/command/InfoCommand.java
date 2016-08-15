@@ -32,6 +32,11 @@ public class InfoCommand extends AbstractCommand {
     private boolean showAll;
 
     @Override
+    public String[] getUsages() {
+        return new String[] {"[-a] [-i] COURSE-OR-EXERSICE"};
+    }
+
+    @Override
     public void getOptions(Options options) {
         options.addOption("a", "all", false, "Show all information for a specific course");
         options.addOption("i", "internet", false, "Get the information from the server");
@@ -54,7 +59,8 @@ public class InfoCommand extends AbstractCommand {
 
         if (fetchFromInternet) {
             if (useWorkingDirectory) {
-                io.println("You must give a course as an argument.");
+                io.errorln("You must give a course as an argument.");
+                printUsage(ctx);
                 return;
             }
             String courseName = stringArgs[0];
@@ -66,7 +72,7 @@ public class InfoCommand extends AbstractCommand {
 
     private void printInfoFromInternet(String courseName) {
         if (!ctx.hasLogin()) {
-            io.println("Loading a course from a server requires login.");
+            io.errorln("Loading a course from a server requires login.");
             return;
         }
 
@@ -84,20 +90,22 @@ public class InfoCommand extends AbstractCommand {
                     "You have to be in a course directory"
                             + " or use the -i option with the course name "
                             + "to get the information from the server.");
+            printUsage(ctx);
             return;
         }
 
         if (useWorkingDirectory) {
             // if in exercise directory, print info for that exercise.
-            String exerciseName = getCurrentExercise(workDir);
-            if (exerciseName == null) {
+            Exercise exercise = getCurrentExercise(workDir);
+            if (exercise == null) {
                 printCourse(info.getCourse());
             } else {
-                printExercise(info.getExercise(exerciseName));
+                printExercise(exercise);
             }
         } else {
             if (stringArgs.length != 1) {
-                io.println("You can only give one path for this command.");
+                io.errorln("You can only give one path for this command.");
+                printUsage(ctx);
                 return;
             }
             String path = stringArgs[0];
@@ -118,8 +126,9 @@ public class InfoCommand extends AbstractCommand {
         if (course != null) {
             printCourse(course);
         } else {
-            io.println("Not a course directory. ");
-            io.println("Use the -i option to get course from " + "server.");
+            io.errorln("Not a course directory.");
+            io.errorln("Use the -i option to get course from server.");
+            printUsage(ctx);
         }
     }
 
@@ -175,7 +184,9 @@ public class InfoCommand extends AbstractCommand {
 
     private void printExerciseShort(Exercise exercise) {
         io.println("Exercise: " + exercise.getName());
-        io.println("Deadline: " + exercise.getDeadlineDate());
+        if (exercise.getDeadline() != null) {
+            io.println("Deadline: " + exercise.getDeadlineDate());
+        }
 
         if (exercise.hasDeadlinePassed() && !exercise.isCompleted()) {
             io.println(ColorUtil.colorString("deadline passed", Color.PURPLE));
@@ -201,8 +212,8 @@ public class InfoCommand extends AbstractCommand {
         return completed;
     }
 
-    private String getCurrentExercise(WorkDir workDir) {
-        List<String> exercises = workDir.getExerciseNames(false, false, false);
+    private Exercise getCurrentExercise(WorkDir workDir) {
+        List<Exercise> exercises = workDir.getExercises(false, false);
         if (exercises.size() == 1) {
             return exercises.get(0);
         }
@@ -225,7 +236,7 @@ public class InfoCommand extends AbstractCommand {
         io.println("    Exercise id: " + exercise.getId());
         io.println("    Is locked: " + exercise.isLocked());
         io.println("    Deadline description: " + exercise.getDeadlineDescription());
-        io.println("    Deadline: " + exercise.getDeadlineDate());
+        io.println("    Deadline: " + CourseInfo.getExerciseDeadline(exercise));
         io.println("    Deadline passed: " + exercise.hasDeadlinePassed());
         io.println("    Is returnable: " + exercise.isReturnable());
         io.println("    Review required: " + exercise.requiresReview());
@@ -243,6 +254,6 @@ public class InfoCommand extends AbstractCommand {
         io.println("    Download URL: " + exercise.getDownloadUrl());
         io.println("    Solution download URL: " + exercise.getSolutionDownloadUrl());
         io.println("    Checksum: " + exercise.getChecksum());
-        io.println("");
+        io.println();
     }
 }

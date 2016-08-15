@@ -87,6 +87,13 @@ public class CourseInfo {
         return null;
     }
 
+    public static String getExerciseDeadline(Exercise exercise) {
+        if (exercise.getDeadline() == null) {
+            return "none";
+        }
+        return exercise.getDeadlineDate().toString();
+    }
+
     public void setExercises(List<Exercise> exercises) {
         this.course.setExercises(exercises);
     }

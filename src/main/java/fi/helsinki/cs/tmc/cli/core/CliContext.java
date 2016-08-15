@@ -148,7 +148,7 @@ public class CliContext {
         }
         courseInfo = CourseInfoIo.load(workDir.getConfigFile());
         if (courseInfo == null) {
-            io.println(
+            io.errorln(
                     "Course configuration file "
                             + workDir.getConfigFile().toString()
                             + "is invalid.");
@@ -189,9 +189,9 @@ public class CliContext {
         if (!hasLogin) {
             if (courseInfo == null) {
                 // if user is not in course folder.
-                io.println("You are not logged in. Log in using: tmc login");
+                io.errorln("You are not logged in. Log in using: tmc login");
             } else {
-                io.println(
+                io.errorln(
                         "You are not logged in as "
                                 + courseInfo.getUsername()
                                 + ". Log in using: tmc login");

@@ -47,7 +47,7 @@ public class CliProgressObserver extends ProgressObserver {
         if (lastMessage == null || !lastMessage.equals(message)) {
             printMessage(message);
             lastMessage = message;
-            io.println("");
+            io.println();
         }
         this.io.print("\r" + progressBar(progress, this.maxline, this.color1, this.color2));
     }
@@ -71,7 +71,7 @@ public class CliProgressObserver extends ProgressObserver {
             //            this.io.println("\r" + this.percentage(1.0)
             //                    + this.progressBar(1.0, this.pips, this.color1, this.color2));
         } else {
-            this.io.println("");
+            this.io.println();
         }
     }
 

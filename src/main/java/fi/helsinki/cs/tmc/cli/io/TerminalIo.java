@@ -70,4 +70,9 @@ public class TerminalIo extends Io {
                 return defaultToYes;
         }
     }
+
+    @Override
+    public void error(String str) {
+        System.err.print(str);
+    }
 }

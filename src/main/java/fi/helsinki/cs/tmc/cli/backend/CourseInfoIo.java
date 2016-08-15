@@ -31,6 +31,7 @@ public class CourseInfoIo {
             Files.createDirectories(courseInfoFile.getParent());
             Files.write(courseInfoFile, json);
         } catch (IOException e) {
+            //TODO print to user
             logger.error("Could not create course file", e);
             return false;
         }
@@ -47,6 +48,7 @@ public class CourseInfoIo {
         try {
             reader = Files.newBufferedReader(courseInfoFile, Charset.forName("UTF-8"));
         } catch (IOException e) {
+            //TODO print to user
             logger.error("Course file located, but failed to read from it", e);
             return null;
         }

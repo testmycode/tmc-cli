@@ -47,7 +47,7 @@ public class PasteCommandTest {
     private TestIo io;
     private TmcCore mockCore;
     private WorkDir workDir;
-    private ArrayList<String> exerciseNames;
+    private ArrayList<Exercise> exercises;
     private Exercise exercise;
 
     private final URI pasteUri;
@@ -64,10 +64,10 @@ public class PasteCommandTest {
         workDir = mock(WorkDir.class);
         when(workDir.getCourseDirectory()).thenReturn(tempDir);
         when(workDir.getConfigFile()).thenReturn((tempDir.resolve(CourseInfoIo.COURSE_CONFIG)));
-        exerciseNames = new ArrayList<>();
-        exerciseNames.add("paste-exercise");
-        when(workDir.getExerciseNames()).thenReturn(exerciseNames);
-        when(workDir.addPath()).thenReturn(true);
+        exercise = new Exercise("paste-exercise");
+        exercises = new ArrayList<>();
+        exercises.add(exercise);
+        when(workDir.getExercises()).thenReturn(exercises);
         when(workDir.addPath(anyString())).thenReturn(true);
 
         mockCore = mock(TmcCore.class);
@@ -76,7 +76,6 @@ public class PasteCommandTest {
         app = new Application(ctx);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
-        exercise = new Exercise("paste-exercise");
         when(mockCourseInfo.getExercise("paste-exercise")).thenReturn(exercise);
 
         mockStatic(TmcUtil.class);
@@ -101,6 +100,17 @@ public class PasteCommandTest {
     }
 
     @Test
+    public void setMessageAndNoMessageOption() {
+        ctx = spy(new CliContext(io, mockCore, workDir));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).loadBackend();
+
+        String[] args = {"paste", "-m", "Message", "-n"};
+        app.run(args);
+        io.assertContains("You can't have the no-message flag and message set");
+    }
+
+    @Test
     public void pasteRunsRightWithoutArguments() throws URISyntaxException {
         when(TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString())).thenReturn(pasteUri);
         io.addConfirmationPrompt(true);
@@ -120,7 +130,7 @@ public class PasteCommandTest {
     @Test
     public void pasteRunsRightwithTooManyArguments() {
         app.run(new String[] {"paste", "paste-exercise", "secondArgument"});
-        io.assertContains("Error: Too many arguments. Expected 1, got");
+        io.assertContains("Error: Too many arguments.");
     }
 
     @Test
@@ -184,12 +194,11 @@ public class PasteCommandTest {
 
     @Test
     public void failsWithNoExercise() {
-        Mockito.when(workDir.getExerciseNames()).thenReturn(new ArrayList<String>());
-        Mockito.when(workDir.addPath()).thenReturn(false);
+        Mockito.when(workDir.getExercises()).thenReturn(new ArrayList<Exercise>());
         Mockito.when(workDir.addPath(anyString())).thenReturn(false);
         app.run(new String[] {"paste", "-m", "This is a message given as an argument"});
 
-        io.assertContains("The command can be used in an exercise directory");
+        io.assertContains("You are not in exercise directory.");
 
         verifyStatic(Mockito.never());
         TmcUtil.sendPaste(eq(ctx), any(Exercise.class), anyString());

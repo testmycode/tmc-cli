@@ -184,7 +184,7 @@ public class ResultPrinter {
             for (ValidationError error : entry.getValue()) {
                 io.println("  Line " + error.getLine() + ": " + error.getMessage());
             }
-            io.println("");
+            io.println();
         }
     }
 
@@ -192,10 +192,10 @@ public class ResultPrinter {
         for (TestResult testResult : testResults) {
             if (!testResult.isSuccessful()) {
                 printFailedTest(testResult);
-                io.println("");
+                io.println();
             } else if (showPassed) {
                 printPassedTest(testResult);
-                io.println("");
+                io.println();
             }
         }
     }
@@ -208,14 +208,14 @@ public class ResultPrinter {
         if (showDetails) {
             String details = joinStrings(testResult.getDetailedMessage(), "\n");
             if (details != null) {
-                io.println("");
+                io.println();
                 io.println("Detailed message:");
                 io.println(details);
             }
 
             String exception = joinStrings(testResult.getException(), "\n");
             if (exception != null) {
-                io.println("");
+                io.println();
                 io.println("Exception:");
                 io.println(exception);
             }

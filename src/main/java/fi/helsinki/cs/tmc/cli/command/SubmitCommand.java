@@ -38,6 +38,7 @@ public class SubmitCommand extends AbstractCommand {
     private Io io;
     private boolean showAll;
     private boolean showDetails;
+    private boolean filterUncompleted;
 
     @Override
     public void getOptions(Options options) {
@@ -69,16 +70,16 @@ public class SubmitCommand extends AbstractCommand {
             }
         }
 
-        List<String> exerciseNames;
-        if (args.hasOption("c")) {
+        List<Exercise> exercises;
+        if (filterUncompleted) {
             workDir.addPath(workDir.getCourseDirectory());
-            exerciseNames = workDir.getExerciseNames(true, true, false);
+            exercises = workDir.getExercises(true, true);
         } else {
-            exerciseNames = workDir.getExerciseNames();
+            exercises = workDir.getExercises();
         }
 
-        if (exerciseNames.isEmpty()) {
-            if (args.hasOption("c") && workDir.getCourseDirectory() != null) {
+        if (exercises.isEmpty()) {
+            if (filterUncompleted && workDir.getCourseDirectory() != null) {
                 io.println("No locally tested exercises.");
                 return;
             }
@@ -97,8 +98,8 @@ public class SubmitCommand extends AbstractCommand {
         ResultPrinter resultPrinter =
                 new ResultPrinter(io, this.showDetails, this.showAll, color1, color2);
 
-        Boolean isOnlyExercise = exerciseNames.size() == 1;
-        List<Exercise> submitExercises = info.getExercises(exerciseNames);
+        boolean isOnlyExercise = (exercises.size() == 1);
+        List<Exercise> submitExercises = exercises;
         List<List<FeedbackQuestion>> feedbackLists = new ArrayList<>();
         List<String> exercisesWithFeedback = new ArrayList<>();
         List<URI> feedbackUris = new ArrayList<>();
@@ -107,9 +108,9 @@ public class SubmitCommand extends AbstractCommand {
             io.println(ColorUtil.colorString("Submitting: " + exercise.getName(), Color.YELLOW));
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
-                io.println("Submission failed.");
+                io.errorln("Submission failed.");
                 if (!isOnlyExercise) {
-                    io.println("Try to submit exercises one by one.");
+                    io.errorln("Try to submit exercises one by one.");
                 }
                 return;
                 //resultPrinter.addFailedExercise();
@@ -124,7 +125,7 @@ public class SubmitCommand extends AbstractCommand {
                 exercisesWithFeedback.add(exercise.getName());
                 feedbackUris.add(URI.create(result.getFeedbackAnswerUrl()));
             }
-            io.println("");
+            io.println();
         }
         if (!isOnlyExercise) {
             resultPrinter.printTotalExerciseResults();
@@ -140,7 +141,7 @@ public class SubmitCommand extends AbstractCommand {
                 if (success) {
                     io.println("Feedback sent.");
                 } else {
-                    io.println("Failed to send feedback.");
+                    io.errorln("Failed to send feedback.");
                 }
             }
         }
@@ -154,7 +155,7 @@ public class SubmitCommand extends AbstractCommand {
 
         Course updatedCourse = TmcUtil.findCourse(ctx, courseInfo.getCourseName());
         if (updatedCourse == null) {
-            io.println("Failed to update config file for course " + courseInfo.getCourseName());
+            io.errorln("Failed to update config file for course " + courseInfo.getCourseName());
             return;
         }
 
@@ -201,13 +202,14 @@ public class SubmitCommand extends AbstractCommand {
         }
         msg += "Use 'tmc update' to download " + (total > 1 ? "them." : "it.");
 
-        io.println("");
+        io.println();
         io.println(ColorUtil.colorString(msg, Color.YELLOW));
     }
 
     private String[] parseArgs(CommandLine args) {
         this.showAll = args.hasOption("a");
         this.showDetails = args.hasOption("d");
+        this.filterUncompleted = args.hasOption("c");
         return args.getArgs();
     }
 }
