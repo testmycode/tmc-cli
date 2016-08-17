@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.cli.command.hidden;
 
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
