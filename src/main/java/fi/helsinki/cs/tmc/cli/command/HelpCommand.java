@@ -42,9 +42,7 @@ public class HelpCommand extends AbstractCommand {
 
     private List<String> getCommandStrings() {
         List<String> strings = new ArrayList<>();
-        Set<Class<Command>> commands = CommandFactory.getCommands();
-        commands.remove(castToCommandClass(ShellHelperCommand.class));
-        commands.remove(castToCommandClass(DocumentCommand.class));
+        List<Class<Command>> commands = CommandFactory.getCommands();
 
         longestNameLength = longestName(commands);
         for (Class<Command> commandClass : commands) {
@@ -69,7 +67,7 @@ public class HelpCommand extends AbstractCommand {
         return builder.toString();
     }
 
-    private int longestName(Set<Class<Command>> commandList) {
+    private int longestName(List<Class<Command>> commandList) {
         int longest = 0;
         for (Class<Command> commandClass : commandList) {
             Command command = CommandFactory.getCommand(commandClass);

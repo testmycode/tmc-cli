@@ -3,8 +3,10 @@ package fi.helsinki.cs.tmc.cli.core;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +17,7 @@ public class CommandFactory {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
     private static final Map<String, Class<Command>> commands = new HashMap<>();
+    private static final Map<String, List<Class<Command>>> packages = new HashMap<>();
 
     static {
         /* Force load the CommandList so that it's static initialization block is executed.
@@ -33,11 +36,19 @@ public class CommandFactory {
      * This method is used for generating the commands list from the annotations.
      *
      * @param name the name visible to the user
+     * @param packageName the package name that is used to categorize the commands
      * @param commandClass the class of the command objects
      */
-    public static void addCommand(String name, Class commandClass) {
+    public static void addCommand(String name, String packageName, Class commandClass) {
         Class<Command> klass = castToCommandClass(commandClass);
         CommandFactory.commands.put(name, klass);
+
+        List<Class<Command>> list = CommandFactory.packages.get(packageName);
+        if (list == null) {
+            list = new ArrayList<>();
+            CommandFactory.packages.put(packageName, list);
+        }
+        list.add(klass);
     }
 
     /**
@@ -94,8 +105,16 @@ public class CommandFactory {
      *
      * @return Set of commands.
      */
-    public static Set<Class<Command>> getCommands() {
-        return new HashSet<>(CommandFactory.commands.values());
+    public static List<Class<Command>> getCommands() {
+        return new ArrayList<>(CommandFactory.commands.values());
+    }
+
+    public static Set<String> getCommandCategories() {
+        return packages.keySet();
+    }
+
+    public static List<Class<Command>> getCategoryCommands(String category) {
+        return packages.get(category);
     }
 
     @SuppressWarnings("unchecked")
