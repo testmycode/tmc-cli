@@ -17,8 +17,15 @@ import java.util.Set;
 
 @Command(name = "help", desc = "List every command")
 public class HelpCommand extends AbstractCommand {
+
     private int longestNameLength;
+    private CliContext context;
     private Io io;
+
+    @Override
+    public String[] getUsages() {
+        return new String[] {"[category]"};
+    }
 
     @Override
     public void getOptions(Options options) {}
@@ -26,12 +33,22 @@ public class HelpCommand extends AbstractCommand {
     @Override
     public void run(CliContext context, CommandLine args) {
         Application app = context.getApp();
+        this.context = context;
         this.io = context.getIo();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("TMC commands:\n");
+        String category = handleArgs(args);
+        if (category == null) {
+            return;
+        }
 
-        List<String> commandStrings = getCommandStrings();
+        StringBuilder sb = new StringBuilder();
+        if (category.equals("")) {
+            sb.append("TMC commands:\n");
+        } else {
+            sb.append("TMC commands in ").append(category).append(":\n");
+        }
+
+        List<String> commandStrings = getCommandStrings(category);
         Collections.sort(commandStrings);
         for (String commandString : commandStrings) {
             sb.append(commandString).append("\n");
@@ -40,15 +57,43 @@ public class HelpCommand extends AbstractCommand {
         app.printHelp(sb.toString());
     }
 
-    private List<String> getCommandStrings() {
+    private String handleArgs(CommandLine args) {
+        String[] stringArguments = args.getArgs();
+        if (stringArguments.length > 1) {
+            io.errorln("Too many arguments.");
+            printUsage(context);
+            return null;
+        }
+        String category = "";
+        if (stringArguments.length == 1) {
+            category = stringArguments[0];
+        }
+        if (category.equals("all")) {
+            return category;
+        }
+        Set<String> helpCategories = CommandFactory.getCommandCategories();
+        if(!helpCategories.contains(category)) {
+            io.errorln("Unknown command category \"" + category + "\".");
+            return null;
+        }
+        return category;
+    }
+
+    private List<String> getCommandStrings(String category) {
         List<String> strings = new ArrayList<>();
-        List<Class<Command>> commands = CommandFactory.getCommands();
+        List<Class<Command>> commands;
+        if (category.equals("all")) {
+            commands = CommandFactory.getCommands();
+        } else {
+            commands = CommandFactory.getCategoryCommands(category);
+        }
 
         longestNameLength = longestName(commands);
         for (Class<Command> commandClass : commands) {
             Command command = CommandFactory.getCommand(commandClass);
             strings.add(createCommandString(command));
         }
+        longestNameLength = Math.max(longestNameLength, 8);
         return strings;
     }
 
