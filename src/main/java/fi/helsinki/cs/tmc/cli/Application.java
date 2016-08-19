@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -25,7 +26,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.cli.Option;
 
 /**
  * The application class for the program.

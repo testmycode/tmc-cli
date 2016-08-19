@@ -32,7 +32,6 @@ public class HelpCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext context, CommandLine args) {
-        Application app = context.getApp();
         this.context = context;
         this.io = context.getIo();
 
@@ -54,7 +53,7 @@ public class HelpCommand extends AbstractCommand {
             sb.append(commandString).append("\n");
         }
 
-        app.printHelp(sb.toString());
+        context.getApp().printHelp(sb.toString());
     }
 
     private String handleArgs(CommandLine args) {
@@ -72,7 +71,7 @@ public class HelpCommand extends AbstractCommand {
             return category;
         }
         Set<String> helpCategories = CommandFactory.getCommandCategories();
-        if(!helpCategories.contains(category)) {
+        if (!helpCategories.contains(category)) {
             io.errorln("Unknown command category \"" + category + "\".");
             return null;
         }

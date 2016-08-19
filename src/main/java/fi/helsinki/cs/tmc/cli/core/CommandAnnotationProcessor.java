@@ -65,7 +65,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
                     //remove prefix
                     packageName = packageName.substring(COMMAND_PACKAGE_NAME.length());
                     //remove the first dot
-                    if(packageName.startsWith(".")) {
+                    if (packageName.startsWith(".")) {
                         packageName = packageName.substring(1);
                     }
                 }
