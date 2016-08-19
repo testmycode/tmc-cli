@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,19 +15,11 @@ import java.util.Set;
 public class CommandFactory {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
-    private static final Map<String, Class<Command>> commands = new HashMap<>();
-    private static final Map<String, List<Class<Command>>> packages = new HashMap<>();
+    private static Map<String, Class<Command>> commands;
+    private static Map<String, List<Class<Command>>> packages;
 
     static {
-        /* Force load the CommandList so that it's static initialization block is executed.
-         * This hack is used instead of import so that the IDEs won't cry about the nonexistent
-         * class.
-         */
-        try {
-            Class.forName("fi.helsinki.cs.tmc.cli.core.CommandList");
-        } catch (ClassNotFoundException ex) {
-            System.out.println("Fail " + ex);
-        }
+        CommandFactory.reload();
     }
 
     /**
@@ -120,5 +111,20 @@ public class CommandFactory {
     @SuppressWarnings("unchecked")
     public static Class<Command> castToCommandClass(Class command) {
         return command;
+    }
+
+    protected static void reload() {
+        CommandFactory.commands = new HashMap<>();
+        CommandFactory.packages = new HashMap<>();
+
+        /* Run constructor of the CommandList.
+         * This hack is used instead of import so that the IDEs won't cry about the nonexistent
+         * class.
+         */
+        try {
+            Class.forName("fi.helsinki.cs.tmc.cli.core.CommandList").newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            logger.warn("CommandList initialization failed", ex);
+        }
     }
 }

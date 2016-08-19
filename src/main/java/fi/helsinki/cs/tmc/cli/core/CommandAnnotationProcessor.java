@@ -73,7 +73,7 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             }
 
             bwriter.append("\npublic class " + CLASS_NAME + " {\n");
-            bwriter.append(TAB + "static {\n");
+            bwriter.append(TAB + "public " + CLASS_NAME + "() {\n");
             for (Entry<String, String> entry : map.entrySet()) {
                 String classPath = entry.getValue();
                 String[] parts = classPath.split("\\.");
