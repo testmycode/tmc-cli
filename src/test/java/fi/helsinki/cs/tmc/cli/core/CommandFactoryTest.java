@@ -18,6 +18,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.List;
+import java.util.Set;
+
 public class CommandFactoryTest {
 
     Application app;
@@ -97,5 +100,59 @@ public class CommandFactoryTest {
         //exception.expect(RuntimeException.class);
         //exception.expectMessage(contains("Interface"));
         CommandFactory.addCommand("category", ReallyBadCommand.class);
+    }
+
+    @Test
+    public void getCommandsGivesDefaultCommands() {
+        assertNotSame(0, CommandFactory.getCommands().size());
+        assertTrue(CommandFactory.getCommands().contains(
+                CommandFactory.castToCommandClass(HelpCommand.class)));
+    }
+
+    @Test
+    public void getCommandsWhenSingleCommandIsAdded() {
+        int oldSize = CommandFactory.getCommands().size();
+        CommandFactory.addCommand("", GoodCommand.class);
+        assertEquals(oldSize + 1, CommandFactory.getCommands().size());
+        assertTrue(CommandFactory.getCommands().contains(
+                CommandFactory.castToCommandClass(GoodCommand.class)));
+    }
+
+    @Test
+    public void getCategoryCommandsWhenItsEmpty() {
+        assertEquals(null, CommandFactory.getCategoryCommands("xyz"));
+    }
+
+    @Test
+    public void getCategoryCommandsWhenSingleCategorizedCommandIsAdded() {
+        int oldSize = CommandFactory.getCommands().size();
+        CommandFactory.addCommand("xyz", GoodCommand.class);
+        List<Class<Command>> list = CommandFactory.getCategoryCommands("xyz");
+        assertEquals(1, list.size());
+        assertEquals(GoodCommand.class, list.get(0));
+    }
+
+    @Test
+    public void getCommandCategoriesIsNotEmpty() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertNotSame(0, list.size());
+    }
+
+    @Test
+    public void getCommandCategoriesContainsDefaultCategory() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertTrue(list.contains(""));
+    }
+
+    @Test
+    public void getCommandCategoriesContainsHiddenCategory() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertTrue(list.contains("hidden"));
+    }
+
+    @Test
+    public void getCommandCategoriesContainsAdminCategory() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertTrue(list.contains("admin"));
     }
 }
