@@ -31,7 +31,33 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
     private static final String COMMAND_PACKAGE_NAME = "fi.helsinki.cs.tmc.cli.command";
     private static final String TAB = "    ";
 
-    //TODO reorder
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        Map<String, String> map = new HashMap<>();
+
+        for (Element elem : roundEnv.getElementsAnnotatedWith(Command.class)) {
+            if (elem.getKind() != ElementKind.CLASS) {
+                logger.warn("Element with command annotation is not class: " + elem.toString());
+                return false;
+            }
+            Command command = elem.getAnnotation(Command.class);
+            logger.info("Element with annotation: " + elem.toString());
+            logger.info("Element name with annotation: " + elem.getClass().getCanonicalName());
+
+            TypeElement classElement = (TypeElement) elem;
+            map.put(
+                    command.name(),
+                    processingEnv.getElementUtils().getBinaryName(classElement).toString());
+        }
+
+        try {
+            generateSourceFile(map);
+        } catch (IOException ex) {
+            logger.warn("Failed to create source file." + ex);
+        }
+        return true;
+    }
+
     private void generateSourceFile(Map<String, String> map) throws IOException {
         JavaFileObject jfo =
                 processingEnv.getFiler().createSourceFile(PACKAGE_NAME + "." + CLASS_NAME);
@@ -82,32 +108,5 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             bwriter.append("//CHECKSTYLE:ON\n");
             bwriter.flush();
         }
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Map<String, String> map = new HashMap<>();
-
-        for (Element elem : roundEnv.getElementsAnnotatedWith(Command.class)) {
-            if (elem.getKind() != ElementKind.CLASS) {
-                logger.warn("Element with command annotation is not class: " + elem.toString());
-                return false;
-            }
-            Command command = elem.getAnnotation(Command.class);
-            logger.info("Element with annotation: " + elem.toString());
-            logger.info("Element name with annotation: " + elem.getClass().getCanonicalName());
-
-            TypeElement classElement = (TypeElement) elem;
-            map.put(
-                    command.name(),
-                    processingEnv.getElementUtils().getBinaryName(classElement).toString());
-        }
-
-        try {
-            generateSourceFile(map);
-        } catch (IOException ex) {
-            logger.warn("Failed to create source file." + ex);
-        }
-        return true;
     }
 }
