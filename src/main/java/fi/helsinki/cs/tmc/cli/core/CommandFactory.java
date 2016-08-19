@@ -43,25 +43,6 @@ public class CommandFactory {
     }
 
     /**
-     * Merge this method implementation with the above version.
-     *
-     * @param packageName The package/category of the command
-     * @param commandClass The class of the command
-     */
-    protected static void addCommand(String packageName, Class commandClass) {
-        Class<Command> klass = castToCommandClass(commandClass);
-        Annotation annotation = klass.getAnnotation(Command.class);
-        if (annotation == null) {
-            throw new RuntimeException("Command must have Command annotation");
-        }
-        Command command = (Command) annotation;
-        if (!AbstractCommand.class.isAssignableFrom(commandClass)) {
-            throw new RuntimeException("Command must implement CommandInterface");
-        }
-        CommandFactory.addCommand(command.name(), packageName, commandClass);
-    }
-
-    /**
      * Create new instance of the command.
      *
      * @param name Name of the command
