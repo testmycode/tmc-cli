@@ -1,10 +1,13 @@
 package fi.helsinki.cs.tmc.cli.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.HelpCommand;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.cli.CommandLine;
@@ -26,6 +29,7 @@ public class CommandFactoryTest {
     @Before
     public void setUp() {
         ctx = new CliContext(new TestIo());
+        CommandFactory.reload();
     }
 
     @Test
@@ -34,12 +38,12 @@ public class CommandFactoryTest {
     }
 
     @Test
-    public void createCommandWorksWithRealCommand() {
+    public void createHelpCommand() {
         assertNotNull(CommandFactory.createCommand("help"));
     }
 
     @Test
-    public void createCommandWorksWithBadCommand() {
+    public void createNonexistingCommand() {
         assertNull(CommandFactory.createCommand("foobar"));
     }
 
@@ -59,7 +63,7 @@ public class CommandFactoryTest {
 
     @Test
     public void addGoodCommand() {
-        CommandFactory.addCommand(GoodCommand.class);
+        CommandFactory.addCommand("category", GoodCommand.class);
         //TODO check the all the stuff in the command
         assertNotNull(CommandFactory.createCommand("good"));
     }
@@ -82,7 +86,7 @@ public class CommandFactoryTest {
         //WARNING The exception code leads to unpredicatble test results
         //exception.expect(RuntimeException.class);
         //exception.expectMessage(contains("annotation"));
-        CommandFactory.addCommand(BadCommand.class);
+        CommandFactory.addCommand("category", BadCommand.class);
     }
 
     private static class ReallyBadCommand {}
@@ -92,6 +96,6 @@ public class CommandFactoryTest {
         //WARNING The exception code leads to unpredicatble test results
         //exception.expect(RuntimeException.class);
         //exception.expectMessage(contains("Interface"));
-        CommandFactory.addCommand(ReallyBadCommand.class);
+        CommandFactory.addCommand("category", ReallyBadCommand.class);
     }
 }
