@@ -191,7 +191,7 @@ public class CommandAnnotationProcessorTest {
 
         Set<TypeElement> annotations = new HashSet<>();
         assertTrue(processor.process(annotations, roundEnv));
-        assertThat("" + stringWriter, containsString("(\"commmand1\", TestTest1.class)"));
-        assertThat("" + stringWriter, containsString("(\"commmand2\", TestTest2.class)"));
+        assertThat("" + stringWriter, containsString("(\"commmand1\", \"?\", TestTest1.class)"));
+        assertThat("" + stringWriter, containsString("(\"commmand2\", \"?\", TestTest2.class)"));
     }
 }

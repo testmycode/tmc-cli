@@ -1,10 +1,13 @@
 package fi.helsinki.cs.tmc.cli.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.command.HelpCommand;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import org.apache.commons.cli.CommandLine;
@@ -15,6 +18,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.List;
+import java.util.Set;
+
 public class CommandFactoryTest {
 
     Application app;
@@ -22,26 +28,6 @@ public class CommandFactoryTest {
     @Rule public ExpectedException exception = ExpectedException.none();
 
     private CliContext ctx;
-
-    @Before
-    public void setUp() {
-        ctx = new CliContext(new TestIo());
-    }
-
-    @Test
-    public void constructorAddsCommands() {
-        assertTrue(!CommandFactory.getCommands().isEmpty());
-    }
-
-    @Test
-    public void createCommandWorksWithRealCommand() {
-        assertNotNull(CommandFactory.createCommand("help"));
-    }
-
-    @Test
-    public void createCommandWorksWithBadCommand() {
-        assertNull(CommandFactory.createCommand("foobar"));
-    }
 
     @Command(name = "good", desc = "test")
     public static class GoodCommand extends AbstractCommand {
@@ -57,41 +43,78 @@ public class CommandFactoryTest {
         }
     }
 
+    @Before
+    public void setUp() {
+        ctx = new CliContext(new TestIo());
+        CommandFactory.reload();
+    }
+
     @Test
-    public void addGoodCommand() {
-        CommandFactory.addCommand(GoodCommand.class);
-        //TODO check the all the stuff in the command
-        assertNotNull(CommandFactory.createCommand("good"));
+    public void constructorAddsCommands() {
+        assertTrue(!CommandFactory.getCommands().isEmpty());
     }
 
-    public static class BadCommand extends AbstractCommand {
-
-        @Override
-        public void getOptions(Options options) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void run(CliContext context, CommandLine args) {
-            throw new UnsupportedOperationException();
-        }
+    @Test
+    public void createHelpCommand() {
+        assertNotNull(CommandFactory.createCommand("help"));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void addCommandWithoutProperAnnotation() {
-        //WARNING The exception code leads to unpredicatble test results
-        //exception.expect(RuntimeException.class);
-        //exception.expectMessage(contains("annotation"));
-        CommandFactory.addCommand(BadCommand.class);
+    @Test
+    public void createNonexistingCommand() {
+        assertNull(CommandFactory.createCommand("foobar"));
     }
 
-    private static class ReallyBadCommand {}
+    @Test
+    public void getCommandsGivesDefaultCommands() {
+        assertNotSame(0, CommandFactory.getCommands().size());
+        assertTrue(CommandFactory.getCommands().contains(
+                CommandFactory.castToCommandClass(HelpCommand.class)));
+    }
 
-    @Test(expected = RuntimeException.class)
-    public void addCommandThatDoesntExtendInterface() {
-        //WARNING The exception code leads to unpredicatble test results
-        //exception.expect(RuntimeException.class);
-        //exception.expectMessage(contains("Interface"));
-        CommandFactory.addCommand(ReallyBadCommand.class);
+    @Test
+    public void getCommandsWhenSingleCommandIsAdded() {
+        int oldSize = CommandFactory.getCommands().size();
+        CommandFactory.addCommand("good", "", GoodCommand.class);
+        assertEquals(oldSize + 1, CommandFactory.getCommands().size());
+        assertTrue(CommandFactory.getCommands().contains(
+                CommandFactory.castToCommandClass(GoodCommand.class)));
+    }
+
+    @Test
+    public void getCategoryCommandsWhenItsEmpty() {
+        assertEquals(null, CommandFactory.getCategoryCommands("xyz"));
+    }
+
+    @Test
+    public void getCategoryCommandsWhenSingleCategorizedCommandIsAdded() {
+        int oldSize = CommandFactory.getCommands().size();
+        CommandFactory.addCommand("good", "xyz", GoodCommand.class);
+        List<Class<Command>> list = CommandFactory.getCategoryCommands("xyz");
+        assertEquals(1, list.size());
+        assertEquals(GoodCommand.class, list.get(0));
+    }
+
+    @Test
+    public void getCommandCategoriesIsNotEmpty() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertNotSame(0, list.size());
+    }
+
+    @Test
+    public void getCommandCategoriesContainsDefaultCategory() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertTrue(list.contains(""));
+    }
+
+    @Test
+    public void getCommandCategoriesContainsHiddenCategory() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertTrue(list.contains("hidden"));
+    }
+
+    @Test
+    public void getCommandCategoriesContainsAdminCategory() {
+        Set<String> list = CommandFactory.getCommandCategories();
+        assertTrue(list.contains("admin"));
     }
 }

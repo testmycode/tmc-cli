@@ -13,6 +13,8 @@ import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The application class for the program.
@@ -49,10 +52,25 @@ public class Application {
         this.context = context;
         this.io = context.getIo();
 
-        options.addOption("h", "help", false, "Display help information about tmc-cli");
+        options.addOption(
+                OptionBuilder.withLongOpt("help-all")
+                        .withDescription("Display all help information of tmc-cli")
+                        .create());
+        options.addOption("h", "help", false, "Display help information");
         options.addOption("v", "version", false, "Give the version of the tmc-cli");
         options.addOption("u", "force-update", false, "Force the auto-update");
         options.addOption("d", "no-update", false, "Disable temporarily the auto-update");
+
+        Set<String> helpCategories = CommandFactory.getCommandCategories();
+        for (String category : helpCategories) {
+            if (category.equals("") || category.equals("hidden")) {
+                continue;
+            }
+            options.addOption(
+                    OptionBuilder.withLongOpt("help-" + category)
+                            .withDescription("Display " + category + " help information")
+                            .create());
+        }
 
         //TODO implement the inTests as context.property
         if (!context.inTests()) {
@@ -103,6 +121,17 @@ public class Application {
             return null;
         }
 
+        // handle help flags
+        for (Option opt : line.getOptions()) {
+            String helpPrefix = "help-";
+            if (!opt.getLongOpt().startsWith(helpPrefix)) {
+                continue;
+            }
+
+            String helpCategory = opt.getLongOpt().substring(helpPrefix.length());
+            runCommand("help", new String[] {helpCategory});
+            return null;
+        }
         if (showHelp) {
             // don't run the help sub-command with -h switch
             if (commandName.equals("help")) {

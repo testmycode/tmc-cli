@@ -28,43 +28,8 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
 
     private static final String CLASS_NAME = "CommandList";
     private static final String PACKAGE_NAME = "fi.helsinki.cs.tmc.cli.core";
+    private static final String COMMAND_PACKAGE_NAME = "fi.helsinki.cs.tmc.cli.command";
     private static final String TAB = "    ";
-
-    private void generateSourceFile(Map<String, String> map) throws IOException {
-        JavaFileObject jfo =
-                processingEnv.getFiler().createSourceFile(PACKAGE_NAME + "." + CLASS_NAME);
-
-        try (Writer writer = jfo.openWriter()) {
-            BufferedWriter bwriter = new BufferedWriter(writer);
-            bwriter.append("package " + PACKAGE_NAME + ";\n\n");
-
-            // import the command classes
-            bwriter.append("//CHECKSTYLE:OFF\n");
-            for (Entry<String, String> entry : map.entrySet()) {
-                bwriter.append("import ").append(entry.getValue()).append(";\n");
-            }
-            bwriter.append("//CHECKSTYLE:ON\n");
-
-            bwriter.append("\npublic class " + CLASS_NAME + " {\n");
-            bwriter.append(TAB + "static {\n");
-            for (Entry<String, String> entry : map.entrySet()) {
-                String[] parts = entry.getValue().split("\\.");
-                if (parts.length == 0) {
-                    continue;
-                }
-                // print out the lines that add the commands to the command factory.
-                String className = parts[parts.length - 1];
-                bwriter.append(TAB + TAB + "CommandFactory.addCommand(\"")
-                        .append(entry.getKey())
-                        .append("\", ")
-                        .append(className)
-                        .append(".class);\n");
-            }
-            bwriter.append(TAB + "}\n");
-            bwriter.append("}\n");
-            bwriter.flush();
-        }
-    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -91,5 +56,57 @@ public class CommandAnnotationProcessor extends AbstractProcessor {
             logger.warn("Failed to create source file." + ex);
         }
         return true;
+    }
+
+    private void generateSourceFile(Map<String, String> map) throws IOException {
+        JavaFileObject jfo =
+                processingEnv.getFiler().createSourceFile(PACKAGE_NAME + "." + CLASS_NAME);
+
+        try (Writer writer = jfo.openWriter()) {
+            BufferedWriter bwriter = new BufferedWriter(writer);
+            bwriter.append("package " + PACKAGE_NAME + ";\n\n");
+
+            // import the command classes
+            bwriter.append("//CHECKSTYLE:OFF\n");
+            for (Entry<String, String> entry : map.entrySet()) {
+                bwriter.append("import ").append(entry.getValue()).append(";\n");
+            }
+
+            bwriter.append("\npublic class " + CLASS_NAME + " {\n");
+            bwriter.append(TAB + "public " + CLASS_NAME + "() {\n");
+            for (Entry<String, String> entry : map.entrySet()) {
+                String classPath = entry.getValue();
+                String[] parts = classPath.split("\\.");
+                if (parts.length < 2) {
+                    continue;
+                }
+
+                String className = parts[parts.length - 1];
+                String packageName = "?";
+                if (classPath.startsWith(COMMAND_PACKAGE_NAME)) {
+                    //remove class name and dot
+                    packageName = classPath.substring(
+                            0,
+                            classPath.length() - className.length() - 1);
+                    //remove prefix
+                    packageName = packageName.substring(COMMAND_PACKAGE_NAME.length());
+                    //remove the first dot
+                    if (packageName.startsWith(".")) {
+                        packageName = packageName.substring(1);
+                    }
+                }
+                bwriter.append(TAB + TAB + "CommandFactory.addCommand(\"")
+                        .append(entry.getKey())
+                        .append("\", \"")
+                        .append(packageName)
+                        .append("\", ")
+                        .append(className)
+                        .append(".class);\n");
+            }
+            bwriter.append(TAB + "}\n");
+            bwriter.append("}\n");
+            bwriter.append("//CHECKSTYLE:ON\n");
+            bwriter.flush();
+        }
     }
 }

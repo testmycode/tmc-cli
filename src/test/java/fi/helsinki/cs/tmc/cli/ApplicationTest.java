@@ -58,14 +58,53 @@ public class ApplicationTest {
         String[] args = {"-h"};
         app.run(args);
         io.assertContains("Usage: tmc");
+        io.assertContains("--help-all");
+        io.assertContains("--help");
+    }
+
+    @Test
+    public void helpDoesntHaveHiddenCommands() {
+        String[] args = {"-h"};
+        app.run(args);
+        io.assertContains("Usage: tmc");
+        io.assertNotContains("shell-helper");
+    }
+
+    @Test
+    public void helpAllHasHiddenCommands() {
+        String[] args = {"--help-all"};
+        app.run(args);
+        io.assertContains("Usage: tmc");
+        io.assertContains("shell-helper");
     }
 
     @Test
     public void helpOfHelpCommandIsNotGiven() {
         String[] args = {"-h", "help"};
         app.run(args);
-        io.assertContains("help");
+        io.assertContains("Usage: tmc");
         io.assertNotContains("Usage: tmc help");
+    }
+
+    @Test
+    public void listOfEveryCommand() {
+        String[] args = {"--help-all"};
+        app.run(args);
+        io.assertContains("TMC commands in all");
+    }
+
+    @Test
+    public void helpOptionForAdminCommands() {
+        String[] args = {"--help-admin"};
+        app.run(args);
+        io.assertContains("TMC commands in admin");
+    }
+
+    @Test
+    public void helpOptionForHiddenCommandsDoesntExist() {
+        String[] args = {"--help-hidden"};
+        app.run(args);
+        io.assertContains("Unrecognized option");
     }
 
     @Test

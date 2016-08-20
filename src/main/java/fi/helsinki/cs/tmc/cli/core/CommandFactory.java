@@ -3,8 +3,9 @@ package fi.helsinki.cs.tmc.cli.core;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,18 +15,11 @@ import java.util.Set;
 public class CommandFactory {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommandFactory.class);
-    private static final Map<String, Class<Command>> commands = new HashMap<>();
+    private static Map<String, Class<Command>> commands;
+    private static Map<String, List<Class<Command>>> packages;
 
     static {
-        /* Force load the CommandList so that it's static initialization block is executed.
-         * This hack is used instead of import so that the IDEs won't cry about the nonexistent
-         * class.
-         */
-        try {
-            Class.forName("fi.helsinki.cs.tmc.cli.core.CommandList");
-        } catch (ClassNotFoundException ex) {
-            System.out.println("Fail " + ex);
-        }
+        CommandFactory.reload();
     }
 
     /**
@@ -33,29 +27,19 @@ public class CommandFactory {
      * This method is used for generating the commands list from the annotations.
      *
      * @param name the name visible to the user
+     * @param packageName the package name that is used to categorize the commands
      * @param commandClass the class of the command objects
      */
-    public static void addCommand(String name, Class commandClass) {
+    public static void addCommand(String name, String packageName, Class commandClass) {
         Class<Command> klass = castToCommandClass(commandClass);
         CommandFactory.commands.put(name, klass);
-    }
 
-    /**
-     * Merge this method implementation with the above version.
-     *
-     * @param commandClass The class of the command
-     */
-    public static void addCommand(Class commandClass) {
-        Class<Command> klass = castToCommandClass(commandClass);
-        Annotation annotation = klass.getAnnotation(Command.class);
-        if (annotation == null) {
-            throw new RuntimeException("Command must have Command annotation");
+        List<Class<Command>> list = CommandFactory.packages.get(packageName);
+        if (list == null) {
+            list = new ArrayList<>();
+            CommandFactory.packages.put(packageName, list);
         }
-        Command command = (Command) annotation;
-        if (!AbstractCommand.class.isAssignableFrom(commandClass)) {
-            throw new RuntimeException("Command must implement CommandInterface");
-        }
-        CommandFactory.commands.put(command.name(), klass);
+        list.add(klass);
     }
 
     /**
@@ -94,12 +78,35 @@ public class CommandFactory {
      *
      * @return Set of commands.
      */
-    public static Set<Class<Command>> getCommands() {
-        return new HashSet<>(CommandFactory.commands.values());
+    public static List<Class<Command>> getCommands() {
+        return new ArrayList<>(CommandFactory.commands.values());
+    }
+
+    public static Set<String> getCommandCategories() {
+        return packages.keySet();
+    }
+
+    public static List<Class<Command>> getCategoryCommands(String category) {
+        return packages.get(category);
     }
 
     @SuppressWarnings("unchecked")
     public static Class<Command> castToCommandClass(Class command) {
         return command;
+    }
+
+    protected static void reload() {
+        CommandFactory.commands = new HashMap<>();
+        CommandFactory.packages = new HashMap<>();
+
+        /* Run constructor of the CommandList.
+         * This hack is used instead of import so that the IDEs won't cry about the nonexistent
+         * class.
+         */
+        try {
+            Class.forName("fi.helsinki.cs.tmc.cli.core.CommandList").newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            logger.warn("CommandList initialization failed", ex);
+        }
     }
 }

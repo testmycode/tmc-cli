@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.cli.command.hidden;
 
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
