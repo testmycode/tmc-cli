@@ -30,6 +30,6 @@ if [ ! -f ./tmc ]; then
 fi
 
 chmod u+x ./tmc
-./tmc > /dev/null
+./tmc
 
 echo "Installation complete"
