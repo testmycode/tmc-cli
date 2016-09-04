@@ -2,43 +2,83 @@
 
 set -euo pipefail
 
-## Embeded binary magic
-
-MYSELF=$(which "$0" 2>/dev/null)
-[ $? -gt 0 ] && [ -f "$0" ] && MYSELF="./$0"
-
-## Find the java binary and correct version
-
-JAVA_BIN=java
-JAVA_HOME=${JAVA_HOME-}
-if [ -n "$JAVA_HOME" ]; then
-    JAVA_BIN="$JAVA_HOME/bin/java"
+if [[ ${TMC_DEBUG-} == 1 ]]; then
+	tmc_debug() {
+		(>&2 echo "$*")
+	}
+else
+	tmc_debug() {
+		:
+	}
 fi
 
-if ! hash "$JAVA_BIN" 2>/dev/null; then
-    echo "Java not installed. If you have installed it in another directory then set the \$JAVA_HOME variable."
-    exit 1
-fi
+tmc_is_native() {
+	# get the script directory
+	local DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-JAVA_VERSION=$("$JAVA_BIN" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-if [ "$JAVA_VERSION" \< "1.7" ]; then
-    echo "You must have at least Java 1.7 installed."
-    exit 1
-fi
+	TMC_NATIVE_PACKAGE=0
 
-## find the place for running the autocomplete/alias file
+	# check if the tmc binary is in read-only directory
+	if [[ ! -w $DIR ]]; then
+		TMC_NATIVE_PACKAGE=1
+	fi
+
+	if [[ "$TMC_NATIVE_PACKAGE" == "1" ]]; then
+		tmc_debug "Tmc is installed through package manager"
+	fi
+
+	echo "$TMC_NATIVE_PACKAGE"
+}
+
+TMC_NATIVE_PACKAGE=$(tmc_is_native)
+
+tmc_get_binary() {
+	tmc_debug "Embeded binary magic"
+
+	local MYSELF=$(which "$0" 2>/dev/null)
+	[ $? -gt 0 ] && [ -f "$0" ] && MYSELF="./$0"
+
+	echo "$MYSELF"
+}
+
+tmc_find_java_binary() {
+	tmc_debug "Find the java binary and correct version"
+
+	local JAVA_BIN=java
+	local JAVA_HOME=${JAVA_HOME-}
+
+	if [ -n "$JAVA_HOME" ]; then
+		JAVA_BIN="$JAVA_HOME/bin/java"
+	fi
+
+	if ! hash "$JAVA_BIN" 2>/dev/null; then
+		echo "Java not installed. If you have installed it" >&2
+		echo "in another directory then set the \$JAVA_HOME" >&2
+		echo "variable." >&2
+		exit 1
+	fi
+
+	local JAVA_VERSION=$("$JAVA_BIN" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+
+	if [ "$JAVA_VERSION" \< "1.7" ]; then
+		echo "You must have at least Java 1.7 installed." >&2
+		exit 1
+	fi
+
+	echo $JAVA_BIN
+}
+JAVA_BIN=$(tmc_find_java_binary)
+
+#####
+tmc_debug "Find the place for running the autocomplete/alias file"
 
 tmc_detect_profile() {
-	local PROFILE_ENV
-	local SHELL_ENV
-	local HOME_ENV
-
-        PROFILE_ENV=${PROFILE-}
-        SHELL_ENV=${SHELL-}
-        HOME_ENV=${HOME-}
+	local PROFILE_ENV=${PROFILE-}
+	local SHELL_ENV=${SHELL-}
+	local HOME_ENV=${HOME-}
 
 	if [ -n "$HOME_ENV" ] && [ -f "$PROFILE_ENV" ]; then
-		(>&2 echo "Home environment variable is not set")
+		echo "Home environment variable is not set" >&2
 		return
 	fi
 
@@ -47,10 +87,8 @@ tmc_detect_profile() {
 		return
 	fi
 
-	local DETECTED_PROFILE
-	DETECTED_PROFILE=''
-	local SHELLTYPE
-	SHELLTYPE="$(basename "/$SHELL_ENV")"
+	local DETECTED_PROFILE=''
+	local SHELLTYPE="$(basename "/$SHELL_ENV")"
 
 	if [ "$SHELLTYPE" = "bash" ]; then
 		if [ -f "$HOME_ENV/.bashrc" ]; then
@@ -81,8 +119,9 @@ tmc_detect_profile() {
 
 ## Bash autocompletion script extraction
 
-# This is used in autocompletion file
-SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+tmc_binary_file() {
+	echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+}
 
 tmc_autocomplete_file() {
 	echo "${TMC_AUTOCOMPLETE_FILE-$HOME/.tmc-autocomplete.sh}"
@@ -90,44 +129,47 @@ tmc_autocomplete_file() {
 
 ## Create the alias and autocompletion code if tmc alias not set
 tmc_update_autocomplete() {
-	local AUTOCOMPLETE_FILE
-	local PROFILE_FILE
+	local AUTOCOMPLETE_FILE="$(tmc_autocomplete_file)"
+	local INSTALLED=0
 
-	AUTOCOMPLETE_FILE="$(tmc_autocomplete_file)"
+	# This variable is defined for the embeded autocompletion file
+	SCRIPT_PATH="$(tmc_binary_file)"
+	if [[ -e "$AUTOCOMPLETE_FILE" ]]; then
+		INSTALLED=1
+	fi
 
 	cat > "$AUTOCOMPLETE_FILE" <<- EOM
 #EMBED_AUTOCOMPLETE_SH
 EOM
 	chmod +x "$AUTOCOMPLETE_FILE"
 
-	PROFILE_FILE=$(tmc_detect_profile)
-
-	# get the aliases
-	#TODO remove this and use global variables
-	set +euo pipefail
-	source $PROFILE_FILE
-	set -euo pipefail
-
-	if type tmc &> /dev/null; then
-		exit
+	if [[ $INSTALLED == 0 ]]; then
+		tmc_install_hook "$AUTOCOMPLETE_FILE"
 	fi
+}
+
+tmc_install_hook() {
+	local AUTOCOMPLETE_FILE="$1"
+	local PROFILE_FILE=$(tmc_detect_profile)
 
 	if [ -z "$PROFILE_FILE" ]; then
 		echo "Profile file not found" >&2
-		echo "Put the \"source $AUTOCOMPLETE_FILE\" line in somewhere where" >&2
-		echo "it's run at terminal initialization." >&2
+		echo "Put the \"source $AUTOCOMPLETE_FILE\" line in" >&2
+		echo "your shell's rc file." >&2
 	fi
-	echo "source $AUTOCOMPLETE_FILE" >> "$PROFILE_FILE"
+	# The `|| true` structure is used just in case that the rc file
+	# has strict mode and user has manually removed tmc script
+	echo "source $AUTOCOMPLETE_FILE || true" >> "$PROFILE_FILE"
 
-	echo "To use new autocompletion run the following on command line:" >&2
-	echo ". ~/.bashrc" >&2
+	echo "To use new autocompletion run the following on command line:" >&1
+	echo ". $PROFILE_FILE" >&1
 }
 
 ## Auto update code
 
 ##### If you MODIFY the install script then do the following:
-##### Enable the "THE INSTALL SCRIPT DEBUGGING LINE" at [Tmc]CliUpdater.java
-##### (It runs the dev script instead of the latest release script)
+##### Enable the "THE INSTALL SCRIPT DEBUGGING LINE" at AutoUpdater.java
+##### (It runs your script instead of the script from latest github release)
 ##### And use the --force-update flag in application.
 
 tmc_update() {
@@ -135,6 +177,11 @@ tmc_update() {
 }
 
 tmc_install_update() {
+	if [[ $TMC_NATIVE_PACKAGE == 1 ]]; then
+		echo "Tmc should be updated by your package manager" >&2
+		exit 126
+	fi
+
 	echo "Please report any error messages that may come up below." >&2
 	if [ ! -f tmc.new ]; then
 		echo "Could not find the updated file." >&2
@@ -155,9 +202,9 @@ tmc_install_update() {
 	rm tmc.orig &> /dev/null
 	echo "Running the new tmc update script..." >&2
 	echo "" >&2
+
 	tmc_update
 
-	echo ""
 	if [ -f tmc ]; then
 		echo "Tmc cli installation was successful" >&2
 	else
@@ -167,18 +214,51 @@ tmc_install_update() {
 	exit
 }
 
-if [ "${1-}" == "++internal-update" ]; then
-	tmc_install_update
-fi
+tmc_uninstall() {
+	local AUTOCOMPLETE_FILE="$(tmc_autocomplete_file)"
+	local PROFILE_FILE=$(tmc_detect_profile)
+	local TMC_FILE="$(tmc_binary_file)"
 
-if [ ! -f "$(tmc_autocomplete_file)" ]; then
-	tmc_update_autocomplete
-	exit
-fi
+	#remove the include line from rc file
 
-#EMBED_UNIT_TESTS_SH
+	grep -v "source $AUTOCOMPLETE_FILE || true" "$PROFILE_FILE" > "${PROFILE_FILE}2"
+	if [[ "$?" == 0 ]]; then
+		mv "${PROFILE_FILE}2" "$PROFILE_FILE"
+	fi
 
-export COLUMNS=$(tput cols)
-exec "$JAVA_BIN" -jar "$MYSELF" "$@"
+	rm "$AUTOCOMPLETE_FILE"
+	rm "$TMC_FILE"
+}
 
-exit 0 
+tmc_main() {
+	if [ "${1-}" == "++internal-update" ]; then
+		tmc_install_update
+	fi
+
+	if [ "${1-}" == "--uninstall" ]; then
+		tmc_uninstall
+		exit
+	fi
+
+	# check if this is first time running the tmc
+	if [ ! -e "$(tmc_autocomplete_file)" ]; then
+		tmc_update_autocomplete
+		exit
+	fi
+
+	local TMC_FLAGS=
+
+	# disable auto updates if tmc is from native package
+	if [[ $TMC_NATIVE_PACKAGE == 1 ]]; then
+		TMC_FLAGS="-d"
+	fi
+
+	#EMBED_UNIT_TESTS_SH
+
+	export COLUMNS=$(tput cols)
+	exec "$JAVA_BIN" -jar "$(tmc_get_binary)" $TMC_FLAGS "$@"
+
+	exit 0
+}
+
+tmc_main $*

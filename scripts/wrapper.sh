@@ -5,6 +5,7 @@ set -euo pipefail
 # find newest jar file
 jar_file=$(ls -t target/tmc-cli-*.jar | head -1)
 
+# escape the string argument $1 for using it as substitution string in sed
 quotePerlSubst() {
 	IFS= read -d '' -r < <(sed -e ':a' -e '$!{N;ba' -e '}' -e 's/[$/\]/\\&/g; s/\n/\\&/g' <<<"$1")
 	printf %s "${REPLY%$'\n'}"
