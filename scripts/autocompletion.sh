@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SCRIPT_PATH will be filled by stub script
-alias tmc="$SCRIPT_PATH/tmc"
+alias tmc="$SCRIPT_PATH"
 
 TMC_COMMANDS=( "\$(tmc -d shell-helper -c)" )
 
