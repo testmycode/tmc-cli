@@ -14,6 +14,7 @@ fi
 echo "Fetching latest release URL"
 if ! PAGE=$(curl -s https://api.github.com/repos/testmycode/tmc-cli/releases/latest); then
 	echo "Failed to fetch latest release from github api." >&2
+	exit
 fi
 URL=$(echo "$PAGE" | grep '"browser_download_url"' | grep '/tmc"' | head -n 1 | cut -d '"' -f 4)
 

@@ -161,8 +161,8 @@ tmc_install_hook() {
 	# has strict mode and user has manually removed tmc script
 	echo "source $AUTOCOMPLETE_FILE || true" >> "$PROFILE_FILE"
 
-	echo "To use new autocompletion run the following on command line:" >&1
-	echo ". $PROFILE_FILE" >&1
+	echo "To use new autocompletion open a new terminal or run the following command:" >&1
+	echo "source $PROFILE_FILE" >&1
 }
 
 ## Auto update code

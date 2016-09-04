@@ -28,10 +28,10 @@ TMC-CLI is the command-line client for University of Helsinki's TestMyCode -fram
 `cd` into the directory where you wish to install TMC-CLI. Then, copy and paste the following command in your terminal:
 
 ```
-curl -0 https://raw.githubusercontent.com/testmycode/tmc-cli/master/scripts/install.sh | bash; source ~/.bashrc
+curl -0 https://raw.githubusercontent.com/testmycode/tmc-cli/master/scripts/install.sh | bash
 ```
 
-TMC-CLI should now be installed. You can try running it with `tmc`.
+TMC-CLI should now be installed. You can try running it with `tmc` in a new terminal.
 
 ###Manual installation
 
