@@ -24,7 +24,7 @@ public class TestIo extends Io {
     private final LinkedList<String> textPrompts;
     private final LinkedList<String> passwordPrompts;
     private final LinkedList<Boolean> confirmationPrompts;
-    private int expectedPromptCount;
+    private int usedPromptCount;
 
     public TestIo() {
         printedText = new StringBuilder();
@@ -32,7 +32,7 @@ public class TestIo extends Io {
         promptOrder = new LinkedList<>();
         passwordPrompts = new LinkedList<>();
         confirmationPrompts = new LinkedList<>();
-        expectedPromptCount = 0;
+        usedPromptCount = 0;
     }
 
     public void assertContains(String contains) {
@@ -55,9 +55,9 @@ public class TestIo extends Io {
         if (!allPromptsUsed()) {
             fail(
                     "Program should have created "
-                            + expectedPromptCount
-                            + " prompts instead of "
                             + promptOrder.size()
+                            + " prompts instead of "
+                            + usedPromptCount
                             + " prompts.");
         }
     }
@@ -132,7 +132,6 @@ public class TestIo extends Io {
                 break;
         }
         promptOrder.add(type);
-        expectedPromptCount++;
     }
 
     private void usePrompt(PromptType type) {
@@ -145,6 +144,7 @@ public class TestIo extends Io {
             throw new AssertionError(
                     "Wrong prompt type expected " + expected.name() + ", got " + type);
         }
+        usedPromptCount++;
     }
 
     private boolean allPromptsUsed() {
