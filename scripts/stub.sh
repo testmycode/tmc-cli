@@ -231,6 +231,8 @@ tmc_uninstall() {
 }
 
 tmc_main() {
+	local TMC_FLAGS=
+
 	if [ "${1-}" == "++internal-update" ]; then
 		tmc_install_update
 	fi
@@ -240,17 +242,15 @@ tmc_main() {
 		exit
 	fi
 
-	# check if this is first time running the tmc
-	if [ ! -e "$(tmc_autocomplete_file)" ]; then
-		tmc_update_autocomplete
-		exit
-	fi
-
-	local TMC_FLAGS=
-
 	# disable auto updates if tmc is from native package
 	if [[ $TMC_NATIVE_PACKAGE == 1 ]]; then
 		TMC_FLAGS="-d"
+	else
+		# check if this is first time running the tmc
+		if [ ! -e "$(tmc_autocomplete_file)" ]; then
+			tmc_update_autocomplete
+			exit
+		fi
 	fi
 
 	#EMBED_UNIT_TESTS_SH
