@@ -39,13 +39,13 @@ public class ConfigCommandTest {
 
     @Test
     public void printsErrorIfTwoConflictingOptionsGiven() {
-        app.run(new String[] {"config", "--get", "--list"});
+        app.run(new String[] {"config", "--delete", "--list"});
         io.assertContains("Only one of the");
     }
 
     @Test
     public void printsErrorIfThreeConflictingOptionsGiven() {
-        app.run(new String[] {"config", "--get", "--list", "--delete"});
+        app.run(new String[] {"config", "--delete", "--list", "--get", "property"});
         io.assertContains("Only one of the");
     }
 
@@ -56,6 +56,43 @@ public class ConfigCommandTest {
         app.run(new String[] {"config", "--list"});
         io.assertContains("hello=world");
         io.assertContains("toilet=wonderland");
+    }
+
+    @Test
+    public void listsAllPropertiesWithExtraArgument() {
+        props.put("hello", "world");
+        props.put("toilet", "wonderland");
+        app.run(new String[] {"config", "--list", "abc"});
+        io.assertContains("Listing option doesn't take any arguments.");
+    }
+
+    @Test
+    public void getProperty() {
+        props.put("thing", "value");
+        app.run(new String[] {"config", "--get", "thing"});
+        io.assertContains("value");
+        io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void getUnexistingProperty() {
+        app.run(new String[] {"config", "--get", "thing"});
+        io.assertContains("The property thing doesn't exist");
+        io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void getUnexistingPropertyQuietly() {
+        app.run(new String[] {"config", "--get", "-q", "thing"});
+        io.assertNotContains("The property thing doesn't exist");
+        io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void getPropertyWithExtraArgument() {
+        props.put("thing", "value");
+        app.run(new String[] {"config", "--get", "thing", "abc"});
+        io.assertContains("There should not be extra arguments when using --get option.");
     }
 
     @Test
@@ -119,6 +156,25 @@ public class ConfigCommandTest {
         props.put("no", "e");
         app.run(new String[] {"config", "-d", "-q", "no"});
         assertTrue(!props.containsKey("no"));
+        io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void deletesInvalidProperty() {
+        app.run(new String[] {"config", "-d", "property"});
+        assertTrue(!props.containsKey("no"));
+        io.assertContains("Key property doesn't exist.");
+        io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void deletesOnePropertyWithNoConfirmation() {
+        io.addConfirmationPrompt(false);
+        props.put("no", "e");
+        app.run(new String[] {"config", "-d", "no"});
+        assertTrue(props.containsKey("no"));
+        io.assertContains("Deleting 1 properties.");
+        io.assertNotContains("Deleted key no, was");
         io.assertAllPromptsUsed();
     }
 

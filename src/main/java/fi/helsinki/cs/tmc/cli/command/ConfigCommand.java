@@ -26,12 +26,16 @@ public class ConfigCommand extends AbstractCommand {
 
     @Override
     public String[] getUsages() {
-        return new String[] {"[-q|--quiet] KEY=\"VALUE\"...", "-d [-q|--quiet] KEY...", "-l"};
+        return new String[] {
+            "[-q|--quiet] KEY=\"VALUE\"...",
+            "-d|--delete [-q|--quiet] KEY...",
+            "-l|--list",
+            "-g|--get=KEY"};
     }
 
     @Override
     public void getOptions(Options options) {
-        options.addOption("g", "get", false, "Get value of a key");
+        options.addOption("g", "get", true, "Get value of a key");
         options.addOption("d", "delete", false, "Unset given property keys");
         options.addOption("q", "quiet", false, "Don't ask confirmations");
         options.addOption("l", "list", false, "List all properties");
@@ -60,13 +64,28 @@ public class ConfigCommand extends AbstractCommand {
         if (listing) {
             if (arguments.length != 0) {
                 io.errorln("Listing option doesn't take any arguments.");
+                printUsage(context);
                 return;
             }
             printAllProperties();
             return;
         }
 
-        if (delete) {
+        if(get) {
+            if (arguments.length != 0) {
+                io.errorln("There should not be extra arguments when using --get option.");
+                printUsage(context);
+                return;
+            }
+            String key = args.getOptionValue('g');
+            boolean exists = properties.containsKey(key);
+            if (!exists && !quiet) {
+                io.errorln("The property " + key + " doesn't exist.");
+                return;
+            }
+            io.println(exists ? properties.get(key) : "");
+            return;
+        } else if (delete) {
             deleteProperties(arguments);
         } else {
             setProperties(arguments);
@@ -113,7 +132,7 @@ public class ConfigCommand extends AbstractCommand {
         }
         for (String key : keys) {
             String oldValue = properties.remove(key);
-            io.println("Unset key " + key + ", was " + oldValue);
+            io.println("Deleted key " + key + ", was " + oldValue);
         }
     }
 
