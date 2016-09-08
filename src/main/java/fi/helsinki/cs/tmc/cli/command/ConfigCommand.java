@@ -71,7 +71,7 @@ public class ConfigCommand extends AbstractCommand {
             return;
         }
 
-        if(get) {
+        if (get) {
             if (arguments.length != 0) {
                 io.errorln("There should not be extra arguments when using --get option.");
                 printUsage(context);
