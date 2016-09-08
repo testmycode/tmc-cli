@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.cli.command;
+package fi.helsinki.cs.tmc.cli.command.hidden;
 
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -37,6 +37,9 @@ public class PropertiesCommand extends AbstractCommand {
         boolean unset = args.hasOption("u");
         String[] arguments = args.getArgs();
         HashMap<String, String> props = context.getProperties();
+
+        io.errorln("This is deprecated command; use config command instead.");
+
         if (arguments.length == 0) {
             printAllProps(props);
             return;
