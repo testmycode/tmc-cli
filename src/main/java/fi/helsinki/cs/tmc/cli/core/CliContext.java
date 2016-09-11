@@ -26,6 +26,7 @@ public class CliContext {
     private Application application;
     private TmcCore tmcCore;
     private Settings settings;
+    private TaskExecutor tmcLangs;
 
     /* cached values */
     private boolean hasLogin;
@@ -42,6 +43,10 @@ public class CliContext {
     }
 
     public CliContext(Io io, TmcCore core, WorkDir workDir) {
+        this(io, core, workDir, null);
+    }
+
+    public CliContext(Io io, TmcCore core, WorkDir workDir, TaskExecutor executor) {
         inTest = (io != null);
         if (!inTest) {
             io = new TerminalIo(System.in);
@@ -52,6 +57,7 @@ public class CliContext {
         this.properties = SettingsIo.loadProperties();
         this.settings = new Settings();
         this.tmcCore = core;
+        this.tmcLangs = executor;
         this.hasLogin = (core != null);
         this.courseInfo = null;
     }
@@ -171,6 +177,15 @@ public class CliContext {
         return this.tmcCore;
     }
 
+    /* TODO this may not work in tests currently
+     */
+    public TaskExecutor getTmcLangs() {
+        if (this.tmcLangs == null) {
+            throw new RuntimeException("The loadBackend* method was NOT called");
+        }
+        return this.tmcLangs;
+    }
+
     /**
      * Initialize the tmc-core and other cached info.
      * Use this method if you need i
@@ -219,11 +234,9 @@ public class CliContext {
     }
 
     private void createTmcCore(Account account) {
-        TaskExecutor tmcLangs;
-
-        tmcLangs = new TaskExecutorImpl();
+        this.tmcLangs = new TaskExecutorImpl();
         this.settings.setAccount(account);
-        this.tmcCore = new TmcCore(settings, tmcLangs);
+        this.tmcCore = new TmcCore(settings, this.tmcLangs);
         settings.setWorkDir(workDir);
     }
 
