@@ -40,9 +40,35 @@ import java.util.Set;
 public class AdminCommand extends AbstractCommand {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminCommand.class);
-    private Io io;
+    private static final String HELP_TEXT =
+            "Usage: tmc admin <COMMAND> [<command-arguments>] \n\n"
+                    + "Commands:\n"
+                    + "checkstyle --exercise=<PATH> --output=<PATH> --locale=<LOCALE>"
+                    + "    Run checkstyle or similar plugin to project if applicable.\n"
+                    + "help"
+                    + "    Display help information.\n"
+                    + "prepare-solutions --exercise=<PATH> --output=<PATH>"
+                    + "    Prepare a presentable solution from the original.\n"
+                    + "prepare-stubs --exercise=<PATH> -- output=<PATH> --locale=<LOCALE>"
+                    + "    Prepare a stub exercise from the original.\n"
+                    + "run-tests --exercise=<PATH> --output=<PATH>"
+                    + "    Run the tests for the exercise.\n"
+                    + "scan-exercise --exercise=<PATH> --output=<PATH>"
+                    + "    Produce an exercise description of an exercise directory.\n"
+                    + "find-exercises --exercise=<PATH> --output=<PATH>"
+                    + "    Produce list of found exercises.\n"
+                    + "get-exercise-packaging-configuration --exercise=<PATH> --output=<PATH>"
+                    + "    Returns configuration of under which folders student and nonstudent"
+                    + " files are located."
+                    + "clean --exercise=<PATH>"
+                    + "    Produce list of found exercises.";
+//                  + "prepare-submission  --clonePath --submissionPath --output=PATH"
+//                  + "    Prepares from submission and solution project for which the tests"
+//                  + " can be run in sandbox";
 
+    private Io io;
     private TaskExecutor executor;
+
     private Path exercisePath;
     private Path outputPath;
     private Locale locale;
@@ -86,7 +112,7 @@ public class AdminCommand extends AbstractCommand {
     private void runSubCommand(String subCommand) {
         switch (subCommand) {
             case "help":
-                io.errorln("Not implemented!");
+                printHelp();
                 break;
             case "checkstyle":
                 runCheckCodeStyle();
@@ -113,6 +139,7 @@ public class AdminCommand extends AbstractCommand {
                 runClean();
                 break;
             default:
+                printHelp();
                 break;
         }
     }
@@ -347,5 +374,9 @@ public class AdminCommand extends AbstractCommand {
         try (FileWriter writer = new FileWriter(outputFile.toAbsolutePath().toFile())) {
             writer.write(new Gson().toJson(obj));
         }
+    }
+
+    private void printHelp() {
+        io.println(HELP_TEXT);
     }
 }

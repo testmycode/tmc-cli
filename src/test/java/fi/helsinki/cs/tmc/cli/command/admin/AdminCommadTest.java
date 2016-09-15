@@ -29,10 +29,6 @@ import java.util.Locale;
 
 public class AdminCommadTest {
 
-    private static final String EXERCISE_PATH = "--exercise-path";
-    private static final String OUTPUT_PATH = "--output-path";
-    private static final String LOCALE = "--locale";
-
     private Application app;
     private CliContext ctx;
     private TestIo io;
