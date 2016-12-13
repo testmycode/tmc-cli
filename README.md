@@ -70,7 +70,7 @@ The man page is generated from docs/MANUAL.md using [md2man](https://github.com/
 
 For system administrators/packagers: To make the man page available for all users, move it to /usr/share/man/man1 - then it can be displayed with `man tmc`.
 
-You can also open the manual in your shell remotely with `curl -0 https://raw.githubusercontent.com/testmycode/tmc-cli/master/docs/tmc.1 | man -l -`. This will show the manual for the latest version. You may want to bind it to an alias for ease of use.
+You can also open the manual in your shell remotely with `curl -0s https://raw.githubusercontent.com/testmycode/tmc-cli/master/docs/tmc.1 | man -l -`. This will show the manual for the latest version. You may want to bind it to an alias for ease of use.
 
 ##Logging in
 
