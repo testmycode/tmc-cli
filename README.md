@@ -7,13 +7,13 @@
 
 ![tmc-cli logo](https://rawgit.com/testmycode/tmc-cli/master/docs/logo_plain.svg)
 
-#tmc-cli
+# tmc-cli
 
 TMC-CLI is the command-line client for University of Helsinki's TestMyCode -framework. TestMyCode is used by various online programming courses for exercise testing and submission.
 
 ![Demonstration](docs/demo.gif)
 
-##Requirements
+## Requirements
 
 * Java Runtime Environment 7
 * Linux, Mac OS X or Microsoft Windows
@@ -21,9 +21,9 @@ TMC-CLI is the command-line client for University of Helsinki's TestMyCode -fram
   * Other Unix-like systems may work, but are not tested
 * If you want autocompletion, Bash or a Bash-compatible shell is required
 
-##Installation
+## Installation
 
-###Using the install script (Linux/OS X only)
+### Using the install script (Linux/OS X only)
 
 `cd` into the directory where you wish to install TMC-CLI. Then, copy and paste the following command in your terminal:
 
@@ -33,7 +33,7 @@ curl -0 https://raw.githubusercontent.com/testmycode/tmc-cli/master/scripts/inst
 
 TMC-CLI should now be installed. You can try running it with `tmc` in a new terminal.
 
-###Manual installation
+### Manual installation
 
 Download the latest [release](https://github.com/testmycode/tmc-cli/releases/latest). If you use Linux or OS X, choose "tmc". If you use Windows, choose "tmc-cli-[VERSION].jar".
 
@@ -58,11 +58,11 @@ Tip: On Windows, use `doskey tmc="java -jar [path_to_tmc-cli.jar] $*"` in cmd.ex
 
 Now that you've installed tmc-cli, you can view all available commands by running tmc without arguments or with `tmc --help`. You can also view all available options for commands by running them with the `--help` switch, for example `tmc courses --help`.
 
-##Uninstallation
+## Uninstallation
 
 Delete tmc from the directory where you downloaded it, .tmc-autocomplete.sh from your home directory and remove 'source $HOME/.tmc-autocomplete' from your shell rc file.
 
-##Manual
+## Manual
 
 The Unix man page for tmc-cli is located in docs/tmc.1 in this repository. To view it, open it with `man -l tmc.1`.
 
@@ -72,7 +72,7 @@ For system administrators/packagers: To make the man page available for all user
 
 You can also open the manual in your shell remotely with `curl -0s https://raw.githubusercontent.com/testmycode/tmc-cli/master/docs/tmc.1 | man -l -`. This will show the manual for the latest version. You may want to bind it to an alias for ease of use.
 
-##Logging in
+## Logging in
 
 Once installation is complete, you can log in using `tmc login`. This saves your TMC login information to a configuration file in ~/.config/tmc-cli/ (or %APPDATA% on Windows) - you will only have to log in once.
 
@@ -84,7 +84,7 @@ password:
 Login successful.
 ```
 
-##Listing courses
+## Listing courses
 
 Once you have logged in, you can list all the available courses on the server with `tmc courses`.
 ```
@@ -98,7 +98,7 @@ javascript-for-lazy-hipsters
 
 Note that you can only submit exercises on courses for which you have enrolled.
 
-##Downloading courses
+## Downloading courses
 
 Navigate to a suitable directory in which you wish to download your course(s). Then, run `tmc download [COURSE_NAME]`. This will create a new directory for your course and download all available exercises into it. By default, only exercises that you have not fully completed are downloaded - download all exercises with `-a`.
 
@@ -114,7 +114,7 @@ exercise1/  exercise2/  exercise3/  exercise4/  .tmc.json
 
 Course-specific information is stored in .tmc.json. Do not manually edit or remove it unless you are completely done with the course - doing so will cause tmc to not function properly.
 
-##Running tests
+## Running tests
 
 After you've completed an exercise and wish to run tests on it, navigate to the exercise directory and run `tmc test`. If you are in the course root directory, you can also give the names of the exercises as arguments: `tmc test exercise1 exercise2`. Running `tmc test` in the course root with no arguments will run tests on all exercises.
 
@@ -125,7 +125,7 @@ Test results: 1/1 tests passed
 All tests passed! Submit to server with 'tmc submit'
 ```
 
-##Submitting exercises
+## Submitting exercises
 
 You have now completed your first exercise! To submit your exercise, run `tmc submit`. The syntax is the same as for running tests.
 
@@ -138,7 +138,7 @@ Points permanently awarded: [exercise1]
 Model solution: https://link.to.model/solution
 ```
 
-##Updating the course
+## Updating the course
 
 As you complete exercises, more exercises may become available. To update the course and download new exercises, run `tmc update`.
 
@@ -147,7 +147,7 @@ As you complete exercises, more exercises may become available. To update the co
 New exercises downloaded: [exercise5, exercise6]
 ```
 
-##Listing exercises
+## Listing exercises
 
 If you want to see your current progress, you can view the status of all course exercises with `tmc exercises [course]`. By default, the exercise list is viewed in your system's pager, but you can print them directly to your terminal with the `-n` or `--no-pager` switch.
 
@@ -161,7 +161,7 @@ Deadline: 2038-20-01 at 18:00:00
   Not completed: exercise4
 ```
 
-##Sending exercises to pastebin
+## Sending exercises to pastebin
 
 If you're having trouble with an exercise or just want to have your code peer-reviewed, you can use `tmc paste` to send an exercise to the TMC server's pastebin. You'll be prompted to add a message, but it is optional.
 
@@ -186,7 +186,7 @@ You cannot submit exercises that you have completed.
 ## Crafting a release
 Releases are automatically built in Travis and pushed to GitHub releases. Once ready to release, update version in pom.xml and gat the commit accordingly. Once tests have passed a new release is uploaded to travis. Note: only travis runs with tag set are used for releases.
 
-##Disclaimer
+## Disclaimer
 
 This software is licensed under [the MIT license](https://raw.githubusercontent.com/testmycode/tmc-cli/instructions/LICENSE).
 
