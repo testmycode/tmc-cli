@@ -131,7 +131,7 @@ public class TmcUtilTest {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
         Account account = new Account();
-        assertFalse(TmcUtil.tryToLogin(ctx, account));
+        assertFalse(TmcUtil.tryToLogin(ctx, account, ""));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class TmcUtilTest {
         ctx.setApp(app);
         when(app.runAutoUpdate()).thenReturn(true);
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        TmcUtil.tryToLogin(ctx, new Account());
+        TmcUtil.tryToLogin(ctx, new Account(), "");
         io.assertContains("Your tmc-cli is outdated");
         verify(app, times(1)).runAutoUpdate();
     }
@@ -167,7 +167,7 @@ public class TmcUtilTest {
                 };
 
         when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        TmcUtil.tryToLogin(ctx, new Account());
+        TmcUtil.tryToLogin(ctx, new Account(), "");
         io.assertContains("Incorrect username or password");
     }
 

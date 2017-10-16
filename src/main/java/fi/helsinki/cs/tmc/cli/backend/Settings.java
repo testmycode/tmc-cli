@@ -7,6 +7,8 @@ import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import com.google.common.base.Optional;
+import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import java.nio.file.Path;
@@ -49,16 +51,29 @@ public class Settings implements TmcSettings {
 
     @Override
     public String getServerAddress() {
-        return account.getServerAddress();
+        if (account.getServerAddress().isPresent()) {
+            return account.getServerAddress().get();
+        }
+        return "https://tmc.mooc.fi";
     }
 
     @Override
-    public String getPassword() {
+    public void setServerAddress(String address) {
+       account.setServerAddress(address);
+    }
+
+    @Override
+    public Optional<String> getPassword() {
         return account.getPassword();
     }
 
     @Override
-    public String getUsername() {
+    public void setPassword(Optional<String> password) {
+            account.setPassword(password);
+    }
+
+    @Override
+    public Optional<String> getUsername() {
         return account.getUsername();
     }
 
@@ -69,12 +84,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public Optional<Course> getCurrentCourse() {
-        return Optional.absent();
-    }
-
-    @Override
-    public String apiVersion() {
-        return "7";
+        return account.getCurrentCourse();
     }
 
     @Override
@@ -116,8 +126,58 @@ public class Settings implements TmcSettings {
     }
 
     @Override
-    public void setCourse(Course course) {}
+    public String hostProgramName() {
+        // which command line is used
+        return null;
+    }
 
     @Override
-    public void setConfigRoot(Path path) {}
+    public String hostProgramVersion() {
+        // which command line is used
+        return null;
+    }
+
+    @Override
+    public boolean getSendDiagnostics() {
+        return false;
+    }
+
+    @Override
+    public Optional<OauthCredentials> getOauthCredentials() {
+        return account.getOauthCredentials();
+    }
+
+    @Override
+    public void setOauthCredentials(Optional<OauthCredentials> credentials) {
+        account.setOauthCredentials(credentials);
+    }
+
+    @Override
+    public void setToken(Optional<String> token) {
+        account.setoAuthToken(token);
+    }
+
+    @Override
+    public Optional<String> getToken() {
+        return account.getoAuthToken();
+    }
+
+    @Override
+    public Optional<Organization> getOrganization() {
+        return account.getOrganization();
+    }
+
+    @Override
+    public void setOrganization(Optional<Organization> organization) {
+        account.setOrganization(organization);
+    }
+
+    @Override
+    public void setCourse(Course course) {
+        account.setCurrentCourse(Optional.of(course));
+    }
+
+    @Override
+    public void setConfigRoot(Path path) {
+    }
 }

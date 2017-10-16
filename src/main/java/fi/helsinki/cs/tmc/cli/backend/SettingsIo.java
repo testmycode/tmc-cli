@@ -32,7 +32,7 @@ public class SettingsIo {
 
     // PROPERTIES_CONFIG is the _global_ configuration file containing
     // tmc-cli's configuration and data, such as when to update when the client
-    //  was last updated. Is located under CONFIG_DIR
+    // was last updated. Is located under CONFIG_DIR
     public static final String PROPERTIES_CONFIG = "properties.json";
 
     public static AccountList loadAccountList() {
@@ -142,7 +142,6 @@ public class SettingsIo {
             try {
                 Files.createDirectories(configRoot);
             } catch (Exception e) {
-                //TODO print error to user
                 logger.error("Could not create config directory", e);
                 return false;
             }
@@ -156,7 +155,6 @@ public class SettingsIo {
         try {
             reader = Files.newBufferedReader(file, Charset.forName("UTF-8"));
         } catch (IOException e) {
-            //TODO print error to user
             logger.error("Accounts file located, but failed to read from it", e);
             return null;
         }
@@ -169,7 +167,6 @@ public class SettingsIo {
         try {
             Files.write(file, json);
         } catch (IOException e) {
-            //TODO print error to user
             logger.error("Could not write account to accounts file", e);
             return false;
         }

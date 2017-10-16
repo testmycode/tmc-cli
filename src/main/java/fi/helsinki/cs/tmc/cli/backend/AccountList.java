@@ -30,8 +30,11 @@ public class AccountList implements Iterable<Account> {
             return getAccount();
         }
         for (Account account : this.accountArray) {
-            if (account.getUsername().equals(username)
-                    && account.getServerAddress().equals(server)) {
+            if (!account.getUsername().isPresent() || !account.getServerAddress().isPresent()) {
+                continue;
+            }
+            if (account.getUsername().get().equals(username)
+                    && account.getServerAddress().get().equals(server)) {
                 // Move account to index 0 so we can always use the last used account by default
                 this.accountArray.remove(account);
                 this.accountArray.add(0, account);

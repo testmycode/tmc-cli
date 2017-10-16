@@ -35,11 +35,6 @@ public class SettingsTest {
     }
 
     @Test
-    public void correctApiVersion() {
-        assertEquals("7", settings.apiVersion());
-    }
-
-    @Test
     public void correctClientVersion() {
         assertEquals(EnvironmentUtil.getVersion(), settings.clientVersion());
     }

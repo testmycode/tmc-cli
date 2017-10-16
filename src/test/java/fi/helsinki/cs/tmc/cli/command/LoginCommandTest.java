@@ -74,7 +74,7 @@ public class LoginCommandTest {
 
     @Test
     public void logsInWithCorrectServerUserAndPassword() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), PASSWORD)).thenReturn(true);
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", PASSWORD};
         app.run(args);
@@ -83,7 +83,7 @@ public class LoginCommandTest {
 
     @Test
     public void userGetsErrorMessageIfLoginFails() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), PASSWORD)).thenReturn(true);
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(false);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME, "-p", "WrongPassword"};
         app.run(args);
@@ -102,7 +102,7 @@ public class LoginCommandTest {
 
     @Test
     public void loginAsksPasswordFromUserIfNotGiven() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), PASSWORD)).thenReturn(true);
         String[] args = {"login", "-s", SERVER, "-u", USERNAME};
         io.addPasswordPrompt(PASSWORD);
         app.run(args);
@@ -111,7 +111,7 @@ public class LoginCommandTest {
 
     @Test
     public void loginAsksServerFromUserIfNotGiven() {
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), PASSWORD)).thenReturn(true);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         io.addLinePrompt(SERVER);
         app.run(args);
@@ -122,7 +122,7 @@ public class LoginCommandTest {
     public void serverAndNotAskedAfterLogout() {
         Account account = new Account(SERVER, "username", "pass");
         CourseInfo info = new CourseInfo(account, null);
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), PASSWORD)).thenReturn(true);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login"};
         io.addPasswordPrompt(PASSWORD);
@@ -134,7 +134,7 @@ public class LoginCommandTest {
     public void courseInfoValuesOverridedByOptions() {
         Account account = new Account(SERVER, "username", "pass");
         CourseInfo info = new CourseInfo(account, null);
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class))).thenReturn(true);
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), PASSWORD)).thenReturn(true);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         app.run(args);
@@ -142,6 +142,6 @@ public class LoginCommandTest {
 
         Account expectedAccount = new Account(SERVER, USERNAME, PASSWORD);
         verifyStatic();
-        TmcUtil.tryToLogin(eq(ctx), eq(expectedAccount));
+        TmcUtil.tryToLogin(eq(ctx), eq(expectedAccount), PASSWORD);
     }
 }

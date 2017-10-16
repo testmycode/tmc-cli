@@ -51,14 +51,15 @@ public class TmcUtil {
         return true;
     }
 
-    public static boolean tryToLogin(CliContext ctx, Account account) {
+    public static boolean tryToLogin(CliContext ctx, Account account, String password) {
         TmcCore core = ctx.getTmcCore();
         ctx.useAccount(account);
-        Callable<List<Course>> callable = core.listCourses(ProgressObserver.NULL_OBSERVER);
+        Callable<Void> callable = core.authenticate(ProgressObserver.NULL_OBSERVER, password);
         //TODO restore the settings object
 
         try {
-            return callable.call() != null;
+            callable.call();
+            return true;
         } catch (Exception e) {
             if (isAuthenticationError(e)) {
                 ctx.getIo().println("Incorrect username or password.");

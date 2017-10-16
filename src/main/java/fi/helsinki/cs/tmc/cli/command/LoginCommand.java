@@ -11,7 +11,10 @@ import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+
+import com.google.common.base.Optional;
 
 @Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand extends AbstractCommand {
@@ -22,6 +25,7 @@ public class LoginCommand extends AbstractCommand {
     private String serverAddress;
     private String username;
     private String password;
+    private String oAuthToken;
 
     @Override
     public String[] getUsages() {
@@ -66,8 +70,8 @@ public class LoginCommand extends AbstractCommand {
         username = getLoginInfo(args, username, "u", "username: ");
         password = getLoginInfo(args, null, "p", "password: ");
 
-        Account account = new Account(serverAddress, username, password);
-        if (!TmcUtil.tryToLogin(ctx, account)) {
+        Account account = new Account(serverAddress, username, null);
+        if (!TmcUtil.tryToLogin(ctx, account, password)) {
             return;
         }
 

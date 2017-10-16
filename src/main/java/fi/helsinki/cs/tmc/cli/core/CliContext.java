@@ -13,12 +13,17 @@ import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class CliContext {
+    private static final Logger LOG = Logger.getLogger(
+            TmcServerCommunicationTaskFactory.class.getName());
+
 
     private final WorkDir workDir;
     private final Io io;
@@ -201,6 +206,10 @@ public class CliContext {
         return true;
     }
 
+    public Settings getSettings() {
+        return settings;
+    }
+
     /**
      * Initialize the cached data, but don't fail if there is not login.
      *
@@ -249,4 +258,5 @@ public class CliContext {
         createTmcCore(cachedAccount);
         return true;
     }
+
 }

@@ -20,12 +20,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The application class for the program.
@@ -80,7 +75,8 @@ public class Application {
     }
 
     private boolean runCommand(String name, String[] args) {
-        AbstractCommand command = CommandFactory.createCommand(name);
+        String[] commandName = name.split(" ");
+        AbstractCommand command = CommandFactory.createCommand(commandName[0]);
         if (command == null) {
             io.errorln("Command " + name + " doesn't exist.");
             return false;
@@ -176,6 +172,20 @@ public class Application {
     }
 
     public static void main(String[] args) {
+        while(true) {
+            Scanner reader = new Scanner(System.in);
+            System.out.println("Enter command (stop to exit)");
+            String command = reader.nextLine();
+            if (command.equals("stop")) {
+                break;
+            } else {
+                String[] argh =  command.split((" "));
+                realMain(argh);
+            }
+        }
+    }
+
+    public static void realMain(String[] args) {
         Application app = new Application(new CliContext(null));
         app.run(args);
     }
