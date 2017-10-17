@@ -23,8 +23,8 @@ public class SettingsTest {
     @Test
     public void constructorInitializesFields() {
         assertEquals("testserver", settings.getServerAddress());
-        assertEquals("testuser", settings.getUsername());
-        assertEquals("testpassword", settings.getPassword());
+        assertEquals("testuser", settings.getUsername().get());
+        assertEquals("testpassword", settings.getPassword().get());
     }
 
     @Test

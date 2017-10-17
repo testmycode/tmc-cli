@@ -69,19 +69,11 @@ public class Account {
     }
 
     public void setOauthCredentials(Optional<OauthCredentials> oauthCredentials) {
-        if (oauthCredentials.isPresent()) {
-            this.oauthCredentials = oauthCredentials.get();
-        } else {
-            this.oauthCredentials = null;
-        }
+        this.oauthCredentials = oauthCredentials.orNull();
     }
 
     public void setPassword(Optional<String> password) {
-        if (password.isPresent()) {
-            this.password = password.get();
-        } else {
-            this.password = null;
-        }
+        this.password = password.orNull();
     }
 
     public Optional<String> getoAuthToken() {
@@ -89,11 +81,7 @@ public class Account {
     }
 
     public void setoAuthToken(Optional<String> token) {
-        if (token.isPresent()) {
-            this.token = token.get();
-        } else {
-            this.token = null;
-        }
+        this.token= token.orNull();
     }
 
     public Optional<Course> getCurrentCourse() {
@@ -113,12 +101,7 @@ public class Account {
     }
 
     public void setCurrentCourse(Optional<Course> currentCourse) {
-        if (currentCourse.isPresent()) {
-            this.currentCourse = currentCourse.get();
-        } else {
-            this.currentCourse = null;
-        }
-
+        this.currentCourse = currentCourse.orNull();
     }
 
     public Optional<Organization> getOrganization() {
@@ -126,10 +109,6 @@ public class Account {
     }
 
     public void setOrganization(Optional<Organization> organization) {
-        if (organization.isPresent()) {
-            this.organization = organization.get();
-        } else {
-            this.organization = null;
-        }
+        this.organization = organization.orNull();
     }
 }

@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import junit.framework.Assert;
@@ -8,10 +9,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static org.junit.Assert.assertTrue;
 
 public class CourseInfoIoTest {
 
@@ -52,5 +56,16 @@ public class CourseInfoIoTest {
         Assert.assertEquals(this.course.getServerAddress(), loadedInfo.getServerAddress());
         Assert.assertEquals(this.course.getUsername(), loadedInfo.getUsername());
         Assert.assertEquals(this.course.getCourseName(), loadedInfo.getCourseName());
+    }
+
+    @Test
+    public void abortingCourseCreationWorks() {
+        CourseInfoIo.save(this.course, this.courseFile);
+        CourseInfo loadedInfo = CourseInfoIo.load(this.courseFile);
+        Assert.assertNotNull(loadedInfo);
+
+        CourseInfoIo.abortCreatingCourse(new Course("test-course"), Paths.get(tempDir));
+        File courseJson = Paths.get(tempDir).resolve(".tmc.json").toFile();
+        assertTrue(!courseJson.exists());
     }
 }

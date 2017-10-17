@@ -57,10 +57,10 @@ public class ListCoursesCommand extends AbstractCommand {
             if (!isFirst) {
                 io.println();
             }
-            if (accountsList.getAccountCount() > 1) {
+            if (accountsList.getAccountCount() > 1 && settings.getServerAddress().isPresent()) {
                 io.println(
                         ColorUtil.colorString(
-                                "Server " + settings.getServerAddress(), Color.YELLOW));
+                                "Server " + settings.getServerAddress().get(), Color.YELLOW));
             }
 
             printCourseList(settings);

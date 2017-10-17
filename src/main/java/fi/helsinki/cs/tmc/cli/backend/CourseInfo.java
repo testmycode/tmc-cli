@@ -19,8 +19,8 @@ public class CourseInfo {
     private HashMap<String, String> properties;
 
     public CourseInfo(Account account, Course course) {
-        this.username = account.getUsername().get();
-        this.serverAddress = account.getServerAddress().get();
+        this.username = account.getUsername().orNull();
+        this.serverAddress = account.getServerAddress().orNull();
         this.course = course;
         this.properties = new HashMap<>();
         this.localCompletedExercises = new ArrayList<>();

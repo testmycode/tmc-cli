@@ -32,11 +32,13 @@ import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.http.entity.BasicHttpEntity;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.omg.PortableInterceptor.ServerRequestInfo;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -60,6 +62,9 @@ public class TmcUtilTest {
     private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
+    private static String SERVER = "server";
+    private static String USERNAME = "username";
+    private static String PASSWORD = "password";
 
     @Before
     public void setUp() {
@@ -130,45 +135,8 @@ public class TmcUtilTest {
     public void failToLogin() throws URISyntaxException {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
-        Account account = new Account();
+        Account account = new Account(SERVER, USERNAME, PASSWORD);
         assertFalse(TmcUtil.tryToLogin(ctx, account, ""));
-    }
-
-    @Test
-    public void loginCatchesObsoleteClientException() {
-        Callable<List<Course>> callable =
-                new Callable<List<Course>>() {
-                    @Override
-                    public List<Course> call() throws Exception {
-                        Exception exception = new ObsoleteClientException();
-                        throw new Exception(exception);
-                    }
-                };
-
-        Application app = mock(Application.class);
-        ctx.setApp(app);
-        when(app.runAutoUpdate()).thenReturn(true);
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        TmcUtil.tryToLogin(ctx, new Account(), "");
-        io.assertContains("Your tmc-cli is outdated");
-        verify(app, times(1)).runAutoUpdate();
-    }
-
-    @Test
-    public void loginCatchesFailedHttpResponseException() {
-        Callable<List<Course>> callable =
-                new Callable<List<Course>>() {
-                    @Override
-                    public List<Course> call() throws Exception {
-                        Exception exception =
-                                new FailedHttpResponseException(401, new BasicHttpEntity());
-                        throw new Exception(exception);
-                    }
-                };
-
-        when(mockCore.listCourses(any(ProgressObserver.class))).thenReturn(callable);
-        TmcUtil.tryToLogin(ctx, new Account(), "");
-        io.assertContains("Incorrect username or password");
     }
 
     @Test

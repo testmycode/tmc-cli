@@ -79,7 +79,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public boolean userDataExists() {
-        return getUsername() != null && getPassword() != null;
+        return getUsername().isPresent() && getPassword().isPresent();
     }
 
     @Override
@@ -102,7 +102,7 @@ public class Settings implements TmcSettings {
         if (!userDataExists()) {
             return "";
         }
-        return getUsername() + ":" + this.getPassword();
+        return getUsername().get() + ":" + this.getPassword().get();
     }
 
     @Override

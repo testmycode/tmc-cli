@@ -15,6 +15,7 @@ import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,11 +241,8 @@ public class TmcUtil {
 
     private static boolean isAuthenticationError(Exception exception) {
         Throwable cause = exception.getCause();
-        if (cause instanceof FailedHttpResponseException) {
-            FailedHttpResponseException httpEx = (FailedHttpResponseException) cause;
-            if (httpEx.getStatusCode() == 401) {
+        if (cause instanceof OAuthProblemException) {
                 return true;
-            }
         }
         return false;
     }

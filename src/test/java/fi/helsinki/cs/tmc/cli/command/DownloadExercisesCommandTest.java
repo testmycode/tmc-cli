@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -281,5 +282,15 @@ public class DownloadExercisesCommandTest {
 
         Settings usedSettings = Whitebox.getInternalState(ctxCaptor.getValue(), "settings");
         assertEquals(account1, usedSettings.getAccount());
+    }
+
+    @Test
+    public void courseConfigFileDeletedIfDownloadingExercisesFails() {
+        ArgumentCaptor<CliContext> ctxCaptor = ArgumentCaptor.forClass(CliContext.class);
+        when(TmcUtil.downloadExercises(ctxCaptor.capture(),  anyListOf(Exercise.class), any(ProgressObserver.class))).thenReturn(null);
+        String[] args = {"download", "course1"};
+        app.run(args);
+        File courseJson = tempDir.resolve("course1").resolve(".tmc.json").toFile();
+        assertTrue(!courseJson.exists());
     }
 }
