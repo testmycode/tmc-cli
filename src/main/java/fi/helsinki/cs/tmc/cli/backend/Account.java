@@ -11,7 +11,7 @@ import fi.helsinki.cs.tmc.core.domain.Organization;
  */
 public class Account {
 
-    static Account NULL_ACCOUNT = new Account(null, null, null);
+    static Account NULL_ACCOUNT = new Account(null, null, null, null);
 
     private String serverAddress;
     private String username;
@@ -25,10 +25,17 @@ public class Account {
     public Account() {}
 
     public Account(String serverAddress, String username, String password) {
-        this.serverAddress = serverAddress;
-        this.username = username;
-        this.password = password;
-        this.organization = new Organization("Default", "lolled", "default", "lolled", false);
+        this.serverAddress = serverAddress == null ? null : serverAddress.trim();
+        this.username = username == null ? null : username.trim();
+        this.password = password == null ? null : password.trim();
+    }
+
+
+    public Account(String serverAddress, String username, String password, Organization organization) {
+        this.serverAddress = serverAddress == null ? null : serverAddress.trim();
+        this.username = username == null ? null : username.trim();
+        this.password = password == null ? null : password.trim();
+        this.organization = organization;
     }
 
     public Optional<String> getServerAddress() {
@@ -61,7 +68,7 @@ public class Account {
     }
 
     public void setServerAddress(String serverAddress) {
-            this.serverAddress = serverAddress;
+            this.serverAddress = serverAddress.trim();
     }
 
     public Optional<OauthCredentials> getOauthCredentials() {
@@ -73,7 +80,10 @@ public class Account {
     }
 
     public void setPassword(Optional<String> password) {
-        this.password = password.orNull();
+        if (password.isPresent()) {
+            this.password = password.get().trim();
+        }
+        this.password = null;
     }
 
     public Optional<String> getoAuthToken() {
@@ -86,18 +96,6 @@ public class Account {
 
     public Optional<Course> getCurrentCourse() {
         return Optional.fromNullable(currentCourse);
-    }
-
-    @Override
-    public String toString() {
-        return "Account{" +
-                "serverAddress='" + serverAddress + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", oauthCredentials='" + oauthCredentials + '\'' +
-                ", token='" + token + '\'' +
-                ", currentCourse='" + currentCourse +  '\'' +
-                '}';
     }
 
     public void setCurrentCourse(Optional<Course> currentCourse) {

@@ -23,8 +23,8 @@ public class Settings implements TmcSettings {
         this.account = Account.NULL_ACCOUNT;
     }
 
-    public Settings(String serverAddress, String username, String password) {
-        this.account = new Account(serverAddress, username, password);
+    public Settings(String serverAddress, String username, String password, Organization organization) {
+        this.account = new Account(serverAddress, username, password, organization);
     }
 
     /**

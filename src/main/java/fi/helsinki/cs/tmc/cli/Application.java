@@ -76,7 +76,7 @@ public class Application {
 
     private boolean runCommand(String name, String[] args) {
         String[] commandName = name.split(" ");
-        AbstractCommand command = CommandFactory.createCommand(commandName[0]);
+        AbstractCommand command = CommandFactory.createCommand(commandName[0].trim().toLowerCase());
         if (command == null) {
             io.errorln("Command " + name + " doesn't exist.");
             return false;

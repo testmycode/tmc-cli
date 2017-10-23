@@ -18,6 +18,7 @@ import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +44,7 @@ public class ListCoursesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
-        Account account = new Account("http://test.test", "", "");
+        Account account = new Account("http://test.test", "", "", new Organization("", "", "", "", false));
         AccountList accountList = new AccountList();
         accountList.addAccount(account);
 
@@ -95,8 +96,8 @@ public class ListCoursesCommandTest {
 
     @Test
     public void listCoursesWorksWithTwoServers() {
-        Account account1 = new Account("http://test.test", "", "");
-        Account account2 = new Account("http://hello.test", "", "");
+        Account account1 = new Account("http://test.test", "", "", new Organization("", "", "", "", false));
+        Account account2 = new Account("http://hello.test", "", "", new Organization("", "", "", "", false));
 
         AccountList accountList = new AccountList();
         accountList.addAccount(account1);

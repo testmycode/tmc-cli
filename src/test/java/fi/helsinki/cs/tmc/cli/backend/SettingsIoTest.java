@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -23,7 +24,8 @@ public class SettingsIoTest {
     @Before
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve(SettingsIo.CONFIG_DIR);
-        account = new Account("testserver", "testuser", "testpassword");
+        account = new Account("testserver", "testuser", "testpassword",
+                new Organization("test", "test", "test", "test", false));
         accountList = new AccountList();
         try {
             FileUtils.deleteDirectory(tempDir.toFile());

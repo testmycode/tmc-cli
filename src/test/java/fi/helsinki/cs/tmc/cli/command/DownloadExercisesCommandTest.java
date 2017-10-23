@@ -24,6 +24,7 @@ import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import org.apache.commons.cli.ParseException;
@@ -57,17 +58,19 @@ public class DownloadExercisesCommandTest {
     private TmcCore mockCore;
     private WorkDir workDir;
     private Path tempDir;
+    private Organization testOrganization;
 
     @Before
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
         workDir = new WorkDir(tempDir);
+        testOrganization = new Organization("test", "test", "hy", "test", false);
 
         io = new TestIo();
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore, workDir);
         app = new Application(ctx);
-        Account account = new Account("server", "user", "password");
+        Account account = new Account("server", "user", "password", testOrganization);
         ctx.useAccount(account);
         AccountList accountList = new AccountList();
         accountList.addAccount(account);
@@ -210,8 +213,8 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServer() {
-        Account account1 = new Account("http://test.test", "", "");
-        Account account2 = new Account("http://hello.test", "", "");
+        Account account1 = new Account("http://test.test", "", "", testOrganization);
+        Account account2 = new Account("http://hello.test", "", "", testOrganization);
         AccountList accountList = new AccountList();
         accountList.addAccount(account1);
         accountList.addAccount(account2);
@@ -227,8 +230,8 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServerWithSameNameWithoutTakingAny() {
-        Account account1 = new Account("http://test.test", "abc", "");
-        Account account2 = new Account("http://hello.test", "def", "");
+        Account account1 = new Account("http://test.test", "abc", "", testOrganization);
+        Account account2 = new Account("http://hello.test", "def", "", testOrganization);
         AccountList accountList = new AccountList();
         accountList.addAccount(account1);
         accountList.addAccount(account2);
@@ -257,8 +260,8 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServerWithSameNameWithTakingFirst() {
-        Account account1 = new Account("http://test.test", "abc", "");
-        Account account2 = new Account("http://hello.test", "def", "");
+        Account account1 = new Account("http://test.test", "abc", "", testOrganization);
+        Account account2 = new Account("http://hello.test", "def", "", testOrganization);
         AccountList accountList = new AccountList();
         accountList.addAccount(account2);
         accountList.addAccount(account1);

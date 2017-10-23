@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
@@ -15,6 +16,7 @@ import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
+import org.apache.commons.compress.archivers.sevenz.CLI;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +84,19 @@ public class TmcUtil {
             TmcUtil.logger.warn("Failed to get courses to list the exercises", e);
         }
         return new ArrayList<>();
+    }
+
+    public static List<Organization> getOrganizationsFromServer(CliContext ctx) {
+        Callable<List<Organization>> callable;
+        callable = ctx.getTmcCore().getOrganizations(ProgressObserver.NULL_OBSERVER);
+
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            TmcUtil.handleTmcExceptions(ctx, e);
+            TmcUtil.logger.error("Failed to get organizations from server", e);
+        }
+        return new ArrayList();
     }
 
     private static Course getDetails(CliContext ctx, Course course) {
@@ -218,17 +233,32 @@ public class TmcUtil {
             io.errorln("Your username or password is not valid anymore.");
             return;
         }
+
+        if (exception instanceof IllegalArgumentException) {
+            logger.error("Invalid arguments", exception);
+            io.errorln("Please give server, username and password in valid form.");
+            return;
+        }
+
         if (cause instanceof FailedHttpResponseException) {
             logger.error("Unable to connect to server", exception);
             io.errorln("Unable to connect to server.");
             return;
         }
+
+        if (exception instanceof UnknownHostException) {
+            logger.error("Unknown host", exception);
+            io.errorln("Unknwon host, check the server address.");
+            return;
+        }
+
         if (cause instanceof ObsoleteClientException) {
             logger.error("Outdated tmc client");
             io.errorln("Your tmc-cli is outdated. Please update it.");
             ctx.getApp().runAutoUpdate();
             return;
         }
+
         if (cause != null && cause.getCause() instanceof UnknownHostException) {
             logger.error("No internet connection");
             io.errorln("You have no internet connection.");
@@ -236,7 +266,7 @@ public class TmcUtil {
         }
         logger.error("Command failed in tmc-core", exception);
         //TODO we seem to write twice error message; here and in the commands.
-        io.errorln("Command failed in tmc-core, check tmc-cli.log file for more info");
+        io.errorln("Command failed, check tmc-cli.log file for more info");
     }
 
     private static boolean isAuthenticationError(Exception exception) {

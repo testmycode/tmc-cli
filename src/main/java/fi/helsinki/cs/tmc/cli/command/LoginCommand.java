@@ -10,11 +10,14 @@ import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import com.google.common.base.Optional;
+
+import java.util.concurrent.Callable;
 
 @Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand extends AbstractCommand {
@@ -25,7 +28,6 @@ public class LoginCommand extends AbstractCommand {
     private String serverAddress;
     private String username;
     private String password;
-    private String oAuthToken;
 
     @Override
     public String[] getUsages() {
@@ -37,6 +39,7 @@ public class LoginCommand extends AbstractCommand {
         options.addOption("u", "user", true, "TMC username");
         options.addOption("p", "password", true, "Password for the user");
         options.addOption("s", "server", true, "Address for TMC server");
+        options.addOption("o", "organization", true, "TMC organization");
     }
 
     @Override
@@ -70,10 +73,19 @@ public class LoginCommand extends AbstractCommand {
         username = getLoginInfo(args, username, "u", "username: ");
         password = getLoginInfo(args, null, "p", "password: ");
 
+        OrganizationCommand organizationCommand = new OrganizationCommand();
         Account account = new Account(serverAddress, username, null);
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
             return;
         }
+
+        Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, args);
+        if (!organization.isPresent()) {
+            return;
+        }
+        Account currentAccount = this.ctx.getSettings().getAccount();
+        currentAccount.setOrganization(organization);
+        this.ctx.getSettings().setAccount(currentAccount);
 
         AccountList list = SettingsIo.loadAccountList();
         list.addAccount(account);

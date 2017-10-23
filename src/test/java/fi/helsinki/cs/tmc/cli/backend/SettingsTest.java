@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,10 +15,12 @@ import java.util.Locale;
 public class SettingsTest {
 
     private Settings settings;
+    private Organization testOrganization;
 
     @Before
     public void setUp() {
-        settings = new Settings("testserver", "testuser", "testpassword");
+        testOrganization = new Organization("test", "test", "hy", "test", false);
+        settings = new Settings("testserver", "testuser", "testpassword", testOrganization);
     }
 
     @Test
@@ -57,7 +60,7 @@ public class SettingsTest {
 
     @Test
     public void userDataDoesNotExistIfUsernameIsNotSet() {
-        Account account = new Account("testserver", null, "testpassword");
+        Account account = new Account("testserver", null, "testpassword", testOrganization);
         settings.setAccount(account);
         assertTrue(!settings.userDataExists());
     }
@@ -69,14 +72,14 @@ public class SettingsTest {
 
     @Test
     public void formattedUserDataIsCorrectIfNotSet() {
-        Account account = new Account("testserver", null, "testpassword");
+        Account account = new Account("testserver", null, "testpassword", testOrganization);
         settings.setAccount(account);
         assertEquals("", settings.getFormattedUserData());
     }
 
     @Test
     public void userDataDoesNotExistIfPasswordIsNotSet() {
-        Account account = new Account("testserver", "testuser", null);
+        Account account = new Account("testserver", "testuser", null, testOrganization);
         settings.setAccount(account);
         assertTrue(!settings.userDataExists());
     }

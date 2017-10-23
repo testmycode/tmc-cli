@@ -23,6 +23,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
@@ -62,9 +63,10 @@ public class TmcUtilTest {
     private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
-    private static String SERVER = "server";
-    private static String USERNAME = "username";
-    private static String PASSWORD = "password";
+    private static final String SERVER = "server";
+    private static final  String USERNAME = "username";
+    private static final String PASSWORD = "password";
+    private static final Organization ORGANIZATION =new Organization("test", "test", "hy", "test", false);
 
     @Before
     public void setUp() {
@@ -135,7 +137,7 @@ public class TmcUtilTest {
     public void failToLogin() throws URISyntaxException {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
-        Account account = new Account(SERVER, USERNAME, PASSWORD);
+        Account account = new Account(SERVER, USERNAME, PASSWORD, ORGANIZATION);
         assertFalse(TmcUtil.tryToLogin(ctx, account, ""));
     }
 
