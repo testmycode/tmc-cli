@@ -20,7 +20,7 @@ public class CourseInfo {
 
     public CourseInfo(Account account, Course course) {
         this.username = account.getUsername().orNull();
-        this.serverAddress = account.getServerAddress().orNull();
+        this.serverAddress = account.getServerAddress();
         this.course = course;
         this.properties = new HashMap<>();
         this.localCompletedExercises = new ArrayList<>();

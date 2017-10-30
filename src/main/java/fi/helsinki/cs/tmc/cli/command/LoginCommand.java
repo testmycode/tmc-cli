@@ -25,7 +25,6 @@ public class LoginCommand extends AbstractCommand {
     private CliContext ctx;
     private Io io;
 
-    private String serverAddress;
     private String username;
     private String password;
 
@@ -38,7 +37,6 @@ public class LoginCommand extends AbstractCommand {
     public void getOptions(Options options) {
         options.addOption("u", "user", true, "TMC username");
         options.addOption("p", "password", true, "Password for the user");
-        options.addOption("s", "server", true, "Address for TMC server");
         options.addOption("o", "organization", true, "TMC organization");
     }
 
@@ -65,16 +63,14 @@ public class LoginCommand extends AbstractCommand {
 
         CourseInfo info = ctx.getCourseInfo();
         if (info != null) {
-            serverAddress = info.getServerAddress();
             username = info.getUsername();
         }
 
-        serverAddress = getLoginInfo(args, serverAddress, "s", "server address: ");
         username = getLoginInfo(args, username, "u", "username: ");
         password = getLoginInfo(args, null, "p", "password: ");
 
         OrganizationCommand organizationCommand = new OrganizationCommand();
-        Account account = new Account(serverAddress, username, null);
+        Account account = new Account(username, null);
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
             return;
         }
@@ -83,9 +79,11 @@ public class LoginCommand extends AbstractCommand {
         if (!organization.isPresent()) {
             return;
         }
-        Account currentAccount = this.ctx.getSettings().getAccount();
-        currentAccount.setOrganization(organization);
-        this.ctx.getSettings().setAccount(currentAccount);
+
+        this.ctx.getSettings().setOrganization(organization);
+
+        boolean sendDiagnostics = getSendDiagnosticsAnswer(username, account.getServerAddress());
+        this.ctx.getSettings().setSendDiagnostics(sendDiagnostics);
 
         AccountList list = SettingsIo.loadAccountList();
         list.addAccount(account);
@@ -115,5 +113,22 @@ public class LoginCommand extends AbstractCommand {
             value = io.readLine(prompt);
         }
         return value;
+    }
+
+    private boolean getSendDiagnosticsAnswer(String username, String server) {
+        AccountList savedAccounts = SettingsIo.loadAccountList();
+        if (savedAccounts.getAccount(username, server) != null) {
+            // not the first time logging in, diagnostics not asked
+            return this.ctx.getSettings().getSendDiagnostics();
+        }
+        while (true) {
+            String sendDiagnostics = io.readLine("Do you want to send crash reports and diagnostics for client development? (y/n)");
+            if (sendDiagnostics.trim().toLowerCase().startsWith("y")) {
+                return true;
+            } else if (sendDiagnostics.trim().toLowerCase().startsWith("n")) {
+                return false;
+            }
+            io.println("Please answer y or n.");
+        }
     }
 }

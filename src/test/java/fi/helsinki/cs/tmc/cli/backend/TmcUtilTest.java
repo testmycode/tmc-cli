@@ -137,7 +137,7 @@ public class TmcUtilTest {
     public void failToLogin() throws URISyntaxException {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createThrowingCallbackOfList(Course.class, "failed"));
-        Account account = new Account(SERVER, USERNAME, PASSWORD, ORGANIZATION);
+        Account account = new Account(USERNAME, PASSWORD, ORGANIZATION);
         assertFalse(TmcUtil.tryToLogin(ctx, account, ""));
     }
 

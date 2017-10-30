@@ -20,7 +20,14 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.lang.management.ManagementFactory;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Scanner;
+import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * The application class for the program.
@@ -171,15 +178,16 @@ public class Application {
         }
     }
 
+
     public static void main(String[] args) {
-        while(true) {
+        while (true) {
             Scanner reader = new Scanner(System.in);
             System.out.println("Enter command (stop to exit)");
             String command = reader.nextLine();
             if (command.equals("stop")) {
                 break;
             } else {
-                String[] argh =  command.split((" "));
+                String[] argh = command.split((" "));
                 realMain(argh);
             }
         }

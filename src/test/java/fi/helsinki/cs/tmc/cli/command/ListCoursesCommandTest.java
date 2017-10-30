@@ -44,7 +44,7 @@ public class ListCoursesCommandTest {
         mockCore = mock(TmcCore.class);
         ctx = new CliContext(io, mockCore);
         app = new Application(ctx);
-        Account account = new Account("http://test.test", "", "", new Organization("", "", "", "", false));
+        Account account = new Account( "", "");
         AccountList accountList = new AccountList();
         accountList.addAccount(account);
 
@@ -92,25 +92,5 @@ public class ListCoursesCommandTest {
         String[] args = {"courses"};
         app.run(args);
         io.assertContains("Found 2 courses");
-    }
-
-    @Test
-    public void listCoursesWorksWithTwoServers() {
-        Account account1 = new Account("http://test.test", "", "", new Organization("", "", "", "", false));
-        Account account2 = new Account("http://hello.test", "", "", new Organization("", "", "", "", false));
-
-        AccountList accountList = new AccountList();
-        accountList.addAccount(account1);
-        accountList.addAccount(account2);
-        when(SettingsIo.loadAccountList()).thenReturn(accountList);
-
-        List<Course> list1 = Collections.singletonList(new Course("course1"));
-        List<Course> list2 = Collections.singletonList(new Course("course2"));
-        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
-
-        String[] args = {"courses"};
-        app.run(args);
-        io.assertContains("Server http://test.test");
-        io.assertContains("Server http://hello.test");
     }
 }

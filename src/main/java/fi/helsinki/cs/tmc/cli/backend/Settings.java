@@ -20,11 +20,11 @@ public class Settings implements TmcSettings {
     private Account account;
 
     public Settings() {
-        this.account = Account.NULL_ACCOUNT;
+        this.account = new Account();
     }
 
-    public Settings(String serverAddress, String username, String password, Organization organization) {
-        this.account = new Account(serverAddress, username, password, organization);
+    public Settings(String username, String password, Organization organization) {
+        this.account = new Account(username, password, organization);
     }
 
     /**
@@ -33,10 +33,7 @@ public class Settings implements TmcSettings {
      */
     public void setAccount(Account account) {
         if (account == null) {
-            /* NULL_ACCOUNT is used so that the NullPointerException
-             * is not thrown in the getters.
-             */
-            account = Account.NULL_ACCOUNT;
+            account = new Account();
         }
         this.account = account;
     }
@@ -51,10 +48,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public String getServerAddress() {
-        if (account.getServerAddress().isPresent()) {
-            return account.getServerAddress().get();
-        }
-        return "https://tmc.mooc.fi";
+            return account.getServerAddress();
     }
 
     @Override
@@ -98,14 +92,6 @@ public class Settings implements TmcSettings {
     }
 
     @Override
-    public String getFormattedUserData() {
-        if (!userDataExists()) {
-            return "";
-        }
-        return getUsername().get() + ":" + this.getPassword().get();
-    }
-
-    @Override
     public Path getTmcProjectDirectory() {
         return workDir.getTmcDirectory();
     }
@@ -128,18 +114,21 @@ public class Settings implements TmcSettings {
     @Override
     public String hostProgramName() {
         // which command line is used
-        return null;
+        return "unknown";
     }
 
     @Override
     public String hostProgramVersion() {
-        // which command line is used
-        return null;
+        return "unknown";
     }
 
     @Override
     public boolean getSendDiagnostics() {
-        return false;
+        return account.getSendDiagnostics();
+    }
+
+    public void setSendDiagnostics(boolean value) {
+        account.setSendDiagnostics(value);
     }
 
     @Override
@@ -175,9 +164,5 @@ public class Settings implements TmcSettings {
     @Override
     public void setCourse(Course course) {
         account.setCurrentCourse(Optional.of(course));
-    }
-
-    @Override
-    public void setConfigRoot(Path path) {
     }
 }

@@ -14,24 +14,24 @@ public class AccountTest {
     @Before
     public void setUp() {
         testOrganization = new Organization("test", "test", "hy", "test", false);
-        account = new Account("testserver", "testuser", "testpassword", testOrganization);
+        account = new Account("testuser", "testpassword", testOrganization);
     }
 
     @Test
     public void equalsWorksWithSameValues() {
-        Account compared = new Account("testserver", "testuser", "testpassword", testOrganization);
+        Account compared = new Account("testuser", "testpassword", testOrganization);
         assertEquals(true, account.equals(compared));
     }
 
     @Test
     public void equalsWorksWithNull() {
-        Account compared = new Account(null, "testuser", "testpassword", testOrganization);
+        Account compared = new Account("testuser", null, testOrganization);
         assertEquals(false, account.equals(compared));
     }
 
     @Test
     public void equalsWorksWithRandomValue() {
-        Account compared = new Account("xyz", "testuser", "testpassword", testOrganization);
+        Account compared = new Account( "asd", "testpassword", testOrganization);
         assertEquals(false, account.equals(compared));
     }
 }

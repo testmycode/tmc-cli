@@ -20,12 +20,11 @@ public class SettingsTest {
     @Before
     public void setUp() {
         testOrganization = new Organization("test", "test", "hy", "test", false);
-        settings = new Settings("testserver", "testuser", "testpassword", testOrganization);
+        settings = new Settings("testuser", "testpassword", testOrganization);
     }
 
     @Test
     public void constructorInitializesFields() {
-        assertEquals("testserver", settings.getServerAddress());
         assertEquals("testuser", settings.getUsername().get());
         assertEquals("testpassword", settings.getPassword().get());
     }
@@ -60,26 +59,14 @@ public class SettingsTest {
 
     @Test
     public void userDataDoesNotExistIfUsernameIsNotSet() {
-        Account account = new Account("testserver", null, "testpassword", testOrganization);
+        Account account = new Account(null, "testpassword", testOrganization);
         settings.setAccount(account);
         assertTrue(!settings.userDataExists());
     }
 
     @Test
-    public void formattedUserDataIsCorrectIfSet() {
-        assertEquals("testuser:testpassword", settings.getFormattedUserData());
-    }
-
-    @Test
-    public void formattedUserDataIsCorrectIfNotSet() {
-        Account account = new Account("testserver", null, "testpassword", testOrganization);
-        settings.setAccount(account);
-        assertEquals("", settings.getFormattedUserData());
-    }
-
-    @Test
     public void userDataDoesNotExistIfPasswordIsNotSet() {
-        Account account = new Account("testserver", "testuser", null, testOrganization);
+        Account account = new Account("testuser", null, testOrganization);
         settings.setAccount(account);
         assertTrue(!settings.userDataExists());
     }

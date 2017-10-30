@@ -86,7 +86,7 @@ public class CourseFinder {
 
             if (io.readConfirmation(
                     "Download course from "
-                            + entryAccount.getServerAddress().get()
+                            + entryAccount.getServerAddress()
                             + " with '"
                             + entryAccount.getUsername().get()
                             + "' account",

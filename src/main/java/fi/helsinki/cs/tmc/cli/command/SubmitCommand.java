@@ -106,6 +106,11 @@ public class SubmitCommand extends AbstractCommand {
 
         for (Exercise exercise : submitExercises) {
             io.println(ColorUtil.colorString("Submitting: " + exercise.getName(), Color.YELLOW));
+            if (exercise.hasDeadlinePassed()) {
+                logger.warn("Tried to submit exercise " + exercise.getName() + " after deadline.");
+                io.errorln("Deadline has passed for this exercise at " + exercise.getDeadline());
+                return;
+            }
             SubmissionResult result = TmcUtil.submitExercise(ctx, exercise);
             if (result == null) {
                 io.errorln("Submission failed.");

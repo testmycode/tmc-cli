@@ -270,10 +270,6 @@ public class TmcUtil {
     }
 
     private static boolean isAuthenticationError(Exception exception) {
-        Throwable cause = exception.getCause();
-        if (cause instanceof OAuthProblemException) {
-                return true;
-        }
-        return false;
+        return exception.getCause() instanceof OAuthProblemException;
     }
 }

@@ -65,7 +65,7 @@ public class CourseInfoIoTest {
         Assert.assertNotNull(loadedInfo);
 
         CourseInfoIo.abortCreatingCourse(new Course("test-course"), Paths.get(tempDir));
-        File courseJson = Paths.get(tempDir).resolve(".tmc.json").toFile();
-        assertTrue(!courseJson.exists());
+        Path courseJson = Paths.get(tempDir).resolve(".tmc.json");
+        assertTrue(!Files.exists(courseJson));
     }
 }

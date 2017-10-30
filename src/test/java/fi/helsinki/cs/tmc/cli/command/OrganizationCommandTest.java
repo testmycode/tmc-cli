@@ -49,7 +49,7 @@ public class OrganizationCommandTest {
         organizationList.add(TEST_ORGANIZATION);
         mixedOrganizationList = new ArrayList<>();
         mixedOrganizationList.add(new Organization("A", "", "a", "", true));
-        mixedOrganizationList.add(new Organization("B", "", "b", "", false));
+        mixedOrganizationList.add(new Organization("B", "", "b", "", true));
         mixedOrganizationList.add(new Organization("C", "", "c", "", false));
         mixedOrganizationList.add(new Organization("D", "", "d", "", false));
         mixedOrganizationList.add(new Organization("E", "", "e", "", false));

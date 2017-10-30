@@ -24,7 +24,7 @@ public class SettingsIoTest {
     @Before
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve(SettingsIo.CONFIG_DIR);
-        account = new Account("testserver", "testuser", "testpassword",
+        account = new Account("testuser", "testpassword",
                 new Organization("test", "test", "test", "test", false));
         accountList = new AccountList();
         try {

@@ -11,8 +11,6 @@ import fi.helsinki.cs.tmc.core.domain.Organization;
  */
 public class Account {
 
-    static Account NULL_ACCOUNT = new Account(null, null, null, null);
-
     private String serverAddress;
     private String username;
     private String password;
@@ -20,26 +18,30 @@ public class Account {
     private Course currentCourse;
     private String token;
     private Organization organization;
+    private boolean sendDiagnostics;
+    private static final String DEFAULT_SERVER =  "https://tmc.mooc.fi/staging";
 
     // for gson
-    public Account() {}
+    public Account() {
+        this.serverAddress = "";
+    }
 
-    public Account(String serverAddress, String username, String password) {
-        this.serverAddress = serverAddress == null ? null : serverAddress.trim();
+    public Account(String username, String password) {
+        this.serverAddress = DEFAULT_SERVER;
         this.username = username == null ? null : username.trim();
         this.password = password == null ? null : password.trim();
     }
 
 
-    public Account(String serverAddress, String username, String password, Organization organization) {
-        this.serverAddress = serverAddress == null ? null : serverAddress.trim();
+    public Account(String username, String password, Organization organization) {
+        this.serverAddress = DEFAULT_SERVER;
         this.username = username == null ? null : username.trim();
         this.password = password == null ? null : password.trim();
         this.organization = organization;
     }
 
-    public Optional<String> getServerAddress() {
-        return Optional.fromNullable(serverAddress);
+    public String getServerAddress() {
+        return serverAddress;
     }
 
     public Optional<String> getPassword() {
@@ -63,12 +65,12 @@ public class Account {
             return false;
         }
         Account another = (Account) obj;
-        return stringEquals(this.serverAddress, another.serverAddress)
+        return stringEquals(this.password, another.password)
                 && stringEquals(this.username, another.username);
     }
 
     public void setServerAddress(String serverAddress) {
-            this.serverAddress = serverAddress.trim();
+            this.serverAddress = serverAddress;
     }
 
     public Optional<OauthCredentials> getOauthCredentials() {
@@ -108,5 +110,13 @@ public class Account {
 
     public void setOrganization(Optional<Organization> organization) {
         this.organization = organization.orNull();
+    }
+
+    public void setSendDiagnostics(boolean value) {
+        this.sendDiagnostics = value;
+    }
+
+    public boolean getSendDiagnostics() {
+        return this.sendDiagnostics;
     }
 }

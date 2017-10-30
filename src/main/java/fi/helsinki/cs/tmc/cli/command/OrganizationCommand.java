@@ -60,11 +60,11 @@ public class OrganizationCommand extends AbstractCommand {
                         others.add(o);
                     }
                 });
-        System.out.println();
+        io.println();
         pinned.stream().forEach(o -> printFormattedOrganization(o));
-        System.out.println("----------");
+        io.println("----------");
         others.stream().forEach(o -> printFormattedOrganization(o));
-        System.out.println();
+        io.println();
     }
 
     private void printFormattedOrganization(Organization o) {
