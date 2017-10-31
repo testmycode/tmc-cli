@@ -5,24 +5,69 @@ import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
+import fi.helsinki.cs.tmc.cli.utils.BadValueTypeException;
+import fi.helsinki.cs.tmc.cli.utils.BiConsumerWithException;
+import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Collections;
 
 @Command(name = "config", desc = "Set/unset TMC-CLI properties")
 public class ConfigCommand extends AbstractCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigCommand.class);
     private CliContext context;
     private Io io;
+    private static final Map<String, BiConsumerWithException<String, Object>> ALLOWED_KEYS = new HashMap<>();
+    private static final Set<String> PROGRESS_BAR_COLORS = new HashSet<String>(Arrays.asList(new String[] {
+            "black", "red", "green", "blue", "yellow", "blue", "purple", "cyan", "white", "none"
+    }));
 
     private HashMap<String, String> properties;
     private boolean quiet;
+
+    public ConfigCommand() {
+        configureAllowedKeys();
+    }
+
+    private void configureAllowedKeys() {
+        // add new possible config options here
+        // each key has a BiConsumer function which validates the value and saves it in settings or properties
+        ALLOWED_KEYS.put("send-diagnostics", (key, value) -> {
+            String newVal = (String) value;
+            if (!newVal.trim().toLowerCase().equals("true") && !newVal.trim().toLowerCase().equals("false")) {
+                throw new BadValueTypeException("Not a boolean value");
+            }
+            boolean send = Boolean.parseBoolean(newVal);
+            context.getSettings().setSendDiagnostics(send);
+        });
+
+        ALLOWED_KEYS.put("server-address", (key, address) -> {
+            String addr = (String) address;
+            if (!addr.matches("^https?://.*")) {
+                throw new BadValueTypeException("Please start the address with http[s]://");
+            }
+            context.getSettings().setServerAddress(addr);
+        });
+
+        ALLOWED_KEYS.put("update-date", (key, value) -> {
+            String date = (String) value;
+            if (!date.matches("[0-9]+")) {
+                throw new BadValueTypeException("Please insert the date as a number");
+            }
+            properties.put("update-date", date);
+        });
+        ALLOWED_KEYS.put("testresults-right", this::addToProperties);
+        ALLOWED_KEYS.put("testresults-left", this::addToProperties);
+        ALLOWED_KEYS.put("progressbar-left", this::addToProperties);
+        ALLOWED_KEYS.put("progressbar-right", this::addToProperties);
+    }
 
     @Override
     public String[] getUsages() {
@@ -52,6 +97,7 @@ public class ConfigCommand extends AbstractCommand {
         this.quiet = args.hasOption("q");
 
         String[] arguments = args.getArgs();
+        arguments = Arrays.stream(arguments).filter(o -> !o.trim().isEmpty()).toArray(String[]::new);
         this.properties = context.getProperties();
 
         if ((get ? 1 : 0) + (listing ? 1 : 0) + (delete ? 1 : 0) > 1) {
@@ -137,7 +183,7 @@ public class ConfigCommand extends AbstractCommand {
     }
 
     private void setProperties(String[] arguments) {
-        if (arguments.length == 0) {
+        if (arguments.length == 0 || !arguments[0].contains("=")) {
             io.errorln("Expected at least one key-value pair.");
             printUsage(context);
             return;
@@ -148,30 +194,63 @@ public class ConfigCommand extends AbstractCommand {
             return;
         }
 
-        io.print("Setting property keys:");
+        io.println("Setting property keys:");
         for (String argument : arguments) {
             String[] parts = argument.split("=", 2);
-            String oldValue = properties.get(parts[0]);
-            io.print(" " + parts[0] + " set to \"" + parts[1] + "\"");
-
-            if (oldValue != null) {
-                io.println(", it was \"" + oldValue + "\".");
-            } else {
-                io.println(".");
+            if (!checkIfAllowedKey(parts[0])) {
+                continue;
             }
+            String oldValue = properties.get(parts[0]);
+            if (io.readConfirmation(" Set " + parts[0] + " to \"" + parts[1] + "\"?", true)) {
+                if (!saveValue(parts[0], parts[1])) {
+                    continue;
+                }
+                io.print("Property " + parts[0] + " is now \"" + parts[1] + "\"");
+                if (oldValue != null) {
+                    io.println(", was \"" + oldValue + "\".");
+                } else {
+                    io.println(".");
+                }
+            }
+
         }
         io.println();
-        if (!io.readConfirmation("Are you sure?", true)) {
-            return;
-        }
-
-        setPropertiesQuietly(arguments);
     }
 
     private void setPropertiesQuietly(String[] arguments) {
         for (String argument : arguments) {
             String[] parts = argument.split("=", 2);
-            properties.put(parts[0], parts[1]);
+            if (checkIfAllowedKey(parts[0])) {
+                saveValue(parts[0], parts[1]);
+            }
         }
+    }
+
+    private boolean saveValue(String key, String value) {
+        try {
+            ALLOWED_KEYS.get(key).apply(key, value);
+        } catch (Exception e) {
+            io.errorln(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkIfAllowedKey(String key) {
+        if (!ALLOWED_KEYS.keySet().contains(key)) {
+            io.println("\"" + key + "\" is not an allowed key.");
+            io.println("Allowed keys are: ");
+            ALLOWED_KEYS.keySet().stream().forEach(k -> io.print(" " + k + '\n'));
+            return false;
+        }
+        return true;
+    }
+
+    private void addToProperties(String key, Object value) throws BadValueTypeException {
+        String color = (String) value;
+        if (!PROGRESS_BAR_COLORS.contains(color)) {
+            throw new BadValueTypeException("Color " + value + " not supported.");
+        }
+        properties.put(key, color);
     }
 }

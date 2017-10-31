@@ -23,7 +23,7 @@ public class Account {
 
     // for gson
     public Account() {
-        this.serverAddress = "";
+        this.serverAddress = DEFAULT_SERVER;
     }
 
     public Account(String username, String password) {
