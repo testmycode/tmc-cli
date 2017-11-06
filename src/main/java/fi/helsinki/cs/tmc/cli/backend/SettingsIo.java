@@ -13,6 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Reads and writes to config files on the system.
@@ -65,6 +68,24 @@ public class SettingsIo {
             return false;
         }
         return true;
+    }
+
+    public static void saveCurrentSettingsToAccountList(Settings settings) {
+        AccountList list = loadAccountList();
+        Set<Account> deletables = new HashSet<>();
+        for (Iterator<Account> i = list.iterator(); i.hasNext(); ) {
+            Account account = i.next();
+            if (account.getUsername().equals(settings.getAccount().getUsername())) {
+                if (!account.getUsername().isPresent()) {
+                    logger.error("Saveable account doesn't exist");
+                    return;
+                }
+                deletables.add(account);
+            }
+        }
+        deletables.stream().forEach(d -> list.deleteAccount(d.getUsername().get(), d.getServerAddress()));
+        list.addAccount(settings.getAccount());
+        saveAccountList(list);
     }
 
     public static HashMap<String, String> loadProperties() {

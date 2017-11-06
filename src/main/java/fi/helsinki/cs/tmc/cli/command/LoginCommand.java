@@ -128,7 +128,7 @@ public class LoginCommand extends AbstractCommand {
             } else if (sendDiagnostics.trim().toLowerCase().startsWith("n")) {
                 return false;
             }
-            io.println("Please answer y or n.");
+            io.println("Please answer y(es) or n(o).");
         }
     }
 }

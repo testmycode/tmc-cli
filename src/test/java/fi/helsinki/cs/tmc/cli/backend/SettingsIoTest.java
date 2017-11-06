@@ -17,6 +17,7 @@ import java.util.HashMap;
 
 public class SettingsIoTest {
 
+    public static final String STUB_SERVER = "stubServer";
     private AccountList accountList;
     private Account account;
     private Path tempDir;
@@ -118,5 +119,18 @@ public class SettingsIoTest {
         SettingsIo.savePropertiesTo(props, tempDir);
         HashMap<String, String> loadedProps = SettingsIo.loadPropertiesFrom(tempDir);
         assertEquals(props, loadedProps);
+    }
+
+    @Test
+    public void saveCurrentSettingsOverridesOldAccountWithSameUsername() {
+        AccountList oldList = new AccountList();
+        Account acc = new Account("username", "password", new Organization("old", "", "", "", false));
+        acc.setServerAddress(STUB_SERVER);
+        oldList.addAccount(acc);
+        Settings settings = new Settings("username", "password", new Organization("new", "", "", "", false));
+        settings.setServerAddress(STUB_SERVER);
+        SettingsIo.saveCurrentSettingsToAccountList(settings);
+        AccountList newList = SettingsIo.loadAccountList();
+        assertEquals("new", newList.getAccount("username", STUB_SERVER).getOrganization().get().getName());
     }
 }

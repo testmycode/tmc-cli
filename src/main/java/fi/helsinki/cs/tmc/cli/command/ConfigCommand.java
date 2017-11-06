@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
@@ -46,6 +47,7 @@ public class ConfigCommand extends AbstractCommand {
             }
             boolean send = Boolean.parseBoolean(newVal);
             context.getSettings().setSendDiagnostics(send);
+            SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
         });
 
         ALLOWED_KEYS.put("server-address", (key, address) -> {
@@ -54,6 +56,7 @@ public class ConfigCommand extends AbstractCommand {
                 throw new BadValueTypeException("Please start the address with http[s]://");
             }
             context.getSettings().setServerAddress(addr);
+            SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
         });
 
         ALLOWED_KEYS.put("update-date", (key, value) -> {
@@ -229,6 +232,7 @@ public class ConfigCommand extends AbstractCommand {
     private boolean saveValue(String key, String value) {
         try {
             ALLOWED_KEYS.get(key).apply(key, value);
+
         } catch (Exception e) {
             io.errorln(e.getMessage());
             return false;
@@ -252,5 +256,6 @@ public class ConfigCommand extends AbstractCommand {
             throw new BadValueTypeException("Color " + value + " not supported.");
         }
         properties.put(key, color);
+        SettingsIo.saveProperties(properties);
     }
 }

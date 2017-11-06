@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -31,9 +33,8 @@ public class OrganizationCommand extends AbstractCommand {
     @Override
     public void run(CliContext ctx, CommandLine args) {
         Optional<Organization> organization = chooseOrganization(ctx, args);
-        Account currentAccount = this.ctx.getSettings().getAccount();
-        currentAccount.setOrganization(organization);
-        this.ctx.getSettings().setAccount(currentAccount);
+        this.ctx.getSettings().setOrganization(organization);
+        SettingsIo.saveCurrentSettingsToAccountList(this.ctx.getSettings());
     }
 
     private List<Organization> listOrganizations() {

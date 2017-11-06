@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SettingsIo.class, TmcUtil.class})
@@ -117,5 +118,14 @@ public class OrganizationCommandTest {
         io.addLinePrompt(organizationList.get(0).getSlug());
         app.run(args);
         io.assertContains(TEST_ORGANIZATION.getName());
+    }
+
+    @Test
+    public void saveConfigruationsToAccountList() {
+        when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
+        String[] args = {"organization", "-o", TEST_ORGANIZATION.getSlug()};
+        app.run(args);
+        verifyStatic();
+        SettingsIo.saveCurrentSettingsToAccountList(eq(settings));
     }
 }
