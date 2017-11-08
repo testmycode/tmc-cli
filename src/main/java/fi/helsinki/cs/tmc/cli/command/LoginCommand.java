@@ -122,7 +122,7 @@ public class LoginCommand extends AbstractCommand {
             return this.ctx.getSettings().getSendDiagnostics();
         }
         while (true) {
-            String sendDiagnostics = io.readLine("Do you want to send crash reports and diagnostics for client development? (y/n)");
+            String sendDiagnostics = io.readLine("Do you want to send crash reports and diagnostics for client development? (y/n) ");
             if (sendDiagnostics.trim().toLowerCase().startsWith("y")) {
                 return true;
             } else if (sendDiagnostics.trim().toLowerCase().startsWith("n")) {

@@ -77,7 +77,7 @@ public class SettingsIo {
             Account account = i.next();
             if (account.getUsername().equals(settings.getAccount().getUsername())) {
                 if (!account.getUsername().isPresent()) {
-                    logger.error("Saveable account doesn't exist");
+                    logger.error("Savable account doesn't exist");
                     return;
                 }
                 deletables.add(account);

@@ -32,6 +32,9 @@ public class OrganizationCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext ctx, CommandLine args) {
+        if (!ctx.loadBackend()) {
+            return;
+        }
         Optional<Organization> organization = chooseOrganization(ctx, args);
         this.ctx.getSettings().setOrganization(organization);
         SettingsIo.saveCurrentSettingsToAccountList(this.ctx.getSettings());
@@ -61,6 +64,7 @@ public class OrganizationCommand extends AbstractCommand {
                         others.add(o);
                     }
                 });
+        io.println("Available Organizations:");
         io.println();
         pinned.stream().forEach(o -> printFormattedOrganization(o));
         io.println("----------");

@@ -132,5 +132,6 @@ public class SettingsIoTest {
         SettingsIo.saveCurrentSettingsToAccountList(settings);
         AccountList newList = SettingsIo.loadAccountList();
         assertEquals("new", newList.getAccount("username", STUB_SERVER).getOrganization().get().getName());
+        SettingsIo.delete();
     }
 }
