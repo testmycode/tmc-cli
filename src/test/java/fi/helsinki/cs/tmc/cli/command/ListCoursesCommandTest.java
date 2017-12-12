@@ -8,17 +8,21 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.AccountList;
-import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +40,17 @@ public class ListCoursesCommandTest {
     private Application app;
     private CliContext ctx;
     private TestIo io;
-    private TmcCore mockCore;
 
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        TmcCore core = new TmcCore(settings, tmcLangs);
+        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         Account account = new Account( "", "");
         AccountList accountList = new AccountList();
@@ -52,17 +60,6 @@ public class ListCoursesCommandTest {
         mockStatic(SettingsIo.class);
         when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
         when(SettingsIo.loadAccountList()).thenReturn(accountList);
-    }
-
-    @Test
-    public void failIfBackendFails() {
-        ctx = spy(ctx);
-        app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackendWithoutLogin();
-
-        String[] args = {"courses", "foo"};
-        app.run(args);
-        io.assertNotContains("Course doesn't exist");
     }
 
     @Test

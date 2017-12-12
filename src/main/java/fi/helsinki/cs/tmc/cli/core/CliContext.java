@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.cli.core;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
@@ -14,8 +16,6 @@ import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -37,28 +37,21 @@ public class CliContext {
     private CourseInfo courseInfo;
     private HashMap<String, String> properties;
     private final boolean inTest;
+    private AnalyticsFacade analyticsFacade;
 
-    public CliContext(Io io) {
-        this(io, null);
-    }
-
-    public CliContext(Io io, TmcCore core) {
-        this(io, core, new WorkDir());
-    }
-
-    public CliContext(Io io, TmcCore core, WorkDir workDir) {
+    public CliContext(Io io, TmcCore core, WorkDir workDir, Settings settings, AnalyticsFacade facade) {
         inTest = (io != null);
         if (!inTest) {
             io = new TerminalIo(System.in);
         }
-
         this.io = io;
         this.workDir = workDir;
         this.properties = SettingsIo.loadProperties();
-        this.settings = new Settings();
+        this.settings = settings;
         this.tmcCore = core;
         this.hasLogin = (core != null);
         this.courseInfo = null;
+        this.analyticsFacade = facade;
     }
 
     /*TODO create reset method for removing all cached data that is called
@@ -160,7 +153,7 @@ public class CliContext {
             //TODO add a way to rewrite the corrupted course config file.
             return null;
         }
-        return this.courseInfo;
+        return courseInfo;
     }
 
     /**
@@ -170,9 +163,6 @@ public class CliContext {
      * @return global tmcutil
      */
     public TmcCore getTmcCore() {
-        if (this.tmcCore == null) {
-            throw new RuntimeException("The loadBackend* method was NOT called");
-        }
         return this.tmcCore;
     }
 
@@ -181,15 +171,8 @@ public class CliContext {
      * Use this method if you need i
      * @return true if success
      */
-    public boolean loadBackend() {
-        if (this.tmcCore != null) {
-            return true;
-        }
-
-        if (!createTmcCore()) {
-            return false;
-        }
-
+    public boolean checkIsLoggedIn() {
+        loadUserInformation();
         //Bug: what if we have wrong login?
         if (!hasLogin) {
             if (courseInfo == null) {
@@ -211,34 +194,25 @@ public class CliContext {
     }
 
     /**
-     * Initialize the cached data, but don't fail if there is not login.
-     *
-     * @return true if success
-     */
-    public boolean loadBackendWithoutLogin() {
-        return this.tmcCore != null || createTmcCore();
-    }
-
-    /**
-     * Copy login info from different settings object and them.
+     * Copy login info from different settings object.
      * @param account login info
      */
     public void useAccount(Account account) {
         this.settings.setAccount(account);
     }
 
-    private void createTmcCore(Account account) {
-        TaskExecutor tmcLangs;
-
-        tmcLangs = new TaskExecutorImpl();
-        this.settings.setAccount(account);
-        this.tmcCore = new TmcCore(settings, tmcLangs);
-        settings.setWorkDir(workDir);
+    public AnalyticsFacade getAnalyticsFacade() {
+        return this.analyticsFacade;
     }
 
-    private boolean createTmcCore() {
+    public void loadUserInformation() {
         Account cachedAccount = null;
         AccountList list = SettingsIo.loadAccountList();
+
+        if (list == null) {
+            hasLogin = false;
+            return;
+        }
 
         if (workDir.getConfigFile() != null) {
             // If we're in a course directory, we load settings matching the course
@@ -253,10 +227,9 @@ public class CliContext {
             // then we may not correctly guess the correct settings.
             cachedAccount = list.getAccount();
         }
-
-        hasLogin = (cachedAccount != null);
-        createTmcCore(cachedAccount);
-        return true;
+        hasLogin = cachedAccount != null;
+        this.settings.setAccount(cachedAccount);
+        settings.setWorkDir(workDir);
     }
 
 }

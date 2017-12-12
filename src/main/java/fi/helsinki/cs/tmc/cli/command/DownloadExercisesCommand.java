@@ -59,7 +59,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         ctx = context;
         showAll = args.hasOption("a");
 
-        if (!ctx.loadBackend()) {
+        if (!ctx.checkIsLoggedIn()) {
             return;
         }
 
@@ -75,6 +75,9 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
         Course course = finder.getCourse();
+
+        this.ctx.getAnalyticsFacade().saveAnalytics(course, "download_exercises");
+
         List<Exercise> filtered = getFilteredExercises(course);
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
@@ -93,7 +96,6 @@ public class DownloadExercisesCommand extends AbstractCommand {
         }
 
         printStatistics(course, filtered.size(), exercises.size());
-
     }
 
     private List<Exercise> getFilteredExercises(Course course) {

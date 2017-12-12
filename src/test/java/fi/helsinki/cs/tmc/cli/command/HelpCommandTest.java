@@ -3,8 +3,10 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.mockito.Mockito.mock;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 
 import org.junit.Before;
@@ -18,7 +20,7 @@ public class HelpCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        CliContext ctx = new CliContext(io, mock(TmcCore.class));
+        CliContext ctx = new CliContext(io, mock(TmcCore.class), new WorkDir(), new Settings(), null);
         app = new Application(ctx);
     }
 

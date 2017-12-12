@@ -2,19 +2,40 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SettingsIo.class)
 public class ConfigCommandTest {
 
     private Application app;
@@ -22,19 +43,40 @@ public class ConfigCommandTest {
     private TestIo io;
     private HashMap<String, String> props;
     private Settings settings;
+    private Path testConfigRoot;
+    private static final String TEST_PROPERTIES_FILENAME = ".test-properties";
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
         io = new TestIo();
-        ctx = Mockito.spy(new CliContext(io));
+        settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        TmcCore core = new TmcCore(settings, tmcLangs);
+        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = Mockito.spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
         app = new Application(ctx);
 
         when(ctx.saveProperties()).thenReturn(true);
         props = new HashMap<>();
         when(ctx.getProperties()).thenReturn(props);
-        settings = new Settings();
         when(ctx.getSettings()).thenReturn(settings);
+        testConfigRoot = Files.createTempDirectory(".test-config");
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.getPropertiesFile(any(Path.class))).thenReturn(testConfigRoot.resolve(TEST_PROPERTIES_FILENAME));
+        when(SettingsIo.getConfigDirectory()).thenReturn(testConfigRoot);
     }
+
+    @After
+    public void cleanUp() {
+        try {
+            Files.deleteIfExists(testConfigRoot.resolve(TEST_PROPERTIES_FILENAME));
+            Files.deleteIfExists(testConfigRoot);
+        } catch (IOException e) {
+        }
+    }
+
 
     @Test
     public void printsErrorIfNoArgumentsGiven() {

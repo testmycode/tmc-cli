@@ -1,16 +1,21 @@
 package fi.helsinki.cs.tmc.cli;
 
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.analytics.TimeTracker;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
+import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.CommandFactory;
-import fi.helsinki.cs.tmc.cli.io.Color;
-import fi.helsinki.cs.tmc.cli.io.ColorUtil;
-import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
-import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
-import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.ShutdownHandler;
+import fi.helsinki.cs.tmc.cli.io.*;
 import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
@@ -20,14 +25,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.management.ManagementFactory;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Scanner;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * The application class for the program.
@@ -47,7 +45,10 @@ public class Application {
     private String commandName;
     private boolean noAutoUpdate;
 
+    private TimeTracker timeTracker;
+
     public Application(CliContext context) {
+        this.timeTracker = new TimeTracker(context);
         this.parser = new GnuParser();
         this.options = new Options();
 
@@ -88,9 +89,30 @@ public class Application {
             io.errorln("Command " + name + " doesn't exist.");
             return false;
         }
+        Optional<Thread> thread = sendAnalytics(command);
 
         command.execute(context, args);
+        joinNewThread(thread);
         return true;
+    }
+
+    private Optional<Thread> sendAnalytics(AbstractCommand command) {
+        Optional<Thread> thread = Optional.empty();
+        if (command instanceof SubmitCommand || timeTracker.anHourHasPassedSinceLastSubmit()) {
+            thread = this.context.getAnalyticsFacade().sendAnalytics();
+            timeTracker.restart();
+        }
+        return thread;
+    }
+
+    private void joinNewThread(Optional<Thread> thread) {
+        thread.ifPresent(t -> {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                logger.warn("Analytics thread interrupted");
+            }
+        });
     }
 
     private String[] parseArgs(String[] args) {
@@ -180,7 +202,13 @@ public class Application {
 
 
     public static void main(String[] args) {
-        Application app = new Application(new CliContext(null));
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        TmcCore core = new TmcCore(settings, tmcLangs);
+        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        Application app = new Application(new CliContext(null, core, new WorkDir(), settings, analyticsFacade));
         app.run(args);
     }
 

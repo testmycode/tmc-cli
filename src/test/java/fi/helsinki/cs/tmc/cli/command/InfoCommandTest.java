@@ -9,7 +9,10 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
@@ -20,6 +23,9 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -66,8 +72,11 @@ public class InfoCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+
+        mockCore = new TmcCore(new Settings(), new TaskExecutorImpl());
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new AnalyticsSettings(), new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new AnalyticsSettings(), eventSendBuffer);
+        ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
 
@@ -82,9 +91,7 @@ public class InfoCommandTest {
 
     @Test
     public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, mockCore));
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackendWithoutLogin();
 
         String[] args = {"info", "course", "-i"};
         app.run(args);

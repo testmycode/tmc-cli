@@ -10,7 +10,6 @@ import fi.helsinki.cs.tmc.cli.io.ColorUtil;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.WorkDir;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -42,6 +41,10 @@ public class ListExercisesCommand extends AbstractCommand {
         this.ctx = context;
         this.io = ctx.getIo();
 
+        if (!ctx.checkIsLoggedIn()) {
+            return;
+        }
+
         String courseName = getCourseName(args);
         if (courseName == null) {
             return;
@@ -51,7 +54,7 @@ public class ListExercisesCommand extends AbstractCommand {
         if (exercises == null) {
             return;
         }
-
+        this.ctx.getAnalyticsFacade().saveAnalytics(courseName, "list_exercises");
         printExercises(courseName, exercises, !args.hasOption("n") && !EnvironmentUtil.isWindows());
     }
 
@@ -86,7 +89,7 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     private List<Exercise> getExercisesFromServer(String courseName) {
-        if (!ctx.loadBackend()) {
+        if (!ctx.checkIsLoggedIn()) {
             return null;
         }
 

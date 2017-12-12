@@ -8,15 +8,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,8 +45,13 @@ public class ExerciseUpdaterTest {
 
     @Before
     public void setUp() {
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(new TestIo(), mockCore);
+        AnalyticsSettings analyticsSettings =new AnalyticsSettings();
+        EventStore eventStore = new EventStore();
+        Settings settings = new Settings();
+        mockCore = new TmcCore(settings, new TaskExecutorImpl());
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(new TestIo(), mockCore, new WorkDir(), settings, analyticsFacade);
 
         mockStatic(TmcUtil.class);
     }

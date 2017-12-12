@@ -1,14 +1,18 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.AccountList;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
-import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,12 +21,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.google.common.base.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -34,18 +37,20 @@ public class OrganizationCommandTest {
     private static List<Organization> organizationList;
     private static final Organization TEST_ORGANIZATION = new Organization("test", "test", "test", "test", false);
     private static List<Organization> mixedOrganizationList;
-    private static OrganizationCommand command;
     private static Settings settings;
 
     private Application app;
     private CliContext ctx;
     private TestIo io;
     private TmcCore mockCore;
+    private AnalyticsFacade analyticsFacade;
 
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        settings = new Settings();
+        mockCore = new TmcCore(settings, tmcLangs);
         organizationList = new ArrayList<>();
         organizationList.add(TEST_ORGANIZATION);
         mixedOrganizationList = new ArrayList<>();
@@ -55,17 +60,30 @@ public class OrganizationCommandTest {
         mixedOrganizationList.add(new Organization("D", "", "d", "", false));
         mixedOrganizationList.add(new Organization("E", "", "e", "", false));
 
-        command = new OrganizationCommand();
-
-        ctx = spy(new CliContext(io, mockCore));
-        settings = ctx.getSettings();
+        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(io, mockCore, new WorkDir(), settings, analyticsFacade);
         app = new Application(ctx);
 
         mockStatic(TmcUtil.class);
         mockStatic(SettingsIo.class);
         when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
-        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        AccountList t = new AccountList();
+        t.addAccount(new Account("username", "password"));
+        when(SettingsIo.loadAccountList()).thenReturn(t);
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
+    }
+
+    @Test
+    public void doNotRunIfNotLoggedIn() {
+        ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).checkIsLoggedIn();
+
+        String[] args = {"organization"};
+        app.run(args);
+        io.assertNotContains("slug");
     }
 
     @Test

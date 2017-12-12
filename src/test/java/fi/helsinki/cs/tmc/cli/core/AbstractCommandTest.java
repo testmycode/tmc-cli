@@ -1,7 +1,9 @@
 package fi.helsinki.cs.tmc.cli.core;
 
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
@@ -49,7 +51,7 @@ public class AbstractCommandTest {
     public AbstractCommandTest() {
         emptyCommand = new EmptyCommand();
         io = new TestIo();
-        ctx = new CliContext(io);
+        ctx = new CliContext(io, null, new WorkDir(), new Settings(), null);
     }
 
     @Test

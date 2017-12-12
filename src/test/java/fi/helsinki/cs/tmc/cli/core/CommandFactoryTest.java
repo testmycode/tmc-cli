@@ -7,9 +7,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.command.HelpCommand;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
@@ -45,7 +47,7 @@ public class CommandFactoryTest {
 
     @Before
     public void setUp() {
-        ctx = new CliContext(new TestIo());
+        ctx = new CliContext(new TestIo(), null, new WorkDir(), new Settings(), null);
         CommandFactory.reload();
     }
 

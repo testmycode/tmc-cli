@@ -9,7 +9,9 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
@@ -18,6 +20,10 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,7 +36,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({TmcUtil.class, SettingsIo.class})
 public class ListExercisesCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -42,6 +48,7 @@ public class ListExercisesCommandTest {
     private TestIo io;
     private TmcCore mockCore;
     private WorkDir workDir;
+    private AccountList list;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -60,19 +67,29 @@ public class ListExercisesCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        Settings settings = new Settings();
+        mockCore = new TmcCore(settings, tmcLangs);
+        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
 
         mockStatic(TmcUtil.class);
+        list = new AccountList();
+        list.addAccount(new Account("username", "pass"));
+
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.loadAccountList()).thenReturn(list);
     }
 
     @Test
-    public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, mockCore));
+    public void doNotRunIfNotLoggedIn() {
+        ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), null));
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
+        doReturn(false).when(ctx).checkIsLoggedIn();
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
@@ -90,6 +107,9 @@ public class ListExercisesCommandTest {
     @Test
     public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
+        Account account = new Account("testuser", "password");
+        account.setServerAddress("https://tmc.example.com");
+        list.addAccount(account);
         String[] args = {"exercises", COURSE_NAME, "-n"};
         app.run(args);
         io.assertContains("Deadline:");
@@ -98,6 +118,9 @@ public class ListExercisesCommandTest {
     @Test
     public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
+        Account account = new Account("testuser", "password");
+        account.setServerAddress("https://tmc.example.com");
+        list.addAccount(account);
         String[] args = {"exercises", "-n"};
         app.run(args);
         io.assertContains("Deadline:");

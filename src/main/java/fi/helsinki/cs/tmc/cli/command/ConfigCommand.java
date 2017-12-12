@@ -8,7 +8,9 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 
 import fi.helsinki.cs.tmc.cli.utils.BadValueTypeException;
 import fi.helsinki.cs.tmc.cli.utils.BiConsumerWithException;
-import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
@@ -56,6 +58,10 @@ public class ConfigCommand extends AbstractCommand {
                 throw new BadValueTypeException("Please start the address with http[s]://");
             }
             context.getSettings().setServerAddress(addr);
+            if (!normalizeServerAddress()) {
+                io.println("There was a problem setting the server address.");
+                return;
+            }
             SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
         });
 
@@ -102,6 +108,12 @@ public class ConfigCommand extends AbstractCommand {
         String[] arguments = args.getArgs();
         arguments = Arrays.stream(arguments).filter(o -> !o.trim().isEmpty()).toArray(String[]::new);
         this.properties = context.getProperties();
+
+        if (this.context.getSettings().getUsername().isPresent()) {
+            this.context.getAnalyticsFacade().saveAnalytics(this.context.getSettings().getUsername().get(), "config");
+        } else {
+            this.context.getAnalyticsFacade().saveAnalytics("config");
+        }
 
         if ((get ? 1 : 0) + (listing ? 1 : 0) + (delete ? 1 : 0) > 1) {
             io.errorln("Only one of the --get or --list or --delete options can "
@@ -257,5 +269,17 @@ public class ConfigCommand extends AbstractCommand {
         }
         properties.put(key, color);
         SettingsIo.saveProperties(properties);
+    }
+
+    private boolean normalizeServerAddress() {
+        TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
+        normalizer.normalize();
+        try {
+            this.context.getTmcCore().authenticate(ProgressObserver.NULL_OBSERVER, TmcSettingsHolder.get().getPassword().get()).call();
+        } catch (Exception e) {
+            return false;
+        }
+        normalizer.selectOrganizationAndCourse();
+        return true;
     }
 }

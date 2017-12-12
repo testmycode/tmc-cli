@@ -41,9 +41,10 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.loadBackend()) {
+        if (!ctx.checkIsLoggedIn()) {
             return;
         }
+
 
         WorkDir workDir = ctx.getWorkDir();
 
@@ -51,6 +52,8 @@ public class UpdateCommand extends AbstractCommand {
             io.errorln("Not a course directory");
             return;
         }
+
+        this.ctx.getAnalyticsFacade().saveAnalytics(this.ctx.getCourseInfo().getCourse(), "update");
 
         CourseInfo info = ctx.getCourseInfo();
         updateExercises(info, workDir.getConfigFile());

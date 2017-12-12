@@ -14,11 +14,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import com.sun.source.util.TaskEvent;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -32,6 +34,7 @@ import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.junit.Before;
@@ -72,7 +75,7 @@ public class TmcUtilTest {
     public void setUp() {
         io = new TestIo();
         mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), null);
 
         Answer<Callable<Course>> answer =
                 new Answer<Callable<Course>>() {

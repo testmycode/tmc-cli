@@ -58,7 +58,7 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.loadBackend()) {
+        if (!ctx.checkIsLoggedIn()) {
             return;
         }
 
@@ -105,6 +105,7 @@ public class SubmitCommand extends AbstractCommand {
         List<URI> feedbackUris = new ArrayList<>();
 
         for (Exercise exercise : submitExercises) {
+            this.ctx.getAnalyticsFacade().saveAnalytics(exercise, "submit");
             io.println(ColorUtil.colorString("Submitting: " + exercise.getName(), Color.YELLOW));
             if (exercise.hasDeadlinePassed()) {
                 logger.warn("Tried to submit exercise " + exercise.getName() + " after deadline.");
@@ -118,8 +119,6 @@ public class SubmitCommand extends AbstractCommand {
                     io.errorln("Try to submit exercises one by one.");
                 }
                 return;
-                //resultPrinter.addFailedExercise();
-                //continue;
             }
 
             resultPrinter.printSubmissionResult(result, isOnlyExercise);
@@ -138,6 +137,10 @@ public class SubmitCommand extends AbstractCommand {
 
         updateCourseJson(submitExercises, info, workDir.getConfigFile());
         checkForExerciseUpdates(currentCourse);
+        sendFeedbacks(feedbackLists, exercisesWithFeedback, feedbackUris);
+    }
+
+    private void sendFeedbacks(List<List<FeedbackQuestion>> feedbackLists, List<String> exercisesWithFeedback, List<URI> feedbackUris) {
         for (int i = 0; i < exercisesWithFeedback.size(); i++) {
             if (io.readConfirmation(
                     "Send feedback for " + exercisesWithFeedback.get(i) + "?", true)) {

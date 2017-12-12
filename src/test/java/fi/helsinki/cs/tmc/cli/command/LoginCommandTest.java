@@ -10,17 +10,20 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.AccountList;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
-import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 
 import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +53,16 @@ public class LoginCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
         organizationList = new ArrayList<>();
         organizationList.add(new Organization("Test", "", "test", "", false));
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        mockCore = new TmcCore(settings, tmcLangs);
+        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
 
-        ctx = spy(new CliContext(io, mockCore));
+        ctx = spy(new CliContext(io, mockCore, new WorkDir(), settings, analyticsFacade));
         app = new Application(ctx);
 
         mockStatic(TmcUtil.class);
@@ -64,15 +72,6 @@ public class LoginCommandTest {
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
 
-    @Test
-    public void failIfBackendFails() {
-        app = new Application(ctx);
-        when(ctx.loadBackendWithoutLogin()).thenReturn(false);
-
-        String[] args = {"login", "-u", USERNAME, "-p", PASSWORD};
-        app.run(args);
-        io.assertNotContains("Login successful");
-    }
 
     @Test
     public void failIfThereIsNoConnection() {

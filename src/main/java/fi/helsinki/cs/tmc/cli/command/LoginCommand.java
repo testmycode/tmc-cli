@@ -51,9 +51,9 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.loadBackendWithoutLogin()) {
-            return;
-        }
+        this.ctx.loadUserInformation();
+
+        this.ctx.getAnalyticsFacade().saveAnalytics("login");
 
         if (!TmcUtil.hasConnection(ctx)) {
             io.errorln("You don't have internet connection currently.");

@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
@@ -34,6 +33,10 @@ public class HelpCommand extends AbstractCommand {
     public void run(CliContext context, CommandLine args) {
         this.context = context;
         this.io = context.getIo();
+
+        if (this.context.checkIsLoggedIn()) {
+            this.context.getAnalyticsFacade().saveAnalytics(this.context.getSettings().getUsername().get(), "help");
+        }
 
         String category = handleArgs(args);
         if (category == null) {

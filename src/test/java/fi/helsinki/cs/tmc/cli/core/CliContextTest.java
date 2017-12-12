@@ -20,7 +20,6 @@ import fi.helsinki.cs.tmc.cli.io.TerminalIo;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 
-import fi.helsinki.cs.tmc.core.TmcCore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +28,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({CourseInfoIo.class, SettingsIo.class})
@@ -37,6 +35,7 @@ public class CliContextTest {
 
     private TestIo io;
     private AccountList list;
+    private CliContext ctx;
 
     @Before
     public void setUp() {
@@ -45,23 +44,22 @@ public class CliContextTest {
 
         mockStatic(SettingsIo.class);
         when(SettingsIo.loadAccountList()).thenReturn(list);
+        ctx = new CliContext(io, null, new WorkDir(), new Settings(), null);
     }
 
     @Test
     public void getIoAfterItsSetInConstructor() {
-        CliContext ctx = new CliContext(io);
         assertEquals(io, ctx.getIo());
     }
 
     @Test
     public void getIoWhenItsNotGiven() {
-        CliContext ctx = new CliContext(null);
+        CliContext ctx = new CliContext(null, null, null, null, null);
         assertEquals(TerminalIo.class, ctx.getIo().getClass());
     }
 
     @Test
     public void setAppAndGetIt() {
-        CliContext ctx = new CliContext(io);
         Application app = new Application(ctx);
         ctx.setApp(app);
         assertEquals(app, ctx.getApp());
@@ -77,9 +75,8 @@ public class CliContextTest {
 
         when(CourseInfoIo.load(eq(path))).thenReturn(mock(CourseInfo.class));
         when(workDir.getConfigFile()).thenReturn(path);
-        CliContext ctx = new CliContext(io, null, workDir);
 
-        ctx.loadBackend();
+        ctx.checkIsLoggedIn();
         ctx.useAccount(newAccount);
 
         //TODO replace the Whitebox usage somehow
@@ -89,14 +86,13 @@ public class CliContextTest {
 
     @Test(expected = RuntimeException.class)
     public void getAppWithoutSettingIt() {
-        CliContext ctx = new CliContext(io);
         assertNull(ctx.getApp());
     }
 
     @Test
     public void setGetWorkDir() {
         WorkDir workDir = new WorkDir();
-        CliContext ctx = new CliContext(io, null, workDir);
+        CliContext ctx = new CliContext(io, null, workDir, null, null);
         assertEquals(workDir, ctx.getWorkDir());
     }
 
@@ -107,7 +103,6 @@ public class CliContextTest {
         WorkDir workDir = mock(WorkDir.class);
 
         when(workDir.getConfigFile()).thenReturn(null);
-        CliContext ctx = new CliContext(io, null, workDir);
 
         assertEquals(null, ctx.getCourseInfo());
     }
@@ -122,7 +117,7 @@ public class CliContextTest {
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
         when(workDir.getConfigFile()).thenReturn(path);
-        CliContext ctx = new CliContext(io, null, workDir);
+        CliContext ctx = new CliContext(io, null, workDir, new Settings(), null);
 
         assertEquals(info, ctx.getCourseInfo());
     }
@@ -138,9 +133,8 @@ public class CliContextTest {
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
         when(workDir.getConfigFile()).thenReturn(path);
-        CliContext ctx = new CliContext(io, null, workDir);
 
-        assertTrue(ctx.loadBackend());
+        assertTrue(ctx.checkIsLoggedIn());
         assertEquals(true, ctx.hasLogin());
     }
 
@@ -155,9 +149,9 @@ public class CliContextTest {
         when(info.getUsername()).thenReturn("user");
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
         when(workDir.getConfigFile()).thenReturn(path);
-        CliContext ctx = new CliContext(io, null, workDir);
+        CliContext ctx = new CliContext(io, null, workDir, new Settings(), null);
 
-        assertFalse(ctx.loadBackend());
+        assertFalse(ctx.checkIsLoggedIn());
         assertEquals(false, ctx.hasLogin());
         io.assertContains("You are not logged in as user. Log in using: tmc login");
     }
@@ -168,9 +162,9 @@ public class CliContextTest {
 
         WorkDir workDir = mock(WorkDir.class);
         when(workDir.getConfigFile()).thenReturn(null);
-        CliContext ctx = new CliContext(io, null, workDir);
+        CliContext ctx = new CliContext(io, null, workDir, new Settings(), null);
 
-        assertFalse(ctx.loadBackend());
+        assertFalse(ctx.checkIsLoggedIn());
         assertEquals(false, ctx.hasLogin());
         io.assertContains("You are not logged in");
     }
@@ -184,9 +178,9 @@ public class CliContextTest {
 
         when(CourseInfoIo.load(eq(path))).thenReturn(null);
         when(workDir.getConfigFile()).thenReturn(path);
-        CliContext ctx = new CliContext(io, null, workDir);
+        CliContext ctx = new CliContext(io, null, workDir, new Settings(), null);
 
-        assertFalse(ctx.loadBackend());
+        assertFalse(ctx.checkIsLoggedIn());
         assertEquals(false, ctx.hasLogin());
         io.assertContains("Course configuration file");
         io.assertContains("is invalid.");
@@ -197,9 +191,8 @@ public class CliContextTest {
     public void backendInitWithoutInternet() {
         WorkDir workDir = mock(WorkDir.class);
         when(workDir.getConfigFile()).thenReturn(null);
-        CliContext ctx = new CliContext(io, null, workDir);
 
-        assertTrue(ctx.loadBackendWithoutLogin());
+        ctx.loadUserInformation();
         assertEquals(false, ctx.hasLogin());
     }
 
@@ -214,9 +207,9 @@ public class CliContextTest {
 
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
         when(workDir.getConfigFile()).thenReturn(path);
-        CliContext ctx = new CliContext(io, null, workDir);
 
-        assertTrue(ctx.loadBackendWithoutLogin());
+        ctx.loadUserInformation();
+
         assertEquals(true, ctx.hasLogin());
     }
 }

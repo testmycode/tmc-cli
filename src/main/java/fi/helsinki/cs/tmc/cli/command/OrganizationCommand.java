@@ -1,7 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
@@ -32,16 +30,19 @@ public class OrganizationCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext ctx, CommandLine args) {
-        if (!ctx.loadBackend()) {
+        this.ctx = ctx;
+        if (!this.ctx.checkIsLoggedIn()) {
             return;
         }
+        this.ctx.getAnalyticsFacade().saveAnalytics(this.ctx.getSettings().getUsername().get(), "change_organization");
         Optional<Organization> organization = chooseOrganization(ctx, args);
         this.ctx.getSettings().setOrganization(organization);
         SettingsIo.saveCurrentSettingsToAccountList(this.ctx.getSettings());
     }
 
     private List<Organization> listOrganizations() {
-        if (!ctx.loadBackend()) {
+        if (this.ctx.getSettings().getServerAddress().isEmpty()) {
+            io.println("A server address has to be specified to get organizations");
             return null;
         }
         List<Organization> organizations = TmcUtil.getOrganizationsFromServer(ctx);

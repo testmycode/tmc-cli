@@ -47,9 +47,7 @@ public class RunTestsCommand extends AbstractCommand {
             return;
         }
 
-        if (!context.loadBackendWithoutLogin()) {
-            return;
-        }
+        context.loadUserInformation();
 
         WorkDir workDir = context.getWorkDir();
         for (String path : paths) {
@@ -75,6 +73,8 @@ public class RunTestsCommand extends AbstractCommand {
         boolean isOnlyExercise = (exercises.size() == 1);
 
         for (Exercise exercise : exercises) {
+            context.getAnalyticsFacade().saveAnalytics(exercise, "test");
+
             io.println(ColorUtil.colorString("Testing: " + exercise.getName(), Color.YELLOW));
 
             RunResult runResult = TmcUtil.runLocalTests(context, exercise);

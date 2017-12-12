@@ -14,9 +14,9 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.ExternalsUtil;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
@@ -25,6 +25,10 @@ import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,16 +43,18 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ExternalsUtil.class, CourseInfoIo.class, TmcUtil.class})
+@PrepareForTest({ExternalsUtil.class, CourseInfoIo.class, TmcUtil.class, SettingsIo.class})
 public class PasteCommandTest {
 
     private Application app;
     private CliContext ctx;
     private TestIo io;
-    private TmcCore mockCore;
+    private TmcCore core;
     private WorkDir workDir;
     private ArrayList<Exercise> exercises;
     private Exercise exercise;
+    private AnalyticsFacade analyticsFacade;
+    private AccountList list;
 
     private final URI pasteUri;
 
@@ -70,9 +76,14 @@ public class PasteCommandTest {
         when(workDir.getExercises()).thenReturn(exercises);
         when(workDir.addPath(anyString())).thenReturn(true);
 
-        mockCore = mock(TmcCore.class);
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        core = new TmcCore(settings, tmcLangs);
+        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
 
-        ctx = new CliContext(io, mockCore, workDir);
+        ctx = new CliContext(io, core, workDir, new Settings(), analyticsFacade);
         app = new Application(ctx);
 
         CourseInfo mockCourseInfo = mock(CourseInfo.class);
@@ -82,6 +93,11 @@ public class PasteCommandTest {
         mockStatic(ExternalsUtil.class);
         when(ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean()))
                 .thenReturn("This is my paste message!");
+        list = new AccountList();
+        list.addAccount(new Account("username", "pass"));
+
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.loadAccountList()).thenReturn(list);
 
         mockStatic(CourseInfoIo.class);
         when(CourseInfoIo.load(any(Path.class))).thenReturn(mockCourseInfo);
@@ -89,10 +105,10 @@ public class PasteCommandTest {
     }
 
     @Test
-    public void failIfCoreIsNull() {
-        ctx = spy(new CliContext(io, mockCore, workDir));
+    public void doNotRunIfNotLoggedIn() {
+        when(CourseInfoIo.load(any(Path.class))).thenReturn(null);
+        list = new AccountList();
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"paste"};
         app.run(args);
@@ -101,9 +117,7 @@ public class PasteCommandTest {
 
     @Test
     public void setMessageAndNoMessageOption() {
-        ctx = spy(new CliContext(io, mockCore, workDir));
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"paste", "-m", "Message", "-n"};
         app.run(args);
