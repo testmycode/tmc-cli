@@ -9,12 +9,13 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
 import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import java.nio.file.Path;
 import java.util.Locale;
 
-public class Settings implements TmcSettings {
+public class Settings implements TmcSettings, SpywareSettings {
 
     private WorkDir workDir;
     private Account account;
@@ -148,12 +149,12 @@ public class Settings implements TmcSettings {
 
     @Override
     public void setToken(Optional<String> token) {
-        account.setoAuthToken(token);
+        account.setOauthToken(token);
     }
 
     @Override
     public Optional<String> getToken() {
-        return account.getoAuthToken();
+        return account.getOauthToken();
     }
 
     @Override
@@ -166,7 +167,21 @@ public class Settings implements TmcSettings {
         account.setOrganization(organization);
     }
 
-    public void setCourse(Course course) {
-        account.setCurrentCourse(Optional.of(course));
+    @Override
+    public boolean isSpywareEnabled() {
+        return account.getSendAnalytics();
+    }
+
+    public void setSpywareEnabled(boolean spywareEnabled) {
+        account.setSendAnalytics(spywareEnabled);
+    }
+
+    @Override
+    public boolean isDetailedSpywareEnabled() {
+        return account.getSendDetailedAnalytics();
+    }
+
+    public void setDetailedSpywareEnabled(boolean detailedSpywareEnabled) {
+        account.setSendDetailedAnalytics(detailedSpywareEnabled);
     }
 }

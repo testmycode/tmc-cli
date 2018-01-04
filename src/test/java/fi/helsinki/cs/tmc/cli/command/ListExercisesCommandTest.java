@@ -3,14 +3,12 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
@@ -24,6 +22,7 @@ import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
 import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -70,7 +69,7 @@ public class ListExercisesCommandTest {
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         Settings settings = new Settings();
         mockCore = new TmcCore(settings, tmcLangs);
-        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        SpywareSettings analyticsSettings = new Settings();
         EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
         AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
         ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
@@ -89,7 +88,7 @@ public class ListExercisesCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), null));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn();
+        doReturn(false).when(ctx).checkIsLoggedIn(false);
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);

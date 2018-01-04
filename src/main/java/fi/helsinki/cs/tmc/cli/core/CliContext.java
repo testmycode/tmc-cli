@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.cli.core;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
@@ -170,11 +169,15 @@ public class CliContext {
      * Initialize the tmc-core and other cached info.
      * Use this method if you need i
      * @return true if success
+     * @param quiet
      */
-    public boolean checkIsLoggedIn() {
+    public boolean checkIsLoggedIn(boolean quiet) {
         loadUserInformation();
         //Bug: what if we have wrong login?
         if (!hasLogin) {
+            if (quiet) {
+                return false;
+            }
             if (courseInfo == null) {
                 // if user is not in course folder.
                 io.errorln("You are not logged in. Log in using: tmc login");

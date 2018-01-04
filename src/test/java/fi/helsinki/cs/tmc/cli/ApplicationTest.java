@@ -12,7 +12,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.Io;
@@ -25,6 +24,7 @@ import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
 import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,7 +46,7 @@ public class ApplicationTest {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         TmcCore core = new TmcCore(settings, tmcLangs);
-        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        SpywareSettings analyticsSettings = new Settings();
         EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
         AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
         app = new Application(new CliContext(io, core, new WorkDir(), settings, analyticsFacade));

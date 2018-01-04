@@ -21,7 +21,11 @@ public class TimeTracker {
     }
 
     public boolean anHourHasPassedSinceLastSubmit() {
-        long startTime = Long.parseLong(SettingsIo.loadProperties().get(PROPERTY_KEY));
+        String submitProperty = SettingsIo.loadProperties().get(PROPERTY_KEY);
+        if (submitProperty == null) {
+            return false;
+        }
+        long startTime = Long.parseLong(submitProperty);
         long endTime = System.nanoTime();
         long elapsedTime = endTime - startTime;
         long hoursPassed = TimeUnit.HOURS.convert(elapsedTime, TimeUnit.NANOSECONDS);

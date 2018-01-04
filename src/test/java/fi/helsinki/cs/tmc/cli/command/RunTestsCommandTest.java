@@ -11,7 +11,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -32,6 +31,7 @@ import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
 import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -85,7 +85,7 @@ public class RunTestsCommandTest {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         mockCore = new TmcCore(settings, tmcLangs);
-        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        SpywareSettings analyticsSettings = new Settings();
         EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
         AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
         ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
@@ -104,7 +104,7 @@ public class RunTestsCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), null));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn();
+        doReturn(false).when(ctx).checkIsLoggedIn(false);
 
         String[] args = {"test"};
         app.run(args);

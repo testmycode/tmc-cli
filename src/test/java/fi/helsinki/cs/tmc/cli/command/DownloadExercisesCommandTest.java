@@ -14,7 +14,6 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
@@ -29,7 +28,6 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
-import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
 import fi.helsinki.cs.tmc.spyware.EventStore;
@@ -75,8 +73,8 @@ public class DownloadExercisesCommandTest {
 
         io = new TestIo();
         mockCore = new TmcCore(new Settings(), new TaskExecutorImpl());
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(new AnalyticsSettings(), new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new AnalyticsSettings(), eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new Settings(), new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
         ctx = new CliContext(io, mockCore, workDir, new Settings(), analyticsFacade);
         app = new Application(ctx);
         Account account = new Account("user", "password", testOrganization);
@@ -98,7 +96,7 @@ public class DownloadExercisesCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, mockCore, workDir, new Settings(), analyticsFacade));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn();
+        doReturn(false).when(ctx).checkIsLoggedIn(false);
 
         String[] args = {"download", "foo"};
         app.run(args);

@@ -52,7 +52,7 @@ public class PasteCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.checkIsLoggedIn()) {
+        if (!ctx.checkIsLoggedIn(false)) {
             return;
         }
 

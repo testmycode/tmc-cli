@@ -34,7 +34,7 @@ public class HelpCommand extends AbstractCommand {
         this.context = context;
         this.io = context.getIo();
 
-        if (this.context.checkIsLoggedIn()) {
+        if (this.context.checkIsLoggedIn(false)) {
             this.context.getAnalyticsFacade().saveAnalytics(this.context.getSettings().getUsername().get(), "help");
         }
 

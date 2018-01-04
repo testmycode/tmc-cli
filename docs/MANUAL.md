@@ -206,6 +206,8 @@ List of configurable settings:
   blue, purple, cyan, white, none. Stored in properties.
 * *send-diagnostics*
   Allow sending crash reports and analytics for client development. Stored with account.
+* *send-analytics*
+  Allow sending analytics data of commands run. Stored in account.
 * *server-address*
   Address to fetch courses from and submit to. Defaults to `https://tmc.mooc.fi`. Stored with account
 

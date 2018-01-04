@@ -9,7 +9,6 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
@@ -25,6 +24,7 @@ import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
 import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TmcUtil.class, CourseInfoIo.class, SettingsIo.class})
@@ -95,7 +94,7 @@ public class SubmitCommandTest {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         core = new TmcCore(settings, tmcLangs);
-        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        SpywareSettings analyticsSettings = new Settings();
         analyticsFacade = spy(new AnalyticsFacade(analyticsSettings, new EventSendBuffer(analyticsSettings, new EventStore())));
         ctx = new CliContext(io, this.core, new WorkDir(), new Settings(), this.analyticsFacade);
         app = new Application(ctx);
@@ -128,7 +127,7 @@ public class SubmitCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, core, workDir, new Settings(), analyticsFacade));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn();
+        doReturn(false).when(ctx).checkIsLoggedIn(false);
 
         String[] args = {"submit"};
         app.run(args);

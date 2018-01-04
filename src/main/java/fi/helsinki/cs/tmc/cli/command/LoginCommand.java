@@ -12,12 +12,9 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import com.google.common.base.Optional;
-
-import java.util.concurrent.Callable;
 
 @Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand extends AbstractCommand {
@@ -51,7 +48,11 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
-        this.ctx.loadUserInformation();
+        if (this.ctx.checkIsLoggedIn(true)) {
+            io.println("You are already logged in as " + this.ctx.getSettings().getUsername().get());
+            io.println("Change your organization with the command organization");
+            return;
+        }
 
         this.ctx.getAnalyticsFacade().saveAnalytics("login");
 
@@ -71,7 +72,10 @@ public class LoginCommand extends AbstractCommand {
 
         OrganizationCommand organizationCommand = new OrganizationCommand();
         Account account = new Account(username, null);
+        this.ctx.getSettings().setAccount(account);
+
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
+            this.ctx.getSettings().setAccount(new Account());
             return;
         }
 
@@ -79,11 +83,14 @@ public class LoginCommand extends AbstractCommand {
         if (!organization.isPresent()) {
             return;
         }
+        account.setOrganization(organization);
 
-        this.ctx.getSettings().setOrganization(organization);
-
-        boolean sendDiagnostics = getSendDiagnosticsAnswer(username, account.getServerAddress());
-        this.ctx.getSettings().setSendDiagnostics(sendDiagnostics);
+        boolean sendDiagnostics = getAnswerFromUser(username, account.getServerAddress(),
+                                    "Do you want to send crash reports for client development?");
+        account.setSendDiagnostics(sendDiagnostics);
+        boolean sendAnalytics = getAnswerFromUser(username, account.getServerAddress(),
+                "Do you want to send analytics data for research?");
+        account.setSendAnalytics(sendAnalytics);
 
         AccountList list = SettingsIo.loadAccountList();
         list.addAccount(account);
@@ -115,17 +122,18 @@ public class LoginCommand extends AbstractCommand {
         return value;
     }
 
-    private boolean getSendDiagnosticsAnswer(String username, String server) {
+    private boolean getAnswerFromUser(String username, String server, String prompt) {
         AccountList savedAccounts = SettingsIo.loadAccountList();
         if (savedAccounts.getAccount(username, server) != null) {
             // not the first time logging in, diagnostics not asked
             return this.ctx.getSettings().getSendDiagnostics();
         }
         while (true) {
-            String sendDiagnostics = io.readLine("Do you want to send crash reports and diagnostics for client development? (y/n) ");
-            if (sendDiagnostics.trim().toLowerCase().startsWith("y")) {
+            String sendDiagnostics = io.readLine(prompt + " (y/n) ");
+            String answer = sendDiagnostics.trim().toLowerCase();
+            if (answer.isEmpty() || answer.startsWith("y")) {
                 return true;
-            } else if (sendDiagnostics.trim().toLowerCase().startsWith("n")) {
+            } else if (answer.startsWith("n")) {
                 return false;
             }
             io.println("Please answer y(es) or n(o).");

@@ -31,10 +31,13 @@ public class OrganizationCommand extends AbstractCommand {
     @Override
     public void run(CliContext ctx, CommandLine args) {
         this.ctx = ctx;
-        if (!this.ctx.checkIsLoggedIn()) {
+        if (!this.ctx.checkIsLoggedIn(false)) {
             return;
         }
-        this.ctx.getAnalyticsFacade().saveAnalytics(this.ctx.getSettings().getUsername().get(), "change_organization");
+
+        Optional<String> username = this.ctx.getSettings().getUsername();
+        this.ctx.getAnalyticsFacade().saveAnalytics(username.isPresent() ? username.get() : "", "config");
+
         Optional<Organization> organization = chooseOrganization(ctx, args);
         this.ctx.getSettings().setOrganization(organization);
         SettingsIo.saveCurrentSettingsToAccountList(this.ctx.getSettings());
@@ -67,9 +70,9 @@ public class OrganizationCommand extends AbstractCommand {
                 });
         io.println("Available Organizations:");
         io.println();
-        pinned.stream().forEach(o -> printFormattedOrganization(o));
+        pinned.forEach(this::printFormattedOrganization);
         io.println("----------");
-        others.stream().forEach(o -> printFormattedOrganization(o));
+        others.forEach(this::printFormattedOrganization);
         io.println();
     }
 
@@ -97,6 +100,7 @@ public class OrganizationCommand extends AbstractCommand {
         List<Organization> organizations = listOrganizations();
         if (organizations == null) {
             io.errorln("Failed to fetch organizations from server.");
+            return Optional.absent();
         }
         java.util.Optional<Organization> organization;
         while (true) {
@@ -113,11 +117,7 @@ public class OrganizationCommand extends AbstractCommand {
                 }
             }
         }
-        if (organization.isPresent()) {
-            io.println("Choosing organization " + organization.get().getName());
-        } else {
-            io.errorln("Error while choosing organization");
-        }
+        io.println("Choosing organization " + organization.get().getName());
         return OptionalToGoptional.convert(organization);
     }
 

@@ -59,7 +59,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         ctx = context;
         showAll = args.hasOption("a");
 
-        if (!ctx.checkIsLoggedIn()) {
+        if (!ctx.checkIsLoggedIn(false)) {
             return;
         }
 

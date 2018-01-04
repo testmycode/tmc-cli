@@ -19,7 +19,7 @@ public class LogoutCommand extends AbstractCommand {
     @Override
     public void run(CliContext context, CommandLine args) {
         Io io = context.getIo();
-        if (!context.checkIsLoggedIn()) {
+        if (!context.checkIsLoggedIn(false)) {
             return;
         }
         context.getAnalyticsFacade().saveAnalytics("logout");
@@ -29,7 +29,7 @@ public class LogoutCommand extends AbstractCommand {
             return;
         }
         SettingsIo.delete();
-        context.getSettings().setToken(Optional.<String>absent());
+        context.getSettings().setToken(Optional.absent());
         io.println("Logged out.");
     }
 }

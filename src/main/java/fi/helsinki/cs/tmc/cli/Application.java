@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.analytics.TimeTracker;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
@@ -205,9 +204,8 @@ public class Application {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         TmcCore core = new TmcCore(settings, tmcLangs);
-        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(settings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(settings, eventSendBuffer);
         Application app = new Application(new CliContext(null, core, new WorkDir(), settings, analyticsFacade));
         app.run(args);
     }

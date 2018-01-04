@@ -8,7 +8,8 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
+import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -20,6 +21,7 @@ import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
 import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +33,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 @RunWith(PowerMockRunner.class)
@@ -52,7 +53,7 @@ public class ConfigCommandTest {
         settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         TmcCore core = new TmcCore(settings, tmcLangs);
-        AnalyticsSettings analyticsSettings = new AnalyticsSettings();
+        SpywareSettings analyticsSettings = new Settings();
         EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
         AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
         ctx = Mockito.spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
@@ -66,6 +67,10 @@ public class ConfigCommandTest {
         mockStatic(SettingsIo.class);
         when(SettingsIo.getPropertiesFile(any(Path.class))).thenReturn(testConfigRoot.resolve(TEST_PROPERTIES_FILENAME));
         when(SettingsIo.getConfigDirectory()).thenReturn(testConfigRoot);
+        AccountList t = new AccountList();
+        t.addAccount(new Account("username", "password"));
+        when(SettingsIo.loadAccountList()).thenReturn(t);
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
 
     @After
@@ -97,12 +102,12 @@ public class ConfigCommandTest {
     }
 
     @Test
-    public void listsAllProperties() {
+    public void listsOnlyPropsFromAllowedKeys() {
         props.put("hello", "world");
         props.put("toilet", "wonderland");
         app.run(new String[] {"config", "--list"});
-        io.assertContains("hello=world");
-        io.assertContains("toilet=wonderland");
+        io.assertNotContains("hello=world");
+        io.assertNotContains("toilet=wonderland");
     }
 
     @Test

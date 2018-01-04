@@ -41,7 +41,7 @@ public class ListExercisesCommand extends AbstractCommand {
         this.ctx = context;
         this.io = ctx.getIo();
 
-        if (!ctx.checkIsLoggedIn()) {
+        if (!ctx.checkIsLoggedIn(false)) {
             return;
         }
 
@@ -89,7 +89,7 @@ public class ListExercisesCommand extends AbstractCommand {
     }
 
     private List<Exercise> getExercisesFromServer(String courseName) {
-        if (!ctx.checkIsLoggedIn()) {
+        if (!ctx.checkIsLoggedIn(false)) {
             return null;
         }
 

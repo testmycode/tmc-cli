@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -17,10 +18,8 @@ import org.apache.commons.cli.Options;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Collections;
 
 @Command(name = "config", desc = "Set/unset TMC-CLI properties")
 public class ConfigCommand extends AbstractCommand {
@@ -43,15 +42,15 @@ public class ConfigCommand extends AbstractCommand {
         // add new possible config options here
         // each key has a BiConsumer function which validates the value and saves it in settings or properties
         ALLOWED_KEYS.put("send-diagnostics", (key, value) -> {
-            String newVal = (String) value;
-            if (!newVal.trim().toLowerCase().equals("true") && !newVal.trim().toLowerCase().equals("false")) {
-                throw new BadValueTypeException("Please write either true or false");
-            }
-            boolean send = Boolean.parseBoolean(newVal);
+            boolean send = getBooleanSendValue((String) value);
             context.getSettings().setSendDiagnostics(send);
             SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
         });
-
+        ALLOWED_KEYS.put("send-analytics", (key, value) -> {
+            boolean send = getBooleanSendValue((String) value);
+            context.getSettings().setSpywareEnabled(send);
+            SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
+        });
         ALLOWED_KEYS.put("server-address", (key, address) -> {
             String addr = (String) address;
             if (!addr.matches("^https?://.*")) {
@@ -64,7 +63,6 @@ public class ConfigCommand extends AbstractCommand {
             }
             SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
         });
-
         ALLOWED_KEYS.put("update-date", (key, value) -> {
             String date = (String) value;
             if (!date.matches("[0-9]+")) {
@@ -72,10 +70,22 @@ public class ConfigCommand extends AbstractCommand {
             }
             properties.put("update-date", date);
         });
-        ALLOWED_KEYS.put("testresults-right", this::addToProperties);
-        ALLOWED_KEYS.put("testresults-left", this::addToProperties);
-        ALLOWED_KEYS.put("progressbar-left", this::addToProperties);
-        ALLOWED_KEYS.put("progressbar-right", this::addToProperties);
+        ALLOWED_KEYS.put("testresults-right", this::addBarColorToProperties);
+        ALLOWED_KEYS.put("testresults-left", this::addBarColorToProperties);
+        ALLOWED_KEYS.put("progressbar-left", this::addBarColorToProperties);
+        ALLOWED_KEYS.put("progressbar-right", this::addBarColorToProperties);
+    }
+
+    private boolean getBooleanSendValue(String value) throws BadValueTypeException {
+        String newVal = value;
+        isBooleanValue(newVal);
+        return Boolean.parseBoolean(newVal);
+    }
+
+    private void isBooleanValue(String newVal) throws BadValueTypeException {
+        if (!newVal.trim().toLowerCase().equals("true") && !newVal.trim().toLowerCase().equals("false")) {
+            throw new BadValueTypeException("Not a boolean value");
+        }
     }
 
     @Override
@@ -109,11 +119,12 @@ public class ConfigCommand extends AbstractCommand {
         arguments = Arrays.stream(arguments).filter(o -> !o.trim().isEmpty()).toArray(String[]::new);
         this.properties = context.getProperties();
 
-        if (this.context.getSettings().getUsername().isPresent()) {
-            this.context.getAnalyticsFacade().saveAnalytics(this.context.getSettings().getUsername().get(), "config");
-        } else {
-            this.context.getAnalyticsFacade().saveAnalytics("config");
+        if (!this.context.checkIsLoggedIn(false)) {
+            return;
         }
+
+        Optional<String> username = this.context.getSettings().getUsername();
+        this.context.getAnalyticsFacade().saveAnalytics(username.isPresent() ? username.get() : "", "config");
 
         if ((get ? 1 : 0) + (listing ? 1 : 0) + (delete ? 1 : 0) > 1) {
             io.errorln("Only one of the --get or --list or --delete options can "
@@ -155,12 +166,12 @@ public class ConfigCommand extends AbstractCommand {
     }
 
     private void printAllProperties() {
-        ArrayList<String> array = new ArrayList<>(properties.keySet());
-        Collections.sort(array);
+        // how to handle that some values are stored in settings and some in properties?
+        ALLOWED_KEYS.keySet().stream().sorted().forEach(k -> {
+            String property = properties.get(k);
+            io.println(k + "=" + (property != null ? property : "<not set>"));
+        });
 
-        for (String key : array) {
-            io.println(key + "=" + properties.get(key));
-        }
     }
 
     private void deleteProperties(String[] keys) {
@@ -256,13 +267,13 @@ public class ConfigCommand extends AbstractCommand {
         if (!ALLOWED_KEYS.keySet().contains(key)) {
             io.println("\"" + key + "\" is not an allowed key.");
             io.println("Allowed keys are: ");
-            ALLOWED_KEYS.keySet().stream().forEach(k -> io.print(" " + k + '\n'));
+            ALLOWED_KEYS.keySet().forEach(k -> io.print(" " + k + '\n'));
             return false;
         }
         return true;
     }
 
-    private void addToProperties(String key, Object value) throws BadValueTypeException {
+    private void addBarColorToProperties(String key, Object value) throws BadValueTypeException {
         String color = (String) value;
         if (!PROGRESS_BAR_COLORS.contains(color)) {
             throw new BadValueTypeException("Color " + value + " not supported.");

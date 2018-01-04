@@ -14,22 +14,18 @@ import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SettingsIo.class, TmcUtil.class})
 public class AnalyticsFacadeTest {
-        private AnalyticsSettings analyticsSettings;
+        private Settings analyticsSettings;
         private AnalyticsFacade analyticsFacade;
         private EventSendBuffer eventSendBuffer;
         private Application app;
@@ -41,7 +37,7 @@ public class AnalyticsFacadeTest {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         TmcCore core = new TmcCore(settings, tmcLangs);
-        analyticsSettings = mock(AnalyticsSettings.class);
+        analyticsSettings = mock(Settings.class);
         eventSendBuffer = mock(EventSendBuffer.class);
         analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
         app = new Application(new CliContext(io, core, new WorkDir(), settings, analyticsFacade));
@@ -51,7 +47,7 @@ public class AnalyticsFacadeTest {
         list.addAccount(new Account("username", "pass"));
 
         mockStatic(SettingsIo.class);
-        Mockito.when(SettingsIo.loadAccountList()).thenReturn(list);
+        when(SettingsIo.loadAccountList()).thenReturn(list);
 
     }
 

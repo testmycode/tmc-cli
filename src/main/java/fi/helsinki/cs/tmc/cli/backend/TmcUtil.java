@@ -18,6 +18,7 @@ import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.compress.archivers.sevenz.CLI;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,7 +237,7 @@ public class TmcUtil {
 
         if (exception instanceof IllegalArgumentException) {
             logger.error("Invalid arguments", exception);
-            io.errorln("Please give server, username and password in valid form.");
+            io.errorln("Please give server, username and password in valid forms.");
             return;
         }
 
@@ -259,11 +260,17 @@ public class TmcUtil {
             return;
         }
 
+        if (cause instanceof OAuthSystemException) {
+            io.errorln("There was a problem with authentication.\nPlease try logging in again.");
+            return;
+        }
+
         if (cause != null && cause.getCause() instanceof UnknownHostException) {
             logger.error("No internet connection");
             io.errorln("You have no internet connection.");
             return;
         }
+
         logger.error("Command failed in tmc-core", exception);
         //TODO we seem to write twice error message; here and in the commands.
         io.errorln("Command failed, check tmc-cli.log file for more info");

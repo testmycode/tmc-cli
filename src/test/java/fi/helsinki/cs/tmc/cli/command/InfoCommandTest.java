@@ -10,7 +10,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.analytics.AnalyticsSettings;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
@@ -74,8 +73,8 @@ public class InfoCommandTest {
         io = new TestIo();
 
         mockCore = new TmcCore(new Settings(), new TaskExecutorImpl());
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(new AnalyticsSettings(), new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new AnalyticsSettings(), eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new Settings(), new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
         ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
