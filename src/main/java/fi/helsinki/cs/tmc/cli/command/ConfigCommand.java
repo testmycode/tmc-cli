@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.cli.core.Command;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import fi.helsinki.cs.tmc.cli.utils.BadValueTypeException;
-import fi.helsinki.cs.tmc.cli.utils.BiConsumerWithException;
+import fi.helsinki.cs.tmc.cli.utils.PropertyFunctions;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
@@ -26,10 +26,16 @@ public class ConfigCommand extends AbstractCommand {
 
     private CliContext context;
     private Io io;
-    private static final Map<String, BiConsumerWithException<String, Object>> ALLOWED_KEYS = new HashMap<>();
-    private static final Set<String> PROGRESS_BAR_COLORS = new HashSet<String>(Arrays.asList(new String[] {
-            "black", "red", "green", "blue", "yellow", "blue", "purple", "cyan", "white", "none"
-    }));
+    private static final Map<String, PropertyFunctions> ALLOWED_KEYS = new HashMap<>();
+    private static final Set<String> PROGRESS_BAR_COLORS = new HashSet<>(Arrays.asList("black", "red", "green", "blue", "yellow", "blue", "purple", "cyan", "white", "none"));
+    private static final String sendAnalyticsKey = "send-analytics";
+    private static final String serverAddressKey = "server-address";
+    private static final String updateDateKey = "update-date";
+    private static final String testResultRightKey = "testresults-right";
+    private static final String testResultLeftKey = "testresults-left";
+    private static final String progressBarLeftKey = "progressbar-left";
+    private static final String progressBarRightKey = "progressbar-right";
+    private static final String sendDiagnosticsKey = "send-diagnostics";
 
     private HashMap<String, String> properties;
     private boolean quiet;
@@ -40,46 +46,117 @@ public class ConfigCommand extends AbstractCommand {
 
     private void configureAllowedKeys() {
         // add new possible config options here
-        // each key has a BiConsumer function which validates the value and saves it in settings or properties
-        ALLOWED_KEYS.put("send-diagnostics", (key, value) -> {
-            boolean send = getBooleanSendValue((String) value);
-            context.getSettings().setSendDiagnostics(send);
-            SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
-        });
-        ALLOWED_KEYS.put("send-analytics", (key, value) -> {
-            boolean send = getBooleanSendValue((String) value);
-            context.getSettings().setSpywareEnabled(send);
-            SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
-        });
-        ALLOWED_KEYS.put("server-address", (key, address) -> {
-            String addr = (String) address;
-            if (!addr.matches("^https?://.*")) {
-                throw new BadValueTypeException("Please start the address with http[s]://");
+        // create an anonymous class which determines where the value is stored
+        // some values are stored in settings, some in properties
+        ALLOWED_KEYS.put(sendDiagnosticsKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return Boolean.toString(context.getSettings().getSendDiagnostics());
             }
-            context.getSettings().setServerAddress(addr);
-            if (!normalizeServerAddress()) {
-                io.println("There was a problem setting the server address.");
-                return;
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                boolean send = getBooleanSendValue(value);
+                context.getSettings().setSendDiagnostics(send);
+                SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
-            SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
         });
-        ALLOWED_KEYS.put("update-date", (key, value) -> {
-            String date = (String) value;
-            if (!date.matches("[0-9]+")) {
-                throw new BadValueTypeException("Please insert the date as a number");
+        ALLOWED_KEYS.put("send-analytics", new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return Boolean.toString(context.getSettings().isSpywareEnabled());
             }
-            properties.put("update-date", date);
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                boolean send = getBooleanSendValue(value);
+                context.getSettings().setSpywareEnabled(send);
+                SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
+            }
         });
-        ALLOWED_KEYS.put("testresults-right", this::addBarColorToProperties);
-        ALLOWED_KEYS.put("testresults-left", this::addBarColorToProperties);
-        ALLOWED_KEYS.put("progressbar-left", this::addBarColorToProperties);
-        ALLOWED_KEYS.put("progressbar-right", this::addBarColorToProperties);
+        ALLOWED_KEYS.put("server-address", new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getSettings().getServerAddress();
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                String addr = value;
+                if (!addr.matches("^https?://.*")) {
+                    throw new BadValueTypeException("Please start the address with http[s]://");
+                }
+                context.getSettings().setServerAddress(addr);
+                if (!normalizeServerAddress()) {
+                    io.println("There was a problem setting the server address.");
+                    return;
+                }
+                SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
+            }
+        });
+        ALLOWED_KEYS.put("update-date", new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get("update-date");
+            }
+
+            @Override
+            public void setter(String date) throws BadValueTypeException {
+                if (!date.matches("[0-9]+")) {
+                    throw new BadValueTypeException("Please insert the date as a number");
+                }
+                properties.put("update-date", date);
+            }
+        });
+        ALLOWED_KEYS.put("testresults-right", new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get("testresults-right");
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties("testresults-right", value);
+            }
+        });
+        ALLOWED_KEYS.put("testresults-left", new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get("testresults-right");
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties("testresults-right", value);
+            }
+        });
+        ALLOWED_KEYS.put("progressbar-left", new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get("testresults-right");
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties("testresults-right", value);
+            }
+        });
+        ALLOWED_KEYS.put("progressbar-right", new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get("testresults-right");
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties("testresults-right", value);
+            }
+        });
     }
 
     private boolean getBooleanSendValue(String value) throws BadValueTypeException {
-        String newVal = value;
-        isBooleanValue(newVal);
-        return Boolean.parseBoolean(newVal);
+        isBooleanValue(value);
+        return Boolean.parseBoolean(value);
     }
 
     private void isBooleanValue(String newVal) throws BadValueTypeException {
@@ -167,11 +244,11 @@ public class ConfigCommand extends AbstractCommand {
 
     private void printAllProperties() {
         // how to handle that some values are stored in settings and some in properties?
-        ALLOWED_KEYS.keySet().stream().sorted().forEach(k -> {
-            String property = properties.get(k);
-            io.println(k + "=" + (property != null ? property : "<not set>"));
+        ALLOWED_KEYS.entrySet().stream().forEach(e -> {
+            String key = e.getKey();
+            String value = e.getValue().getter();
+            io.println(key + "=" + ( value != null ? value: "<no value set>" ));
         });
-
     }
 
     private void deleteProperties(String[] keys) {
@@ -254,8 +331,7 @@ public class ConfigCommand extends AbstractCommand {
 
     private boolean saveValue(String key, String value) {
         try {
-            ALLOWED_KEYS.get(key).apply(key, value);
-
+            ALLOWED_KEYS.get(key).setter(value);
         } catch (Exception e) {
             io.errorln(e.getMessage());
             return false;
@@ -273,10 +349,9 @@ public class ConfigCommand extends AbstractCommand {
         return true;
     }
 
-    private void addBarColorToProperties(String key, Object value) throws BadValueTypeException {
-        String color = (String) value;
+    private void addBarColorToProperties(String key, String color) throws BadValueTypeException {
         if (!PROGRESS_BAR_COLORS.contains(color)) {
-            throw new BadValueTypeException("Color " + value + " not supported.");
+            throw new BadValueTypeException("Color " + color + " not supported.");
         }
         properties.put(key, color);
         SettingsIo.saveProperties(properties);
