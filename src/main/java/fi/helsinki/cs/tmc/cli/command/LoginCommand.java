@@ -49,12 +49,14 @@ public class LoginCommand extends AbstractCommand {
         }
 
         if (this.ctx.checkIsLoggedIn(true)) {
-            io.println("You are already logged in as " + this.ctx.getSettings().getUsername().get());
-            io.println("Change your organization with the command organization");
+            io.println("You are already logged in as " + this.ctx.getSettings().getUsername().get() +
+                    (this.ctx.getSettings().getOrganization().isPresent() ?
+                    " and your current organization is " + this.ctx.getSettings().getOrganization().get().getName() :
+                    ""));
+            io.println("Change your organization with the command organization.");
+            io.println("Run tmc config -l to see your current settings.");
             return;
         }
-
-        this.ctx.getAnalyticsFacade().saveAnalytics("login");
 
         if (!TmcUtil.hasConnection(ctx)) {
             io.errorln("You don't have internet connection currently.");
@@ -70,15 +72,15 @@ public class LoginCommand extends AbstractCommand {
         username = getLoginInfo(args, username, "u", "username: ");
         password = getLoginInfo(args, null, "p", "password: ");
 
-        OrganizationCommand organizationCommand = new OrganizationCommand();
         Account account = new Account(username, null);
-        this.ctx.getSettings().setAccount(account);
+        ctx.useAccount(account);
 
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
             this.ctx.getSettings().setAccount(new Account());
             return;
         }
 
+        OrganizationCommand organizationCommand = new OrganizationCommand();
         Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, args);
         if (!organization.isPresent()) {
             return;
@@ -86,10 +88,12 @@ public class LoginCommand extends AbstractCommand {
         account.setOrganization(organization);
 
         boolean sendDiagnostics = getAnswerFromUser(username, account.getServerAddress(),
-                                    "Do you want to send crash reports for client development?");
+                            "Do you want to send crash reports for client development?",
+                                    this.ctx.getSettings().getSendDiagnostics());
         account.setSendDiagnostics(sendDiagnostics);
         boolean sendAnalytics = getAnswerFromUser(username, account.getServerAddress(),
-                "Do you want to send analytics data for research?");
+                            "Do you want to send analytics data for research?",
+                                    this.ctx.getSettings().isSpywareEnabled());
         account.setSendAnalytics(sendAnalytics);
 
         AccountList list = SettingsIo.loadAccountList();
@@ -98,6 +102,8 @@ public class LoginCommand extends AbstractCommand {
             io.errorln("Failed to write the accounts file.");
             return;
         }
+
+        this.ctx.getAnalyticsFacade().saveAnalytics("login");
 
         io.println("Login successful.");
     }
@@ -122,18 +128,20 @@ public class LoginCommand extends AbstractCommand {
         return value;
     }
 
-    private boolean getAnswerFromUser(String username, String server, String prompt) {
+    private boolean getAnswerFromUser(String username, String server, String prompt, boolean defaultValue) {
         AccountList savedAccounts = SettingsIo.loadAccountList();
         if (savedAccounts.getAccount(username, server) != null) {
-            // not the first time logging in, diagnostics not asked
-            return this.ctx.getSettings().getSendDiagnostics();
+            // not the first time logging in
+            return defaultValue;
         }
         while (true) {
-            String sendDiagnostics = io.readLine(prompt + " (y/n) ");
-            String answer = sendDiagnostics.trim().toLowerCase();
+            String sendInfo = io.readLine(prompt + " (Y/n) ");
+            String answer = sendInfo.trim().toLowerCase();
             if (answer.isEmpty() || answer.startsWith("y")) {
+                io.println("Set to yes");
                 return true;
             } else if (answer.startsWith("n")) {
+                io.println("Set to no");
                 return false;
             }
             io.println("Please answer y(es) or n(o).");

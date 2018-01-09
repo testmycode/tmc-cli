@@ -59,7 +59,6 @@ public class TmcUtil {
         TmcCore core = ctx.getTmcCore();
         ctx.useAccount(account);
         Callable<Void> callable = core.authenticate(ProgressObserver.NULL_OBSERVER, password);
-        //TODO restore the settings object
 
         try {
             callable.call();
@@ -118,19 +117,6 @@ public class TmcUtil {
         for (Course item : courses) {
             if (item.getName().equals(name)) {
                 return TmcUtil.getDetails(ctx, item);
-            }
-        }
-        return null;
-    }
-
-    //TODO This is exactly same method as CourseInfo.getExercise(course, name)
-    public static Exercise findExercise(Course course, String name) {
-        List<Exercise> exercises;
-        exercises = course.getExercises();
-
-        for (Exercise item : exercises) {
-            if (item.getName().equals(name)) {
-                return item;
             }
         }
         return null;
@@ -272,7 +258,6 @@ public class TmcUtil {
         }
 
         logger.error("Command failed in tmc-core", exception);
-        //TODO we seem to write twice error message; here and in the commands.
         io.errorln("Command failed, check tmc-cli.log file for more info");
     }
 

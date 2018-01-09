@@ -2,15 +2,20 @@ package fi.helsinki.cs.tmc.cli;
 
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
 import fi.helsinki.cs.tmc.cli.analytics.TimeTracker;
+import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
-import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.*;
 import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
+import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 
+
+import fi.helsinki.cs.tmc.cli.utils.OptionalToGoptional;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.TmcRequestProcessor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
@@ -98,6 +103,13 @@ public class Application {
     private Optional<Thread> sendAnalytics(AbstractCommand command) {
         Optional<Thread> thread = Optional.empty();
         if (command instanceof SubmitCommand || timeTracker.anHourHasPassedSinceLastSubmit()) {
+            this.context.loadUserInformation();
+            // get course info returns null
+            CourseInfo courseInfo = this.context.getCourseInfo();
+            if (courseInfo == null) {
+                return Optional.empty();
+            }
+            TmcSettingsHolder.get().setCourse(OptionalToGoptional.convert(Optional.of(courseInfo.getCourse())));
             thread = this.context.getAnalyticsFacade().sendAnalytics();
             timeTracker.restart();
         }
@@ -199,7 +211,6 @@ public class Application {
         }
     }
 
-
     public static void main(String[] args) {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
@@ -208,6 +219,8 @@ public class Application {
         AnalyticsFacade analyticsFacade = new AnalyticsFacade(settings, eventSendBuffer);
         Application app = new Application(new CliContext(null, core, new WorkDir(), settings, analyticsFacade));
         app.run(args);
+        // Because of EventSendBuffer
+        TmcRequestProcessor.instance.shutdown();
     }
 
     private boolean versionCheck() {
@@ -220,8 +233,8 @@ public class Application {
             try {
                 time = Long.parseLong(previousTimestamp);
             } catch (NumberFormatException ex) {
-                io.errorln("The previous update date isn't number.");
-                logger.warn("The previous update date isn't number.", ex);
+                io.errorln("The previous update date isn't a number.");
+                logger.warn("The previous update date isn't a number.", ex);
                 return false;
             }
             previous = new Date(time);
@@ -247,24 +260,4 @@ public class Application {
         return updated;
     }
 
-    //TODO rename this as getColorProperty and move it somewhere else
-    public Color getColor(String propertyName) {
-        String propertyValue = context.getProperties().get(propertyName);
-        Color color = ColorUtil.getColor(propertyValue);
-        if (color == null) {
-            switch (propertyName) {
-                case "progressbar-left":
-                    return Color.CYAN;
-                case "progressbar-right":
-                    return Color.CYAN;
-                case "testresults-left":
-                    return Color.GREEN;
-                case "testresults-right":
-                    return Color.RED;
-                default:
-                    return Color.NONE;
-            }
-        }
-        return color;
-    }
 }

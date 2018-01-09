@@ -16,7 +16,6 @@ public class AccountList implements Iterable<Account> {
         this.accountArray = new ArrayList<>();
     }
 
-    //TODO This should not be used
     public Account getAccount() {
         if (this.accountArray.size() > 0) {
             // Get last used account by default

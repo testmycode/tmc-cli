@@ -15,11 +15,7 @@ import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 @Command(name = "config", desc = "Set/unset TMC-CLI properties")
 public class ConfigCommand extends AbstractCommand {
@@ -122,34 +118,34 @@ public class ConfigCommand extends AbstractCommand {
         ALLOWED_KEYS.put("testresults-left", new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("testresults-right");
+                return context.getProperties().get("testresults-left");
             }
 
             @Override
             public void setter(String value) throws BadValueTypeException {
-                addBarColorToProperties("testresults-right", value);
+                addBarColorToProperties("testresults-left", value);
             }
         });
         ALLOWED_KEYS.put("progressbar-left", new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("testresults-right");
+                return context.getProperties().get("progressbar-left");
             }
 
             @Override
             public void setter(String value) throws BadValueTypeException {
-                addBarColorToProperties("testresults-right", value);
+                addBarColorToProperties("progressbar-left", value);
             }
         });
         ALLOWED_KEYS.put("progressbar-right", new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("testresults-right");
+                return context.getProperties().get("progressbar-right");
             }
 
             @Override
             public void setter(String value) throws BadValueTypeException {
-                addBarColorToProperties("testresults-right", value);
+                addBarColorToProperties("progressbar-right", value);
             }
         });
     }
@@ -243,19 +239,21 @@ public class ConfigCommand extends AbstractCommand {
     }
 
     private void printAllProperties() {
-        // how to handle that some values are stored in settings and some in properties?
-        ALLOWED_KEYS.entrySet().stream().forEach(e -> {
-            String key = e.getKey();
-            String value = e.getValue().getter();
-            io.println(key + "=" + ( value != null ? value: "<no value set>" ));
-        });
+        ALLOWED_KEYS.entrySet()
+                    .stream()
+                    .sorted(Comparator.comparing(Map.Entry::getKey))
+                    .forEach(e -> {
+                        String key = e.getKey();
+                        String value = e.getValue().getter();
+                        io.println(key + "=" + ( value != null ? value: "<no value set>" ));
+                    });
     }
 
     private void deleteProperties(String[] keys) {
         if (this.quiet) {
             for (String key : keys) {
-                if (properties.containsKey(key)) {
-                    properties.remove(key);
+                if (ALLOWED_KEYS.keySet().contains(key) && properties.containsKey(key)) {
+                        properties.remove(key);
                 }
             }
             return;
@@ -268,8 +266,8 @@ public class ConfigCommand extends AbstractCommand {
         }
 
         for (String key : keys) {
-            if (!properties.containsKey(key)) {
-                io.error("Key " + key + " doesn't exist.");
+            if (!properties.containsKey(key) || !ALLOWED_KEYS.keySet().contains(key)) {
+                io.error("Key " + key + " doesn't exist or cannot be removed.");
                 return;
             }
         }

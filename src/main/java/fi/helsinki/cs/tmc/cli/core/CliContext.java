@@ -8,21 +8,12 @@ import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
-import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
-import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.*;
 import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
-
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
-
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 public class CliContext {
-    private static final Logger LOG = Logger.getLogger(
-            TmcServerCommunicationTaskFactory.class.getName());
-
 
     private final WorkDir workDir;
     private final Io io;
@@ -235,4 +226,24 @@ public class CliContext {
         settings.setWorkDir(workDir);
     }
 
+    //TODO rename this as getColorProperty and move it somewhere else
+    public Color getColorProperty(String propertyName, Application application) {
+        String propertyValue = getProperties().get(propertyName);
+        Color color = ColorUtil.getColor(propertyValue);
+        if (color == null) {
+            switch (propertyName) {
+                case "progressbar-left":
+                    return Color.CYAN;
+                case "progressbar-right":
+                    return Color.CYAN;
+                case "testresults-left":
+                    return Color.GREEN;
+                case "testresults-right":
+                    return Color.RED;
+                default:
+                    return Color.NONE;
+            }
+        }
+        return color;
+    }
 }

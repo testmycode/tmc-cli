@@ -10,6 +10,7 @@ import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 
 import java.awt.*;
+import java.security.spec.ECField;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +19,6 @@ import java.util.logging.Logger;
 public class AnalyticsFacade {
     private EventSendBuffer eventSendBuffer;
     private SpywareSettings settings;
-    private static final Logger log = Logger.getLogger(AnalyticsFacade.class.getName());
 
     public AnalyticsFacade(SpywareSettings settings, EventSendBuffer eventSendBuffer) {
         this.settings = settings;

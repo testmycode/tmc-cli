@@ -48,7 +48,6 @@ public class SubmitCommandTest {
 
     private static Path pathToDummyCourse;
     private static Path pathToDummyExercise;
-    private static Path pathToDummyExerciseWithDeadlinePassed;
     private static Path pathToDummyExerciseSrc;
     private static Path pathToNonCourseDir;
 
@@ -76,9 +75,6 @@ public class SubmitCommandTest {
         assertNotNull(pathToDummyCourse);
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
-        assertNotNull(pathToDummyExercise);
-
-        pathToDummyExerciseWithDeadlinePassed = pathToDummyCourse.resolve(EXERCISE_WITH_DEADLINE_PASSED);
         assertNotNull(pathToDummyExercise);
 
         pathToDummyExerciseSrc = pathToDummyExercise.resolve("src");
@@ -135,16 +131,6 @@ public class SubmitCommandTest {
     }
 
     @Test
-    public void testSuccessInExerciseRoot() {
-        workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
-        io.assertContains("Submitting: " + EXERCISE1_NAME);
-
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
-    }
-
-    @Test
     public void canSubmitFromCourseDirIfExerciseNameIsGiven() {
         workDir.setWorkdir(pathToDummyCourse);
         app.run(new String[] {"submit", EXERCISE1_NAME});
@@ -168,7 +154,7 @@ public class SubmitCommandTest {
     @Test
     public void submitsAllExercisesFromCourseDirIfNoNameIsGiven() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[] {"submit"});
+        app.run(new String[] {"submit", EXERCISE1_NAME, EXERCISE2_NAME, EXERCISE_WITH_DEADLINE_PASSED});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         io.assertContains("Submitting: " + EXERCISE2_NAME);
         io.assertContains("Submitting: " + EXERCISE_WITH_DEADLINE_PASSED);
@@ -177,13 +163,6 @@ public class SubmitCommandTest {
         // the third one's deadline is passed so it should not be submitted
         verifyStatic(times(2));
         TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
-    }
-
-    @Test
-    public void doesNotSubmitExtraExercisesFromExerciseRoot() {
-        workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
-        assertEquals(1, countSubstring("Submitting: ", io.out()));
     }
 
     @Test
@@ -212,16 +191,6 @@ public class SubmitCommandTest {
     }
 
     @Test
-    public void abortGracefullyIfNotInCourseDir() {
-        workDir.setWorkdir(pathToNonCourseDir);
-        app.run(new String[] {"submit"});
-        io.assertContains("No exercises specified.");
-
-        verifyStatic(times(0));
-        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
-    }
-
-    @Test
     public void showFailMsgIfSubmissionFailsInCore() {
         when(TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class))).thenReturn(null);
         workDir.setWorkdir(pathToDummyCourse);
@@ -235,19 +204,9 @@ public class SubmitCommandTest {
     }
 
     @Test
-    public void canSubmitFromExerciseSubdirs() {
-        workDir.setWorkdir(pathToDummyExerciseSrc);
-        app.run(new String[] {"submit"});
-
-        io.assertContains("Submitting: " + EXERCISE1_NAME);
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
-    }
-
-    @Test
     public void doesNotShowUpdateMessageIfNoUpdatesAvailable() {
         workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
+        app.run(new String[] {"submit", EXERCISE1_NAME});
 
         io.assertNotContains("available");
         io.assertNotContains("been changed on TMC server");
@@ -268,8 +227,8 @@ public class SubmitCommandTest {
         when(TmcUtil.getUpdatableExercises(any(CliContext.class), any(Course.class)))
                 .thenReturn(updateResult);
 
-        workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
+        workDir.setWorkdir(pathToDummyCourse);
+        app.run(new String[] {"submit", EXERCISE2_NAME});
 
         io.assertContains("1 new exercise available");
         io.assertContains("1 exercise has been changed on TMC server");

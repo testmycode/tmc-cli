@@ -19,16 +19,10 @@ import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
 @Command(name = "test", desc = "Run local exercise tests")
 public class RunTestsCommand extends AbstractCommand {
-
-    private static final Logger logger = LoggerFactory.getLogger(RunTestsCommand.class);
-
     private boolean showPassed;
     private boolean showDetails;
 
@@ -65,8 +59,8 @@ public class RunTestsCommand extends AbstractCommand {
 
         CourseInfo info = context.getCourseInfo();
 
-        Color passedColor = context.getApp().getColor("testresults-left");
-        Color failedColor = context.getApp().getColor("testresults-right");
+        Color passedColor = context.getColorProperty("testresults-left", context.getApp());
+        Color failedColor = context.getColorProperty("testresults-right", context.getApp());
         ResultPrinter resultPrinter =
                 new ResultPrinter(io, showDetails, showPassed, passedColor, failedColor);
 

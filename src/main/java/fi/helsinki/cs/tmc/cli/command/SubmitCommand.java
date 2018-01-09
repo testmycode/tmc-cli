@@ -57,6 +57,10 @@ public class SubmitCommand extends AbstractCommand {
         if (exercisesFromArgs == null) {
             return;
         }
+        if (exercisesFromArgs.length == 0) {
+            io.println("Please give exercise to submit as argument");
+            return;
+        }
 
         if (!ctx.checkIsLoggedIn(false)) {
             return;
@@ -93,8 +97,8 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        Color color1 = ctx.getApp().getColor("testresults-left");
-        Color color2 = ctx.getApp().getColor("testresults-right");
+        Color color1 = ctx.getColorProperty("testresults-left", ctx.getApp());
+        Color color2 = ctx.getColorProperty("testresults-right", ctx.getApp());
         ResultPrinter resultPrinter =
                 new ResultPrinter(io, this.showDetails, this.showAll, color1, color2);
 
@@ -168,7 +172,7 @@ public class SubmitCommand extends AbstractCommand {
         }
 
         for (Exercise submitted : submittedExercises) {
-            Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
+            Exercise updatedEx = courseInfo.getExercise(submitted.getName());
             if (updatedEx == null) {
                 io.println(
                         "Failed to update config file for exercise "

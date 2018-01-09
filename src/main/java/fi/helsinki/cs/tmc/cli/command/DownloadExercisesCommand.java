@@ -82,8 +82,8 @@ public class DownloadExercisesCommand extends AbstractCommand {
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
-        Color color1 = ctx.getApp().getColor("progressbar-left");
-        Color color2 = ctx.getApp().getColor("progressbar-right");
+        Color color1 = ctx.getColorProperty("progressbar-left", ctx.getApp());
+        Color color2 = ctx.getColorProperty("progressbar-right", ctx.getApp());
         CliProgressObserver progobs = new CliProgressObserver(io, color1, color2);
 
         ctx.useAccount(finder.getAccount());

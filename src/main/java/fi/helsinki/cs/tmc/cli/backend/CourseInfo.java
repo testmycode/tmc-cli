@@ -77,7 +77,6 @@ public class CourseInfo {
         return names;
     }
 
-    //TODO This is exactly same method as TmcUtil.findExercise(course, name)
     public Exercise getExercise(String name) {
         for (Exercise exercise : this.course.getExercises()) {
             if (exercise.getName().equals(name)) {

@@ -1,8 +1,10 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import com.google.gson.Gson;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

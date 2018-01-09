@@ -89,6 +89,7 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", ORGANIZATION};
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertContains("Login successful.");
     }
@@ -99,6 +100,7 @@ public class LoginCommandTest {
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(false);
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", ORGANIZATION};
+        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertContains("Failed to write the accounts file.");
@@ -122,6 +124,7 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
     }
@@ -132,6 +135,7 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", ORGANIZATION};
         io.addLinePrompt(SERVER);
+        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -148,6 +152,7 @@ public class LoginCommandTest {
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt(ORGANIZATION);
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
     }
@@ -160,6 +165,7 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", TEST_ORGANIZATION.getSlug()};
+        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -178,6 +184,7 @@ public class LoginCommandTest {
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt(ORGANIZATION);
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertContains("Choose organization");
     }
@@ -190,6 +197,7 @@ public class LoginCommandTest {
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), eq(PASSWORD))).thenReturn(true);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         io.addLinePrompt(ORGANIZATION);
+        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -229,8 +237,20 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", TEST_ORGANIZATION.getSlug()};
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
-        io.assertContains("Do you want to send");
+        io.assertContains("want to send crash reports");
     }
 
+    @Test
+    public void analyticsAskedOnFirstLogin() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), eq(PASSWORD))).thenReturn(true);
+        when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
+        String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", TEST_ORGANIZATION.getSlug()};
+        io.addLinePrompt("y");
+        io.addLinePrompt("y");
+        app.run(args);
+        io.assertContains("analytics");
+    }
 }

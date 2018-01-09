@@ -51,7 +51,6 @@ public abstract class AbstractCommand {
 
     /**
      * Method runs the command.
-     * TODO io param isn't needed anymore!!!!
      *
      * @param args Command line arguments for this command.
      * @param ctx The context object.

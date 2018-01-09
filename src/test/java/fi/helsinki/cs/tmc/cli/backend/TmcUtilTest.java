@@ -176,24 +176,6 @@ public class TmcUtilTest {
     }
 
     @Test
-    public void findExerciseOfCourse() {
-        final Course course = new Course("test-course");
-        Exercise exercise = new Exercise("second");
-        course.setExercises(Arrays.asList(new Exercise("first"), exercise));
-
-        Exercise result = TmcUtil.findExercise(course, "second");
-        assertEquals(exercise, result);
-    }
-
-    @Test
-    public void returnNullIfExerciseWontExist() {
-        Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(new Exercise("first"), new Exercise("second")));
-
-        assertNull(TmcUtil.findExercise(course, "not-existing-exercise"));
-    }
-
-    @Test
     public void downloadSomeExercises() {
         List<Exercise> expectedResult =
                 Arrays.asList(new Exercise("first"), new Exercise("second"));

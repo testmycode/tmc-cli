@@ -3,6 +3,8 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
@@ -42,6 +44,8 @@ public class ConfigCommandTest {
     private Application app;
     CliContext ctx;
     private TestIo io;
+    private TmcCore core;
+    private AnalyticsFacade analyticsFacade;
     private HashMap<String, String> props;
     private Settings settings;
     private Path testConfigRoot;
@@ -52,10 +56,10 @@ public class ConfigCommandTest {
         io = new TestIo();
         settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
-        TmcCore core = new TmcCore(settings, tmcLangs);
+        core = new TmcCore(settings, tmcLangs);
         SpywareSettings analyticsSettings = new Settings();
         EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
         ctx = Mockito.spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
         app = new Application(ctx);
 
@@ -82,7 +86,16 @@ public class ConfigCommandTest {
         }
     }
 
+    @Test
+    public void doNotRunIfNotLoggedIn() {
+        ctx = spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
+        app = new Application(ctx);
+        doReturn(false).when(ctx).checkIsLoggedIn(false);
 
+        String[] args = {"config -l"};
+        app.run(args);
+        io.assertNotContains("=");
+    }
     @Test
     public void printsErrorIfNoArgumentsGiven() {
         app.run(new String[] {"config"});
@@ -197,18 +210,18 @@ public class ConfigCommandTest {
     @Test
     public void deletesOneProperty() {
         io.addConfirmationPrompt(true);
-        props.put("no", "e");
-        app.run(new String[] {"config", "-d", "no"});
-        assertTrue(!props.containsKey("no"));
+        props.put("testresults-right", "cyan");
+        app.run(new String[] {"config", "-d", "testresults-right"});
+        assertTrue(!props.containsKey("cyan"));
         io.assertContains("Deleting 1 properties.");
         io.assertAllPromptsUsed();
     }
 
     @Test
     public void deletesOnePropertyQuietly() {
-        props.put("no", "e");
-        app.run(new String[] {"config", "-d", "-q", "no"});
-        assertTrue(!props.containsKey("no"));
+        props.put("testresults-right", "cyan");
+        app.run(new String[] {"config", "-d", "-q", "testresults-right"});
+        assertTrue(!props.containsKey("cyan"));
         io.assertAllPromptsUsed();
     }
 
@@ -216,16 +229,16 @@ public class ConfigCommandTest {
     public void deletesInvalidProperty() {
         app.run(new String[] {"config", "-d", "property"});
         assertTrue(!props.containsKey("no"));
-        io.assertContains("Key property doesn't exist.");
+        io.assertContains("Key property doesn't exist");
         io.assertAllPromptsUsed();
     }
 
     @Test
     public void deletesOnePropertyWithNoConfirmation() {
         io.addConfirmationPrompt(false);
-        props.put("no", "e");
-        app.run(new String[] {"config", "-d", "no"});
-        assertTrue(props.containsKey("no"));
+        props.put("testresults-right", "cyan");
+        app.run(new String[] {"config", "-d", "testresults-right"});
+        assertTrue(props.containsKey("testresults-right"));
         io.assertContains("Deleting 1 properties.");
         io.assertNotContains("Deleted key no, was");
         io.assertAllPromptsUsed();
@@ -234,14 +247,14 @@ public class ConfigCommandTest {
     @Test
     public void deletesMultiplePropertiesCorrectly() {
         io.addConfirmationPrompt(true);
-        props.put("biggie", "smalls");
-        props.put("snoop", "dogg");
-        props.put("some", "thing");
-        app.run(new String[] {"config", "-d", "biggie", "snoop"});
-        assertTrue(!props.containsKey("biggie"));
-        assertTrue(!props.containsKey("snoop"));
-        assertTrue(props.containsKey("some"));
-        assertEquals("thing", props.get("some"));
+        props.put("testresults-right", "red");
+        props.put("testresults-left", "green");
+        props.put("progressbar-left", "purple");
+        app.run(new String[] {"config", "-d", "testresults-right", "testresults-left"});
+        assertTrue(!props.containsKey("testresults-left"));
+        assertTrue(!props.containsKey("testresults-right"));
+        assertTrue(props.containsKey("progressbar-left"));
+        assertEquals("purple", props.get("progressbar-left"));
         io.assertAllPromptsUsed();
     }
 
@@ -342,5 +355,11 @@ public class ConfigCommandTest {
         app.run(new String[] {"config", "-q",  "asd=asdf", "server-address=https://mooc.fi"});
         io.assertContains("not an allowed key");
         assertEquals("https://mooc.fi", settings.getServerAddress());
+    }
+
+    @Test
+    public void cannotDeleteAPropertyIfNotAnAllowedKey() {
+        app.run(new String[] {"config", "-d", "last-submit"});
+        io.assertContains("doesn't exist");
     }
 }
