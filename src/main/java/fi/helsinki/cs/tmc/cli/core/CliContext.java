@@ -11,6 +11,8 @@ import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.io.*;
 import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+
 import java.util.HashMap;
 
 public class CliContext {

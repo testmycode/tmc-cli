@@ -137,4 +137,20 @@ public class Account {
     public void setSendDetailedAnalytics(boolean sendDetailedAnalytics) {
         this.sendDetailedAnalytics = false;
     }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "serverAddress='" + serverAddress + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", oauthCredentials=" + oauthCredentials +
+                ", currentCourse=" + currentCourse +
+                ", token='" + token + '\'' +
+                ", organization=" + organization +
+                ", sendDiagnostics=" + sendDiagnostics +
+                ", sendAnalytics=" + sendAnalytics +
+                ", sendDetailedAnalytics=" + sendDetailedAnalytics +
+                '}';
+    }
 }

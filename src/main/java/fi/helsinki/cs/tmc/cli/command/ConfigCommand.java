@@ -17,7 +17,7 @@ import org.apache.commons.cli.Options;
 
 import java.util.*;
 
-@Command(name = "config", desc = "Set/unset TMC-CLI properties")
+@Command(name = "config", desc = "Set/unset TMC-CLI properties and change settings")
 public class ConfigCommand extends AbstractCommand {
 
     private CliContext context;

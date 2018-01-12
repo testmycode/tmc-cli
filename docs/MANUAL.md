@@ -126,12 +126,10 @@ COMMAND: SUBMIT
 `tmc` `submit` [`-a`] [`-d`] [`-c`] [*path*] ...
 
 Submit exercises to the server. If no *path* is given, the exercise in the
-current working directory will be submitted. Several exercises can be submitted
-at once. If the current work directory is the course root directory or the
-course root directory was given as a *path*, then all exercises will be submitted.
+current working directory will be submitted. The submittable exercise(s) must be given as an argument.
 
 For every successful submission, you'll be prompted to send feedback for the
-exercise if the course has enabledfeedback questions. Sending feedback is
+exercise if the course has enabled feedback questions. Sending feedback is
 always optional.
 
 `-a` `--all`
@@ -192,7 +190,7 @@ Set or unset TMC-CLI properties. Only accepts certain keys. If not invoked with 
   Do not ask for confirmations or print out set values.
 
 `-l` `--list`
-  List all current properties.
+  List all current settings.
 
 `-g` `--get=KEY` or `--get KEY`
   Get the value of a specific key.
@@ -209,7 +207,17 @@ List of configurable settings:
 * *send-analytics*
   Allow sending analytics data of commands run. Stored in account.
 * *server-address*
-  Address to fetch courses from and submit to. Defaults to `https://tmc.mooc.fi`. Stored with account
+  Address to fetch courses from and submit to. Defaults to `https://tmc.mooc.fi`. Stored with account.
+
+COMMAND: ORGANIZATION
+---------------
+
+`tmc` `organization` [`-o`][*slug*] ...
+
+Change organization, which determines the downloadable courses. If no slug is given, or the slug is invalid, all available organizations are listed, and the user will be prompted to choose one.
+
+`-o` `--organization`
+Change organization to slug given as an argument without the listing of all organizations.
 
 ---
 
