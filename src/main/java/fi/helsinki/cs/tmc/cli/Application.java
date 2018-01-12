@@ -221,6 +221,11 @@ public class Application {
         app.run(args);
         // Because of EventSendBuffer
         TmcRequestProcessor.instance.shutdown();
+        try {
+            eventSendBuffer.saveNow(1000);
+        } catch (Exception e) {
+            logger.warn("Failed to save events: ", e.getStackTrace());
+        }
     }
 
     private boolean versionCheck() {
