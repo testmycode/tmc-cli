@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.backend;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 
+import fi.helsinki.cs.tmc.core.communication.oauth2.Oauth;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
@@ -11,12 +12,17 @@ import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Locale;
 
 public class Settings implements TmcSettings, SpywareSettings {
 
+    private static final Logger logger = LoggerFactory.getLogger(Settings.class);
     private WorkDir workDir;
     private Account account;
 
@@ -35,6 +41,16 @@ public class Settings implements TmcSettings, SpywareSettings {
     public void setAccount(Account account) {
         if (account == null) {
             account = new Account();
+        }
+        try {
+            Optional<String> password = account.getPassword();
+            if(password.isPresent()) {
+                Oauth.getInstance().fetchNewToken(password.get());
+                account.setPassword(Optional.absent());
+                SettingsIo.saveCurrentSettingsToAccountList(this);
+            }
+        } catch (OAuthProblemException | OAuthSystemException var1) {
+            logger.warn("Settings migration failed.");
         }
         this.account = account;
     }
