@@ -113,10 +113,4 @@ public class CommandFactoryTest {
         Set<String> list = CommandFactory.getCommandCategories();
         assertTrue(list.contains("hidden"));
     }
-
-    @Test
-    public void getCommandCategoriesContainsAdminCategory() {
-        Set<String> list = CommandFactory.getCommandCategories();
-        assertTrue(list.contains("admin"));
-    }
 }

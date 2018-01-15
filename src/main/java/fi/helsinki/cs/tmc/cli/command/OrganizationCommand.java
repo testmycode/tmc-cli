@@ -35,8 +35,7 @@ public class OrganizationCommand extends AbstractCommand {
             return;
         }
 
-        Optional<String> username = this.ctx.getSettings().getUsername();
-        this.ctx.getAnalyticsFacade().saveAnalytics(username.isPresent() ? username.get() : "", "config");
+        this.ctx.getAnalyticsFacade().saveAnalytics("organization");
 
         Optional<Organization> organization = chooseOrganization(ctx, args);
         this.ctx.getSettings().setOrganization(organization);

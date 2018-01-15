@@ -65,7 +65,9 @@ public class InfoCommand extends AbstractCommand {
         } else {
             printLocalInfo(args.getArgs());
         }
-        this.ctx.getAnalyticsFacade().saveAnalytics(courseName, "info");
+        if (this.ctx.checkIsLoggedIn(true)) {
+            this.ctx.getAnalyticsFacade().saveAnalytics(courseName, "info");
+        }
     }
 
     private void printInfoFromInternet(String courseName) {

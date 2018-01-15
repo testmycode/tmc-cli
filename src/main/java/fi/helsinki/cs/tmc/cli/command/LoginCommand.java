@@ -54,7 +54,7 @@ public class LoginCommand extends AbstractCommand {
                     " and your current organization is " + this.ctx.getSettings().getOrganization().get().getName() :
                     ""));
             io.println("Change your organization with the command organization.");
-            io.println("Run tmc config -l to see your current settings.");
+            io.println("Inspect and change your current settings with the command config.");
             return;
         }
 
@@ -106,6 +106,8 @@ public class LoginCommand extends AbstractCommand {
         this.ctx.getAnalyticsFacade().saveAnalytics("login");
 
         io.println("Login successful.");
+        io.println("You can change your organization with the command organization, " +
+                "and inspect and change other settings with the command config.");
     }
 
     private String getLoginInfo(CommandLine line, String oldValue, String option, String prompt) {

@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
 import fi.helsinki.cs.tmc.spyware.EventStore;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.security.spec.ECField;
@@ -17,6 +18,8 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 public class AnalyticsFacade {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AnalyticsFacade.class);
+
     private EventSendBuffer eventSendBuffer;
     private SpywareSettings settings;
 
@@ -30,7 +33,7 @@ public class AnalyticsFacade {
             return;
         }
         LoggableEvent event = LoggableEventCreator.createEvent(command);
-        this.eventSendBuffer.receiveEvent(event);
+        saveEvent(event);
     }
 
     public void saveAnalytics(String courseName, String command) {
@@ -38,7 +41,7 @@ public class AnalyticsFacade {
             return;
         }
         LoggableEvent event = LoggableEventCreator.createEvent(courseName, command);
-        this.eventSendBuffer.receiveEvent(event);
+        saveEvent(event);
     }
 
     public void saveAnalytics(Course course, String command) {
@@ -46,7 +49,7 @@ public class AnalyticsFacade {
             return;
         }
         LoggableEvent event = LoggableEventCreator.createEvent(course, command);
-        this.eventSendBuffer.receiveEvent(event);
+        saveEvent(event);
     }
 
     public void saveAnalytics(Exercise exercise, String command) {
@@ -54,7 +57,16 @@ public class AnalyticsFacade {
             return;
         }
         LoggableEvent event = LoggableEventCreator.createEvent(exercise, command);
+        saveEvent(event);
+    }
+
+    private void saveEvent(LoggableEvent event) {
         this.eventSendBuffer.receiveEvent(event);
+        try {
+            eventSendBuffer.saveNow(1000);
+        } catch (Exception e) {
+            logger.warn("Failed to save events: ", e.getStackTrace());
+        }
     }
 
     public Optional<Thread> sendAnalytics() {

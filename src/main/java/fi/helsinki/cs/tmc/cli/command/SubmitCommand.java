@@ -57,16 +57,17 @@ public class SubmitCommand extends AbstractCommand {
         if (exercisesFromArgs == null) {
             return;
         }
-        if (exercisesFromArgs.length == 0) {
-            io.println("Please give exercise to submit as argument");
-            return;
-        }
 
         if (!ctx.checkIsLoggedIn(false)) {
             return;
         }
 
         WorkDir workDir = ctx.getWorkDir();
+        if (exercisesFromArgs.length == 0 && workDir.getExercises().size() != 1) {
+            io.println("Please give exercise to submit as argument");
+            return;
+        }
+
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
                 io.println("Error: " + exercise + " is not a valid exercise.");

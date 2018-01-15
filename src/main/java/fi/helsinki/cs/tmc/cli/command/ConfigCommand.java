@@ -57,7 +57,7 @@ public class ConfigCommand extends AbstractCommand {
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
         });
-        ALLOWED_KEYS.put("send-analytics", new PropertyFunctions() {
+        ALLOWED_KEYS.put(sendAnalyticsKey, new PropertyFunctions() {
             @Override
             public String getter() {
                 return Boolean.toString(context.getSettings().isSpywareEnabled());
@@ -70,7 +70,7 @@ public class ConfigCommand extends AbstractCommand {
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
         });
-        ALLOWED_KEYS.put("server-address", new PropertyFunctions() {
+        ALLOWED_KEYS.put(serverAddressKey, new PropertyFunctions() {
             @Override
             public String getter() {
                 return context.getSettings().getServerAddress();
@@ -90,10 +90,10 @@ public class ConfigCommand extends AbstractCommand {
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
         });
-        ALLOWED_KEYS.put("update-date", new PropertyFunctions() {
+        ALLOWED_KEYS.put(updateDateKey, new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("update-date");
+                return context.getProperties().get(updateDateKey);
             }
 
             @Override
@@ -101,51 +101,51 @@ public class ConfigCommand extends AbstractCommand {
                 if (!date.matches("[0-9]+")) {
                     throw new BadValueTypeException("Please insert the date as a number");
                 }
-                properties.put("update-date", date);
+                properties.put(updateDateKey, date);
             }
         });
-        ALLOWED_KEYS.put("testresults-right", new PropertyFunctions() {
+        ALLOWED_KEYS.put(testResultRightKey, new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("testresults-right");
+                return context.getProperties().get(testResultRightKey);
             }
 
             @Override
             public void setter(String value) throws BadValueTypeException {
-                addBarColorToProperties("testresults-right", value);
+                addBarColorToProperties(testResultRightKey, value);
             }
         });
-        ALLOWED_KEYS.put("testresults-left", new PropertyFunctions() {
+        ALLOWED_KEYS.put(testResultLeftKey, new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("testresults-left");
+                return context.getProperties().get(testResultLeftKey);
             }
 
             @Override
             public void setter(String value) throws BadValueTypeException {
-                addBarColorToProperties("testresults-left", value);
+                addBarColorToProperties(testResultLeftKey, value);
             }
         });
-        ALLOWED_KEYS.put("progressbar-left", new PropertyFunctions() {
+        ALLOWED_KEYS.put(progressBarLeftKey, new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("progressbar-left");
+                return context.getProperties().get(progressBarLeftKey);
             }
 
             @Override
             public void setter(String value) throws BadValueTypeException {
-                addBarColorToProperties("progressbar-left", value);
+                addBarColorToProperties(progressBarLeftKey, value);
             }
         });
-        ALLOWED_KEYS.put("progressbar-right", new PropertyFunctions() {
+        ALLOWED_KEYS.put(progressBarRightKey, new PropertyFunctions() {
             @Override
             public String getter() {
-                return context.getProperties().get("progressbar-right");
+                return context.getProperties().get(progressBarRightKey);
             }
 
             @Override
             public void setter(String value) throws BadValueTypeException {
-                addBarColorToProperties("progressbar-right", value);
+                addBarColorToProperties(progressBarRightKey, value);
             }
         });
     }
@@ -196,8 +196,7 @@ public class ConfigCommand extends AbstractCommand {
             return;
         }
 
-        Optional<String> username = this.context.getSettings().getUsername();
-        this.context.getAnalyticsFacade().saveAnalytics(username.isPresent() ? username.get() : "", "config");
+        this.context.getAnalyticsFacade().saveAnalytics("config");
 
         if ((get ? 1 : 0) + (listing ? 1 : 0) + (delete ? 1 : 0) > 1) {
             io.errorln("Only one of the --get or --list or --delete options can "

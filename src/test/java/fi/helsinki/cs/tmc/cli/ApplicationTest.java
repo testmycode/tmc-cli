@@ -109,13 +109,6 @@ public class ApplicationTest {
     }
 
     @Test
-    public void helpOptionForAdminCommands() {
-        String[] args = {"--help-admin"};
-        app.run(args);
-        io.assertContains("TMC commands in admin");
-    }
-
-    @Test
     public void helpOptionForHiddenCommandsDoesntExist() {
         String[] args = {"--help-hidden"};
         app.run(args);

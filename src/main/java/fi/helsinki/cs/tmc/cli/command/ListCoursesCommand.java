@@ -37,7 +37,9 @@ public class ListCoursesCommand extends AbstractCommand {
 
         this.ctx.loadUserInformation();
 
-        this.ctx.getAnalyticsFacade().saveAnalytics("list_courses");
+        if (this.ctx.checkIsLoggedIn(true)) {
+            this.ctx.getAnalyticsFacade().saveAnalytics("list_courses");
+        }
 
        if (!TmcUtil.hasConnection(ctx)) {
             io.errorln("You don't have internet connection currently.");
