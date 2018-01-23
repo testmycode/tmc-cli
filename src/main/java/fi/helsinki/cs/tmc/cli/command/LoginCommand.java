@@ -48,11 +48,11 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
-        if (this.ctx.checkIsLoggedIn(true)) {
+        if (this.ctx.checkIsLoggedIn(true, true)) {
             io.println("You are already logged in as " + this.ctx.getSettings().getUsername().get() +
                     (this.ctx.getSettings().getOrganization().isPresent() ?
                     " and your current organization is " + this.ctx.getSettings().getOrganization().get().getName() :
-                    ""));
+                    "."));
             io.println("Change your organization with the command organization.");
             io.println("Inspect and change your current settings with the command config.");
             return;
@@ -72,11 +72,11 @@ public class LoginCommand extends AbstractCommand {
         username = getLoginInfo(args, username, "u", "username: ");
         password = getLoginInfo(args, null, "p", "password: ");
 
-        Account account = new Account(username, null);
+        Account account = new Account(username);
         ctx.useAccount(account);
 
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
-            this.ctx.getSettings().setAccount(new Account());
+            this.ctx.getSettings().setAccount(this.ctx, new Account());
             return;
         }
 
@@ -89,11 +89,11 @@ public class LoginCommand extends AbstractCommand {
 
         boolean sendDiagnostics = getAnswerFromUser(username, account.getServerAddress(),
                             "Do you want to send crash reports for client development?",
-                                    this.ctx.getSettings().getSendDiagnostics());
+                                    this.ctx.getSettings().getSendDiagnostics(), this.io);
         account.setSendDiagnostics(sendDiagnostics);
         boolean sendAnalytics = getAnswerFromUser(username, account.getServerAddress(),
                             "Do you want to send analytics data for research?",
-                                    this.ctx.getSettings().isSpywareEnabled());
+                                    this.ctx.getSettings().isSpywareEnabled(), this.io);
         account.setSendAnalytics(sendAnalytics);
 
         AccountList list = SettingsIo.loadAccountList();
@@ -130,9 +130,9 @@ public class LoginCommand extends AbstractCommand {
         return value;
     }
 
-    private boolean getAnswerFromUser(String username, String server, String prompt, boolean defaultValue) {
+    public boolean getAnswerFromUser(String username, String server, String prompt, boolean defaultValue, Io io) {
         AccountList savedAccounts = SettingsIo.loadAccountList();
-        if (savedAccounts.getAccount(username, server) != null) {
+        if (username != null && savedAccounts.getAccount(username) != null) {
             // not the first time logging in
             return defaultValue;
         }

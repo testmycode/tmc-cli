@@ -31,7 +31,7 @@ public class OrganizationCommand extends AbstractCommand {
     @Override
     public void run(CliContext ctx, CommandLine args) {
         this.ctx = ctx;
-        if (!this.ctx.checkIsLoggedIn(false)) {
+        if (!this.ctx.checkIsLoggedIn(false, true)) {
             return;
         }
 
@@ -81,13 +81,13 @@ public class OrganizationCommand extends AbstractCommand {
 
 
     private String getOrganizationFromUser(List<Organization> organizations, CommandLine line, boolean printOptions, boolean oneLine) {
-        if (oneLine && line.hasOption("o")) {
+        if (oneLine && line != null && line.hasOption("o")) {
             return line.getOptionValue("o");
         }
         if (printOptions) {
-            printOrganizations(organizations, !line.hasOption("n") && !EnvironmentUtil.isWindows());
+            printOrganizations(organizations, line != null && !line.hasOption("n") && !EnvironmentUtil.isWindows());
         }
-        return io.readLine("Choose organization by writing its slug: ");
+        return io.readLine("Choose an organization by writing its slug: ");
     }
 
 
@@ -95,7 +95,10 @@ public class OrganizationCommand extends AbstractCommand {
         this.ctx = ctx;
         this.io = ctx.getIo();
         boolean printOptions = true;
-        boolean oneLine = args.hasOption("o");
+        boolean oneLine = false;
+        if (args != null) {
+            oneLine = args.hasOption("o");
+        }
         List<Organization> organizations = listOrganizations();
         if (organizations == null) {
             io.errorln("Failed to fetch organizations from server.");

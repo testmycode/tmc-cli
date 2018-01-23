@@ -96,7 +96,7 @@ public class DownloadExercisesCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, mockCore, workDir, new Settings(), analyticsFacade));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false);
+        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"download", "foo"};
         app.run(args);

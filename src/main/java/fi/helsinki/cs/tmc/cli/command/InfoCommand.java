@@ -65,7 +65,7 @@ public class InfoCommand extends AbstractCommand {
         } else {
             printLocalInfo(args.getArgs());
         }
-        if (this.ctx.checkIsLoggedIn(true)) {
+        if (this.ctx.checkIsLoggedIn(true, true)) {
             this.ctx.getAnalyticsFacade().saveAnalytics(courseName, "info");
         }
     }

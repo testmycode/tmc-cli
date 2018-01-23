@@ -62,7 +62,7 @@ public class AccountListTest {
         list.addAccount(new Account("-", "D"));
         list.addAccount(wanted);
         list.addAccount(new Account("wc", "fffssshhhh aaahhh"));
-        Account get = list.getAccount("2", "1");
+        Account get = list.getAccount("2");
         assertSame(wanted, get);
     }
 
@@ -72,7 +72,7 @@ public class AccountListTest {
         wanted.setServerAddress("1");
         list.addAccount(wanted);
         list.addAccount(new Account("-", "D"));
-        list.getAccount("2", "1");
+        list.getAccount("2");
         Account get = list.getAccount();
         assertSame(wanted, get);
     }

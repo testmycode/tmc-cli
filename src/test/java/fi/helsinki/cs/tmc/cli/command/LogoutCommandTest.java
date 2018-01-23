@@ -43,7 +43,7 @@ public class LogoutCommandTest {
 
         mockStatic(SettingsIo.class);
         AccountList t = new AccountList();
-        t.addAccount(new Account("username", "password"));
+        t.addAccount(new Account("username"));
         when(SettingsIo.loadAccountList()).thenReturn(t);
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }

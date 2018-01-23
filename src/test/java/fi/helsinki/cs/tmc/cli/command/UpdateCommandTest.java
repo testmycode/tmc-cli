@@ -90,8 +90,8 @@ public class UpdateCommandTest {
 
         mockStatic(TmcUtil.class);
         AccountList list = new AccountList();
-        list.addAccount(new Account("username", "pass"));
-        Account account = new Account("testuser", "password");
+        list.addAccount(new Account("username"));
+        Account account = new Account("testuser");
         account.setServerAddress("https://tmc.example.com");
         list.addAccount(account);
 
@@ -106,7 +106,7 @@ public class UpdateCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, core, new WorkDir(pathToNonCourseDir), new Settings(), null));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false);
+        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"update"};
         app.run(args);

@@ -41,7 +41,7 @@ public class RunTestsCommand extends AbstractCommand {
             return;
         }
 
-        context.loadUserInformation();
+        context.loadUserInformation(true);
 
         WorkDir workDir = context.getWorkDir();
         for (String path : paths) {

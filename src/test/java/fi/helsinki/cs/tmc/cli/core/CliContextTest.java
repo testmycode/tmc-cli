@@ -76,7 +76,7 @@ public class CliContextTest {
         when(CourseInfoIo.load(eq(path))).thenReturn(mock(CourseInfo.class));
         when(workDir.getConfigFile()).thenReturn(path);
 
-        ctx.checkIsLoggedIn(false);
+        ctx.checkIsLoggedIn(false, true);
         ctx.useAccount(newAccount);
 
         //TODO replace the Whitebox usage somehow
@@ -134,7 +134,7 @@ public class CliContextTest {
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
         when(workDir.getConfigFile()).thenReturn(path);
 
-        assertTrue(ctx.checkIsLoggedIn(false));
+        assertTrue(ctx.checkIsLoggedIn(false, true));
         assertEquals(true, ctx.hasLogin());
     }
 
@@ -151,7 +151,7 @@ public class CliContextTest {
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir, new Settings(), null);
 
-        assertFalse(ctx.checkIsLoggedIn(false));
+        assertFalse(ctx.checkIsLoggedIn(false, true));
         assertEquals(false, ctx.hasLogin());
         io.assertContains("You are not logged in as user. Log in using: tmc login");
     }
@@ -164,7 +164,7 @@ public class CliContextTest {
         when(workDir.getConfigFile()).thenReturn(null);
         CliContext ctx = new CliContext(io, null, workDir, new Settings(), null);
 
-        assertFalse(ctx.checkIsLoggedIn(false));
+        assertFalse(ctx.checkIsLoggedIn(false, true));
         assertEquals(false, ctx.hasLogin());
         io.assertContains("You are not logged in");
     }
@@ -180,7 +180,7 @@ public class CliContextTest {
         when(workDir.getConfigFile()).thenReturn(path);
         CliContext ctx = new CliContext(io, null, workDir, new Settings(), null);
 
-        assertFalse(ctx.checkIsLoggedIn(false));
+        assertFalse(ctx.checkIsLoggedIn(false, true));
         assertEquals(false, ctx.hasLogin());
         io.assertContains("Course configuration file");
         io.assertContains("is invalid.");
@@ -192,7 +192,7 @@ public class CliContextTest {
         WorkDir workDir = mock(WorkDir.class);
         when(workDir.getConfigFile()).thenReturn(null);
 
-        ctx.loadUserInformation();
+        ctx.loadUserInformation(true);
         assertEquals(false, ctx.hasLogin());
     }
 
@@ -208,7 +208,7 @@ public class CliContextTest {
         when(CourseInfoIo.load(eq(path))).thenReturn(info);
         when(workDir.getConfigFile()).thenReturn(path);
 
-        ctx.loadUserInformation();
+        ctx.loadUserInformation(true);
 
         assertEquals(true, ctx.hasLogin());
     }

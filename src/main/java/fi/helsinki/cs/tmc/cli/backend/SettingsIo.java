@@ -82,7 +82,7 @@ public class SettingsIo {
                 deletables.add(account);
             }
         });
-        deletables.stream().forEach(d -> list.deleteAccount(d.getUsername().get(), d.getServerAddress()));
+        deletables.stream().forEach(d -> list.deleteAccount(d.getUsername().get()));
         list.addAccount(settings.getAccount());
         saveAccountList(list);
     }

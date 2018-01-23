@@ -104,7 +104,7 @@ public class RunTestsCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), null));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false);
+        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"test"};
         app.run(args);

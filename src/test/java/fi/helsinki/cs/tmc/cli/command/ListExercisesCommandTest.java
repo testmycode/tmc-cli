@@ -78,7 +78,7 @@ public class ListExercisesCommandTest {
 
         mockStatic(TmcUtil.class);
         list = new AccountList();
-        list.addAccount(new Account("username", "pass"));
+        list.addAccount(new Account("username"));
 
         mockStatic(SettingsIo.class);
         when(SettingsIo.loadAccountList()).thenReturn(list);
@@ -88,7 +88,7 @@ public class ListExercisesCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), null));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false);
+        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
@@ -106,7 +106,7 @@ public class ListExercisesCommandTest {
     @Test
     public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
-        Account account = new Account("testuser", "password");
+        Account account = new Account("testuser", "");
         account.setServerAddress("https://tmc.example.com");
         list.addAccount(account);
         String[] args = {"exercises", COURSE_NAME, "-n"};
@@ -117,7 +117,7 @@ public class ListExercisesCommandTest {
     @Test
     public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
-        Account account = new Account("testuser", "password");
+        Account account = new Account("testuser", "");
         account.setServerAddress("https://tmc.example.com");
         list.addAccount(account);
         String[] args = {"exercises", "-n"};

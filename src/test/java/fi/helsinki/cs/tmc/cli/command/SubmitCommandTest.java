@@ -106,8 +106,8 @@ public class SubmitCommandTest {
                 .thenReturn(result)
                 .thenReturn(result2);
         list = new AccountList();
-        list.addAccount(new Account("username", "pass"));
-        Account account = new Account("testuser", "password");
+        list.addAccount(new Account("username"));
+        Account account = new Account("testuser");
         account.setServerAddress("https://tmc.example.com");
         list.addAccount(account);
 
@@ -123,7 +123,7 @@ public class SubmitCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, core, workDir, new Settings(), analyticsFacade));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false);
+        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"submit"};
         app.run(args);

@@ -66,7 +66,7 @@ public class AnalyticsFacadeTest {
 
         mockStatic(TmcUtil.class);
         list = new AccountList();
-        list.addAccount(new Account("username", "pass"));
+        list.addAccount(new Account("username"));
 
         mockStatic(SettingsIo.class);
         when(SettingsIo.loadAccountList()).thenReturn(list);

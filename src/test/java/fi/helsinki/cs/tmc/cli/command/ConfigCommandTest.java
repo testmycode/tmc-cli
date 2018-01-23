@@ -72,7 +72,7 @@ public class ConfigCommandTest {
         when(SettingsIo.getPropertiesFile(any(Path.class))).thenReturn(testConfigRoot.resolve(TEST_PROPERTIES_FILENAME));
         when(SettingsIo.getConfigDirectory()).thenReturn(testConfigRoot);
         AccountList t = new AccountList();
-        t.addAccount(new Account("username", "password"));
+        t.addAccount(new Account("username", ""));
         when(SettingsIo.loadAccountList()).thenReturn(t);
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
@@ -90,7 +90,7 @@ public class ConfigCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false);
+        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"config -l"};
         app.run(args);

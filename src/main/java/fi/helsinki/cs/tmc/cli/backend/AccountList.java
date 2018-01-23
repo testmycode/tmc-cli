@@ -24,16 +24,15 @@ public class AccountList implements Iterable<Account> {
         return null;
     }
 
-    public Account getAccount(String username, String server) {
-        if (username == null || server == null) {
+    public Account getAccount(String username) {
+        if (username == null) {
             return getAccount();
         }
         for (Account account : this.accountArray) {
             if (!account.getUsername().isPresent()) {
                 continue;
             }
-            if (account.getUsername().get().equals(username)
-                    && account.getServerAddress().equals(server)) {
+            if (account.getUsername().get().equals(username)) {
                 // Move account to index 0 so we can always use the last used account by default
                 this.accountArray.remove(account);
                 this.accountArray.add(0, account);
@@ -45,8 +44,7 @@ public class AccountList implements Iterable<Account> {
 
     public void addAccount(Account newSettings) {
         for (Account account : this.accountArray) {
-            if (account.getUsername().equals(newSettings.getUsername())
-                    && account.getServerAddress().equals(newSettings.getServerAddress())) {
+            if (account.getUsername().equals(newSettings.getUsername())) {
                 // Replace old account if username and server match
                 this.accountArray.remove(account);
                 break;
@@ -55,11 +53,13 @@ public class AccountList implements Iterable<Account> {
         this.accountArray.add(0, newSettings);
     }
 
-    public void deleteAccount(String username, String server) {
+    public void deleteAccount(String username) {
         Account remove = null;
         for (Account account : this.accountArray) {
-            if (account.getUsername().equals(username)
-                    && account.getServerAddress().equals(server)) {
+            if (!account.getUsername().isPresent()) {
+                continue;
+            }
+            if (account.getUsername().get().equals(username)) {
                 remove = account;
                 break;
             }

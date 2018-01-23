@@ -94,7 +94,7 @@ public class PasteCommandTest {
         when(ExternalsUtil.getUserEditedMessage(anyString(), anyString(), anyBoolean()))
                 .thenReturn("This is my paste message!");
         list = new AccountList();
-        list.addAccount(new Account("username", "pass"));
+        list.addAccount(new Account("username"));
 
         mockStatic(SettingsIo.class);
         when(SettingsIo.loadAccountList()).thenReturn(list);

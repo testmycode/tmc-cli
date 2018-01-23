@@ -11,7 +11,6 @@ import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.io.*;
 import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 
 import java.util.HashMap;
 
@@ -163,9 +162,10 @@ public class CliContext {
      * Use this method if you need i
      * @return true if success
      * @param quiet
+     * @param loadUserFromCache
      */
-    public boolean checkIsLoggedIn(boolean quiet) {
-        loadUserInformation();
+    public boolean checkIsLoggedIn(boolean quiet, boolean loadUserFromCache) {
+        loadUserInformation(loadUserFromCache);
         //Bug: what if we have wrong login?
         if (!hasLogin) {
             if (quiet) {
@@ -194,14 +194,14 @@ public class CliContext {
      * @param account login info
      */
     public void useAccount(Account account) {
-        this.settings.setAccount(account);
+        this.settings.setAccount(this, account);
     }
 
     public AnalyticsFacade getAnalyticsFacade() {
         return this.analyticsFacade;
     }
 
-    public void loadUserInformation() {
+    public void loadUserInformation(boolean useCache) {
         Account cachedAccount = null;
         AccountList list = SettingsIo.loadAccountList();
 
@@ -216,7 +216,7 @@ public class CliContext {
             courseInfo = getCourseInfo();
             if (courseInfo != null) {
                 cachedAccount =
-                        list.getAccount(courseInfo.getUsername(), courseInfo.getServerAddress());
+                        list.getAccount(courseInfo.getUsername());
             }
         } else {
             // Bug: if we are not inside course directory
@@ -224,7 +224,9 @@ public class CliContext {
             cachedAccount = list.getAccount();
         }
         hasLogin = cachedAccount != null;
-        this.settings.setAccount(cachedAccount);
+        if (useCache) {
+            this.settings.setAccount(this, cachedAccount);
+        }
         settings.setWorkDir(workDir);
     }
 

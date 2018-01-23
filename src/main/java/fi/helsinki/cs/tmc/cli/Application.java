@@ -103,7 +103,7 @@ public class Application {
     private Optional<Thread> sendAnalytics(AbstractCommand command) {
         Optional<Thread> thread = Optional.empty();
         if (command instanceof SubmitCommand || timeTracker.anHourHasPassedSinceLastSubmit()) {
-            this.context.loadUserInformation();
+            this.context.loadUserInformation(true);
             // get course info returns null
             CourseInfo courseInfo = this.context.getCourseInfo();
             if (courseInfo == null) {

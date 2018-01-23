@@ -1,24 +1,28 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
+import fi.helsinki.cs.tmc.cli.command.LoginCommand;
+import fi.helsinki.cs.tmc.cli.command.OrganizationCommand;
+import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
+import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 
-import fi.helsinki.cs.tmc.core.communication.oauth2.Oauth;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
 import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.concurrent.Callable;
 
 public class Settings implements TmcSettings, SpywareSettings {
 
@@ -38,21 +42,56 @@ public class Settings implements TmcSettings, SpywareSettings {
      * This method is used for changing the main settings object.
      * @param account account that has the login info
      */
-    public void setAccount(Account account) {
+    public void setAccount(CliContext context, Account account) {
         if (account == null) {
             account = new Account();
         }
+        Account prevAccount = this.account;
+        this.account = account;
         try {
             Optional<String> password = account.getPassword();
             if(password.isPresent()) {
-                Oauth.getInstance().fetchNewToken(password.get());
-                account.setPassword(Optional.absent());
+                if (!migrateAccount(context, account)) {
+                    return;
+                }
                 SettingsIo.saveCurrentSettingsToAccountList(this);
             }
-        } catch (OAuthProblemException | OAuthSystemException var1) {
+        } catch (Exception e) {
             logger.warn("Settings migration failed.");
+            this.account = prevAccount;
         }
-        this.account = account;
+    }
+
+    private boolean migrateAccount(CliContext context, Account account) throws Exception {
+        Io io = context.getIo();
+        io.println("TMC cli has been updated. Please provide the following information.");
+        TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
+        normalizer.normalize();
+        normalizer.selectOrganizationAndCourse();
+        if (!context.getSettings().getOrganization().isPresent()) {
+            OrganizationCommand organizationCommand = new OrganizationCommand();
+            Optional<Organization> organization = organizationCommand.chooseOrganization(context, null);
+            if (!organization.isPresent()) {
+                return false;
+            }
+            account.setOrganization(organization);
+        }
+        Callable<Void> callable = context.getTmcCore().authenticate(ProgressObserver.NULL_OBSERVER, account.getPassword().get());
+        callable.call();
+        LoginCommand loginCommand = new LoginCommand();
+        boolean sendDiagnostics = loginCommand.getAnswerFromUser(null, account.getServerAddress(),
+                "Do you want to send crash reports for client development?",
+                false,
+                io);
+        account.setSendDiagnostics(sendDiagnostics);
+        boolean sendAnalytics = loginCommand.getAnswerFromUser(null, account.getServerAddress(),
+                "Do you want to send analytics data for research?",
+                false,
+                io);
+        account.setSendAnalytics(sendAnalytics);
+        io.println("");
+        account.setPassword(Optional.absent());
+        return true;
     }
 
     public Account getAccount() {
@@ -80,7 +119,7 @@ public class Settings implements TmcSettings, SpywareSettings {
 
     @Override
     public void setPassword(Optional<String> password) {
-            account.setPassword(password);
+            throw new RuntimeException("Using password is deprecated");
     }
 
     @Override

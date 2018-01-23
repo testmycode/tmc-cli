@@ -170,7 +170,7 @@ public class LoginCommandTest {
         app.run(args);
         io.assertAllPromptsUsed();
 
-        Account expectedAccount = new Account(USERNAME, null);
+        Account expectedAccount = new Account(USERNAME);
         verifyStatic();
         TmcUtil.tryToLogin(eq(ctx), eq(expectedAccount), eq(PASSWORD));
     }
@@ -186,7 +186,7 @@ public class LoginCommandTest {
         io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
-        io.assertContains("Choose organization");
+        io.assertContains("Choose an organization");
     }
 
     @Test
@@ -218,16 +218,6 @@ public class LoginCommandTest {
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         app.run(args);
         assertTrue(ctx.getSettings().getAccount().getOrganization() != null);
-    }
-
-    @Test
-    public void diagnosticsNotAskedAfterFirstLogin() {
-        AccountList list = new AccountList();
-        list.addAccount(new Account(USERNAME, PASSWORD));
-        when(SettingsIo.loadAccountList()).thenReturn(list);
-        String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", TEST_ORGANIZATION.getSlug()};
-        app.run(args);
-        io.assertAllPromptsUsed();
     }
 
     @Test

@@ -41,7 +41,7 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.checkIsLoggedIn(false)) {
+        if (!ctx.checkIsLoggedIn(false, true)) {
             return;
         }
 

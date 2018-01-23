@@ -192,7 +192,7 @@ public class ConfigCommand extends AbstractCommand {
         arguments = Arrays.stream(arguments).filter(o -> !o.trim().isEmpty()).toArray(String[]::new);
         this.properties = context.getProperties();
 
-        if (!this.context.checkIsLoggedIn(false)) {
+        if (!this.context.checkIsLoggedIn(false, true)) {
             return;
         }
 

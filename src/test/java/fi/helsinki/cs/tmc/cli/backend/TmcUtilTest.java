@@ -31,6 +31,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
@@ -75,7 +76,9 @@ public class TmcUtilTest {
     public void setUp() {
         io = new TestIo();
         mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), null);
+        Settings settings = new Settings();
+        TmcSettingsHolder.set(settings);
+        ctx = new CliContext(io, mockCore, new WorkDir(), settings, null);
 
         Answer<Callable<Course>> answer =
                 new Answer<Callable<Course>>() {

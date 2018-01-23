@@ -31,14 +31,25 @@ public class Account {
     public Account(String username, String password) {
         this.serverAddress = DEFAULT_SERVER;
         this.username = username == null ? null : username.trim();
-        this.password = password == null ? null : password.trim();
+        this.password = password == null || password.trim().isEmpty() ? null : password.trim();
+    }
+
+    public Account(String username) {
+        this.serverAddress = DEFAULT_SERVER;
+        this.username = username == null ? null : username.trim();
     }
 
 
     public Account(String username, String password, Organization organization) {
         this.serverAddress = DEFAULT_SERVER;
         this.username = username == null ? null : username.trim();
-        this.password = password == null ? null : password.trim();
+        this.password = password == null || password.trim().isEmpty() ? null : password.trim();
+        this.organization = organization;
+    }
+
+    public Account(String username, Organization organization) {
+        this.serverAddress = DEFAULT_SERVER;
+        this.username = username == null ? null : username.trim();
         this.organization = organization;
     }
 
@@ -136,6 +147,10 @@ public class Account {
 
     public void setSendDetailedAnalytics(boolean sendDetailedAnalytics) {
         this.sendDetailedAnalytics = false;
+    }
+
+    public void setServerAddressToDefault() {
+        this.serverAddress = DEFAULT_SERVER;
     }
 
     @Override

@@ -70,7 +70,7 @@ public class OrganizationCommandTest {
         mockStatic(SettingsIo.class);
         when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
         AccountList t = new AccountList();
-        t.addAccount(new Account("username", "password"));
+        t.addAccount(new Account("username"));
         when(SettingsIo.loadAccountList()).thenReturn(t);
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
@@ -79,7 +79,7 @@ public class OrganizationCommandTest {
     public void doNotRunIfNotLoggedIn() {
         ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade));
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false);
+        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"organization"};
         app.run(args);
