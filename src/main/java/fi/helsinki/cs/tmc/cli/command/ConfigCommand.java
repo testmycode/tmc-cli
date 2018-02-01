@@ -90,20 +90,6 @@ public class ConfigCommand extends AbstractCommand {
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
         });
-        ALLOWED_KEYS.put(updateDateKey, new PropertyFunctions() {
-            @Override
-            public String getter() {
-                return context.getProperties().get(updateDateKey);
-            }
-
-            @Override
-            public void setter(String date) throws BadValueTypeException {
-                if (!date.matches("[0-9]+")) {
-                    throw new BadValueTypeException("Please insert the date as a number");
-                }
-                properties.put(updateDateKey, date);
-            }
-        });
         ALLOWED_KEYS.put(testResultRightKey, new PropertyFunctions() {
             @Override
             public String getter() {
@@ -222,12 +208,13 @@ public class ConfigCommand extends AbstractCommand {
                 return;
             }
             String key = args.getOptionValue('g');
-            boolean exists = properties.containsKey(key);
+            boolean exists = ALLOWED_KEYS.containsKey(key);
             if (!exists && !quiet) {
                 io.errorln("The property " + key + " doesn't exist.");
                 return;
             }
-            io.println(exists ? properties.get(key) : "");
+            String value = ALLOWED_KEYS.get(key).getter();
+            io.println(exists ? (value != null ? value : "no value set") : "");
             return;
         } else if (delete) {
             deleteProperties(arguments);

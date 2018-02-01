@@ -256,7 +256,6 @@ public class Application {
         long timestamp = now.getTime();
         properties.put(previousUpdateDateKey, Long.toString(timestamp));
         context.saveProperties();
-
         return updated;
     }
 

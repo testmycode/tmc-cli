@@ -49,6 +49,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
         Io io = context.getIo();
         ctx = context;
 
+        if (!ctx.checkIsLoggedIn(false, true)) {
+            return;
+        }
+
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
             io.errorln("You must give a course name as an argument.");
@@ -58,10 +62,6 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         ctx = context;
         showAll = args.hasOption("a");
-
-        if (!ctx.checkIsLoggedIn(false, true)) {
-            return;
-        }
 
         WorkDir workDir = ctx.getWorkDir();
         if (workDir.getConfigFile() != null) {

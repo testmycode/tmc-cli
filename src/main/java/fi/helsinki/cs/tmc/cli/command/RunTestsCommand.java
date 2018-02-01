@@ -41,7 +41,9 @@ public class RunTestsCommand extends AbstractCommand {
             return;
         }
 
-        context.loadUserInformation(true);
+        if (!context.checkIsLoggedIn(false, true)) {
+            return;
+        }
 
         WorkDir workDir = context.getWorkDir();
         for (String path : paths) {
