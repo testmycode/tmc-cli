@@ -86,13 +86,12 @@ public class ListExercisesCommandTest {
 
     @Test
     public void doNotRunIfNotLoggedIn() {
-        ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), null));
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
-        io.assertNotContains("Course 'foo' doesn't exist");
+        io.assertContains("You are not logged in");
     }
 
     @Test

@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -10,9 +11,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
@@ -38,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({ TmcUtil.class, SettingsIo.class })
 public class InfoCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -53,6 +52,7 @@ public class InfoCommandTest {
     private TmcCore mockCore;
     private WorkDir workDir;
     private Course course;
+    private AnalyticsFacade analyticsFacade;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -74,7 +74,7 @@ public class InfoCommandTest {
 
         mockCore = new TmcCore(new Settings(), new TaskExecutorImpl());
         EventSendBuffer eventSendBuffer = new EventSendBuffer(new Settings(), new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
+        analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
         ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
@@ -86,15 +86,22 @@ public class InfoCommandTest {
         course.setExercises(exercises);
 
         mockStatic(TmcUtil.class);
+        mockStatic(SettingsIo.class);
+        AccountList t = new AccountList();
+        t.addAccount(new Account("username"));
+        when(SettingsIo.loadAccountList()).thenReturn(t);
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
+
     }
 
     @Test
-    public void failIfBackendFails() {
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
 
         String[] args = {"info", "course", "-i"};
         app.run(args);
-        io.assertNotContains("doesn't exist on this server.");
+        io.assertContains("You haven't logged in");
     }
 
     @Test

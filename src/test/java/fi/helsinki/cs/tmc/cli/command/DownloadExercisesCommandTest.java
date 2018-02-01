@@ -94,13 +94,12 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void doNotRunIfNotLoggedIn() {
-        ctx = spy(new CliContext(io, mockCore, workDir, new Settings(), analyticsFacade));
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"download", "foo"};
         app.run(args);
-        io.assertNotContains("Course doesn't exist");
+        io.assertContains("You are not logged in");
     }
 
     @Test

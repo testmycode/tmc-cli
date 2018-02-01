@@ -77,13 +77,12 @@ public class OrganizationCommandTest {
 
     @Test
     public void doNotRunIfNotLoggedIn() {
-        ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade));
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"organization"};
         app.run(args);
-        io.assertNotContains("slug");
+        io.assertContains("You are not logged in");
     }
 
     @Test

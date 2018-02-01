@@ -243,4 +243,14 @@ public class LoginCommandTest {
         app.run(args);
         io.assertContains("analytics");
     }
+
+    @Test
+    public void logInNotAllowedIfAlreadyLoggedIn() {
+        AccountList list = new AccountList();
+        list.addAccount(new Account("loggedin"));
+        when(SettingsIo.loadAccountList()).thenReturn(list);
+        String[] args = {"login"};
+        app.run(args);
+        io.assertContains("You are already logged in");
+    }
 }

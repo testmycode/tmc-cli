@@ -104,13 +104,12 @@ public class UpdateCommandTest {
 
     @Test
     public void doNotRunIfNotLoggedIn() {
-        ctx = spy(new CliContext(io, core, new WorkDir(pathToNonCourseDir), new Settings(), null));
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"update"};
         app.run(args);
-        io.assertNotContains("Not a course directory");
+        io.assertContains("You are not logged in");
     }
 
     @Test

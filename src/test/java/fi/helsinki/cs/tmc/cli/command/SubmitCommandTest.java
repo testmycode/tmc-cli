@@ -121,13 +121,12 @@ public class SubmitCommandTest {
 
     @Test
     public void doNotRunIfNotLoggedIn() {
-        ctx = spy(new CliContext(io, core, workDir, new Settings(), analyticsFacade));
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"submit"};
         app.run(args);
-        io.assertNotContains("Submitting");
+        io.assertContains("You are not logged in");
     }
 
     @Test

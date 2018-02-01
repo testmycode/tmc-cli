@@ -11,8 +11,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
@@ -44,7 +43,7 @@ import java.nio.file.Paths;
 
 /*TODO test the command line options */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({ TmcUtil.class, SettingsIo.class })
 public class RunTestsCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -98,17 +97,22 @@ public class RunTestsCommandTest {
         runResult = new RunResult(status, testResults, logs);
 
         mockStatic(TmcUtil.class);
+        mockStatic(SettingsIo.class);
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
+        AccountList t = new AccountList();
+        t.addAccount(new Account("testuser"));
+        when(SettingsIo.loadAccountList()).thenReturn(t);
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
 
     @Test
     public void doNotRunIfNotLoggedIn() {
-        ctx = spy(new CliContext(io, mockCore, new WorkDir(), new Settings(), null));
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"test"};
         app.run(args);
-        io.assertNotContains("Testing:");
+        io.assertContains("You are not logged in");
     }
 
     @Test

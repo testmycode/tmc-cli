@@ -88,13 +88,12 @@ public class ConfigCommandTest {
 
     @Test
     public void doNotRunIfNotLoggedIn() {
-        ctx = spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).checkIsLoggedIn(false, true);
 
         String[] args = {"config -l"};
         app.run(args);
-        io.assertNotContains("=");
+        io.assertContains("You are not logged in");
     }
     @Test
     public void printsErrorIfNoArgumentsGiven() {
@@ -133,9 +132,9 @@ public class ConfigCommandTest {
 
     @Test
     public void getProperty() {
-        props.put("thing", "value");
-        app.run(new String[] {"config", "--get", "thing"});
-        io.assertContains("value");
+        props.put("testresults-right", "red");
+        app.run(new String[] {"config", "--get", "testresults-right"});
+        io.assertContains("red");
         io.assertAllPromptsUsed();
     }
 
@@ -194,8 +193,8 @@ public class ConfigCommandTest {
     public void setsMultiplePropertiesCorrectly() {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "update-date=12345", "testresults-right=cyan"});
-        assertEquals("12345", props.get("update-date"));
+        app.run(new String[] {"config", "testresults-left=blue", "testresults-right=cyan"});
+        assertEquals("blue", props.get("testresults-left"));
         assertEquals("cyan", props.get("testresults-right"));
         io.assertAllPromptsUsed();
     }

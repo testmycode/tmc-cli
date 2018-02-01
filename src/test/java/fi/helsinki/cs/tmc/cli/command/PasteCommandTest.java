@@ -107,12 +107,12 @@ public class PasteCommandTest {
     @Test
     public void doNotRunIfNotLoggedIn() {
         when(CourseInfoIo.load(any(Path.class))).thenReturn(null);
-        list = new AccountList();
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
 
         String[] args = {"paste"};
         app.run(args);
-        io.assertNotContains("No exercise specified");
+        io.assertContains("You are not logged in");
     }
 
     @Test

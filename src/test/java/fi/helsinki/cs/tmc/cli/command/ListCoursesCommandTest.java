@@ -63,6 +63,14 @@ public class ListCoursesCommandTest {
     }
 
     @Test
+    public void failIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        String[] args = {"courses"};
+        app.run(args);
+        io.assertContains("You are not logged in");
+    }
+
+    @Test
     public void failIfThereIsNoConnection() {
         when(TmcUtil.hasConnection(eq(ctx))).thenReturn(false);
 
