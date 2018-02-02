@@ -87,6 +87,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
         CliProgressObserver progobs = new CliProgressObserver(io, color1, color2);
 
         ctx.useAccount(finder.getAccount());
+        if (!ctx.getSettings().getOrganization().isPresent()) {
+            io.errorln("Failed to download exercises. Make sure you are properly logged in.");
+            return;
+        }
         CourseInfoIo.createNewCourse(course, finder.getAccount(), workDir.getWorkingDirectory());
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {

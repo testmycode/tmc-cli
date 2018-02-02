@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
@@ -20,6 +21,7 @@ import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
@@ -129,6 +131,11 @@ public class SubmitCommand extends AbstractCommand {
 
             resultPrinter.printSubmissionResult(result, isOnlyExercise);
 
+            exercise.setAttempted(true);
+            if (result.getStatus() == SubmissionResult.Status.OK) {
+                exercise.setCompleted(true);
+            }
+
             List<FeedbackQuestion> feedback = result.getFeedbackQuestions();
             if (feedback != null && feedback.size() > 0) {
                 feedbackLists.add(feedback);
@@ -167,22 +174,22 @@ public class SubmitCommand extends AbstractCommand {
     private void updateCourseJson(
             List<Exercise> submittedExercises, CourseInfo courseInfo, Path courseInfoFile) {
 
-        Course updatedCourse = TmcUtil.findCourse(ctx, courseInfo.getCourseName());
-        if (updatedCourse == null) {
-            io.errorln("Failed to update config file for course " + courseInfo.getCourseName());
+        List<Exercise> exercises = TmcUtil.getCourseExercises(ctx, courseInfo.getCourse());
+        if (exercises == null) {
+            io.println(
+                    "Failed to update config file for course " + courseInfo.getCourseName());
             return;
         }
-
         for (Exercise submitted : submittedExercises) {
-            Exercise updatedEx = courseInfo.getExercise(submitted.getName());
-            if (updatedEx == null) {
+            java.util.Optional<Exercise> ex = exercises.stream().filter(e -> e.getName().equals(submitted.getName())).findFirst();
+            if (!ex.isPresent()) {
                 io.println(
                         "Failed to update config file for exercise "
                                 + submitted.getName()
                                 + ". The exercise doesn't exist in server anymore.");
                 continue;
             }
-
+            Exercise updatedEx = ex.get();
             if (updatedEx.isCompleted()) {
                 if (courseInfo.getLocalCompletedExercises().contains(updatedEx.getName())) {
                     courseInfo.getLocalCompletedExercises().remove(updatedEx.getName());

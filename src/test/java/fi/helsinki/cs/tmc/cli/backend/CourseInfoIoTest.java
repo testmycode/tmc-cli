@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.cli.backend;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;

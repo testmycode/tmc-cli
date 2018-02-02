@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
@@ -27,6 +28,7 @@ import java.net.UnknownHostException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class TmcUtil {
@@ -74,9 +76,7 @@ public class TmcUtil {
     }
 
     public static List<Course> listCourses(CliContext ctx) {
-        Callable<List<Course>> callable;
-        callable = ctx.getTmcCore().listCourses(ProgressObserver.NULL_OBSERVER);
-
+        Callable<List<Course>> callable = ctx.getTmcCore().listCourses(ProgressObserver.NULL_OBSERVER);
         try {
             return callable.call();
         } catch (Exception e) {
@@ -199,6 +199,17 @@ public class TmcUtil {
         }
     }
 
+    public static List<Exercise> getCourseExercises(CliContext ctx, Course course) {
+        try {
+            TmcCore tmcCore = ctx.getTmcCore();
+            Course updatedCourse = tmcCore.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
+            return updatedCourse.getExercises();
+        } catch (Exception e) {
+            logger.error("Failed to fetch exercises for course " + course.getName());
+            return null;
+        }
+    }
+
     public static boolean sendFeedback(
             CliContext ctx, List<FeedbackAnswer> answers, URI feedbackUri) {
         try {
@@ -209,6 +220,17 @@ public class TmcUtil {
             TmcUtil.handleTmcExceptions(ctx, e);
             logger.error("Couldn't send feedback", e);
             return false;
+        }
+    }
+
+    public static Organization getOrganizationForCourse(CliContext ctx, Course course) {
+        TmcCore tmcCore = ctx.getTmcCore();
+        Callable<Organization> callable = tmcCore.getCourseOrganization(ProgressObserver.NULL_OBSERVER, course);
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            logger.error("Could not get organization for course " + course.getName());
+            return null;
         }
     }
 
