@@ -105,12 +105,13 @@ public class AutoUpdater {
         InputStream inputStream;
         try {
             URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(10000);
             connection.setRequestProperty(
                     "User-Agent", "tmc-cli (https://github.com/tmc-cli/tmc-cli)");
             inputStream = connection.getInputStream();
         } catch (IOException ex) {
             logger.warn("Failed to fetch page", ex);
-            io.errorln("Failed to create https connection to github.");
+            io.errorln("Failed to create a https connection.");
             return null;
         }
 

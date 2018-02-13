@@ -32,8 +32,11 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -248,6 +251,21 @@ public class SubmitCommandTest {
         workDir.setWorkdir(pathToDummyExercise);
         app.run(new String[] {"submit"});
         verify(analyticsFacade).sendAnalytics();
+    }
+
+    @Test
+    public void updateAllExercisesIfCourseApiUrlIsOutDated() {
+        workDir.setWorkdir(pathToDummyExercise);
+        ArrayList<Exercise> exercises = new ArrayList<>();
+        Exercise test = new Exercise("test");
+        try {
+            test.setReturnUrl(new URI("test"));
+        } catch (URISyntaxException e) {
+        }
+        exercises.add(test);
+        when(TmcUtil.getCourseExercises(ctx)).thenReturn(exercises);
+        app.run(new String[] {"submit"});
+        assertEquals(ctx.getCourseInfo().getCourse().getExercises(), exercises);
     }
 
     private static int countSubstring(String subStr, String str) {

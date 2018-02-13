@@ -77,7 +77,7 @@ public class DownloadExercisesCommandTest {
         AnalyticsFacade analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
         ctx = new CliContext(io, mockCore, workDir, new Settings(), analyticsFacade);
         app = new Application(ctx);
-        Account account = new Account("user", "password", testOrganization);
+        Account account = new Account("user", testOrganization);
         ctx.useAccount(account);
         accountList = new AccountList();
         accountList.addAccount(account);

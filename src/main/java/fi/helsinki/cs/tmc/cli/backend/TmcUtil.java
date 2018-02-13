@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.core.exceptions.ShowToUserException;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
@@ -199,7 +200,8 @@ public class TmcUtil {
         }
     }
 
-    public static List<Exercise> getCourseExercises(CliContext ctx, Course course) {
+    public static List<Exercise> getCourseExercises(CliContext ctx) {
+        Course course = ctx.getCourseInfo().getCourse();
         try {
             TmcCore tmcCore = ctx.getTmcCore();
             Course updatedCourse = tmcCore.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
@@ -220,17 +222,6 @@ public class TmcUtil {
             TmcUtil.handleTmcExceptions(ctx, e);
             logger.error("Couldn't send feedback", e);
             return false;
-        }
-    }
-
-    public static Organization getOrganizationForCourse(CliContext ctx, Course course) {
-        TmcCore tmcCore = ctx.getTmcCore();
-        Callable<Organization> callable = tmcCore.getCourseOrganization(ProgressObserver.NULL_OBSERVER, course);
-        try {
-            return callable.call();
-        } catch (Exception e) {
-            logger.error("Could not get organization for course " + course.getName());
-            return null;
         }
     }
 
@@ -276,6 +267,12 @@ public class TmcUtil {
         if (cause != null && cause.getCause() instanceof UnknownHostException) {
             logger.error("No internet connection");
             io.errorln("You have no internet connection.");
+            return;
+        }
+
+        if (cause instanceof ShowToUserException) {
+            logger.error(exception.getMessage());
+            io.errorln(cause.getMessage());
             return;
         }
 
