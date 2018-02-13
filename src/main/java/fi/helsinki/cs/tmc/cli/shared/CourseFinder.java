@@ -88,7 +88,7 @@ public class CourseFinder {
                     "Download course from "
                             + entryAccount.getServerAddress()
                             + " with '"
-                            + entryAccount.getUsername()
+                            + entryAccount.getUsername().get()
                             + "' account",
                     false)) {
                 this.account = entryAccount;

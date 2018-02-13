@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -23,8 +24,8 @@ public class LogoutCommand extends AbstractCommand {
             printUsage(context);
             return;
         }
-
         SettingsIo.delete();
+        context.getSettings().setToken(Optional.<String>absent());
         io.println("Logged out.");
     }
 }

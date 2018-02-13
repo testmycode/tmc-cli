@@ -62,7 +62,7 @@ public class ExternalsUtil {
     }
 
     /**
-     * Show a string in a pager for the user, with colour.
+     * Show a string in a pager for the user, with color.
      * Write output to a file and open it in pager
      * Assume colour has already been stripped on Windows.
      * @param string String to be shown to the user

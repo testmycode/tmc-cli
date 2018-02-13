@@ -62,6 +62,8 @@ public class ListCoursesCommand extends AbstractCommand {
                         ColorUtil.colorString(
                                 "Server " + settings.getServerAddress(), Color.YELLOW));
             }
+            io.println(settings.toString());
+
             printCourseList(settings);
             isFirst = false;
         }

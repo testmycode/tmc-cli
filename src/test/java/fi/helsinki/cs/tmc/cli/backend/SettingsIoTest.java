@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 
 public class SettingsIoTest {
 
+    public static final String STUB_SERVER = "stubServer";
     private AccountList accountList;
     private Account account;
     private Path tempDir;
@@ -23,7 +25,8 @@ public class SettingsIoTest {
     @Before
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve(SettingsIo.CONFIG_DIR);
-        account = new Account("testserver", "testuser", "testpassword");
+        account = new Account("testuser", "testpassword",
+                new Organization("test", "test", "test", "test", false));
         accountList = new AccountList();
         try {
             FileUtils.deleteDirectory(tempDir.toFile());
@@ -116,5 +119,19 @@ public class SettingsIoTest {
         SettingsIo.savePropertiesTo(props, tempDir);
         HashMap<String, String> loadedProps = SettingsIo.loadPropertiesFrom(tempDir);
         assertEquals(props, loadedProps);
+    }
+
+    @Test
+    public void saveCurrentSettingsOverridesOldAccountWithSameUsername() {
+        AccountList oldList = new AccountList();
+        Account acc = new Account("username", "password", new Organization("old", "", "", "", false));
+        acc.setServerAddress(STUB_SERVER);
+        oldList.addAccount(acc);
+        Settings settings = new Settings("username", "password", new Organization("new", "", "", "", false));
+        settings.setServerAddress(STUB_SERVER);
+        SettingsIo.saveCurrentSettingsToAccountList(settings);
+        AccountList newList = SettingsIo.loadAccountList();
+        assertEquals("new", newList.getAccount("username", STUB_SERVER).getOrganization().get().getName());
+        SettingsIo.delete();
     }
 }

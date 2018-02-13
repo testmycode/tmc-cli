@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
@@ -17,18 +18,22 @@ import java.util.HashMap;
 public class ConfigCommandTest {
 
     private Application app;
+    CliContext ctx;
     private TestIo io;
     private HashMap<String, String> props;
+    private Settings settings;
 
     @Before
     public void setup() {
         io = new TestIo();
-        CliContext ctx = Mockito.spy(new CliContext(io));
+        ctx = Mockito.spy(new CliContext(io));
         app = new Application(ctx);
 
         when(ctx.saveProperties()).thenReturn(true);
         props = new HashMap<>();
         when(ctx.getProperties()).thenReturn(props);
+        settings = new Settings();
+        when(ctx.getSettings()).thenReturn(settings);
     }
 
     @Test
@@ -98,39 +103,40 @@ public class ConfigCommandTest {
     @Test
     public void setsOnePropertyWhenNoOptionsGiven() {
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "cool=yeah"});
-        assertTrue(props.containsKey("cool"));
-        assertTrue(props.containsValue("yeah"));
-        io.assertContains(" cool set to \"yeah\".");
+        app.run(new String[] {"config", "testresults-right=red"});
+        assertTrue(props.containsKey("testresults-right"));
+        assertTrue(props.containsValue("red"));
+        io.assertContains(" testresults-right is now \"red\".");
         io.assertAllPromptsUsed();
     }
 
     @Test
     public void setsOnePropertyQuietly() {
-        app.run(new String[] {"config", "-q", "cool=yeah"});
-        assertTrue(props.containsKey("cool"));
-        assertTrue(props.containsValue("yeah"));
-        io.assertNotContains(" cool set to \"yeah\".");
+        app.run(new String[] {"config", "-q", "testresults-right=cyan"});
+        assertTrue(props.containsKey("testresults-right"));
+        assertTrue(props.containsValue("cyan"));
+        io.assertNotContains(" testresults-right is now \"cyan\".");
         io.assertAllPromptsUsed();
     }
 
     @Test
     public void setsOneExistingProperty() {
         io.addConfirmationPrompt(true);
-        props.put("cool", "old");
-        app.run(new String[] {"config", "cool=yeah"});
-        assertTrue(props.containsKey("cool"));
-        assertTrue(props.containsValue("yeah"));
-        io.assertContains(" cool set to \"yeah\", it was \"old\".");
+        props.put("testresults-right", "red");
+        app.run(new String[] {"config", "testresults-right=blue"});
+        assertTrue(props.containsKey("testresults-right"));
+        assertTrue(props.containsValue("blue"));
+        io.assertContains(" testresults-right is now \"blue\", was \"red\".");
         io.assertAllPromptsUsed();
     }
 
     @Test
     public void setsMultiplePropertiesCorrectly() {
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "cool=yeah", "hello=world"});
-        assertEquals("yeah", props.get("cool"));
-        assertEquals("world", props.get("hello"));
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "update-date=12345", "testresults-right=cyan"});
+        assertEquals("12345", props.get("update-date"));
+        assertEquals("cyan", props.get("testresults-right"));
         io.assertAllPromptsUsed();
     }
 
@@ -190,5 +196,104 @@ public class ConfigCommandTest {
         assertTrue(props.containsKey("some"));
         assertEquals("thing", props.get("some"));
         io.assertAllPromptsUsed();
+    }
+
+    @Test
+    public void onlyAllowedKeysAccepted() {
+        app.run(new String[] {"config", "inValid=Argument"});
+        io.assertContains("not an allowed key");
+        io.assertContains("Allowed keys are:");
+    }
+
+    @Test
+    public void sendDiagnosticsIsAllowed() {
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "send-diagnostics=true"});
+        io.assertContains("Set send-diagnostics to");
+    }
+
+    @Test
+    public void serverAddressIsAllowed() {
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "server-address=https://mooc.fi"});
+        io.assertContains("Set server-address to");
+    }
+
+    @Test
+    public void printsErrorWithTooFewArgumentsa() {
+        app.run(new String[] {"config", "inValid"});
+        io.assertContains("Expected at least one key-value pair.");
+    }
+
+    @Test
+    public void serverAddressIsValidated() {
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "server-address=lol"});
+        io.assertContains("Please start the address with http");
+    }
+
+    @Test
+    public void httpsIsRequiredInBeginningInValidation() {
+        app.run(new String[] {"config", "-q", "server-address=asdfhttps://"});
+        io.assertContains("Please start the address with http");
+    }
+
+    @Test
+    public void sendDiagnosticsIsValidated() {
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "send-diagnostics=lol"});
+        io.assertContains("Not a boolean value");
+    }
+
+    @Test
+    public void serverAddressConfiguredToSettings() {
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "server-address=https://mooc.fi"});
+        assertEquals("https://mooc.fi", settings.getServerAddress());
+    }
+
+    @Test
+    public void sendDiagnosticsConfiguredToSettings() {
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "send-diagnostics=true"});
+        assertEquals(true, settings.getSendDiagnostics());
+    }
+
+    @Test
+    public void configuredToSettingsWithQuiet() {
+        app.run(new String[] {"config", "-q", "send-diagnostics=true"});
+        assertEquals(true, settings.getSendDiagnostics());
+    }
+
+    @Test
+    public void ifSeveralPairsAndSomeInvalidConfiguresValidOnes() {
+        io.addConfirmationPrompt(true);
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config", "send-diagnostics=asdf", "server-address=https://mooc.fi"});
+        io.assertContains("Not a boolean value");
+        assertEquals("https://mooc.fi", settings.getServerAddress());
+    }
+
+    @Test
+    public void ifSeveralPairsAndSomeInvalidValuesConfiguresValidOnesWithQuiet() {
+        app.run(new String[] {"config", "-q",  "send-diagnostics=asdf", "server-address=https://mooc.fi"});
+        io.assertContains("Not a boolean value");
+        assertEquals("https://mooc.fi", settings.getServerAddress());
+    }
+
+    @Test
+    public void ifSeveralPairsAndSomeInvalidKeysConfiguresValidOnes() {
+        io.addConfirmationPrompt(true);
+        io.addConfirmationPrompt(true);
+        app.run(new String[] {"config",  "asd=asdf", "server-address=https://mooc.fi"});
+        io.assertContains("not an allowed key");
+        assertEquals("https://mooc.fi", settings.getServerAddress());
+    }
+
+    @Test
+    public void ifSeveralPairsAndSomeInvalidKeysConfiguresValidOnesWithQuiet() {
+        app.run(new String[] {"config", "-q",  "asd=asdf", "server-address=https://mooc.fi"});
+        io.assertContains("not an allowed key");
+        assertEquals("https://mooc.fi", settings.getServerAddress());
     }
 }

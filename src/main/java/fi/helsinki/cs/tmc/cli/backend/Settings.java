@@ -7,6 +7,8 @@ import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import com.google.common.base.Optional;
+import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import java.nio.file.Path;
@@ -18,11 +20,11 @@ public class Settings implements TmcSettings {
     private Account account;
 
     public Settings() {
-        this.account = Account.NULL_ACCOUNT;
+        this.account = new Account();
     }
 
-    public Settings(String serverAddress, String username, String password) {
-        this.account = new Account(serverAddress, username, password);
+    public Settings(String username, String password, Organization organization) {
+        this.account = new Account(username, password, organization);
     }
 
     /**
@@ -31,10 +33,7 @@ public class Settings implements TmcSettings {
      */
     public void setAccount(Account account) {
         if (account == null) {
-            /* NULL_ACCOUNT is used so that the NullPointerException
-             * is not thrown in the getters.
-             */
-            account = Account.NULL_ACCOUNT;
+            account = new Account();
         }
         this.account = account;
     }
@@ -49,32 +48,37 @@ public class Settings implements TmcSettings {
 
     @Override
     public String getServerAddress() {
-        return account.getServerAddress();
+            return account.getServerAddress();
     }
 
     @Override
-    public String getPassword() {
+    public void setServerAddress(String address) {
+       account.setServerAddress(address);
+    }
+
+    @Override
+    public Optional<String> getPassword() {
         return account.getPassword();
     }
 
     @Override
-    public String getUsername() {
+    public void setPassword(Optional<String> password) {
+            account.setPassword(password);
+    }
+
+    @Override
+    public Optional<String> getUsername() {
         return account.getUsername();
     }
 
     @Override
     public boolean userDataExists() {
-        return getUsername() != null && getPassword() != null;
+        return getUsername().isPresent() && getPassword().isPresent();
     }
 
     @Override
     public Optional<Course> getCurrentCourse() {
-        return Optional.absent();
-    }
-
-    @Override
-    public String apiVersion() {
-        return "7";
+        return account.getCurrentCourse();
     }
 
     @Override
@@ -85,14 +89,6 @@ public class Settings implements TmcSettings {
     @Override
     public String clientVersion() {
         return EnvironmentUtil.getVersion();
-    }
-
-    @Override
-    public String getFormattedUserData() {
-        if (!userDataExists()) {
-            return "";
-        }
-        return getUsername() + ":" + this.getPassword();
     }
 
     @Override
@@ -116,8 +112,57 @@ public class Settings implements TmcSettings {
     }
 
     @Override
-    public void setCourse(Course course) {}
+    public String hostProgramName() {
+        // which command line is used
+        return "unknown";
+    }
 
     @Override
-    public void setConfigRoot(Path path) {}
+    public String hostProgramVersion() {
+        return "unknown";
+    }
+
+    @Override
+    public boolean getSendDiagnostics() {
+        return account.getSendDiagnostics();
+    }
+
+    public void setSendDiagnostics(boolean value) {
+        account.setSendDiagnostics(value);
+    }
+
+    @Override
+    public Optional<OauthCredentials> getOauthCredentials() {
+        return account.getOauthCredentials();
+    }
+
+    @Override
+    public void setOauthCredentials(Optional<OauthCredentials> credentials) {
+        account.setOauthCredentials(credentials);
+    }
+
+    @Override
+    public void setToken(Optional<String> token) {
+        account.setoAuthToken(token);
+    }
+
+    @Override
+    public Optional<String> getToken() {
+        return account.getoAuthToken();
+    }
+
+    @Override
+    public Optional<Organization> getOrganization() {
+        return account.getOrganization();
+    }
+
+    @Override
+    public void setOrganization(Optional<Organization> organization) {
+        account.setOrganization(organization);
+    }
+
+    @Override
+    public void setCourse(Course course) {
+        account.setCurrentCourse(Optional.of(course));
+    }
 }
