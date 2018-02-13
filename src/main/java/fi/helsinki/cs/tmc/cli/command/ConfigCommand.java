@@ -83,10 +83,11 @@ public class ConfigCommand extends AbstractCommand {
                     throw new BadValueTypeException("Please start the address with http[s]://");
                 }
                 context.getSettings().setServerAddress(addr);
-                if (!normalizeServerAddress()) {
-                    io.println("There was a problem setting the server address.");
-                    return;
+                normalizeServerAddress();
+                if (addr.matches("^https?://tmc.mooc.fi/mooc")) {
+                    io.println("Please note that the server http://tmc.mooc.fi/mooc is no longer supported.");
                 }
+                io.println("All courses are now hosted at https://tmc.mooc.fi. We do not advise changing the server address.");
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
         });
