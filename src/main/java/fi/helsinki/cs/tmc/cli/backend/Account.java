@@ -21,7 +21,7 @@ public class Account {
     private boolean sendDiagnostics;
     private boolean sendAnalytics;
     private boolean sendDetailedAnalytics;
-    private static final String DEFAULT_SERVER =  "https://tmc.mooc.fi/staging";
+    private static final String DEFAULT_SERVER =  "https://tmc.mooc.fi";
 
     // for gson
     public Account() {

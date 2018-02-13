@@ -26,7 +26,6 @@ public class ConfigCommand extends AbstractCommand {
     private static final Set<String> PROGRESS_BAR_COLORS = new HashSet<>(Arrays.asList("black", "red", "green", "blue", "yellow", "blue", "purple", "cyan", "white", "none"));
     private static final String sendAnalyticsKey = "send-analytics";
     private static final String serverAddressKey = "server-address";
-    private static final String updateDateKey = "update-date";
     private static final String testResultRightKey = "testresults-right";
     private static final String testResultLeftKey = "testresults-left";
     private static final String progressBarLeftKey = "progressbar-left";
@@ -84,10 +83,6 @@ public class ConfigCommand extends AbstractCommand {
                 }
                 context.getSettings().setServerAddress(addr);
                 normalizeServerAddress();
-                if (addr.matches("^https?://tmc.mooc.fi/mooc")) {
-                    io.println("Please note that the server http://tmc.mooc.fi/mooc is no longer supported.");
-                }
-                io.println("All courses are now hosted at https://tmc.mooc.fi. We do not advise changing the server address.");
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
         });
@@ -289,6 +284,16 @@ public class ConfigCommand extends AbstractCommand {
                 continue;
             }
             String oldValue = properties.get(parts[0]);
+            if (parts[0].equals(serverAddressKey)) {
+                io.println("All courses are now hosted at https://tmc.mooc.fi. We do not advise changing the server address.");
+                if (parts[0].contains("tmc.mooc.fi/mooc")) {
+                    io.println("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
+                            "If you'd like to do the migrated courses, you'll have to create an account on the new server.\n" +
+                            "Choose the MOOC organization when logging in.\n\n" +
+                            "For more information, check the course materials on mooc.fi.");
+                    return;
+                }
+            }
             if (io.readConfirmation(" Set " + parts[0] + " to \"" + parts[1] + "\"?", true)) {
                 if (!saveValue(parts[0], parts[1])) {
                     continue;

@@ -64,10 +64,14 @@ public class Settings implements TmcSettings, SpywareSettings {
 
     private boolean migrateAccount(CliContext context, Account account) throws Exception {
         Io io = context.getIo();
-        io.println("TMC cli has been updated. Please provide the following information.");
+        // the old server doesn't have any organizations
+        if (account.getServerAddress().contains("tmc.mooc.fi/mooc")) {
+            return false;
+        }
         TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
         normalizer.normalize();
         normalizer.selectOrganizationAndCourse();
+        io.println("TMC cli has been updated. Please provide the following information.");
         if (!context.getSettings().getOrganization().isPresent()) {
             OrganizationCommand organizationCommand = new OrganizationCommand();
             Optional<Organization> organization = organizationCommand.chooseOrganization(context, null);

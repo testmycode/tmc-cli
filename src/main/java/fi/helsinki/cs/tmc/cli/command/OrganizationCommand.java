@@ -100,7 +100,7 @@ public class OrganizationCommand extends AbstractCommand {
             oneLine = args.hasOption("o");
         }
         List<Organization> organizations = listOrganizations();
-        if (organizations == null) {
+        if (organizations == null || organizations.isEmpty()) {
             io.errorln("Failed to fetch organizations from server.");
             return Optional.absent();
         }

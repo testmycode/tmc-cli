@@ -224,6 +224,15 @@ public class CliContext {
             cachedAccount = list.getAccount();
         }
         hasLogin = cachedAccount != null;
+        if (hasLogin && cachedAccount.getServerAddress().contains("tmc.mooc.fi/mooc")) {
+            io.println("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
+                    "All the courses have been migrated to our main server https://tmc.mooc.fi.\n" +
+                    "If you'd like to do the migrated courses, you have to create a new account on the new server.\n" +
+                    "Choose the MOOC organization when logging in.\n\n" +
+                    "For more information, check the course materials on mooc.fi.");
+            SettingsIo.delete();
+            return;
+        }
         if (useCache) {
             this.settings.setAccount(this, cachedAccount);
         }
