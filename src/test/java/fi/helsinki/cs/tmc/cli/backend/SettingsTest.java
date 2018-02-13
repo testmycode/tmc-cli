@@ -3,6 +3,9 @@ package fi.helsinki.cs.tmc.cli.backend;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
@@ -13,6 +16,7 @@ import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
@@ -20,21 +24,28 @@ import fi.helsinki.cs.tmc.spyware.EventStore;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Locale;
+import java.util.concurrent.Callable;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(TmcCore.class)
 public class SettingsTest {
 
     private Settings settings;
     private Organization testOrganization;
     private CliContext context;
     private TestIo io;
+    private TmcCore core;
 
     @Before
     public void setUp() {
         testOrganization = new Organization("test", "test", "hy", "test", false);
         settings = new Settings("testuser", "testpassword", testOrganization);
-        TmcCore core = new TmcCore(settings, new TaskExecutorImpl());
+        core = spy(new TmcCore(settings, new TaskExecutorImpl()));
         SpywareSettings analyticsSettings = settings;
         EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
         AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
@@ -78,11 +89,20 @@ public class SettingsTest {
 
     @Test
     public void ifPasswordExistsSettingsAreMigrated() {
+        doReturn(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                return null;
+            }
+        }).when(core).authenticate(any(ProgressObserver.class), any(String.class));
         Account account = new Account("username", "password", testOrganization);
         TmcSettingsHolder.set(settings);
+        io.addLinePrompt(testOrganization.getSlug());
+        io.addLinePrompt("y");
+        io.addLinePrompt("y");
         settings.setAccount(this.context, account);
         assertTrue(!settings.getPassword().isPresent());
-        assertTrue(settings.getServerAddress().equals("https://tmc.mooc.fi/"));
+        assertTrue(settings.getServerAddress().equals("https://tmc.mooc.fi"));
     }
 
     @Test
