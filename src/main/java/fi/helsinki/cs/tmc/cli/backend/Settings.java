@@ -107,6 +107,11 @@ public class Settings implements TmcSettings {
     }
 
     @Override
+    public void setCourse(Optional<Course> course) {
+        this.account.setCurrentCourse(course);
+    }
+
+    @Override
     public Path getConfigRoot() {
         return SettingsIo.getConfigDirectory();
     }
@@ -161,7 +166,6 @@ public class Settings implements TmcSettings {
         account.setOrganization(organization);
     }
 
-    @Override
     public void setCourse(Course course) {
         account.setCurrentCourse(Optional.of(course));
     }
