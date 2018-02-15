@@ -43,7 +43,7 @@ public class ConfigCommand extends AbstractCommand {
         ALLOWED_KEYS.put("send-diagnostics", (key, value) -> {
             String newVal = (String) value;
             if (!newVal.trim().toLowerCase().equals("true") && !newVal.trim().toLowerCase().equals("false")) {
-                throw new BadValueTypeException("Not a boolean value");
+                throw new BadValueTypeException("Please write either true or false");
             }
             boolean send = Boolean.parseBoolean(newVal);
             context.getSettings().setSendDiagnostics(send);

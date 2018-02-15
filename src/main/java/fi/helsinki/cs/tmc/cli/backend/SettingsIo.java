@@ -73,8 +73,7 @@ public class SettingsIo {
     public static void saveCurrentSettingsToAccountList(Settings settings) {
         AccountList list = loadAccountList();
         Set<Account> deletables = new HashSet<>();
-        for (Iterator<Account> i = list.iterator(); i.hasNext(); ) {
-            Account account = i.next();
+        list.forEach(account -> {
             if (account.getUsername().equals(settings.getAccount().getUsername())) {
                 if (!account.getUsername().isPresent()) {
                     logger.error("Savable account doesn't exist");
@@ -82,7 +81,7 @@ public class SettingsIo {
                 }
                 deletables.add(account);
             }
-        }
+        });
         deletables.stream().forEach(d -> list.deleteAccount(d.getUsername().get(), d.getServerAddress()));
         list.addAccount(settings.getAccount());
         saveAccountList(list);

@@ -242,7 +242,7 @@ public class ConfigCommandTest {
     public void sendDiagnosticsIsValidated() {
         io.addConfirmationPrompt(true);
         app.run(new String[] {"config", "send-diagnostics=lol"});
-        io.assertContains("Not a boolean value");
+        io.assertContains("Please write either true or false");
     }
 
     @Test
@@ -270,14 +270,14 @@ public class ConfigCommandTest {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
         app.run(new String[] {"config", "send-diagnostics=asdf", "server-address=https://mooc.fi"});
-        io.assertContains("Not a boolean value");
+        io.assertContains("Please write either true or false");
         assertEquals("https://mooc.fi", settings.getServerAddress());
     }
 
     @Test
     public void ifSeveralPairsAndSomeInvalidValuesConfiguresValidOnesWithQuiet() {
         app.run(new String[] {"config", "-q",  "send-diagnostics=asdf", "server-address=https://mooc.fi"});
-        io.assertContains("Not a boolean value");
+        io.assertContains("Please write either true or false");
         assertEquals("https://mooc.fi", settings.getServerAddress());
     }
 

@@ -180,20 +180,6 @@ public class Application {
 
 
     public static void main(String[] args) {
-        while (true) {
-            Scanner reader = new Scanner(System.in);
-            System.out.println("Enter command (stop to exit)");
-            String command = reader.nextLine();
-            if (command.equals("stop")) {
-                break;
-            } else {
-                String[] argh = command.split((" "));
-                realMain(argh);
-            }
-        }
-    }
-
-    public static void realMain(String[] args) {
         Application app = new Application(new CliContext(null));
         app.run(args);
     }

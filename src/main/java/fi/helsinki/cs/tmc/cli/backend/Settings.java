@@ -48,7 +48,7 @@ public class Settings implements TmcSettings {
 
     @Override
     public String getServerAddress() {
-            return account.getServerAddress();
+        return account.getServerAddress();
     }
 
     @Override

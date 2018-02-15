@@ -88,7 +88,7 @@ public class DownloadExercisesCommand extends AbstractCommand {
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {
             io.errorln("Failed to download exercises");
-            CourseInfoIo.abortCreatingCourse(course, workDir.getWorkingDirectory());
+            CourseInfoIo.deleteConfigDirectory(course, workDir.getWorkingDirectory());
             return;
         }
 

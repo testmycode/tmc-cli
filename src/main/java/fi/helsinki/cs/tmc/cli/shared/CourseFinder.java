@@ -84,6 +84,10 @@ public class CourseFinder {
             Account entryAccount = entrySet.getKey();
             Course entryCourse = entrySet.getValue();
 
+            if (!entryAccount.getUsername().isPresent()) {
+                continue;
+            }
+
             if (io.readConfirmation(
                     "Download course from "
                             + entryAccount.getServerAddress()

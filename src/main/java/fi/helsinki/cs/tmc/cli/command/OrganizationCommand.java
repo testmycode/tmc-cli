@@ -102,14 +102,14 @@ public class OrganizationCommand extends AbstractCommand {
             String slug = getOrganizationFromUser(organizations, args, printOptions, oneLine);
             printOptions = false;
             organization = organizations.stream().filter(o -> o.getSlug().equals(slug.trim().toLowerCase())).findFirst();
-            if (!organization.isPresent()) {
+            if (organization.isPresent()) {
+                break;
+            } else {
                 io.errorln("Slug doesn't match any organization.");
                 if (oneLine) {
                     oneLine = false;
                     printOptions = true;
                 }
-            } else {
-                break;
             }
         }
         if (organization.isPresent()) {

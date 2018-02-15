@@ -63,7 +63,7 @@ public class CourseInfoIo {
         CourseInfoIo.save(info, configFile);
     }
 
-    public static void abortCreatingCourse(Course course, Path parentDir) {
+    public static void deleteConfigDirectory(Course course, Path parentDir) {
         Path configFile = parentDir.resolve(course.getName()).resolve(CourseInfoIo.COURSE_CONFIG);
         delete(configFile);
     }
