@@ -139,7 +139,7 @@ public class ConfigCommand extends AbstractCommand {
 
     private void isBooleanValue(String newVal) throws BadValueTypeException {
         if (!newVal.trim().toLowerCase().equals("true") && !newVal.trim().toLowerCase().equals("false")) {
-            throw new BadValueTypeException("Not a boolean value");
+            throw new BadValueTypeException("Please write either true or false");
         }
     }
 
