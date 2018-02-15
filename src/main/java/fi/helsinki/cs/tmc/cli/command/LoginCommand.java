@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import com.google.common.base.Optional;
@@ -49,9 +50,11 @@ public class LoginCommand extends AbstractCommand {
         }
 
         if (this.ctx.checkIsLoggedIn(true, true)) {
-            io.println("You are already logged in as " + this.ctx.getSettings().getUsername().get() +
-                    (this.ctx.getSettings().getOrganization().isPresent() ?
-                    " and your current organization is " + this.ctx.getSettings().getOrganization().get().getName() :
+            Optional<String> username = this.ctx.getSettings().getUsername();
+            Optional<Organization> organization = this.ctx.getSettings().getOrganization();
+            io.println("You are already logged in " + (username.isPresent()? "as " + username.get() : "") +
+                    (organization.isPresent() ?
+                    " and your current organization is " + organization.get().getName() :
                     "."));
             io.println("Change your organization with the command organization.");
             io.println("Inspect and change your current settings with the command config.");
@@ -69,31 +72,40 @@ public class LoginCommand extends AbstractCommand {
             username = info.getUsername();
         }
 
-        username = getLoginInfo(args, username, "u", "username: ");
-        password = getLoginInfo(args, null, "p", "password: ");
+        login(this.ctx, args, Optional.absent());
+    }
+
+    public void login(CliContext ctx, CommandLine args, Optional<String> serverAddress) {
+        Io io = ctx.getIo();
+        username = getLoginInfo(args, username, "u", "username: ", io);
+        password = getLoginInfo(args, null, "p", "password: ", io);
+
 
         Account account = new Account(username);
+        if (serverAddress.isPresent()) {
+            account.setServerAddress(serverAddress.get());
+        }
         ctx.useAccount(account);
 
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
-            this.ctx.getSettings().setAccount(this.ctx, new Account());
+            ctx.getSettings().setAccount(ctx, new Account());
             return;
         }
 
         OrganizationCommand organizationCommand = new OrganizationCommand();
-        Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, args);
+        Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, Optional.of(args));
         if (!organization.isPresent()) {
             return;
         }
         account.setOrganization(organization);
 
-        boolean sendDiagnostics = getAnswerFromUser(username, account.getServerAddress(),
-                            "Do you want to send crash reports for client development?",
-                                    this.ctx.getSettings().getSendDiagnostics(), this.io);
+        boolean sendDiagnostics = getBooleanAnswerFromUser(Optional.of(username),
+                "Do you want to send crash reports for client development?",
+                                    ctx.getSettings().getSendDiagnostics(), io);
         account.setSendDiagnostics(sendDiagnostics);
-        boolean sendAnalytics = getAnswerFromUser(username, account.getServerAddress(),
-                            "Do you want to send analytics data for research?",
-                                    this.ctx.getSettings().isSpywareEnabled(), this.io);
+        boolean sendAnalytics = getBooleanAnswerFromUser(Optional.of(username),
+                "Do you want to send analytics data for research?",
+                                    ctx.getSettings().isSpywareEnabled(), io);
         account.setSendAnalytics(sendAnalytics);
 
         AccountList list = SettingsIo.loadAccountList();
@@ -103,18 +115,18 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
-        this.ctx.getAnalyticsFacade().saveAnalytics("login");
+        ctx.getAnalyticsFacade().saveAnalytics("login");
 
         io.println("Login successful.");
         io.println("You can change your organization with the command organization, " +
                 "and inspect and change other settings with the command config.");
     }
 
-    private String getLoginInfo(CommandLine line, String oldValue, String option, String prompt) {
+    private String getLoginInfo(CommandLine line, String oldValue, String option, String prompt, Io io) {
         String value = oldValue;
         boolean isPassword = option.equals("p");
 
-        if (line.hasOption(option)) {
+        if (line != null && line.hasOption(option)) {
             value = line.getOptionValue(option);
         }
 
@@ -130,9 +142,9 @@ public class LoginCommand extends AbstractCommand {
         return value;
     }
 
-    public boolean getAnswerFromUser(String username, String server, String prompt, boolean defaultValue, Io io) {
+    public boolean getBooleanAnswerFromUser(Optional<String> username, String prompt, boolean defaultValue, Io io) {
         AccountList savedAccounts = SettingsIo.loadAccountList();
-        if (username != null && savedAccounts.getAccount(username) != null) {
+        if (username.isPresent() && savedAccounts.getAccount(username.get()) != null) {
             // not the first time logging in
             return defaultValue;
         }

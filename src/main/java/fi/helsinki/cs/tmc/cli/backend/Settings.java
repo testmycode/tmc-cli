@@ -20,6 +20,7 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.text.html.Option;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -74,7 +75,7 @@ public class Settings implements TmcSettings, SpywareSettings {
         io.println("TMC cli has been updated. Please provide the following information.");
         if (!context.getSettings().getOrganization().isPresent()) {
             OrganizationCommand organizationCommand = new OrganizationCommand();
-            Optional<Organization> organization = organizationCommand.chooseOrganization(context, null);
+            Optional<Organization> organization = organizationCommand.chooseOrganization(context, Optional.absent());
             if (!organization.isPresent()) {
                 return false;
             }
@@ -83,12 +84,12 @@ public class Settings implements TmcSettings, SpywareSettings {
         Callable<Void> callable = context.getTmcCore().authenticate(ProgressObserver.NULL_OBSERVER, account.getPassword().get());
         callable.call();
         LoginCommand loginCommand = new LoginCommand();
-        boolean sendDiagnostics = loginCommand.getAnswerFromUser(null, account.getServerAddress(),
+        boolean sendDiagnostics = loginCommand.getBooleanAnswerFromUser(Optional.absent(),
                 "Do you want to send crash reports for client development?",
                 false,
                 io);
         account.setSendDiagnostics(sendDiagnostics);
-        boolean sendAnalytics = loginCommand.getAnswerFromUser(null, account.getServerAddress(),
+        boolean sendAnalytics = loginCommand.getBooleanAnswerFromUser(Optional.absent(),
                 "Do you want to send analytics data for research?",
                 false,
                 io);

@@ -207,7 +207,7 @@ List of configurable settings:
 * *send-analytics*
   Allow sending analytics data of commands run. Stored in account.
 * *server-address*
-  Address to fetch courses from and submit to. Defaults to `https://tmc.mooc.fi`. Stored with account.
+  Address to fetch courses from and submit to. Defaults to `https://tmc.mooc.fi`. Stored with account. Changing the server address will log the user out and prompt a new login.
 
 COMMAND: ORGANIZATION
 ---------------

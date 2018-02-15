@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -10,15 +11,13 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.AccountList;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
-import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
@@ -35,10 +34,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(SettingsIo.class)
+@PrepareForTest({ SettingsIo.class, TmcUtil.class })
 public class ConfigCommandTest {
 
     private Application app;
@@ -69,7 +69,11 @@ public class ConfigCommandTest {
         when(ctx.getSettings()).thenReturn(settings);
         testConfigRoot = Files.createTempDirectory(".test-config");
         mockStatic(SettingsIo.class);
+        mockStatic(TmcUtil.class);
         when(SettingsIo.getPropertiesFile(any(Path.class))).thenReturn(testConfigRoot.resolve(TEST_PROPERTIES_FILENAME));
+        ArrayList<Organization> organizationList = new ArrayList<>();
+        organizationList.add(new Organization("Test", "", "test", "", false));
+        when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         when(SettingsIo.getConfigDirectory()).thenReturn(testConfigRoot);
         AccountList t = new AccountList();
         t.addAccount(new Account("username", ""));
@@ -272,13 +276,6 @@ public class ConfigCommandTest {
     }
 
     @Test
-    public void serverAddressIsAllowed() {
-        io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "server-address=https://mooc.fi"});
-        io.assertContains("Set server-address to");
-    }
-
-    @Test
     public void printsErrorWithTooFewArgumentsa() {
         app.run(new String[] {"config", "inValid"});
         io.assertContains("Expected at least one key-value pair.");
@@ -305,8 +302,14 @@ public class ConfigCommandTest {
     }
 
     @Test
-    public void serverAddressConfiguredToSettings() {
+    public void serverAddressConfiguredToSettingsAndPromptsLogin() {
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), any(String.class))).thenReturn(true);
         io.addConfirmationPrompt(true);
+        io.addLinePrompt("test");
+        io.addPasswordPrompt("password");
+        io.addLinePrompt("test");
+        io.addLinePrompt("yes");
+        io.addLinePrompt("yes");
         app.run(new String[] {"config", "server-address=https://mooc.fi"});
         assertEquals("https://mooc.fi", settings.getServerAddress());
     }
@@ -328,32 +331,32 @@ public class ConfigCommandTest {
     public void ifSeveralPairsAndSomeInvalidConfiguresValidOnes() {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "send-diagnostics=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config", "send-diagnostics=asdf", "send-diagnostics=true"});
         io.assertContains("Please write either true or false");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
     }
 
     @Test
     public void ifSeveralPairsAndSomeInvalidValuesConfiguresValidOnesWithQuiet() {
-        app.run(new String[] {"config", "-q",  "send-diagnostics=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config", "-q",  "send-analytics=asdf", "send-diagnostics=true"});
         io.assertContains("Please write either true or false");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
     }
 
     @Test
     public void ifSeveralPairsAndSomeInvalidKeysConfiguresValidOnes() {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config",  "asd=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config",  "asd=asdf", "send-diagnostics=true"});
         io.assertContains("not an allowed key");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
     }
 
     @Test
     public void ifSeveralPairsAndSomeInvalidKeysConfiguresValidOnesWithQuiet() {
-        app.run(new String[] {"config", "-q",  "asd=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config", "-q",  "asd=asdf", "send-diagnostics=true"});
         io.assertContains("not an allowed key");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
     }
 
     @Test

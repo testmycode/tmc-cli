@@ -10,6 +10,7 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.utils.OptionalToGoptional;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class OrganizationCommand extends AbstractCommand {
 
         this.ctx.getAnalyticsFacade().saveAnalytics("organization");
 
-        Optional<Organization> organization = chooseOrganization(ctx, args);
+        Optional<Organization> organization = chooseOrganization(ctx, Optional.of(args));
         this.ctx.getSettings().setOrganization(organization);
         SettingsIo.saveCurrentSettingsToAccountList(this.ctx.getSettings());
     }
@@ -80,24 +81,24 @@ public class OrganizationCommand extends AbstractCommand {
     }
 
 
-    private String getOrganizationFromUser(List<Organization> organizations, CommandLine line, boolean printOptions, boolean oneLine) {
-        if (oneLine && line != null && line.hasOption("o")) {
-            return line.getOptionValue("o");
+    private String getOrganizationFromUser(List<Organization> organizations, Optional<CommandLine> line, boolean printOptions, boolean oneLine) {
+        if (oneLine && line.isPresent() && line.get().hasOption("o")) {
+            return line.get().getOptionValue("o");
         }
         if (printOptions) {
-            printOrganizations(organizations, line != null && !line.hasOption("n") && !EnvironmentUtil.isWindows());
+            printOrganizations(organizations, line.isPresent() && !line.get().hasOption("n") && !EnvironmentUtil.isWindows());
         }
         return io.readLine("Choose an organization by writing its slug: ");
     }
 
 
-    public Optional<Organization> chooseOrganization(CliContext ctx, CommandLine args) {
+    public Optional<Organization> chooseOrganization(CliContext ctx, Optional<CommandLine> args) {
         this.ctx = ctx;
         this.io = ctx.getIo();
         boolean printOptions = true;
         boolean oneLine = false;
-        if (args != null) {
-            oneLine = args.hasOption("o");
+        if (args.isPresent()) {
+            oneLine = args.get().hasOption("o");
         }
         List<Organization> organizations = listOrganizations();
         if (organizations == null || organizations.isEmpty()) {

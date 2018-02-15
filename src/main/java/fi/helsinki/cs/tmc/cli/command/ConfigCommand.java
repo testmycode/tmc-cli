@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
+import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
 import fi.helsinki.cs.tmc.cli.utils.BadValueTypeException;
@@ -84,6 +85,10 @@ public class ConfigCommand extends AbstractCommand {
                 context.getSettings().setServerAddress(addr);
                 normalizeServerAddress();
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
+                io.println("Please login again to use the new server.");
+                SettingsIo.delete();
+                LoginCommand loginCommand = new LoginCommand();
+                loginCommand.login(context, null, Optional.of(value));
             }
         });
         ALLOWED_KEYS.put(testResultRightKey, new PropertyFunctions() {
