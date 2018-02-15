@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,17 +15,18 @@ import java.util.Locale;
 public class SettingsTest {
 
     private Settings settings;
+    private Organization testOrganization;
 
     @Before
     public void setUp() {
-        settings = new Settings("testserver", "testuser", "testpassword");
+        testOrganization = new Organization("test", "test", "hy", "test", false);
+        settings = new Settings("testuser", "testpassword", testOrganization);
     }
 
     @Test
     public void constructorInitializesFields() {
-        assertEquals("testserver", settings.getServerAddress());
-        assertEquals("testuser", settings.getUsername());
-        assertEquals("testpassword", settings.getPassword());
+        assertEquals("testuser", settings.getUsername().get());
+        assertEquals("testpassword", settings.getPassword().get());
     }
 
     @Test
@@ -32,11 +34,6 @@ public class SettingsTest {
         Account account = new Account();
         settings.setAccount(account);
         assertEquals(account, settings.getAccount());
-    }
-
-    @Test
-    public void correctApiVersion() {
-        assertEquals("7", settings.apiVersion());
     }
 
     @Test
@@ -62,26 +59,14 @@ public class SettingsTest {
 
     @Test
     public void userDataDoesNotExistIfUsernameIsNotSet() {
-        Account account = new Account("testserver", null, "testpassword");
+        Account account = new Account(null, "testpassword", testOrganization);
         settings.setAccount(account);
         assertTrue(!settings.userDataExists());
     }
 
     @Test
-    public void formattedUserDataIsCorrectIfSet() {
-        assertEquals("testuser:testpassword", settings.getFormattedUserData());
-    }
-
-    @Test
-    public void formattedUserDataIsCorrectIfNotSet() {
-        Account account = new Account("testserver", null, "testpassword");
-        settings.setAccount(account);
-        assertEquals("", settings.getFormattedUserData());
-    }
-
-    @Test
     public void userDataDoesNotExistIfPasswordIsNotSet() {
-        Account account = new Account("testserver", "testuser", null);
+        Account account = new Account("testuser", null, testOrganization);
         settings.setAccount(account);
         assertTrue(!settings.userDataExists());
     }

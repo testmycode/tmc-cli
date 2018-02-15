@@ -43,9 +43,11 @@ public class SubmitCommandTest {
     private static final String COURSE_NAME = "2016-aalto-c";
     private static final String EXERCISE1_NAME = "Module_1-02_intro";
     private static final String EXERCISE2_NAME = "Module_1-04_func";
+    private static final String EXERCISE_WITH_DEADLINE_PASSED = "Module_1-05_calc";
 
     private static Path pathToDummyCourse;
     private static Path pathToDummyExercise;
+    private static Path pathToDummyExerciseWithDeadlinePassed;
     private static Path pathToDummyExerciseSrc;
     private static Path pathToNonCourseDir;
 
@@ -70,6 +72,9 @@ public class SubmitCommandTest {
         assertNotNull(pathToDummyCourse);
 
         pathToDummyExercise = pathToDummyCourse.resolve(EXERCISE1_NAME);
+        assertNotNull(pathToDummyExercise);
+
+        pathToDummyExerciseWithDeadlinePassed = pathToDummyCourse.resolve(EXERCISE_WITH_DEADLINE_PASSED);
         assertNotNull(pathToDummyExercise);
 
         pathToDummyExerciseSrc = pathToDummyExercise.resolve("src");
@@ -139,8 +144,10 @@ public class SubmitCommandTest {
         app.run(new String[] {"submit"});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         io.assertContains("Submitting: " + EXERCISE2_NAME);
-        assertEquals(2, countSubstring("Submitting: ", io.out()));
+        io.assertContains("Submitting: " + EXERCISE_WITH_DEADLINE_PASSED);
+        assertEquals(3, countSubstring("Submitting: ", io.out()));
 
+        // the third one's deadline is passed so it should not be submitted
         verifyStatic(times(2));
         TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
     }
@@ -240,6 +247,15 @@ public class SubmitCommandTest {
         io.assertContains("1 new exercise available");
         io.assertContains("1 exercise has been changed on TMC server");
         io.assertContains("Use 'tmc update' to download them");
+    }
+
+    @Test
+    public void notifyUserAndDontSubmitIfDeadlinePassed() {
+        workDir.setWorkdir(pathToDummyCourse);
+        app.run(new String[] {"submit", EXERCISE_WITH_DEADLINE_PASSED});
+        io.assertContains("Deadline has passed for this exercise");
+        verifyStatic(times(0));
+        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
     }
 
     private static int countSubstring(String subStr, String str) {

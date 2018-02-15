@@ -62,4 +62,17 @@ public class CourseInfoIo {
         info.setExercises(course.getExercises());
         CourseInfoIo.save(info, configFile);
     }
+
+    public static void deleteConfigDirectory(Course course, Path parentDir) {
+        Path configFile = parentDir.resolve(course.getName()).resolve(CourseInfoIo.COURSE_CONFIG);
+        delete(configFile);
+    }
+
+    private static void delete(Path courseInfoFile) {
+        try {
+            Files.deleteIfExists(courseInfoFile);
+        } catch (IOException e) {
+            logger.error("Could not delete course file", e);
+        }
+    }
 }

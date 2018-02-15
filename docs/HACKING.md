@@ -105,14 +105,14 @@ public class ExampleCommandTest {
 
 If you are doing tests for any other class, simply create normal unit tests that don't depend on any command.
 
-##Adding properties
+## Adding properties
 
 Properties are saved as a Java `HashMap<String, String>`. They are read from ~/.config/tmc-cli/properties.json on initialisation. The purpose of the properties file is to provide a backwards- and forwards-compatible method of storing user preferences and internal data. Properties can be accessed via the `CliContext` class method getProperties(). Remember to store any changes to the properties with saveProperties(). Feel free to create new properties, but please document *all* properties in the 'COMMAND: PROP'-section of MANUAL.md.
 
-##Updating the documentation
+## Updating the documentation
 
 Please document any new features or revisions in MANUAL.md and HISTORY.md as well as README.md, if the affected feature is already documented there.
 
 If you make changes to MANUAL.md, please rebuild tmc.1 with [md2man](https://github.com/sunaku/md2man) before you push your changes. Use `md2man-roff docs/MANUAL.md > docs/tmc.1` to build the manpage.
 
-There are no strict guidelines for README.md or MANUAL.md, but please try not to deviate from the original style (eg. new command sections should follow the same pattern). 
+There are no strict guidelines for README.md or MANUAL.md, but please try not to deviate from the original style (eg. new command sections should follow the same pattern).

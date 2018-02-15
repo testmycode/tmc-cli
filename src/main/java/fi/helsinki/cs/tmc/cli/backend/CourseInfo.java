@@ -19,7 +19,7 @@ public class CourseInfo {
     private HashMap<String, String> properties;
 
     public CourseInfo(Account account, Course course) {
-        this.username = account.getUsername();
+        this.username = account.getUsername().orNull();
         this.serverAddress = account.getServerAddress();
         this.course = course;
         this.properties = new HashMap<>();

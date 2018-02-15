@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertTrue;
+
 public class CourseInfoIoTest {
 
     private CourseInfo course;
@@ -52,5 +54,16 @@ public class CourseInfoIoTest {
         Assert.assertEquals(this.course.getServerAddress(), loadedInfo.getServerAddress());
         Assert.assertEquals(this.course.getUsername(), loadedInfo.getUsername());
         Assert.assertEquals(this.course.getCourseName(), loadedInfo.getCourseName());
+    }
+
+    @Test
+    public void abortingCourseCreationWorks() {
+        CourseInfoIo.save(this.course, this.courseFile);
+        CourseInfo loadedInfo = CourseInfoIo.load(this.courseFile);
+        Assert.assertNotNull(loadedInfo);
+
+        CourseInfoIo.deleteConfigDirectory(new Course("test-course"), Paths.get(tempDir));
+        Path courseJson = Paths.get(tempDir).resolve(".tmc.json");
+        assertTrue(!Files.exists(courseJson));
     }
 }

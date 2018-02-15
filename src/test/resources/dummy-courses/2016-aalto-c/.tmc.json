@@ -9,8 +9,6 @@
             "id":4837,
             "name":"Module_1-02_intro",
             "locked":false,
-            "deadline_description":"2016-08-31 23:59:59 +0300",
-            "deadline":"2016-08-31T23:59:59.999+03:00",
             "checksum":"07b219c9dc2c1c9841cda42d21205532",
             "zip_url":"https://tmc.example.com/exercises/4837.zip",
             "return_url":"https://tmc.example.com/exercises/4837/submissions.json",
@@ -32,8 +30,6 @@
             "id":4838,
             "name":"Module_1-04_func",
             "locked":false,
-            "deadline_description":"2016-08-31 23:59:59 +0300",
-            "deadline":"2016-08-31T23:59:59.999+03:00",
             "checksum":"055f099cf81e622e09e82f7f2a954b03",
             "zip_url":"https://tmc.example.com/exercises/4838.zip",
             "return_url":"https://tmc.example.com/exercises/4838/submissions.json",
@@ -49,6 +45,29 @@
             "code_review_requests_enabled":true,
             "run_tests_locally_action_enabled":true,
             "exercise_submissions_url":"https://tmc.example.com/exercises/4838.json?api_version\u003d7",
+            "courseName":"2016-aalto-c"
+         },
+         {
+            "id":3422,
+            "name":"Module_1-05_calc",
+            "locked":false,
+            "deadline_description":"2016-08-31 23:59:59 +0300",
+            "deadline":"2016-08-31T23:59:59.999+03:00",
+            "checksum":"055f099cf81e622e09e82f7f2a954b03",
+            "zip_url":"https://tmc.example.com/exercises/3422.zip",
+            "return_url":"https://tmc.example.com/exercises/3422/submissions.json",
+            "returnable":true,
+            "requires_review":false,
+            "attempted":false,
+            "completed":false,
+            "reviewed":false,
+            "all_review_points_given":true,
+            "runtime_params":[
+
+            ],
+            "code_review_requests_enabled":true,
+            "run_tests_locally_action_enabled":true,
+            "exercise_submissions_url":"https://tmc.example.com/exercises/3422.json?api_version\u003d7",
             "courseName":"2016-aalto-c"
          }
       ],
