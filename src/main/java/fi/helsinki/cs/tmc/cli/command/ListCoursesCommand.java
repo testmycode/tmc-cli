@@ -35,11 +35,13 @@ public class ListCoursesCommand extends AbstractCommand {
         this.ctx = context;
         this.io = ctx.getIo();
 
-        if (!ctx.loadBackendWithoutLogin()) {
+
+        if (!this.ctx.checkIsLoggedIn(false, true)) {
             return;
         }
 
-        if (!TmcUtil.hasConnection(ctx)) {
+        this.ctx.getAnalyticsFacade().saveAnalytics("list_courses");
+       if (!TmcUtil.hasConnection(ctx)) {
             io.errorln("You don't have internet connection currently.");
             io.errorln("Check the tmc-cli logs if you disagree.");
             return;
@@ -62,7 +64,6 @@ public class ListCoursesCommand extends AbstractCommand {
                         ColorUtil.colorString(
                                 "Server " + settings.getServerAddress(), Color.YELLOW));
             }
-            io.println(settings.toString());
 
             printCourseList(settings);
             isFirst = false;

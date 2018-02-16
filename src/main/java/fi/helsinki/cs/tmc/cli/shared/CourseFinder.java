@@ -59,6 +59,7 @@ public class CourseFinder {
         if (matches.isEmpty()) {
             //TODO we could search here for similar courses.
             io.errorln("Course doesn't exist.");
+            io.errorln("Please make sure that you are logged in with the right organization.");
             return false;
         } else if (matches.size() == 1) {
             return handleSingleMatchingCourses(matches);

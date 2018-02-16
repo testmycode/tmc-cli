@@ -13,6 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
@@ -27,6 +28,9 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 
@@ -43,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +62,8 @@ public class DownloadExercisesCommandTest {
     private WorkDir workDir;
     private Path tempDir;
     private Organization testOrganization;
+    private AnalyticsFacade analyticsFacade;
+    private AccountList accountList;
 
     @Before
     public void setUp() {
@@ -67,12 +72,14 @@ public class DownloadExercisesCommandTest {
         testOrganization = new Organization("test", "test", "hy", "test", false);
 
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore, workDir);
+        mockCore = new TmcCore(new Settings(), new TaskExecutorImpl());
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new Settings(), new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
+        ctx = new CliContext(io, mockCore, workDir, new Settings(), analyticsFacade);
         app = new Application(ctx);
-        Account account = new Account("user", "password", testOrganization);
+        Account account = new Account("user", testOrganization);
         ctx.useAccount(account);
-        AccountList accountList = new AccountList();
+        accountList = new AccountList();
         accountList.addAccount(account);
 
         mockStatic(TmcUtil.class);
@@ -86,14 +93,13 @@ public class DownloadExercisesCommandTest {
     }
 
     @Test
-    public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, mockCore, workDir));
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"download", "foo"};
         app.run(args);
-        io.assertNotContains("Course doesn't exist");
+        io.assertContains("You are not logged in");
     }
 
     @Test

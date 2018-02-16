@@ -29,7 +29,7 @@ public class SettingsIo {
     public static final String CONFIG_DIR = "tmc-cli";
 
     // ACCOUNTS_CONFIG is the _global_ configuration file containing all
-    // user login information including usernames, passwords (in plain text)
+    // user login information including usernames, oauth credentials
     // and servers. Is located under CONFIG_DIR
     public static final String ACCOUNTS_CONFIG = "accounts.json";
 
@@ -82,7 +82,7 @@ public class SettingsIo {
                 deletables.add(account);
             }
         });
-        deletables.stream().forEach(d -> list.deleteAccount(d.getUsername().get(), d.getServerAddress()));
+        deletables.stream().forEach(d -> list.deleteAccount(d.getUsername().get()));
         list.addAccount(settings.getAccount());
         saveAccountList(list);
     }
@@ -114,7 +114,7 @@ public class SettingsIo {
      * Get the correct directory in which our config files go
      * ie /home/user/.config/tmc-cli/.
      */
-    static Path getConfigDirectory() {
+    public static Path getConfigDirectory() {
         Path configPath;
         if (EnvironmentUtil.isWindows()) {
             String appdata = System.getenv("APPDATA");
@@ -144,7 +144,7 @@ public class SettingsIo {
         return file;
     }
 
-    private static Path getPropertiesFile(Path configRoot) {
+    public static Path getPropertiesFile(Path configRoot) {
         Path file = configRoot.resolve(PROPERTIES_CONFIG);
         if (!requireConfigDirectory(configRoot)) {
             return null;

@@ -14,11 +14,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import com.sun.source.util.TaskEvent;
 import fi.helsinki.cs.tmc.cli.Application;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.commands.GetUpdatableExercises.UpdateResult;
 import fi.helsinki.cs.tmc.core.domain.Course;
@@ -29,9 +31,11 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.junit.Before;
@@ -72,7 +76,9 @@ public class TmcUtilTest {
     public void setUp() {
         io = new TestIo();
         mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        Settings settings = new Settings();
+        TmcSettingsHolder.set(settings);
+        ctx = new CliContext(io, mockCore, new WorkDir(), settings, null);
 
         Answer<Callable<Course>> answer =
                 new Answer<Callable<Course>>() {
@@ -170,24 +176,6 @@ public class TmcUtilTest {
         when(mockCore.listCourses(any(ProgressObserver.class)))
                 .thenReturn(createReturningCallback(courses));
         assertNull(TmcUtil.findCourse(ctx, "not-existing-course"));
-    }
-
-    @Test
-    public void findExerciseOfCourse() {
-        final Course course = new Course("test-course");
-        Exercise exercise = new Exercise("second");
-        course.setExercises(Arrays.asList(new Exercise("first"), exercise));
-
-        Exercise result = TmcUtil.findExercise(course, "second");
-        assertEquals(exercise, result);
-    }
-
-    @Test
-    public void returnNullIfExerciseWontExist() {
-        Course course = new Course("test-course");
-        course.setExercises(Arrays.asList(new Exercise("first"), new Exercise("second")));
-
-        assertNull(TmcUtil.findExercise(course, "not-existing-exercise"));
     }
 
     @Test

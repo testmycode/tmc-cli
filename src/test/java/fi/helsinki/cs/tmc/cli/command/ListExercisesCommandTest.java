@@ -3,13 +3,13 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
@@ -18,6 +18,11 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,7 +35,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({TmcUtil.class, SettingsIo.class})
 public class ListExercisesCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -42,6 +47,7 @@ public class ListExercisesCommandTest {
     private TestIo io;
     private TmcCore mockCore;
     private WorkDir workDir;
+    private AccountList list;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -60,23 +66,32 @@ public class ListExercisesCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        Settings settings = new Settings();
+        mockCore = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
 
         mockStatic(TmcUtil.class);
+        list = new AccountList();
+        list.addAccount(new Account("username"));
+
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.loadAccountList()).thenReturn(list);
     }
 
     @Test
-    public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, mockCore));
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"exercises", "-n", "foo", "-i"};
         app.run(args);
-        io.assertNotContains("Course 'foo' doesn't exist");
+        io.assertContains("You are not logged in");
     }
 
     @Test
@@ -90,6 +105,9 @@ public class ListExercisesCommandTest {
     @Test
     public void worksLocallyIfInCourseDirectoryAndRightCourseIsSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
+        Account account = new Account("testuser", "");
+        account.setServerAddress("https://tmc.example.com");
+        list.addAccount(account);
         String[] args = {"exercises", COURSE_NAME, "-n"};
         app.run(args);
         io.assertContains("Deadline:");
@@ -98,6 +116,9 @@ public class ListExercisesCommandTest {
     @Test
     public void worksLocallyIfInCourseDirectoryAndCourseIsNotSpecified() {
         workDir.setWorkdir(pathToDummyCourse);
+        Account account = new Account("testuser", "");
+        account.setServerAddress("https://tmc.example.com");
+        list.addAccount(account);
         String[] args = {"exercises", "-n"};
         app.run(args);
         io.assertContains("Deadline:");

@@ -1,7 +1,9 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
+import fi.helsinki.cs.tmc.cli.command.OrganizationCommand;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ public class CourseInfo {
     private String username;
     private String serverAddress;
     private Course course;
+    private Organization organization;
     private List<String> localCompletedExercises;
     private HashMap<String, String> properties;
 
@@ -22,6 +25,7 @@ public class CourseInfo {
         this.username = account.getUsername().orNull();
         this.serverAddress = account.getServerAddress();
         this.course = course;
+        this.organization = account.getOrganization().orNull();
         this.properties = new HashMap<>();
         this.localCompletedExercises = new ArrayList<>();
     }
@@ -77,7 +81,6 @@ public class CourseInfo {
         return names;
     }
 
-    //TODO This is exactly same method as TmcUtil.findExercise(course, name)
     public Exercise getExercise(String name) {
         for (Exercise exercise : this.course.getExercises()) {
             if (exercise.getName().equals(name)) {
@@ -127,6 +130,14 @@ public class CourseInfo {
         for (Exercise newExercise : newExercises) {
             replaceOldExercise(newExercise);
         }
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(Organization organization) {
+        this.organization = organization;
     }
 
     public void removeProperty(String prop) {

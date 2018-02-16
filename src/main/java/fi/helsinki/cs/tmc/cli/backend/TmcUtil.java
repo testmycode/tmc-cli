@@ -13,11 +13,14 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.core.exceptions.ShowToUserException;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import org.apache.commons.compress.archivers.sevenz.CLI;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +29,7 @@ import java.net.UnknownHostException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class TmcUtil {
@@ -58,7 +62,6 @@ public class TmcUtil {
         TmcCore core = ctx.getTmcCore();
         ctx.useAccount(account);
         Callable<Void> callable = core.authenticate(ProgressObserver.NULL_OBSERVER, password);
-        //TODO restore the settings object
 
         try {
             callable.call();
@@ -74,9 +77,7 @@ public class TmcUtil {
     }
 
     public static List<Course> listCourses(CliContext ctx) {
-        Callable<List<Course>> callable;
-        callable = ctx.getTmcCore().listCourses(ProgressObserver.NULL_OBSERVER);
-
+        Callable<List<Course>> callable = ctx.getTmcCore().listCourses(ProgressObserver.NULL_OBSERVER);
         try {
             return callable.call();
         } catch (Exception e) {
@@ -117,19 +118,6 @@ public class TmcUtil {
         for (Course item : courses) {
             if (item.getName().equals(name)) {
                 return TmcUtil.getDetails(ctx, item);
-            }
-        }
-        return null;
-    }
-
-    //TODO This is exactly same method as CourseInfo.getExercise(course, name)
-    public static Exercise findExercise(Course course, String name) {
-        List<Exercise> exercises;
-        exercises = course.getExercises();
-
-        for (Exercise item : exercises) {
-            if (item.getName().equals(name)) {
-                return item;
             }
         }
         return null;
@@ -212,6 +200,18 @@ public class TmcUtil {
         }
     }
 
+    public static List<Exercise> getCourseExercises(CliContext ctx) {
+        Course course = ctx.getCourseInfo().getCourse();
+        try {
+            TmcCore tmcCore = ctx.getTmcCore();
+            Course updatedCourse = tmcCore.getCourseDetails(ProgressObserver.NULL_OBSERVER, course).call();
+            return updatedCourse.getExercises();
+        } catch (Exception e) {
+            logger.error("Failed to fetch exercises for course " + course.getName());
+            return null;
+        }
+    }
+
     public static boolean sendFeedback(
             CliContext ctx, List<FeedbackAnswer> answers, URI feedbackUri) {
         try {
@@ -236,7 +236,7 @@ public class TmcUtil {
 
         if (exception instanceof IllegalArgumentException) {
             logger.error("Invalid arguments", exception);
-            io.errorln("Please give server, username and password in valid form.");
+            io.errorln("Please give server, username and password in valid forms.");
             return;
         }
 
@@ -259,13 +259,24 @@ public class TmcUtil {
             return;
         }
 
+        if (cause instanceof OAuthSystemException) {
+            io.errorln("There was a problem with authentication.\nPlease try logging in again.");
+            return;
+        }
+
         if (cause != null && cause.getCause() instanceof UnknownHostException) {
             logger.error("No internet connection");
             io.errorln("You have no internet connection.");
             return;
         }
+
+        if (cause instanceof ShowToUserException) {
+            logger.error(exception.getMessage());
+            io.errorln(cause.getMessage());
+            return;
+        }
+
         logger.error("Command failed in tmc-core", exception);
-        //TODO we seem to write twice error message; here and in the commands.
         io.errorln("Command failed, check tmc-cli.log file for more info");
     }
 

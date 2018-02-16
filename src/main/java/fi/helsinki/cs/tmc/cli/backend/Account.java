@@ -19,7 +19,9 @@ public class Account {
     private String token;
     private Organization organization;
     private boolean sendDiagnostics;
-    private static final String DEFAULT_SERVER =  "https://tmc.mooc.fi/staging";
+    private boolean sendAnalytics;
+    private boolean sendDetailedAnalytics;
+    private static final String DEFAULT_SERVER =  "https://tmc.mooc.fi";
 
     // for gson
     public Account() {
@@ -29,14 +31,25 @@ public class Account {
     public Account(String username, String password) {
         this.serverAddress = DEFAULT_SERVER;
         this.username = username == null ? null : username.trim();
-        this.password = password == null ? null : password.trim();
+        this.password = password == null || password.trim().isEmpty() ? null : password.trim();
+    }
+
+    public Account(String username) {
+        this.serverAddress = DEFAULT_SERVER;
+        this.username = username == null ? null : username.trim();
     }
 
 
     public Account(String username, String password, Organization organization) {
         this.serverAddress = DEFAULT_SERVER;
         this.username = username == null ? null : username.trim();
-        this.password = password == null ? null : password.trim();
+        this.password = password == null || password.trim().isEmpty() ? null : password.trim();
+        this.organization = organization;
+    }
+
+    public Account(String username, Organization organization) {
+        this.serverAddress = DEFAULT_SERVER;
+        this.username = username == null ? null : username.trim();
         this.organization = organization;
     }
 
@@ -88,12 +101,12 @@ public class Account {
         this.password = null;
     }
 
-    public Optional<String> getoAuthToken() {
-        return Optional.of(this.token);
+    public Optional<String> getOauthToken() {
+        return Optional.fromNullable(this.token);
     }
 
-    public void setoAuthToken(Optional<String> token) {
-        this.token= token.orNull();
+    public void setOauthToken(Optional<String> token) {
+        this.token = token.orNull();
     }
 
     public Optional<Course> getCurrentCourse() {
@@ -118,5 +131,41 @@ public class Account {
 
     public boolean getSendDiagnostics() {
         return this.sendDiagnostics;
+    }
+
+    public boolean getSendAnalytics() {
+        return this.sendAnalytics;
+    }
+
+    public void setSendAnalytics(boolean sendAnalytics) {
+        this.sendAnalytics = sendAnalytics;
+    }
+
+    public boolean getSendDetailedAnalytics() {
+        return false;
+    }
+
+    public void setSendDetailedAnalytics(boolean sendDetailedAnalytics) {
+        this.sendDetailedAnalytics = false;
+    }
+
+    public void setServerAddressToDefault() {
+        this.serverAddress = DEFAULT_SERVER;
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "serverAddress='" + serverAddress + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", oauthCredentials=" + oauthCredentials +
+                ", currentCourse=" + currentCourse +
+                ", token='" + token + '\'' +
+                ", organization=" + organization +
+                ", sendDiagnostics=" + sendDiagnostics +
+                ", sendAnalytics=" + sendAnalytics +
+                ", sendDetailedAnalytics=" + sendDetailedAnalytics +
+                '}';
     }
 }

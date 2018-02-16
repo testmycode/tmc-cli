@@ -17,8 +17,6 @@ import org.apache.commons.cli.Options;
 
 import com.google.common.base.Optional;
 
-import java.util.concurrent.Callable;
-
 @Command(name = "login", desc = "Login to TMC server")
 public class LoginCommand extends AbstractCommand {
 
@@ -51,7 +49,15 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.loadBackendWithoutLogin()) {
+        if (this.ctx.checkIsLoggedIn(true, true)) {
+            Optional<String> username = this.ctx.getSettings().getUsername();
+            Optional<Organization> organization = this.ctx.getSettings().getOrganization();
+            io.println("You are already logged in " + (username.isPresent()? "as " + username.get() : "") +
+                    (organization.isPresent() ?
+                    " and your current organization is " + organization.get().getName() :
+                    "."));
+            io.println("Change your organization with the command organization.");
+            io.println("Inspect and change your current settings with the command config.");
             return;
         }
 
@@ -66,24 +72,41 @@ public class LoginCommand extends AbstractCommand {
             username = info.getUsername();
         }
 
-        username = getLoginInfo(args, username, "u", "username: ");
-        password = getLoginInfo(args, null, "p", "password: ");
+        login(this.ctx, args, Optional.absent());
+    }
 
-        OrganizationCommand organizationCommand = new OrganizationCommand();
-        Account account = new Account(username, null);
+    public void login(CliContext ctx, CommandLine args, Optional<String> serverAddress) {
+        Io io = ctx.getIo();
+        username = getLoginInfo(args, username, "u", "username: ", io);
+        password = getLoginInfo(args, null, "p", "password: ", io);
+
+
+        Account account = new Account(username);
+        if (serverAddress.isPresent()) {
+            account.setServerAddress(serverAddress.get());
+        }
+        ctx.useAccount(account);
+
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
+            ctx.getSettings().setAccount(ctx, new Account());
             return;
         }
 
-        Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, args);
+        OrganizationCommand organizationCommand = new OrganizationCommand();
+        Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, Optional.of(args));
         if (!organization.isPresent()) {
             return;
         }
+        account.setOrganization(organization);
 
-        this.ctx.getSettings().setOrganization(organization);
-
-        boolean sendDiagnostics = getSendDiagnosticsAnswer(username, account.getServerAddress());
-        this.ctx.getSettings().setSendDiagnostics(sendDiagnostics);
+        boolean sendDiagnostics = getBooleanAnswerFromUser(Optional.of(username),
+                "Do you want to send crash reports for client development?",
+                                    ctx.getSettings().getSendDiagnostics(), io);
+        account.setSendDiagnostics(sendDiagnostics);
+        boolean sendAnalytics = getBooleanAnswerFromUser(Optional.of(username),
+                "Do you want to send analytics data for research?",
+                                    ctx.getSettings().isSpywareEnabled(), io);
+        account.setSendAnalytics(sendAnalytics);
 
         AccountList list = SettingsIo.loadAccountList();
         list.addAccount(account);
@@ -92,14 +115,18 @@ public class LoginCommand extends AbstractCommand {
             return;
         }
 
+        ctx.getAnalyticsFacade().saveAnalytics("login");
+
         io.println("Login successful.");
+        io.println("You can change your organization with the command organization, " +
+                "and inspect and change other settings with the command config.");
     }
 
-    private String getLoginInfo(CommandLine line, String oldValue, String option, String prompt) {
+    private String getLoginInfo(CommandLine line, String oldValue, String option, String prompt, Io io) {
         String value = oldValue;
         boolean isPassword = option.equals("p");
 
-        if (line.hasOption(option)) {
+        if (line != null && line.hasOption(option)) {
             value = line.getOptionValue(option);
         }
 
@@ -115,17 +142,20 @@ public class LoginCommand extends AbstractCommand {
         return value;
     }
 
-    private boolean getSendDiagnosticsAnswer(String username, String server) {
+    public boolean getBooleanAnswerFromUser(Optional<String> username, String prompt, boolean defaultValue, Io io) {
         AccountList savedAccounts = SettingsIo.loadAccountList();
-        if (savedAccounts.getAccount(username, server) != null) {
-            // not the first time logging in, diagnostics not asked
-            return this.ctx.getSettings().getSendDiagnostics();
+        if (username.isPresent() && savedAccounts.getAccount(username.get()) != null) {
+            // not the first time logging in
+            return defaultValue;
         }
         while (true) {
-            String sendDiagnostics = io.readLine("Do you want to send crash reports and diagnostics for client development? (y/n) ");
-            if (sendDiagnostics.trim().toLowerCase().startsWith("y")) {
+            String sendInfo = io.readLine(prompt + " (Y/n) ");
+            String answer = sendInfo.trim().toLowerCase();
+            if (answer.isEmpty() || answer.startsWith("y")) {
+                io.println("Set to yes");
                 return true;
-            } else if (sendDiagnostics.trim().toLowerCase().startsWith("n")) {
+            } else if (answer.startsWith("n")) {
+                io.println("Set to no");
                 return false;
             }
             io.println("Please answer y(es) or n(o).");

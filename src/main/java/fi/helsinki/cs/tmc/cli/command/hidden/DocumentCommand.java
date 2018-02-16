@@ -123,7 +123,6 @@ public class DocumentCommand extends AbstractCommand {
         }
         fadeOut();
 
-        //Blittable logo = new Blittable(loadFile("/test.ansi"));
         logo = new Blittable(loadFile("/logo.ansi"));
         logoText = new Blittable(loadFile("/text-logo.ansi"));
         if (!logo.isLoaded() || !logoText.isLoaded()) {

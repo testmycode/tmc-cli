@@ -21,7 +21,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"fi.helsinki.cs.tmc.cli.core.Command"})
 public class CommandAnnotationProcessor extends AbstractProcessor {
     private static final Logger logger = LoggerFactory.getLogger(CommandAnnotationProcessor.class);

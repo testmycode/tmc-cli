@@ -5,9 +5,11 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -23,7 +25,7 @@ public class PropertiesCommandTest {
     @Before
     public void setup() {
         io = new TestIo();
-        CliContext ctx = Mockito.spy(new CliContext(io));
+        CliContext ctx = Mockito.spy(new CliContext(io, null, new WorkDir(), new Settings(), null));
         app = new Application(ctx);
 
         when(ctx.saveProperties()).thenReturn(true);

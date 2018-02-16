@@ -131,7 +131,7 @@ public class SettingsIoTest {
         settings.setServerAddress(STUB_SERVER);
         SettingsIo.saveCurrentSettingsToAccountList(settings);
         AccountList newList = SettingsIo.loadAccountList();
-        assertEquals("new", newList.getAccount("username", STUB_SERVER).getOrganization().get().getName());
+        assertEquals("new", newList.getAccount("username").getOrganization().get().getName());
         SettingsIo.delete();
     }
 }

@@ -10,17 +10,20 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.AccountList;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
-import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 
 import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +53,16 @@ public class LoginCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
         organizationList = new ArrayList<>();
         organizationList.add(new Organization("Test", "", "test", "", false));
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        mockCore = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
 
-        ctx = spy(new CliContext(io, mockCore));
+        ctx = spy(new CliContext(io, mockCore, new WorkDir(), settings, analyticsFacade));
         app = new Application(ctx);
 
         mockStatic(TmcUtil.class);
@@ -64,15 +72,6 @@ public class LoginCommandTest {
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
 
-    @Test
-    public void failIfBackendFails() {
-        app = new Application(ctx);
-        when(ctx.loadBackendWithoutLogin()).thenReturn(false);
-
-        String[] args = {"login", "-u", USERNAME, "-p", PASSWORD};
-        app.run(args);
-        io.assertNotContains("Login successful");
-    }
 
     @Test
     public void failIfThereIsNoConnection() {
@@ -90,6 +89,7 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", ORGANIZATION};
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertContains("Login successful.");
     }
@@ -100,6 +100,7 @@ public class LoginCommandTest {
         when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(false);
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", ORGANIZATION};
+        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertContains("Failed to write the accounts file.");
@@ -123,6 +124,7 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
     }
@@ -133,6 +135,7 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", ORGANIZATION};
         io.addLinePrompt(SERVER);
+        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -149,6 +152,7 @@ public class LoginCommandTest {
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt(ORGANIZATION);
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
     }
@@ -162,10 +166,11 @@ public class LoginCommandTest {
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", TEST_ORGANIZATION.getSlug()};
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
 
-        Account expectedAccount = new Account(USERNAME, null);
+        Account expectedAccount = new Account(USERNAME);
         verifyStatic();
         TmcUtil.tryToLogin(eq(ctx), eq(expectedAccount), eq(PASSWORD));
     }
@@ -179,8 +184,9 @@ public class LoginCommandTest {
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt(ORGANIZATION);
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
-        io.assertContains("Choose organization");
+        io.assertContains("Choose an organization");
     }
 
     @Test
@@ -191,6 +197,7 @@ public class LoginCommandTest {
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), eq(PASSWORD))).thenReturn(true);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         io.addLinePrompt(ORGANIZATION);
+        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -214,24 +221,36 @@ public class LoginCommandTest {
     }
 
     @Test
-    public void diagnosticsNotAskedAfterFirstLogin() {
-        AccountList list = new AccountList();
-        list.addAccount(new Account(USERNAME, PASSWORD));
-        when(SettingsIo.loadAccountList()).thenReturn(list);
-        String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", TEST_ORGANIZATION.getSlug()};
-        app.run(args);
-        io.assertAllPromptsUsed();
-    }
-
-    @Test
     public void diagnosticsAskedOnFirstLogin() {
         when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), eq(PASSWORD))).thenReturn(true);
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", TEST_ORGANIZATION.getSlug()};
         io.addLinePrompt("y");
+        io.addLinePrompt("y");
         app.run(args);
-        io.assertContains("Do you want to send");
+        io.assertContains("want to send crash reports");
     }
 
+    @Test
+    public void analyticsAskedOnFirstLogin() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), eq(PASSWORD))).thenReturn(true);
+        when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
+        String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", TEST_ORGANIZATION.getSlug()};
+        io.addLinePrompt("y");
+        io.addLinePrompt("y");
+        app.run(args);
+        io.assertContains("analytics");
+    }
+
+    @Test
+    public void logInNotAllowedIfAlreadyLoggedIn() {
+        AccountList list = new AccountList();
+        list.addAccount(new Account("loggedin"));
+        when(SettingsIo.loadAccountList()).thenReturn(list);
+        String[] args = {"login"};
+        app.run(args);
+        io.assertContains("You are already logged in");
+    }
 }

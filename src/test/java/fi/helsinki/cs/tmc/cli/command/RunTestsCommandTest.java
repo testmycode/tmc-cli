@@ -10,7 +10,8 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
@@ -25,6 +26,11 @@ import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,7 +43,7 @@ import java.nio.file.Paths;
 
 /*TODO test the command line options */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(TmcUtil.class)
+@PrepareForTest({ TmcUtil.class, SettingsIo.class })
 public class RunTestsCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -75,8 +81,13 @@ public class RunTestsCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        mockCore = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
 
@@ -86,17 +97,22 @@ public class RunTestsCommandTest {
         runResult = new RunResult(status, testResults, logs);
 
         mockStatic(TmcUtil.class);
+        mockStatic(SettingsIo.class);
+        when(TmcUtil.hasConnection(eq(ctx))).thenReturn(true);
+        AccountList t = new AccountList();
+        t.addAccount(new Account("testuser"));
+        when(SettingsIo.loadAccountList()).thenReturn(t);
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
 
     @Test
-    public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, mockCore));
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"test"};
         app.run(args);
-        io.assertNotContains("Testing:");
+        io.assertContains("You are not logged in");
     }
 
     @Test

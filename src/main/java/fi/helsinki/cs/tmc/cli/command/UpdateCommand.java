@@ -41,9 +41,10 @@ public class UpdateCommand extends AbstractCommand {
             return;
         }
 
-        if (!ctx.loadBackend()) {
+        if (!ctx.checkIsLoggedIn(false, true)) {
             return;
         }
+
 
         WorkDir workDir = ctx.getWorkDir();
 
@@ -51,6 +52,8 @@ public class UpdateCommand extends AbstractCommand {
             io.errorln("Not a course directory");
             return;
         }
+
+        this.ctx.getAnalyticsFacade().saveAnalytics(this.ctx.getCourseInfo().getCourse(), "update");
 
         CourseInfo info = ctx.getCourseInfo();
         updateExercises(info, workDir.getConfigFile());
@@ -67,8 +70,8 @@ public class UpdateCommand extends AbstractCommand {
         printExercises(exerciseUpdater.getUpdatedExercises(), "Modified exercises:");
         io.println();
 
-        Color color1 = ctx.getApp().getColor("progressbar-left");
-        Color color2 = ctx.getApp().getColor("progressbar-right");
+        Color color1 = ctx.getColorProperty("progressbar-left", ctx.getApp());
+        Color color2 = ctx.getColorProperty("progressbar-right", ctx.getApp());
         List<Exercise> downloaded =
                 exerciseUpdater.downloadUpdates(new CliProgressObserver(io, color1, color2));
         if (downloaded.isEmpty()) {

@@ -1,29 +1,20 @@
 package fi.helsinki.cs.tmc.cli.core;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
-import fi.helsinki.cs.tmc.cli.io.Io;
-import fi.helsinki.cs.tmc.cli.io.TerminalIo;
-import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.cli.io.*;
 import fi.helsinki.cs.tmc.cli.shared.CourseFinder;
-
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 public class CliContext {
-    private static final Logger LOG = Logger.getLogger(
-            TmcServerCommunicationTaskFactory.class.getName());
-
 
     private final WorkDir workDir;
     private final Io io;
@@ -37,28 +28,21 @@ public class CliContext {
     private CourseInfo courseInfo;
     private HashMap<String, String> properties;
     private final boolean inTest;
+    private AnalyticsFacade analyticsFacade;
 
-    public CliContext(Io io) {
-        this(io, null);
-    }
-
-    public CliContext(Io io, TmcCore core) {
-        this(io, core, new WorkDir());
-    }
-
-    public CliContext(Io io, TmcCore core, WorkDir workDir) {
+    public CliContext(Io io, TmcCore core, WorkDir workDir, Settings settings, AnalyticsFacade facade) {
         inTest = (io != null);
         if (!inTest) {
             io = new TerminalIo(System.in);
         }
-
         this.io = io;
         this.workDir = workDir;
         this.properties = SettingsIo.loadProperties();
-        this.settings = new Settings();
+        this.settings = settings;
         this.tmcCore = core;
         this.hasLogin = (core != null);
         this.courseInfo = null;
+        this.analyticsFacade = facade;
     }
 
     /*TODO create reset method for removing all cached data that is called
@@ -160,7 +144,7 @@ public class CliContext {
             //TODO add a way to rewrite the corrupted course config file.
             return null;
         }
-        return this.courseInfo;
+        return courseInfo;
     }
 
     /**
@@ -170,9 +154,6 @@ public class CliContext {
      * @return global tmcutil
      */
     public TmcCore getTmcCore() {
-        if (this.tmcCore == null) {
-            throw new RuntimeException("The loadBackend* method was NOT called");
-        }
         return this.tmcCore;
     }
 
@@ -180,18 +161,16 @@ public class CliContext {
      * Initialize the tmc-core and other cached info.
      * Use this method if you need i
      * @return true if success
+     * @param quiet
+     * @param loadUserFromCache
      */
-    public boolean loadBackend() {
-        if (this.tmcCore != null) {
-            return true;
-        }
-
-        if (!createTmcCore()) {
-            return false;
-        }
-
+    public boolean checkIsLoggedIn(boolean quiet, boolean loadUserFromCache) {
+        loadUserInformation(loadUserFromCache);
         //Bug: what if we have wrong login?
         if (!hasLogin) {
+            if (quiet) {
+                return false;
+            }
             if (courseInfo == null) {
                 // if user is not in course folder.
                 io.errorln("You are not logged in. Log in using: tmc login");
@@ -211,34 +190,25 @@ public class CliContext {
     }
 
     /**
-     * Initialize the cached data, but don't fail if there is not login.
-     *
-     * @return true if success
-     */
-    public boolean loadBackendWithoutLogin() {
-        return this.tmcCore != null || createTmcCore();
-    }
-
-    /**
-     * Copy login info from different settings object and them.
+     * Copy login info from different settings object.
      * @param account login info
      */
     public void useAccount(Account account) {
-        this.settings.setAccount(account);
+        this.settings.setAccount(this, account);
     }
 
-    private void createTmcCore(Account account) {
-        TaskExecutor tmcLangs;
-
-        tmcLangs = new TaskExecutorImpl();
-        this.settings.setAccount(account);
-        this.tmcCore = new TmcCore(settings, tmcLangs);
-        settings.setWorkDir(workDir);
+    public AnalyticsFacade getAnalyticsFacade() {
+        return this.analyticsFacade;
     }
 
-    private boolean createTmcCore() {
+    public void loadUserInformation(boolean useCache) {
         Account cachedAccount = null;
         AccountList list = SettingsIo.loadAccountList();
+
+        if (list == null) {
+            hasLogin = false;
+            return;
+        }
 
         if (workDir.getConfigFile() != null) {
             // If we're in a course directory, we load settings matching the course
@@ -246,17 +216,47 @@ public class CliContext {
             courseInfo = getCourseInfo();
             if (courseInfo != null) {
                 cachedAccount =
-                        list.getAccount(courseInfo.getUsername(), courseInfo.getServerAddress());
+                        list.getAccount(courseInfo.getUsername());
             }
         } else {
             // Bug: if we are not inside course directory
             // then we may not correctly guess the correct settings.
             cachedAccount = list.getAccount();
         }
-
-        hasLogin = (cachedAccount != null);
-        createTmcCore(cachedAccount);
-        return true;
+        hasLogin = cachedAccount != null;
+        if (hasLogin && cachedAccount.getServerAddress().contains("tmc.mooc.fi/mooc")) {
+            io.println("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
+                    "All the courses have been migrated to our main server https://tmc.mooc.fi.\n" +
+                    "If you'd like to do the migrated courses, you have to create a new account on the new server.\n" +
+                    "Choose the MOOC organization when logging in.\n\n" +
+                    "For more information, check the course materials on mooc.fi.");
+            SettingsIo.delete();
+            return;
+        }
+        if (useCache) {
+            this.settings.setAccount(this, cachedAccount);
+        }
+        settings.setWorkDir(workDir);
     }
 
+    //TODO rename this as getColorProperty and move it somewhere else
+    public Color getColorProperty(String propertyName, Application application) {
+        String propertyValue = getProperties().get(propertyName);
+        Color color = ColorUtil.getColor(propertyValue);
+        if (color == null) {
+            switch (propertyName) {
+                case "progressbar-left":
+                    return Color.CYAN;
+                case "progressbar-right":
+                    return Color.CYAN;
+                case "testresults-left":
+                    return Color.GREEN;
+                case "testresults-right":
+                    return Color.RED;
+                default:
+                    return Color.NONE;
+            }
+        }
+        return color;
+    }
 }

@@ -2,40 +2,105 @@ package fi.helsinki.cs.tmc.cli.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
+import fi.helsinki.cs.tmc.cli.backend.Account;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
+import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ SettingsIo.class, TmcUtil.class })
 public class ConfigCommandTest {
 
     private Application app;
     CliContext ctx;
     private TestIo io;
+    private TmcCore core;
+    private AnalyticsFacade analyticsFacade;
     private HashMap<String, String> props;
     private Settings settings;
+    private Path testConfigRoot;
+    private static final String TEST_PROPERTIES_FILENAME = ".test-properties";
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
         io = new TestIo();
-        ctx = Mockito.spy(new CliContext(io));
+        settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        core = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = Mockito.spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
         app = new Application(ctx);
 
         when(ctx.saveProperties()).thenReturn(true);
         props = new HashMap<>();
         when(ctx.getProperties()).thenReturn(props);
-        settings = new Settings();
         when(ctx.getSettings()).thenReturn(settings);
+        testConfigRoot = Files.createTempDirectory(".test-config");
+        mockStatic(SettingsIo.class);
+        mockStatic(TmcUtil.class);
+        when(SettingsIo.getPropertiesFile(any(Path.class))).thenReturn(testConfigRoot.resolve(TEST_PROPERTIES_FILENAME));
+        ArrayList<Organization> organizationList = new ArrayList<>();
+        organizationList.add(new Organization("Test", "", "test", "", false));
+        when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
+        when(SettingsIo.getConfigDirectory()).thenReturn(testConfigRoot);
+        AccountList t = new AccountList();
+        t.addAccount(new Account("username", ""));
+        when(SettingsIo.loadAccountList()).thenReturn(t);
+        when(SettingsIo.saveAccountList(any(AccountList.class))).thenReturn(true);
     }
 
+    @After
+    public void cleanUp() {
+        try {
+            Files.deleteIfExists(testConfigRoot.resolve(TEST_PROPERTIES_FILENAME));
+            Files.deleteIfExists(testConfigRoot);
+        } catch (IOException e) {
+        }
+    }
+
+    @Test
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        app = new Application(ctx);
+
+        String[] args = {"config -l"};
+        app.run(args);
+        io.assertContains("You are not logged in");
+    }
     @Test
     public void printsErrorIfNoArgumentsGiven() {
         app.run(new String[] {"config"});
@@ -55,12 +120,12 @@ public class ConfigCommandTest {
     }
 
     @Test
-    public void listsAllProperties() {
+    public void listsOnlyPropsFromAllowedKeys() {
         props.put("hello", "world");
         props.put("toilet", "wonderland");
         app.run(new String[] {"config", "--list"});
-        io.assertContains("hello=world");
-        io.assertContains("toilet=wonderland");
+        io.assertNotContains("hello=world");
+        io.assertNotContains("toilet=wonderland");
     }
 
     @Test
@@ -73,9 +138,9 @@ public class ConfigCommandTest {
 
     @Test
     public void getProperty() {
-        props.put("thing", "value");
-        app.run(new String[] {"config", "--get", "thing"});
-        io.assertContains("value");
+        props.put("testresults-right", "red");
+        app.run(new String[] {"config", "--get", "testresults-right"});
+        io.assertContains("red");
         io.assertAllPromptsUsed();
     }
 
@@ -134,8 +199,8 @@ public class ConfigCommandTest {
     public void setsMultiplePropertiesCorrectly() {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "update-date=12345", "testresults-right=cyan"});
-        assertEquals("12345", props.get("update-date"));
+        app.run(new String[] {"config", "testresults-left=blue", "testresults-right=cyan"});
+        assertEquals("blue", props.get("testresults-left"));
         assertEquals("cyan", props.get("testresults-right"));
         io.assertAllPromptsUsed();
     }
@@ -150,18 +215,18 @@ public class ConfigCommandTest {
     @Test
     public void deletesOneProperty() {
         io.addConfirmationPrompt(true);
-        props.put("no", "e");
-        app.run(new String[] {"config", "-d", "no"});
-        assertTrue(!props.containsKey("no"));
+        props.put("testresults-right", "cyan");
+        app.run(new String[] {"config", "-d", "testresults-right"});
+        assertTrue(!props.containsKey("cyan"));
         io.assertContains("Deleting 1 properties.");
         io.assertAllPromptsUsed();
     }
 
     @Test
     public void deletesOnePropertyQuietly() {
-        props.put("no", "e");
-        app.run(new String[] {"config", "-d", "-q", "no"});
-        assertTrue(!props.containsKey("no"));
+        props.put("testresults-right", "cyan");
+        app.run(new String[] {"config", "-d", "-q", "testresults-right"});
+        assertTrue(!props.containsKey("cyan"));
         io.assertAllPromptsUsed();
     }
 
@@ -169,16 +234,16 @@ public class ConfigCommandTest {
     public void deletesInvalidProperty() {
         app.run(new String[] {"config", "-d", "property"});
         assertTrue(!props.containsKey("no"));
-        io.assertContains("Key property doesn't exist.");
+        io.assertContains("Key property doesn't exist");
         io.assertAllPromptsUsed();
     }
 
     @Test
     public void deletesOnePropertyWithNoConfirmation() {
         io.addConfirmationPrompt(false);
-        props.put("no", "e");
-        app.run(new String[] {"config", "-d", "no"});
-        assertTrue(props.containsKey("no"));
+        props.put("testresults-right", "cyan");
+        app.run(new String[] {"config", "-d", "testresults-right"});
+        assertTrue(props.containsKey("testresults-right"));
         io.assertContains("Deleting 1 properties.");
         io.assertNotContains("Deleted key no, was");
         io.assertAllPromptsUsed();
@@ -187,14 +252,14 @@ public class ConfigCommandTest {
     @Test
     public void deletesMultiplePropertiesCorrectly() {
         io.addConfirmationPrompt(true);
-        props.put("biggie", "smalls");
-        props.put("snoop", "dogg");
-        props.put("some", "thing");
-        app.run(new String[] {"config", "-d", "biggie", "snoop"});
-        assertTrue(!props.containsKey("biggie"));
-        assertTrue(!props.containsKey("snoop"));
-        assertTrue(props.containsKey("some"));
-        assertEquals("thing", props.get("some"));
+        props.put("testresults-right", "red");
+        props.put("testresults-left", "green");
+        props.put("progressbar-left", "purple");
+        app.run(new String[] {"config", "-d", "testresults-right", "testresults-left"});
+        assertTrue(!props.containsKey("testresults-left"));
+        assertTrue(!props.containsKey("testresults-right"));
+        assertTrue(props.containsKey("progressbar-left"));
+        assertEquals("purple", props.get("progressbar-left"));
         io.assertAllPromptsUsed();
     }
 
@@ -210,13 +275,6 @@ public class ConfigCommandTest {
         io.addConfirmationPrompt(true);
         app.run(new String[] {"config", "send-diagnostics=true"});
         io.assertContains("Set send-diagnostics to");
-    }
-
-    @Test
-    public void serverAddressIsAllowed() {
-        io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "server-address=https://mooc.fi"});
-        io.assertContains("Set server-address to");
     }
 
     @Test
@@ -246,8 +304,14 @@ public class ConfigCommandTest {
     }
 
     @Test
-    public void serverAddressConfiguredToSettings() {
+    public void serverAddressConfiguredToSettingsAndPromptsLogin() {
+        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), any(String.class))).thenReturn(true);
         io.addConfirmationPrompt(true);
+        io.addLinePrompt("test");
+        io.addPasswordPrompt("password");
+        io.addLinePrompt("test");
+        io.addLinePrompt("yes");
+        io.addLinePrompt("yes");
         app.run(new String[] {"config", "server-address=https://mooc.fi"});
         assertEquals("https://mooc.fi", settings.getServerAddress());
     }
@@ -269,31 +333,37 @@ public class ConfigCommandTest {
     public void ifSeveralPairsAndSomeInvalidConfiguresValidOnes() {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config", "send-diagnostics=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config", "send-diagnostics=asdf", "send-diagnostics=true"});
         io.assertContains("Please write either true or false");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
     }
 
     @Test
     public void ifSeveralPairsAndSomeInvalidValuesConfiguresValidOnesWithQuiet() {
-        app.run(new String[] {"config", "-q",  "send-diagnostics=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config", "-q",  "send-analytics=asdf", "send-diagnostics=true"});
         io.assertContains("Please write either true or false");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
     }
 
     @Test
     public void ifSeveralPairsAndSomeInvalidKeysConfiguresValidOnes() {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
-        app.run(new String[] {"config",  "asd=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config",  "asd=asdf", "send-diagnostics=true"});
         io.assertContains("not an allowed key");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
     }
 
     @Test
     public void ifSeveralPairsAndSomeInvalidKeysConfiguresValidOnesWithQuiet() {
-        app.run(new String[] {"config", "-q",  "asd=asdf", "server-address=https://mooc.fi"});
+        app.run(new String[] {"config", "-q",  "asd=asdf", "send-diagnostics=true"});
         io.assertContains("not an allowed key");
-        assertEquals("https://mooc.fi", settings.getServerAddress());
+        assertEquals(true, settings.getSendDiagnostics());
+    }
+
+    @Test
+    public void cannotDeleteAPropertyIfNotAnAllowedKey() {
+        app.run(new String[] {"config", "-d", "last-submit"});
+        io.assertContains("doesn't exist");
     }
 }

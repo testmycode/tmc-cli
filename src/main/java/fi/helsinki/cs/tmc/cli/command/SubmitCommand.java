@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
@@ -16,15 +17,18 @@ import fi.helsinki.cs.tmc.cli.shared.ResultPrinter;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +43,8 @@ public class SubmitCommand extends AbstractCommand {
     private boolean showAll;
     private boolean showDetails;
     private boolean filterUncompleted;
+    private static int API_VERSION = 8;
+    private Path courseInfoFile;
 
     @Override
     public void getOptions(Options options) {
@@ -52,22 +58,39 @@ public class SubmitCommand extends AbstractCommand {
     public void run(CliContext context, CommandLine args) {
         this.ctx = context;
         this.io = ctx.getIo();
+        WorkDir workDir = ctx.getWorkDir();
 
         String[] exercisesFromArgs = parseArgs(args);
         if (exercisesFromArgs == null) {
             return;
         }
 
-        if (!ctx.loadBackend()) {
+        if (!ctx.checkIsLoggedIn(false, true)) {
             return;
         }
 
-        WorkDir workDir = ctx.getWorkDir();
+        if (exercisesFromArgs.length == 0 && workDir.getExercises().size() != 1) {
+            io.println("Please give exercise to submit as argument");
+            return;
+        }
+
         for (String exercise : exercisesFromArgs) {
             if (!workDir.addPath(exercise)) {
                 io.println("Error: " + exercise + " is not a valid exercise.");
                 return;
             }
+        }
+
+        CourseInfo info = ctx.getCourseInfo();
+        Course currentCourse = info.getCourse();
+        if (currentCourse == null) {
+            return;
+        }
+
+        courseInfoFile = workDir.getConfigFile();
+
+        if (apiUrlIsOutdated(currentCourse)) {
+            updateCourseAndExercises();
         }
 
         List<Exercise> exercises;
@@ -87,14 +110,9 @@ public class SubmitCommand extends AbstractCommand {
             return;
         }
 
-        CourseInfo info = ctx.getCourseInfo();
-        Course currentCourse = info.getCourse();
-        if (currentCourse == null) {
-            return;
-        }
 
-        Color color1 = ctx.getApp().getColor("testresults-left");
-        Color color2 = ctx.getApp().getColor("testresults-right");
+        Color color1 = ctx.getColorProperty("testresults-left", ctx.getApp());
+        Color color2 = ctx.getColorProperty("testresults-right", ctx.getApp());
         ResultPrinter resultPrinter =
                 new ResultPrinter(io, this.showDetails, this.showAll, color1, color2);
 
@@ -105,6 +123,7 @@ public class SubmitCommand extends AbstractCommand {
         List<URI> feedbackUris = new ArrayList<>();
 
         for (Exercise exercise : submitExercises) {
+            this.ctx.getAnalyticsFacade().saveAnalytics(exercise, "submit");
             io.println(ColorUtil.colorString("Submitting: " + exercise.getName(), Color.YELLOW));
             if (exercise.hasDeadlinePassed()) {
                 logger.warn("Tried to submit exercise " + exercise.getName() + " after deadline.");
@@ -118,11 +137,14 @@ public class SubmitCommand extends AbstractCommand {
                     io.errorln("Try to submit exercises one by one.");
                 }
                 return;
-                //resultPrinter.addFailedExercise();
-                //continue;
             }
 
             resultPrinter.printSubmissionResult(result, isOnlyExercise);
+
+            exercise.setAttempted(true);
+            if (result.getStatus() == SubmissionResult.Status.OK) {
+                exercise.setCompleted(true);
+            }
 
             List<FeedbackQuestion> feedback = result.getFeedbackQuestions();
             if (feedback != null && feedback.size() > 0) {
@@ -136,8 +158,12 @@ public class SubmitCommand extends AbstractCommand {
             resultPrinter.printTotalExerciseResults();
         }
 
-        updateCourseJson(submitExercises, info, workDir.getConfigFile());
+        updateCourseJson(submitExercises, info);
         checkForExerciseUpdates(currentCourse);
+        sendFeedbacks(feedbackLists, exercisesWithFeedback, feedbackUris);
+    }
+
+    private void sendFeedbacks(List<List<FeedbackQuestion>> feedbackLists, List<String> exercisesWithFeedback, List<URI> feedbackUris) {
         for (int i = 0; i < exercisesWithFeedback.size(); i++) {
             if (io.readConfirmation(
                     "Send feedback for " + exercisesWithFeedback.get(i) + "?", true)) {
@@ -156,24 +182,24 @@ public class SubmitCommand extends AbstractCommand {
      * Fetch updated exercise statuses from server and update course JSON file accordingly.
      */
     private void updateCourseJson(
-            List<Exercise> submittedExercises, CourseInfo courseInfo, Path courseInfoFile) {
+            List<Exercise> submittedExercises, CourseInfo courseInfo) {
 
-        Course updatedCourse = TmcUtil.findCourse(ctx, courseInfo.getCourseName());
-        if (updatedCourse == null) {
-            io.errorln("Failed to update config file for course " + courseInfo.getCourseName());
+        List<Exercise> exercises = TmcUtil.getCourseExercises(ctx);
+        if (exercises == null) {
+            io.println(
+                    "Failed to update config file for course " + courseInfo.getCourseName());
             return;
         }
-
         for (Exercise submitted : submittedExercises) {
-            Exercise updatedEx = TmcUtil.findExercise(updatedCourse, submitted.getName());
-            if (updatedEx == null) {
+            java.util.Optional<Exercise> ex = exercises.stream().filter(e -> e.getName().equals(submitted.getName())).findFirst();
+            if (!ex.isPresent()) {
                 io.println(
                         "Failed to update config file for exercise "
                                 + submitted.getName()
                                 + ". The exercise doesn't exist in server anymore.");
                 continue;
             }
-
+            Exercise updatedEx = ex.get();
             if (updatedEx.isCompleted()) {
                 if (courseInfo.getLocalCompletedExercises().contains(updatedEx.getName())) {
                     courseInfo.getLocalCompletedExercises().remove(updatedEx.getName());
@@ -210,6 +236,43 @@ public class SubmitCommand extends AbstractCommand {
         io.println();
         io.println(ColorUtil.colorString(msg, Color.YELLOW));
     }
+
+    private boolean apiUrlIsOutdated(Course course) {
+        return !course.getDetailsUrl().toString().contains("v" + API_VERSION);
+    }
+
+    private void updateCourseAndExercises() {
+        // This is a patch to migrate away from api 7 urls
+        // as some exercises have been downloaded before the new api
+        String oldDetailsUrl = ctx.getCourseInfo().getCourse().getDetailsUrl().toString();
+        String updatedUrl = getUpdatedDetailsUrl(oldDetailsUrl);
+        try {
+            ctx.getCourseInfo().getCourse().setDetailsUrl(new URI(updatedUrl));
+        } catch (URISyntaxException e) {
+            logger.error("Could not update details url for course " + ctx.getCourseInfo().getCourseName());
+            return;
+        }
+        List<Exercise> exercises = TmcUtil.getCourseExercises(ctx);
+        if (exercises == null) {
+            io.println(
+                    "Failed to update urls for exercises of course " + ctx.getCourseInfo().getCourseName());
+            return;
+        }
+        ctx.getCourseInfo().getCourse().setExercises(exercises);
+        CourseInfoIo.save(ctx.getCourseInfo(), courseInfoFile);
+    }
+
+    private static String getUpdatedDetailsUrl(String oldDetailsUrl) {
+        if (!oldDetailsUrl.contains("/org")) {
+            return oldDetailsUrl;
+        }
+        int iOrg = oldDetailsUrl.indexOf("/org");
+        int iCourses = oldDetailsUrl.indexOf("/courses");
+        String beginningPart = oldDetailsUrl.substring(0, iOrg);
+        String endPart = oldDetailsUrl.substring(iCourses, oldDetailsUrl.length());
+        return beginningPart + "/api/v" + API_VERSION + "/core" + endPart;
+    }
+
 
     private String[] parseArgs(CommandLine args) {
         this.showAll = args.hasOption("a");

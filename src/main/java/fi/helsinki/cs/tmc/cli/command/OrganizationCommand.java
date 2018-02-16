@@ -1,7 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
@@ -12,6 +10,7 @@ import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.utils.OptionalToGoptional;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.util.ArrayList;
@@ -32,16 +31,21 @@ public class OrganizationCommand extends AbstractCommand {
 
     @Override
     public void run(CliContext ctx, CommandLine args) {
-        if (!ctx.loadBackend()) {
+        this.ctx = ctx;
+        if (!this.ctx.checkIsLoggedIn(false, true)) {
             return;
         }
-        Optional<Organization> organization = chooseOrganization(ctx, args);
+
+        this.ctx.getAnalyticsFacade().saveAnalytics("organization");
+
+        Optional<Organization> organization = chooseOrganization(ctx, Optional.of(args));
         this.ctx.getSettings().setOrganization(organization);
         SettingsIo.saveCurrentSettingsToAccountList(this.ctx.getSettings());
     }
 
     private List<Organization> listOrganizations() {
-        if (!ctx.loadBackend()) {
+        if (this.ctx.getSettings().getServerAddress().isEmpty()) {
+            io.println("A server address has to be specified to get organizations");
             return null;
         }
         List<Organization> organizations = TmcUtil.getOrganizationsFromServer(ctx);
@@ -66,9 +70,9 @@ public class OrganizationCommand extends AbstractCommand {
                 });
         io.println("Available Organizations:");
         io.println();
-        pinned.stream().forEach(o -> printFormattedOrganization(o));
+        pinned.forEach(this::printFormattedOrganization);
         io.println("----------");
-        others.stream().forEach(o -> printFormattedOrganization(o));
+        others.forEach(this::printFormattedOrganization);
         io.println();
     }
 
@@ -77,25 +81,29 @@ public class OrganizationCommand extends AbstractCommand {
     }
 
 
-    private String getOrganizationFromUser(List<Organization> organizations, CommandLine line, boolean printOptions, boolean oneLine) {
-        if (oneLine && line.hasOption("o")) {
-            return line.getOptionValue("o");
+    private String getOrganizationFromUser(List<Organization> organizations, Optional<CommandLine> line, boolean printOptions, boolean oneLine) {
+        if (oneLine && line.isPresent() && line.get().hasOption("o")) {
+            return line.get().getOptionValue("o");
         }
         if (printOptions) {
-            printOrganizations(organizations, !line.hasOption("n") && !EnvironmentUtil.isWindows());
+            printOrganizations(organizations, line.isPresent() && !line.get().hasOption("n") && !EnvironmentUtil.isWindows());
         }
-        return io.readLine("Choose organization by writing its slug: ");
+        return io.readLine("Choose an organization by writing its slug: ");
     }
 
 
-    public Optional<Organization> chooseOrganization(CliContext ctx, CommandLine args) {
+    public Optional<Organization> chooseOrganization(CliContext ctx, Optional<CommandLine> args) {
         this.ctx = ctx;
         this.io = ctx.getIo();
         boolean printOptions = true;
-        boolean oneLine = args.hasOption("o");
+        boolean oneLine = false;
+        if (args.isPresent()) {
+            oneLine = args.get().hasOption("o");
+        }
         List<Organization> organizations = listOrganizations();
-        if (organizations == null) {
+        if (organizations == null || organizations.isEmpty()) {
             io.errorln("Failed to fetch organizations from server.");
+            return Optional.absent();
         }
         java.util.Optional<Organization> organization;
         while (true) {
@@ -112,11 +120,7 @@ public class OrganizationCommand extends AbstractCommand {
                 }
             }
         }
-        if (organization.isPresent()) {
-            io.println("Choosing organization " + organization.get().getName());
-        } else {
-            io.errorln("Error while choosing organization");
-        }
+        io.println("Choosing organization " + organization.get().getName());
         return OptionalToGoptional.convert(organization);
     }
 
