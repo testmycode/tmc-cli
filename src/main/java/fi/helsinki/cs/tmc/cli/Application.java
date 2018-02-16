@@ -7,7 +7,11 @@ import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.command.SubmitCommand;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
-import fi.helsinki.cs.tmc.cli.io.*;
+import fi.helsinki.cs.tmc.cli.io.ShutdownHandler;
+import fi.helsinki.cs.tmc.cli.io.Io;
+import fi.helsinki.cs.tmc.cli.io.EnvironmentUtil;
+import fi.helsinki.cs.tmc.cli.io.HelpGenerator;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
 import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 

@@ -124,7 +124,7 @@ public class Settings implements TmcSettings, SpywareSettings {
 
     @Override
     public void setPassword(Optional<String> password) {
-            throw new RuntimeException("Using password is deprecated");
+        account.setPassword(password);
     }
 
     @Override

@@ -1,9 +1,6 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * This is a class for storing all different accounts as a single array.
@@ -54,18 +51,17 @@ public class AccountList implements Iterable<Account> {
     }
 
     public void deleteAccount(String username) {
-        Account remove = null;
+        Set<Account> removables = new HashSet<>();
         for (Account account : this.accountArray) {
             if (!account.getUsername().isPresent()) {
-                continue;
-            }
-            if (account.getUsername().get().equals(username)) {
-                remove = account;
+                removables.add(account);
+            } else if (account.getUsername().get().equals(username)) {
+                removables.add(account);
                 break;
             }
         }
-        if (remove != null) {
-            this.accountArray.remove(remove);
+        if (!removables.isEmpty()) {
+            this.accountArray.removeAll(removables);
         }
     }
 
