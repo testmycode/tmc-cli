@@ -48,11 +48,11 @@ public class PasteCommand extends AbstractCommand {
         this.io = context.getIo();
         WorkDir workdir = ctx.getWorkDir();
 
-        if (!parseArgs(args)) {
+        if (!ctx.checkIsLoggedIn(false, true)) {
             return;
         }
 
-        if (!ctx.checkIsLoggedIn(false, true)) {
+        if (!parseArgs(args)) {
             return;
         }
 
