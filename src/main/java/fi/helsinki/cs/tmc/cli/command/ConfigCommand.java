@@ -288,6 +288,9 @@ public class ConfigCommand extends AbstractCommand {
         io.println("Setting property keys:");
         for (String argument : arguments) {
             String[] parts = argument.split("=", 2);
+            if (parts.length < 2) {
+                continue;
+            }
             if (!checkIfAllowedKey(parts[0])) {
                 continue;
             }
