@@ -85,10 +85,13 @@ public class ConfigCommand extends AbstractCommand {
                 context.getSettings().setServerAddress(addr);
                 normalizeServerAddress();
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
-                io.println("Please login again to use the new server.");
                 SettingsIo.delete();
+                io.println("You have been logged out.");
+                io.println("Please login again to use the new server.");
                 LoginCommand loginCommand = new LoginCommand();
-                loginCommand.login(context, null, Optional.of(value));
+                while (!loginCommand.login(context, null, Optional.of(value))) {
+                    io.println("Please login again.");
+                }
             }
         });
         ALLOWED_KEYS.put(testResultRightKey, new PropertyFunctions() {
@@ -285,13 +288,16 @@ public class ConfigCommand extends AbstractCommand {
         io.println("Setting property keys:");
         for (String argument : arguments) {
             String[] parts = argument.split("=", 2);
+            if (parts.length < 2) {
+                continue;
+            }
             if (!checkIfAllowedKey(parts[0])) {
                 continue;
             }
             String oldValue = properties.get(parts[0]);
             if (parts[0].equals(serverAddressKey)) {
                 io.println("All courses are now hosted at https://tmc.mooc.fi. We do not advise changing the server address.");
-                if (parts[0].contains("tmc.mooc.fi/mooc")) {
+                if (parts[1].contains("tmc.mooc.fi/mooc")) {
                     io.println("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
                             "If you'd like to do the migrated courses, you'll have to create an account on the new server.\n" +
                             "Choose the MOOC organization when logging in.\n\n" +

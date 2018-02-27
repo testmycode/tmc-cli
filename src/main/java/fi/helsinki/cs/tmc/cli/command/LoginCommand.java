@@ -56,8 +56,8 @@ public class LoginCommand extends AbstractCommand {
                     (organization.isPresent() ?
                     " and your current organization is " + organization.get().getName() :
                     "."));
-            io.println("Change your organization with the command organization.");
-            io.println("Inspect and change your current settings with the command config.");
+            io.println("You can change your organization with the command organization.");
+            io.println("You can change your current settings with the command config.");
             return;
         }
 
@@ -75,7 +75,7 @@ public class LoginCommand extends AbstractCommand {
         login(this.ctx, args, Optional.absent());
     }
 
-    public void login(CliContext ctx, CommandLine args, Optional<String> serverAddress) {
+    public boolean login(CliContext ctx, CommandLine args, Optional<String> serverAddress) {
         Io io = ctx.getIo();
         username = getLoginInfo(args, username, "u", "username: ", io);
         password = getLoginInfo(args, null, "p", "password: ", io);
@@ -89,21 +89,22 @@ public class LoginCommand extends AbstractCommand {
 
         if (!TmcUtil.tryToLogin(ctx, account, password)) {
             ctx.getSettings().setAccount(ctx, new Account());
-            return;
+            username = null;
+            return false;
         }
 
         OrganizationCommand organizationCommand = new OrganizationCommand();
-        Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, Optional.of(args));
+        Optional<Organization> organization = organizationCommand.chooseOrganization(ctx, Optional.fromNullable(args));
         if (!organization.isPresent()) {
-            return;
+            return false;
         }
         account.setOrganization(organization);
 
-        boolean sendDiagnostics = getBooleanAnswerFromUser(Optional.of(username),
+        boolean sendDiagnostics = getBooleanAnswerFromUser(Optional.fromNullable(username),
                 "Do you want to send crash reports for client development?",
                                     ctx.getSettings().getSendDiagnostics(), io);
         account.setSendDiagnostics(sendDiagnostics);
-        boolean sendAnalytics = getBooleanAnswerFromUser(Optional.of(username),
+        boolean sendAnalytics = getBooleanAnswerFromUser(Optional.fromNullable(username),
                 "Do you want to send analytics data for research?",
                                     ctx.getSettings().isSpywareEnabled(), io);
         account.setSendAnalytics(sendAnalytics);
@@ -112,14 +113,15 @@ public class LoginCommand extends AbstractCommand {
         list.addAccount(account);
         if (!SettingsIo.saveAccountList(list)) {
             io.errorln("Failed to write the accounts file.");
-            return;
+            return false;
         }
 
         ctx.getAnalyticsFacade().saveAnalytics("login");
 
         io.println("Login successful.");
         io.println("You can change your organization with the command organization, " +
-                "and inspect and change other settings with the command config.");
+                "and change other settings with the command config.");
+        return true;
     }
 
     private String getLoginInfo(CommandLine line, String oldValue, String option, String prompt, Io io) {
