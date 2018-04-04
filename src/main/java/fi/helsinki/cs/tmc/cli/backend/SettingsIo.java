@@ -13,6 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Reads and writes to config files on the system.
@@ -26,13 +29,13 @@ public class SettingsIo {
     public static final String CONFIG_DIR = "tmc-cli";
 
     // ACCOUNTS_CONFIG is the _global_ configuration file containing all
-    // user login information including usernames, passwords (in plain text)
+    // user login information including usernames, oauth credentials
     // and servers. Is located under CONFIG_DIR
     public static final String ACCOUNTS_CONFIG = "accounts.json";
 
     // PROPERTIES_CONFIG is the _global_ configuration file containing
     // tmc-cli's configuration and data, such as when to update when the client
-    //  was last updated. Is located under CONFIG_DIR
+    // was last updated. Is located under CONFIG_DIR
     public static final String PROPERTIES_CONFIG = "properties.json";
 
     public static AccountList loadAccountList() {
@@ -67,6 +70,23 @@ public class SettingsIo {
         return true;
     }
 
+    public static void saveCurrentSettingsToAccountList(Settings settings) {
+        AccountList list = loadAccountList();
+        Set<Account> deletables = new HashSet<>();
+        list.forEach(account -> {
+            if (account.getUsername().equals(settings.getAccount().getUsername())) {
+                if (!account.getUsername().isPresent()) {
+                    logger.error("Savable account doesn't exist");
+                    return;
+                }
+                deletables.add(account);
+            }
+        });
+        deletables.stream().forEach(d -> list.deleteAccount(d.getUsername().get()));
+        list.addAccount(settings.getAccount());
+        saveAccountList(list);
+    }
+
     public static HashMap<String, String> loadProperties() {
         return loadPropertiesFrom(getConfigDirectory());
     }
@@ -94,7 +114,7 @@ public class SettingsIo {
      * Get the correct directory in which our config files go
      * ie /home/user/.config/tmc-cli/.
      */
-    static Path getConfigDirectory() {
+    public static Path getConfigDirectory() {
         Path configPath;
         if (EnvironmentUtil.isWindows()) {
             String appdata = System.getenv("APPDATA");
@@ -124,7 +144,7 @@ public class SettingsIo {
         return file;
     }
 
-    private static Path getPropertiesFile(Path configRoot) {
+    public static Path getPropertiesFile(Path configRoot) {
         Path file = configRoot.resolve(PROPERTIES_CONFIG);
         if (!requireConfigDirectory(configRoot)) {
             return null;

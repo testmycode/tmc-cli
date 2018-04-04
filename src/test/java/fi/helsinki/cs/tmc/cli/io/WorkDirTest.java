@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

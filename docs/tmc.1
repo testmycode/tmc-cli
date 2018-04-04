@@ -34,14 +34,11 @@ with a command, display a help message for that command.
 \l'\n(.lu'
 .SH COMMAND: LOGIN
 .PP
-\fB\fCtmc\fR \fB\fClogin\fR [\fB\fC\-s\fR \fIserver address\fP] [\fB\fC\-u\fR \fIusername\fP] [\fB\fC\-p\fR \fIpassword\fP]
+\fB\fCtmc\fR \fB\fClogin\fR [\fB\fC\-u\fR \fIusername\fP] [\fB\fC\-p\fR \fIpassword\fP]
 .PP
 Login to TMC server. If credentials are not given as options, the user will
 be asked to input any missing credentials. You will have to be logged in
 in order to use certain commands.
-.TP
-\fB\fC\-s\fR \fB\fC\-\-server\fR
-Specify which server to connect to.
 .TP
 \fB\fC\-u\fR \fB\fC\-\-user\fR
 Specify username.
@@ -103,12 +100,12 @@ Display more detailed error messages.
 \fB\fCtmc\fR \fB\fCsubmit\fR [\fB\fC\-a\fR] [\fB\fC\-d\fR] [\fB\fC\-c\fR] [\fIpath\fP] ...
 .PP
 Submit exercises to the server. If no \fIpath\fP is given, the exercise in the
-current working directory will be submitted. Several exercises can be submitted
-at once. If the current work directory is the course root directory or the
-course root directory was given as a \fIpath\fP, then all exercises will be submitted.
+current working directory will be submitted. The submittable 
+.BR exercise (s) 
+must be given as an argument.
 .PP
 For every successful submission, you'll be prompted to send feedback for the
-exercise if the course has enabledfeedback questions. Sending feedback is
+exercise if the course has enabled feedback questions. Sending feedback is
 always optional.
 .TP
 \fB\fC\-a\fR \fB\fC\-\-all\fR
@@ -147,28 +144,54 @@ Do not send a message alongside the paste.
 .TP
 \fB\fC\-m\fR \fB\fC\-\-message\fR
 Give the message as an argument instead of opening a text editor.
-.SH COMMAND: PROP
+.SH COMMAND: CONFIG
 .PP
-\fB\fCtmc\fR \fB\fCprop\fR [\fIKEY\fP] [\fIVALUE\fP] ...
-      \fB\fCprop\fR \fB\fC\-u\fR \fIKEY\fP ... 
+\fB\fCtmc\fR \fB\fCconfig\fR \fB\fC[\-q]\fR[\fIKEY=VALUE\fP] ...
+      \fB\fCconfig\fR \fB\fC\-d\fR \fB\fC[\-q]\fR [\fIKEY\fP] ...
+      \fB\fCconfig\fR \fB\fC\-l\fR
+      \fB\fCconfig\fR \fB\fC\-g\fR [\fIKEY\fP] or \fB\fC\-g\fR=[\fIKEY\fP]
 .PP
-Set or unset TMC\-CLI properties. Invoke without any arguments to display all
-current properties. If more than a single property is added or removed, the user
-will be asked to confirm the changes.
+Set or unset TMC\-CLI properties. Only accepts certain keys. If not invoked with the option \fB\fCquiet\fR will ask to confirm changes.
 .TP
-\fB\fC\-u\fR \fB\fC\-\-unset\fR
+\fB\fC\-d\fR \fB\fC\-\-delete\fR
 Unset given properties.
+.TP
+\fB\fC\-q\fR \fB\fC\-\-quiet\fR
+Do not ask for confirmations or print out set values.
+.TP
+\fB\fC\-l\fR \fB\fC\-\-list\fR
+List all current settings.
+.TP
+\fB\fC\-g\fR \fB\fC\-\-get=KEY\fR or \fB\fC\-\-get KEY\fR
+Get the value of a specific key.
 .PP
-List of properties:
+List of configurable settings:
 .RS
 .IP \(bu 2
 \fIupdate\-date\fP
-Scheduled time for the next version check.
+Scheduled time for the next version check. Stored in properties.
 .IP \(bu 2
 \fItestresults\-left\fP \fItestresults\-right\fP \fIprogressbar\-left\fP \fIprogressbar\-right\fP
 Change progress bar colours. Recognised values: black, red, green, yellow,
-blue, purple, cyan, white, none.
+blue, purple, cyan, white, none. Stored in properties.
+.IP \(bu 2
+\fIsend\-diagnostics\fP
+Allow sending crash reports and analytics for client development. Stored with account.
+.IP \(bu 2
+\fIsend\-analytics\fP
+Allow sending analytics data of commands run. Stored in account.
+.IP \(bu 2
+\fIserver\-address\fP
+Address to fetch courses from and submit to. Defaults to \fB\fChttps://tmc.mooc.fi\fR\&. Stored with account.
 .RE
+.SH COMMAND: ORGANIZATION
+.PP
+\fB\fCtmc\fR \fB\fCorganization\fR [\fB\fC\-o\fR][\fIslug\fP] ...
+.PP
+Change organization, which determines the downloadable courses. If no slug is given, or the slug is invalid, all available organizations are listed, and the user will be prompted to choose one.
+.PP
+\fB\fC\-o\fR \fB\fC\-\-organization\fR
+Change organization to slug given as an argument without the listing of all organizations.
 .ti 0
 \l'\n(.lu'
 .SH FILES
@@ -176,7 +199,7 @@ blue, purple, cyan, white, none.
 \fB\fC[course directory]/.tmc.json\fR
 Course configuration and cache file. Saves the status of the username, server
 address and course's exercises. Manually editing this file may have adverse
-effects.  
+effects.
 .TP
 \fB\fC~/.config/tmc\-cli/properties.json\fR
 User configuration file. Use \fB\fCtmc prop\fR to edit properties.

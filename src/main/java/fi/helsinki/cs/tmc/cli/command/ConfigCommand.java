@@ -1,28 +1,155 @@
 package fi.helsinki.cs.tmc.cli.command;
 
+import com.google.common.base.Optional;
+import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.core.Command;
+import fi.helsinki.cs.tmc.cli.core.CommandFactory;
 import fi.helsinki.cs.tmc.cli.io.Io;
 
+import fi.helsinki.cs.tmc.cli.utils.BadValueTypeException;
+import fi.helsinki.cs.tmc.cli.utils.PropertyFunctions;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
-@Command(name = "config", desc = "Set/unset TMC-CLI properties")
+@Command(name = "config", desc = "Set/unset TMC-CLI properties and change settings")
 public class ConfigCommand extends AbstractCommand {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigCommand.class);
     private CliContext context;
     private Io io;
+    private static final Map<String, PropertyFunctions> ALLOWED_KEYS = new HashMap<>();
+    private static final Set<String> PROGRESS_BAR_COLORS = new HashSet<>(Arrays.asList("black", "red", "green", "blue", "yellow", "blue", "purple", "cyan", "white", "none"));
+    private static final String sendAnalyticsKey = "send-analytics";
+    private static final String serverAddressKey = "server-address";
+    private static final String testResultRightKey = "testresults-right";
+    private static final String testResultLeftKey = "testresults-left";
+    private static final String progressBarLeftKey = "progressbar-left";
+    private static final String progressBarRightKey = "progressbar-right";
+    private static final String sendDiagnosticsKey = "send-diagnostics";
 
     private HashMap<String, String> properties;
     private boolean quiet;
+
+    public ConfigCommand() {
+        configureAllowedKeys();
+    }
+
+    private void configureAllowedKeys() {
+        // add new possible config options here
+        // create an anonymous class which determines where the value is stored
+        // some values are stored in settings, some in properties
+        ALLOWED_KEYS.put(sendDiagnosticsKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return Boolean.toString(context.getSettings().getSendDiagnostics());
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                boolean send = getBooleanSendValue(value);
+                context.getSettings().setSendDiagnostics(send);
+                SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
+            }
+        });
+        ALLOWED_KEYS.put(sendAnalyticsKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return Boolean.toString(context.getSettings().isSpywareEnabled());
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                boolean send = getBooleanSendValue(value);
+                context.getSettings().setSpywareEnabled(send);
+                SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
+            }
+        });
+        ALLOWED_KEYS.put(serverAddressKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getSettings().getServerAddress();
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                String addr = value;
+                if (!addr.matches("^https?://.*")) {
+                    throw new BadValueTypeException("Please start the address with http[s]://");
+                }
+                context.getSettings().setServerAddress(addr);
+                normalizeServerAddress();
+                SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
+                SettingsIo.delete();
+                io.println("You have been logged out.");
+                io.println("Please login again to use the new server.");
+                LoginCommand loginCommand = new LoginCommand();
+                while (!loginCommand.login(context, null, Optional.of(value))) {
+                    io.println("Please login again.");
+                }
+            }
+        });
+        ALLOWED_KEYS.put(testResultRightKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get(testResultRightKey);
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties(testResultRightKey, value);
+            }
+        });
+        ALLOWED_KEYS.put(testResultLeftKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get(testResultLeftKey);
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties(testResultLeftKey, value);
+            }
+        });
+        ALLOWED_KEYS.put(progressBarLeftKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get(progressBarLeftKey);
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties(progressBarLeftKey, value);
+            }
+        });
+        ALLOWED_KEYS.put(progressBarRightKey, new PropertyFunctions() {
+            @Override
+            public String getter() {
+                return context.getProperties().get(progressBarRightKey);
+            }
+
+            @Override
+            public void setter(String value) throws BadValueTypeException {
+                addBarColorToProperties(progressBarRightKey, value);
+            }
+        });
+    }
+
+    private boolean getBooleanSendValue(String value) throws BadValueTypeException {
+        isBooleanValue(value);
+        return Boolean.parseBoolean(value);
+    }
+
+    private void isBooleanValue(String newVal) throws BadValueTypeException {
+        if (!newVal.trim().toLowerCase().equals("true") && !newVal.trim().toLowerCase().equals("false")) {
+            throw new BadValueTypeException("Please write either true or false");
+        }
+    }
 
     @Override
     public String[] getUsages() {
@@ -52,7 +179,14 @@ public class ConfigCommand extends AbstractCommand {
         this.quiet = args.hasOption("q");
 
         String[] arguments = args.getArgs();
+        arguments = Arrays.stream(arguments).filter(o -> !o.trim().isEmpty()).toArray(String[]::new);
         this.properties = context.getProperties();
+
+        if (!this.context.checkIsLoggedIn(false, true)) {
+            return;
+        }
+
+        this.context.getAnalyticsFacade().saveAnalytics("config");
 
         if ((get ? 1 : 0) + (listing ? 1 : 0) + (delete ? 1 : 0) > 1) {
             io.errorln("Only one of the --get or --list or --delete options can "
@@ -78,12 +212,13 @@ public class ConfigCommand extends AbstractCommand {
                 return;
             }
             String key = args.getOptionValue('g');
-            boolean exists = properties.containsKey(key);
+            boolean exists = ALLOWED_KEYS.containsKey(key);
             if (!exists && !quiet) {
                 io.errorln("The property " + key + " doesn't exist.");
                 return;
             }
-            io.println(exists ? properties.get(key) : "");
+            String value = ALLOWED_KEYS.get(key).getter();
+            io.println(exists ? (value != null ? value : "no value set") : "");
             return;
         } else if (delete) {
             deleteProperties(arguments);
@@ -94,19 +229,21 @@ public class ConfigCommand extends AbstractCommand {
     }
 
     private void printAllProperties() {
-        ArrayList<String> array = new ArrayList<>(properties.keySet());
-        Collections.sort(array);
-
-        for (String key : array) {
-            io.println(key + "=" + properties.get(key));
-        }
+        ALLOWED_KEYS.entrySet()
+                    .stream()
+                    .sorted(Comparator.comparing(Map.Entry::getKey))
+                    .forEach(e -> {
+                        String key = e.getKey();
+                        String value = e.getValue().getter();
+                        io.println(key + "=" + ( value != null ? value: "<no value set>" ));
+                    });
     }
 
     private void deleteProperties(String[] keys) {
         if (this.quiet) {
             for (String key : keys) {
-                if (properties.containsKey(key)) {
-                    properties.remove(key);
+                if (ALLOWED_KEYS.keySet().contains(key) && properties.containsKey(key)) {
+                        properties.remove(key);
                 }
             }
             return;
@@ -119,8 +256,8 @@ public class ConfigCommand extends AbstractCommand {
         }
 
         for (String key : keys) {
-            if (!properties.containsKey(key)) {
-                io.error("Key " + key + " doesn't exist.");
+            if (!properties.containsKey(key) || !ALLOWED_KEYS.keySet().contains(key)) {
+                io.error("Key " + key + " doesn't exist or cannot be removed.");
                 return;
             }
         }
@@ -137,7 +274,7 @@ public class ConfigCommand extends AbstractCommand {
     }
 
     private void setProperties(String[] arguments) {
-        if (arguments.length == 0) {
+        if (arguments.length == 0 || !arguments[0].contains("=")) {
             io.errorln("Expected at least one key-value pair.");
             printUsage(context);
             return;
@@ -148,30 +285,88 @@ public class ConfigCommand extends AbstractCommand {
             return;
         }
 
-        io.print("Setting property keys:");
+        io.println("Setting property keys:");
         for (String argument : arguments) {
             String[] parts = argument.split("=", 2);
-            String oldValue = properties.get(parts[0]);
-            io.print(" " + parts[0] + " set to \"" + parts[1] + "\"");
-
-            if (oldValue != null) {
-                io.println(", it was \"" + oldValue + "\".");
-            } else {
-                io.println(".");
+            if (parts.length < 2) {
+                continue;
             }
+            if (!checkIfAllowedKey(parts[0])) {
+                continue;
+            }
+            String oldValue = properties.get(parts[0]);
+            if (parts[0].equals(serverAddressKey)) {
+                io.println("All courses are now hosted at https://tmc.mooc.fi. We do not advise changing the server address.");
+                if (parts[1].contains("tmc.mooc.fi/mooc")) {
+                    io.println("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
+                            "If you'd like to do the migrated courses, you'll have to create an account on the new server.\n" +
+                            "Choose the MOOC organization when logging in.\n\n" +
+                            "For more information, check the course materials on mooc.fi.");
+                    return;
+                }
+            }
+            if (io.readConfirmation(" Set " + parts[0] + " to \"" + parts[1] + "\"?", true)) {
+                if (!saveValue(parts[0], parts[1])) {
+                    continue;
+                }
+                io.print("Property " + parts[0] + " is now \"" + parts[1] + "\"");
+                if (oldValue != null) {
+                    io.println(", was \"" + oldValue + "\".");
+                } else {
+                    io.println(".");
+                }
+            }
+
         }
         io.println();
-        if (!io.readConfirmation("Are you sure?", true)) {
-            return;
-        }
-
-        setPropertiesQuietly(arguments);
     }
 
     private void setPropertiesQuietly(String[] arguments) {
         for (String argument : arguments) {
             String[] parts = argument.split("=", 2);
-            properties.put(parts[0], parts[1]);
+            if (checkIfAllowedKey(parts[0])) {
+                saveValue(parts[0], parts[1]);
+            }
         }
+    }
+
+    private boolean saveValue(String key, String value) {
+        try {
+            ALLOWED_KEYS.get(key).setter(value);
+        } catch (Exception e) {
+            io.errorln(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkIfAllowedKey(String key) {
+        if (!ALLOWED_KEYS.keySet().contains(key)) {
+            io.println("\"" + key + "\" is not an allowed key.");
+            io.println("Allowed keys are: ");
+            ALLOWED_KEYS.keySet().forEach(k -> io.print(" " + k + '\n'));
+            return false;
+        }
+        return true;
+    }
+
+    private void addBarColorToProperties(String key, String color) throws BadValueTypeException {
+        if (!PROGRESS_BAR_COLORS.contains(color)) {
+            throw new BadValueTypeException("Color " + color + " not supported.");
+        }
+        properties.put(key, color);
+        SettingsIo.saveProperties(properties);
+    }
+
+    private boolean normalizeServerAddress() {
+        TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
+        normalizer.normalize();
+        try {
+            this.context.getTmcCore().authenticate(ProgressObserver.NULL_OBSERVER, TmcSettingsHolder.get().getPassword().get()).call();
+        } catch (Exception e) {
+            return false;
+        }
+        normalizer.selectOrganizationAndCourse();
+        return true;
     }
 }

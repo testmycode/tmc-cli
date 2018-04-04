@@ -1,9 +1,6 @@
 package fi.helsinki.cs.tmc.cli.backend;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * This is a class for storing all different accounts as a single array.
@@ -16,7 +13,6 @@ public class AccountList implements Iterable<Account> {
         this.accountArray = new ArrayList<>();
     }
 
-    //TODO This should not be used
     public Account getAccount() {
         if (this.accountArray.size() > 0) {
             // Get last used account by default
@@ -25,13 +21,15 @@ public class AccountList implements Iterable<Account> {
         return null;
     }
 
-    public Account getAccount(String username, String server) {
-        if (username == null || server == null) {
+    public Account getAccount(String username) {
+        if (username == null) {
             return getAccount();
         }
         for (Account account : this.accountArray) {
-            if (account.getUsername().equals(username)
-                    && account.getServerAddress().equals(server)) {
+            if (!account.getUsername().isPresent()) {
+                continue;
+            }
+            if (account.getUsername().get().equals(username)) {
                 // Move account to index 0 so we can always use the last used account by default
                 this.accountArray.remove(account);
                 this.accountArray.add(0, account);
@@ -43,8 +41,7 @@ public class AccountList implements Iterable<Account> {
 
     public void addAccount(Account newSettings) {
         for (Account account : this.accountArray) {
-            if (account.getUsername().equals(newSettings.getUsername())
-                    && account.getServerAddress().equals(newSettings.getServerAddress())) {
+            if (account.getUsername().equals(newSettings.getUsername())) {
                 // Replace old account if username and server match
                 this.accountArray.remove(account);
                 break;
@@ -53,17 +50,18 @@ public class AccountList implements Iterable<Account> {
         this.accountArray.add(0, newSettings);
     }
 
-    public void deleteAccount(String username, String server) {
-        Account remove = null;
+    public void deleteAccount(String username) {
+        Set<Account> removables = new HashSet<>();
         for (Account account : this.accountArray) {
-            if (account.getUsername().equals(username)
-                    && account.getServerAddress().equals(server)) {
-                remove = account;
+            if (!account.getUsername().isPresent()) {
+                removables.add(account);
+            } else if (account.getUsername().get().equals(username)) {
+                removables.add(account);
                 break;
             }
         }
-        if (remove != null) {
-            this.accountArray.remove(remove);
+        if (!removables.isEmpty()) {
+            this.accountArray.removeAll(removables);
         }
     }
 

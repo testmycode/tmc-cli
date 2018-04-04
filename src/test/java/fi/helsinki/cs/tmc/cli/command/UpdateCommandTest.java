@@ -7,9 +7,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.CliProgressObserver;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
@@ -19,6 +21,11 @@ import fi.helsinki.cs.tmc.cli.shared.ExerciseUpdater;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(UpdateCommand.class)
+@PrepareForTest({UpdateCommand.class, TmcUtil.class, SettingsIo.class})
 public class UpdateCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
@@ -47,7 +54,7 @@ public class UpdateCommandTest {
     private Application app;
     private CliContext ctx;
     private TestIo io;
-    private TmcCore mockCore;
+    private TmcCore core;
     private WorkDir workDir;
     private ExerciseUpdater exerciseUpdater;
 
@@ -71,24 +78,38 @@ public class UpdateCommandTest {
     @Before
     public void setUp() throws Exception {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        core = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(io, this.core, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
+
+        mockStatic(TmcUtil.class);
+        AccountList list = new AccountList();
+        list.addAccount(new Account("username"));
+        Account account = new Account("testuser");
+        account.setServerAddress("https://tmc.example.com");
+        list.addAccount(account);
+
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.loadAccountList()).thenReturn(list);
 
         exerciseUpdater = PowerMockito.mock(ExerciseUpdater.class);
         PowerMockito.whenNew(ExerciseUpdater.class).withAnyArguments().thenReturn(exerciseUpdater);
     }
 
     @Test
-    public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, mockCore, new WorkDir(pathToNonCourseDir)));
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"update"};
         app.run(args);
-        io.assertNotContains("Not a course directory");
+        io.assertContains("You are not logged in");
     }
 
     @Test

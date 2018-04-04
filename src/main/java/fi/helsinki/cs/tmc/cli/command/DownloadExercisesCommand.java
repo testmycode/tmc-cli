@@ -49,6 +49,10 @@ public class DownloadExercisesCommand extends AbstractCommand {
         Io io = context.getIo();
         ctx = context;
 
+        if (!ctx.checkIsLoggedIn(false, true)) {
+            return;
+        }
+
         String[] stringArgs = args.getArgs();
         if (stringArgs.length == 0 || stringArgs.length > 1) {
             io.errorln("You must give a course name as an argument.");
@@ -58,10 +62,6 @@ public class DownloadExercisesCommand extends AbstractCommand {
 
         ctx = context;
         showAll = args.hasOption("a");
-
-        if (!ctx.loadBackend()) {
-            return;
-        }
 
         WorkDir workDir = ctx.getWorkDir();
         if (workDir.getConfigFile() != null) {
@@ -75,24 +75,31 @@ public class DownloadExercisesCommand extends AbstractCommand {
             return;
         }
         Course course = finder.getCourse();
+
+        this.ctx.getAnalyticsFacade().saveAnalytics(course, "download_exercises");
+
         List<Exercise> filtered = getFilteredExercises(course);
         // todo: If -c switch, use core.downloadCompletedExercises() to download user's old
         //       submissions. Not yet implemented in tmc-core.
 
-        Color color1 = ctx.getApp().getColor("progressbar-left");
-        Color color2 = ctx.getApp().getColor("progressbar-right");
+        Color color1 = ctx.getColorProperty("progressbar-left", ctx.getApp());
+        Color color2 = ctx.getColorProperty("progressbar-right", ctx.getApp());
         CliProgressObserver progobs = new CliProgressObserver(io, color1, color2);
 
         ctx.useAccount(finder.getAccount());
+        if (!ctx.getSettings().getOrganization().isPresent()) {
+            io.errorln("Failed to download exercises. Make sure you are properly logged in.");
+            return;
+        }
+        CourseInfoIo.createNewCourse(course, finder.getAccount(), workDir.getWorkingDirectory());
         List<Exercise> exercises = TmcUtil.downloadExercises(ctx, filtered, progobs);
         if (exercises == null) {
             io.errorln("Failed to download exercises");
+            CourseInfoIo.deleteConfigDirectory(course, workDir.getWorkingDirectory());
             return;
         }
 
         printStatistics(course, filtered.size(), exercises.size());
-
-        CourseInfoIo.createNewCourse(course, finder.getAccount(), workDir.getWorkingDirectory());
     }
 
     private List<Exercise> getFilteredExercises(Course course) {

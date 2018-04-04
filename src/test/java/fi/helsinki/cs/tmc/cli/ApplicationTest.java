@@ -11,11 +11,20 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.backend.Settings;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.Io;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.cli.updater.AutoUpdater;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +43,13 @@ public class ApplicationTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        app = new Application(new CliContext(io));
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        TmcCore core = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        app = new Application(new CliContext(io, core, new WorkDir(), settings, analyticsFacade));
         mockStatic(AutoUpdater.class);
     }
 
@@ -94,13 +109,6 @@ public class ApplicationTest {
     }
 
     @Test
-    public void helpOptionForAdminCommands() {
-        String[] args = {"--help-admin"};
-        app.run(args);
-        io.assertContains("TMC commands in admin");
-    }
-
-    @Test
     public void helpOptionForHiddenCommandsDoesntExist() {
         String[] args = {"--help-hidden"};
         app.run(args);
@@ -122,7 +130,7 @@ public class ApplicationTest {
                 .thenReturn(mockUpdater);
         when(mockUpdater.run()).thenReturn(true);
 
-        CliContext ctx = spy(new CliContext(null));
+        CliContext ctx = spy(new CliContext(null, null, new WorkDir(), new Settings(), null));
         when(ctx.getProperties()).thenReturn(new HashMap<String, String>());
 
         app = new Application(ctx);

@@ -3,16 +3,13 @@ package fi.helsinki.cs.tmc.cli.command;
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
-import fi.helsinki.cs.tmc.cli.backend.CourseInfoIo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
@@ -23,6 +20,11 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,19 +32,22 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TmcUtil.class, CourseInfoIo.class})
+@PrepareForTest({TmcUtil.class, CourseInfoIo.class, SettingsIo.class})
 public class SubmitCommandTest {
 
     private static final String COURSE_NAME = "2016-aalto-c";
     private static final String EXERCISE1_NAME = "Module_1-02_intro";
     private static final String EXERCISE2_NAME = "Module_1-04_func";
+    private static final String EXERCISE_WITH_DEADLINE_PASSED = "Module_1-05_calc";
 
     private static Path pathToDummyCourse;
     private static Path pathToDummyExercise;
@@ -52,12 +57,15 @@ public class SubmitCommandTest {
     private Application app;
     private CliContext ctx;
     private TestIo io;
-    private TmcCore mockCore;
+    private TmcCore core;
     private WorkDir workDir;
+    private AnalyticsFacade analyticsFacade;
 
     private Course course;
     private SubmissionResult result;
     private SubmissionResult result2;
+
+    private AccountList list;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -82,8 +90,12 @@ public class SubmitCommandTest {
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        core = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        analyticsFacade = spy(new AnalyticsFacade(analyticsSettings, new EventSendBuffer(analyticsSettings, new EventStore())));
+        ctx = new CliContext(io, this.core, new WorkDir(), new Settings(), this.analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
 
@@ -96,6 +108,14 @@ public class SubmitCommandTest {
         when(TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class)))
                 .thenReturn(result)
                 .thenReturn(result2);
+        list = new AccountList();
+        list.addAccount(new Account("username"));
+        Account account = new Account("testuser");
+        account.setServerAddress("https://tmc.example.com");
+        list.addAccount(account);
+
+        mockStatic(SettingsIo.class);
+        when(SettingsIo.loadAccountList()).thenReturn(list);
 
         mockStatic(CourseInfoIo.class);
         when(CourseInfoIo.load(any(Path.class))).thenCallRealMethod();
@@ -103,13 +123,13 @@ public class SubmitCommandTest {
     }
 
     @Test
-    public void testSuccessInExerciseRoot() {
-        workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
-        io.assertContains("Submitting: " + EXERCISE1_NAME);
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        app = new Application(ctx);
 
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
+        String[] args = {"submit"};
+        app.run(args);
+        io.assertContains("You are not logged in");
     }
 
     @Test
@@ -136,20 +156,15 @@ public class SubmitCommandTest {
     @Test
     public void submitsAllExercisesFromCourseDirIfNoNameIsGiven() {
         workDir.setWorkdir(pathToDummyCourse);
-        app.run(new String[] {"submit"});
+        app.run(new String[] {"submit", EXERCISE1_NAME, EXERCISE2_NAME, EXERCISE_WITH_DEADLINE_PASSED});
         io.assertContains("Submitting: " + EXERCISE1_NAME);
         io.assertContains("Submitting: " + EXERCISE2_NAME);
-        assertEquals(2, countSubstring("Submitting: ", io.out()));
+        io.assertContains("Submitting: " + EXERCISE_WITH_DEADLINE_PASSED);
+        assertEquals(3, countSubstring("Submitting: ", io.out()));
 
+        // the third one's deadline is passed so it should not be submitted
         verifyStatic(times(2));
         TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
-    }
-
-    @Test
-    public void doesNotSubmitExtraExercisesFromExerciseRoot() {
-        workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
-        assertEquals(1, countSubstring("Submitting: ", io.out()));
     }
 
     @Test
@@ -178,16 +193,6 @@ public class SubmitCommandTest {
     }
 
     @Test
-    public void abortGracefullyIfNotInCourseDir() {
-        workDir.setWorkdir(pathToNonCourseDir);
-        app.run(new String[] {"submit"});
-        io.assertContains("No exercises specified.");
-
-        verifyStatic(times(0));
-        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
-    }
-
-    @Test
     public void showFailMsgIfSubmissionFailsInCore() {
         when(TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class))).thenReturn(null);
         workDir.setWorkdir(pathToDummyCourse);
@@ -201,19 +206,9 @@ public class SubmitCommandTest {
     }
 
     @Test
-    public void canSubmitFromExerciseSubdirs() {
-        workDir.setWorkdir(pathToDummyExerciseSrc);
-        app.run(new String[] {"submit"});
-
-        io.assertContains("Submitting: " + EXERCISE1_NAME);
-        verifyStatic(times(1));
-        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
-    }
-
-    @Test
     public void doesNotShowUpdateMessageIfNoUpdatesAvailable() {
         workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
+        app.run(new String[] {"submit", EXERCISE1_NAME});
 
         io.assertNotContains("available");
         io.assertNotContains("been changed on TMC server");
@@ -234,12 +229,43 @@ public class SubmitCommandTest {
         when(TmcUtil.getUpdatableExercises(any(CliContext.class), any(Course.class)))
                 .thenReturn(updateResult);
 
-        workDir.setWorkdir(pathToDummyExercise);
-        app.run(new String[] {"submit"});
+        workDir.setWorkdir(pathToDummyCourse);
+        app.run(new String[] {"submit", EXERCISE2_NAME});
 
         io.assertContains("1 new exercise available");
         io.assertContains("1 exercise has been changed on TMC server");
         io.assertContains("Use 'tmc update' to download them");
+    }
+
+    @Test
+    public void notifyUserAndDontSubmitIfDeadlinePassed() {
+        workDir.setWorkdir(pathToDummyCourse);
+        app.run(new String[] {"submit", EXERCISE_WITH_DEADLINE_PASSED});
+        io.assertContains("Deadline has passed for this exercise");
+        verifyStatic(times(0));
+        TmcUtil.submitExercise(any(CliContext.class), any(Exercise.class));
+    }
+
+    @Test
+    public void sendAnalyticsIsCalledOnSubmit() {
+        workDir.setWorkdir(pathToDummyExercise);
+        app.run(new String[] {"submit"});
+        verify(analyticsFacade).sendAnalytics();
+    }
+
+    @Test
+    public void updateAllExercisesIfCourseApiUrlIsOutDated() {
+        workDir.setWorkdir(pathToDummyExercise);
+        ArrayList<Exercise> exercises = new ArrayList<>();
+        Exercise test = new Exercise("test");
+        try {
+            test.setReturnUrl(new URI("test"));
+        } catch (URISyntaxException e) {
+        }
+        exercises.add(test);
+        when(TmcUtil.getCourseExercises(ctx)).thenReturn(exercises);
+        app.run(new String[] {"submit"});
+        assertEquals(ctx.getCourseInfo().getCourse().getExercises(), exercises);
     }
 
     private static int countSubstring(String subStr, String str) {

@@ -81,8 +81,13 @@ Once installation is complete, you can log in using `tmc login`. This saves your
 server address:
 username:
 password:
-Login successful.
+Choose organization by writing its slug:
+Do you want to send crash reports for client development? (Y/n)
+Do you want to send analytics data for research? (Y/n)
 ```
+
+You can change your organization with the command `organization`. Use the option `-o` and give the slug of an organization as an argument. Otherwise all available organizations will be listed.
+You can inspect and change your settings such as sending data with the command `config`. Use the option `-l` to see your current settings and give `[KEY]=[NEW VALUE]` as arguments to change them.
 
 ## Listing courses
 
@@ -96,7 +101,7 @@ c-mooc
 javascript-for-lazy-hipsters
 ```
 
-Note that you can only submit exercises on courses for which you have enrolled.
+Note that you can only exercises on courses for which you have enrolled.
 
 ## Downloading courses
 
@@ -127,7 +132,7 @@ All tests passed! Submit to server with 'tmc submit'
 
 ## Submitting exercises
 
-You have now completed your first exercise! To submit your exercise, run `tmc submit`. The syntax is the same as for running tests.
+You have now completed your first exercise! To submit your exercise, run `tmc submit [exercise-name]` or run `tmc submit` in an exercise directory. The syntax is the same as for running tests.
 
 ```
 ~/tmc-courses/test-course/exercise1 $ tmc submit

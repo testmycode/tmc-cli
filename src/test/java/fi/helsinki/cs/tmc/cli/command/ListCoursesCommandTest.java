@@ -8,16 +8,21 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
-import fi.helsinki.cs.tmc.cli.backend.Account;
-import fi.helsinki.cs.tmc.cli.backend.AccountList;
-import fi.helsinki.cs.tmc.cli.backend.SettingsIo;
-import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
+import fi.helsinki.cs.tmc.cli.backend.*;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
 import fi.helsinki.cs.tmc.cli.io.TestIo;
 
+import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
+import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,15 +40,19 @@ public class ListCoursesCommandTest {
     private Application app;
     private CliContext ctx;
     private TestIo io;
-    private TmcCore mockCore;
 
     @Before
     public void setUp() {
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore);
+        Settings settings = new Settings();
+        TaskExecutor tmcLangs = new TaskExecutorImpl();
+        TmcCore core = new TmcCore(settings, tmcLangs);
+        SpywareSettings analyticsSettings = new Settings();
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        ctx = new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
-        Account account = new Account("http://test.test", "", "");
+        Account account = new Account( "", "");
         AccountList accountList = new AccountList();
         accountList.addAccount(account);
 
@@ -54,14 +63,11 @@ public class ListCoursesCommandTest {
     }
 
     @Test
-    public void failIfBackendFails() {
-        ctx = spy(ctx);
-        app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackendWithoutLogin();
-
-        String[] args = {"courses", "foo"};
+    public void failIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
+        String[] args = {"courses"};
         app.run(args);
-        io.assertNotContains("Course doesn't exist");
+        io.assertContains("You are not logged in");
     }
 
     @Test
@@ -91,25 +97,5 @@ public class ListCoursesCommandTest {
         String[] args = {"courses"};
         app.run(args);
         io.assertContains("Found 2 courses");
-    }
-
-    @Test
-    public void listCoursesWorksWithTwoServers() {
-        Account account1 = new Account("http://test.test", "", "");
-        Account account2 = new Account("http://hello.test", "", "");
-
-        AccountList accountList = new AccountList();
-        accountList.addAccount(account1);
-        accountList.addAccount(account2);
-        when(SettingsIo.loadAccountList()).thenReturn(accountList);
-
-        List<Course> list1 = Collections.singletonList(new Course("course1"));
-        List<Course> list2 = Collections.singletonList(new Course("course2"));
-        when(TmcUtil.listCourses(eq(ctx))).thenReturn(list1).thenReturn(list2);
-
-        String[] args = {"courses"};
-        app.run(args);
-        io.assertContains("Server http://test.test");
-        io.assertContains("Server http://hello.test");
     }
 }

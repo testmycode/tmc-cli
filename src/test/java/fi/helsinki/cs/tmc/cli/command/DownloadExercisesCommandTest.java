@@ -13,6 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import fi.helsinki.cs.tmc.cli.Application;
+import fi.helsinki.cs.tmc.cli.analytics.AnalyticsFacade;
 import fi.helsinki.cs.tmc.cli.backend.Account;
 import fi.helsinki.cs.tmc.cli.backend.AccountList;
 import fi.helsinki.cs.tmc.cli.backend.Settings;
@@ -24,8 +25,12 @@ import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 
@@ -56,19 +61,25 @@ public class DownloadExercisesCommandTest {
     private TmcCore mockCore;
     private WorkDir workDir;
     private Path tempDir;
+    private Organization testOrganization;
+    private AnalyticsFacade analyticsFacade;
+    private AccountList accountList;
 
     @Before
     public void setUp() {
         tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("downloadTest");
         workDir = new WorkDir(tempDir);
+        testOrganization = new Organization("test", "test", "hy", "test", false);
 
         io = new TestIo();
-        mockCore = mock(TmcCore.class);
-        ctx = new CliContext(io, mockCore, workDir);
+        mockCore = new TmcCore(new Settings(), new TaskExecutorImpl());
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new Settings(), new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
+        ctx = new CliContext(io, mockCore, workDir, new Settings(), analyticsFacade);
         app = new Application(ctx);
-        Account account = new Account("server", "user", "password");
+        Account account = new Account("user", testOrganization);
         ctx.useAccount(account);
-        AccountList accountList = new AccountList();
+        accountList = new AccountList();
         accountList.addAccount(account);
 
         mockStatic(TmcUtil.class);
@@ -82,14 +93,13 @@ public class DownloadExercisesCommandTest {
     }
 
     @Test
-    public void failIfBackendFails() {
-        ctx = spy(new CliContext(io, mockCore, workDir));
+    public void doNotRunIfNotLoggedIn() {
+        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
-        doReturn(false).when(ctx).loadBackend();
 
         String[] args = {"download", "foo"};
         app.run(args);
-        io.assertNotContains("Course doesn't exist");
+        io.assertContains("You are not logged in");
     }
 
     @Test
@@ -209,8 +219,10 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServer() {
-        Account account1 = new Account("http://test.test", "", "");
-        Account account2 = new Account("http://hello.test", "", "");
+        Account account1 = new Account("", "", testOrganization);
+        account1.setServerAddress("http://test.test");
+        Account account2 = new Account("", "", testOrganization);
+        account2.setServerAddress("http://hello.test");
         AccountList accountList = new AccountList();
         accountList.addAccount(account1);
         accountList.addAccount(account2);
@@ -226,8 +238,10 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServerWithSameNameWithoutTakingAny() {
-        Account account1 = new Account("http://test.test", "abc", "");
-        Account account2 = new Account("http://hello.test", "def", "");
+        Account account1 = new Account("abc", "", testOrganization);
+        account1.setServerAddress("http://test.test");
+        Account account2 = new Account("def", "", testOrganization);
+        account2.setServerAddress("http://hello.test");
         AccountList accountList = new AccountList();
         accountList.addAccount(account1);
         accountList.addAccount(account2);
@@ -256,8 +270,10 @@ public class DownloadExercisesCommandTest {
 
     @Test
     public void findFromMultipleServerWithSameNameWithTakingFirst() {
-        Account account1 = new Account("http://test.test", "abc", "");
-        Account account2 = new Account("http://hello.test", "def", "");
+        Account account1 = new Account("abc", "", testOrganization);
+        account1.setServerAddress("http://test.test");
+        Account account2 = new Account("def", "", testOrganization);
+        account2.setServerAddress("http://hello.test");
         AccountList accountList = new AccountList();
         accountList.addAccount(account2);
         accountList.addAccount(account1);
@@ -281,5 +297,15 @@ public class DownloadExercisesCommandTest {
 
         Settings usedSettings = Whitebox.getInternalState(ctxCaptor.getValue(), "settings");
         assertEquals(account1, usedSettings.getAccount());
+    }
+
+    @Test
+    public void courseConfigFileDeletedIfDownloadingExercisesFails() {
+        ArgumentCaptor<CliContext> ctxCaptor = ArgumentCaptor.forClass(CliContext.class);
+        when(TmcUtil.downloadExercises(ctxCaptor.capture(),  anyListOf(Exercise.class), any(ProgressObserver.class))).thenReturn(null);
+        String[] args = {"download", "course1"};
+        app.run(args);
+        File courseJson = tempDir.resolve("course1").resolve(".tmc.json").toFile();
+        assertTrue(!courseJson.exists());
     }
 }

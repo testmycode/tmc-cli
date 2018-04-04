@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.cli.command;
 
-import fi.helsinki.cs.tmc.cli.backend.CourseInfo;
 import fi.helsinki.cs.tmc.cli.backend.TmcUtil;
 import fi.helsinki.cs.tmc.cli.core.AbstractCommand;
 import fi.helsinki.cs.tmc.cli.core.CliContext;
@@ -49,20 +48,23 @@ public class PasteCommand extends AbstractCommand {
         this.io = context.getIo();
         WorkDir workdir = ctx.getWorkDir();
 
+        if (!ctx.checkIsLoggedIn(false, true)) {
+            return;
+        }
+
         if (!parseArgs(args)) {
             return;
         }
 
-        if (!ctx.loadBackend()) {
-            return;
-        }
-        
         List<Exercise> exercises = workdir.getExercises();
         if (exercises.size() != 1) {
             io.errorln("Matched too many exercises.");
             printUsage(context);
             return;
         }
+
+        Exercise exercise = exercises.get(0);
+        this.ctx.getAnalyticsFacade().saveAnalytics(exercise, "paste");
 
         if (!noMessage && message == null) {
             if (io.readConfirmation("Attach a message to your paste?", true)) {
@@ -77,7 +79,7 @@ public class PasteCommand extends AbstractCommand {
                         true);
             }
         }
-        sendPaste(message, exercises.get(0));
+        sendPaste(message, exercise);
     }
 
     private boolean parseArgs(CommandLine args) {

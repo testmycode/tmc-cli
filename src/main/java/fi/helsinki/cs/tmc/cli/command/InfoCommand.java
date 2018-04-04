@@ -26,6 +26,7 @@ public class InfoCommand extends AbstractCommand {
     private WorkDir workDir;
     private Io io;
     private CliContext ctx;
+    private String courseName;
 
     private boolean useWorkingDirectory;
     private boolean fetchFromInternet;
@@ -53,20 +54,19 @@ public class InfoCommand extends AbstractCommand {
         fetchFromInternet = args.hasOption("i");
         showAll = args.hasOption("a");
 
-        if (!ctx.loadBackendWithoutLogin()) {
-            return;
-        }
-
         if (fetchFromInternet) {
             if (useWorkingDirectory) {
                 io.errorln("You must give a course as an argument.");
                 printUsage(ctx);
                 return;
             }
-            String courseName = stringArgs[0];
+            courseName = stringArgs[0];
             printInfoFromInternet(courseName);
         } else {
             printLocalInfo(args.getArgs());
+        }
+        if (this.ctx.checkIsLoggedIn(true, true)) {
+            this.ctx.getAnalyticsFacade().saveAnalytics(courseName, "info");
         }
     }
 
@@ -93,6 +93,8 @@ public class InfoCommand extends AbstractCommand {
             printUsage(ctx);
             return;
         }
+
+        courseName = ctx.getCourseInfo().getCourseName();
 
         if (useWorkingDirectory) {
             // if in exercise directory, print info for that exercise.
