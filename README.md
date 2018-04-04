@@ -15,7 +15,7 @@ TMC-CLI is the command-line client for University of Helsinki's TestMyCode -fram
 
 ## Requirements
 
-* Java Runtime Environment 7
+* Java Runtime Environment 8
 * Linux, Mac OS X or Microsoft Windows
   * Currently only limited support for Windows
   * Other Unix-like systems may work, but are not tested
