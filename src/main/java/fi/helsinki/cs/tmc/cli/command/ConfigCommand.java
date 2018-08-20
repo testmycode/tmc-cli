@@ -176,13 +176,14 @@ public class ConfigCommand extends AbstractCommand {
         boolean get = args.hasOption("g");
         boolean listing = args.hasOption("l");
         boolean delete = args.hasOption("d");
+        boolean update = !get && !listing && !delete;
         this.quiet = args.hasOption("q");
 
         String[] arguments = args.getArgs();
         arguments = Arrays.stream(arguments).filter(o -> !o.trim().isEmpty()).toArray(String[]::new);
         this.properties = context.getProperties();
 
-        if (!this.context.checkIsLoggedIn(false, true)) {
+        if (!update && !this.context.checkIsLoggedIn(false, true)) {
             return;
         }
 

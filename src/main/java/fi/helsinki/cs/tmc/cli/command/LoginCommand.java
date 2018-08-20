@@ -77,6 +77,9 @@ public class LoginCommand extends AbstractCommand {
 
     public boolean login(CliContext ctx, CommandLine args, Optional<String> serverAddress) {
         Io io = ctx.getIo();
+        if (serverAddress.isPresent()) {
+            io.println("Logging in to " + serverAddress.get());
+        }
         username = getLoginInfo(args, username, "u", "username: ", io);
         password = getLoginInfo(args, null, "p", "password: ", io);
 
