@@ -183,10 +183,6 @@ public class ConfigCommand extends AbstractCommand {
         arguments = Arrays.stream(arguments).filter(o -> !o.trim().isEmpty()).toArray(String[]::new);
         this.properties = context.getProperties();
 
-        if (!update && !this.context.checkIsLoggedIn(false, true)) {
-            return;
-        }
-
         this.context.getAnalyticsFacade().saveAnalytics("config");
 
         if ((get ? 1 : 0) + (listing ? 1 : 0) + (delete ? 1 : 0) > 1) {

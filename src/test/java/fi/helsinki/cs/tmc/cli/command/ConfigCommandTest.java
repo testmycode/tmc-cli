@@ -93,13 +93,13 @@ public class ConfigCommandTest {
     }
 
     @Test
-    public void doNotRunIfNotLoggedIn() {
+    public void doRunIfNotLoggedIn() {
         when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
         app = new Application(ctx);
 
         String[] args = {"config -l"};
         app.run(args);
-        io.assertContains("You are not logged in");
+        io.assertNotContains("You are not logged in");
     }
     @Test
     public void printsErrorIfNoArgumentsGiven() {
