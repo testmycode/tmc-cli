@@ -3,13 +3,8 @@
 set -euo pipefail
 
 echo "~ Installing TMC-CLI ~"
+echo "(If your shell is not bash, you may have to do the installation manually.)"
 echo ""
-
-if [ -f $HOME/.tmc-autocomplete.sh ]; then
-	echo -e ".tmc-autocomplete is already installed try adding the following line to your bashrc file."
-	echo "source $HOME/.tmc-autocomplete.sh"
-	exit
-fi
 
 echo "Fetching latest release URL"
 if ! PAGE=$(curl -s https://api.github.com/repos/testmycode/tmc-cli/releases/latest); then
@@ -29,7 +24,13 @@ if [ ! -f ./tmc ]; then
 	exit 1
 fi
 
+if [ -f "$HOME/.tmc-autocomplete.sh" ]; then
+	rm "$HOME/.tmc-autocomplete.sh" || true
+fi
+
 chmod u+x ./tmc
 ./tmc
 
-echo "Installation complete"
+echo "source $HOME/.tmc-autocomplete.sh || true" >> "$HOME/.bashrc"
+
+echo "Installation complete. Please restart the terminal."
