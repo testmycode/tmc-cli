@@ -22,8 +22,8 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -73,8 +73,8 @@ public class InfoCommandTest {
         io = new TestIo();
 
         mockCore = new TmcCore(new Settings(), new TaskExecutorImpl());
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(new Settings(), new EventStore());
-        analyticsFacade = new AnalyticsFacade(new Settings(), eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        analyticsFacade = new AnalyticsFacade(eventSendBuffer);
         ctx = new CliContext(io, mockCore, new WorkDir(), new Settings(), analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();

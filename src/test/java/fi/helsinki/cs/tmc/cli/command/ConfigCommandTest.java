@@ -22,9 +22,8 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,9 +58,8 @@ public class ConfigCommandTest {
         settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         core = new TmcCore(settings, tmcLangs);
-        SpywareSettings analyticsSettings = new Settings();
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
-        analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        analyticsFacade = new AnalyticsFacade(eventSendBuffer);
         ctx = Mockito.spy(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
         app = new Application(ctx);
 
@@ -334,13 +332,6 @@ public class ConfigCommandTest {
         io.addConfirmationPrompt(true);
         io.addConfirmationPrompt(true);
         app.run(new String[] {"config", "send-diagnostics=asdf", "send-diagnostics=true"});
-        io.assertContains("Please write either true or false");
-        assertEquals(true, settings.getSendDiagnostics());
-    }
-
-    @Test
-    public void ifSeveralPairsAndSomeInvalidValuesConfiguresValidOnesWithQuiet() {
-        app.run(new String[] {"config", "-q",  "send-analytics=asdf", "send-diagnostics=true"});
         io.assertContains("Please write either true or false");
         assertEquals(true, settings.getSendDiagnostics());
     }

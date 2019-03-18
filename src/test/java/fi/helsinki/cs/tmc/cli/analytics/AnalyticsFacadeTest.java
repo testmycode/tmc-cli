@@ -9,8 +9,8 @@ import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,7 +33,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SettingsIo.class, TmcUtil.class})
 public class AnalyticsFacadeTest {
-    private Settings analyticsSettings;
     private AnalyticsFacade analyticsFacade;
     private EventSendBuffer eventSendBuffer;
     private Application app;
@@ -59,9 +58,8 @@ public class AnalyticsFacadeTest {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         TmcCore core = new TmcCore(settings, tmcLangs);
-        analyticsSettings = mock(Settings.class);
         eventSendBuffer = mock(EventSendBuffer.class);
-        analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        analyticsFacade = new AnalyticsFacade(eventSendBuffer);
         CliContext ctx = new CliContext(io, core, new WorkDir(), settings, analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();
@@ -76,32 +74,16 @@ public class AnalyticsFacadeTest {
     }
 
     @Test
-    public void analyticsNotSentIfSpywareIsNotEnabled() {
-        workDir.setWorkdir(pathToDummyCourse);
-        when(analyticsSettings.isSpywareEnabled()).thenReturn(false);
-        app.run(new String[] {"submit", "Module_1-02_intro"});
-        verify(eventSendBuffer, never()).sendNow();
-    }
-
-    @Test
     public void analyticsisSentOnSubmitIfSpywareIsEnabled() {
         workDir.setWorkdir(pathToDummyCourse);
-        when(analyticsSettings.isSpywareEnabled()).thenReturn(true);
         app.run(new String[] {"submit", "Module_1-02_intro"});
         verify(eventSendBuffer).sendNow();
     }
 
     @Test
     public void analyticsIsSavedIfSpywareIsEnabled() {
-        when(analyticsSettings.isSpywareEnabled()).thenReturn(true);
         app.run(new String[] {"courses"});
         verify(eventSendBuffer, times(1)).receiveEvent(any(LoggableEvent.class));
     }
 
-    @Test
-    public void analyticsIsNotSavedIfSpywareIsNotEnabled() {
-        when(analyticsSettings.isSpywareEnabled()).thenReturn(false);
-        app.run(new String[] {"courses"});
-        verify(eventSendBuffer, never()).receiveEvent(any(LoggableEvent.class));
-    }
 }

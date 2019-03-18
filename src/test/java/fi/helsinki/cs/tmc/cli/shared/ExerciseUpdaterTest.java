@@ -21,9 +21,8 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,11 +43,10 @@ public class ExerciseUpdaterTest {
 
     @Before
     public void setUp() {
-        SpywareSettings analyticsSettings = new Settings();
         Settings settings = new Settings();
         mockCore = new TmcCore(settings, new TaskExecutorImpl());
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(eventSendBuffer);
         ctx = new CliContext(new TestIo(), mockCore, new WorkDir(), settings, analyticsFacade);
 
         mockStatic(TmcUtil.class);

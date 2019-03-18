@@ -15,17 +15,15 @@ import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 
-public class Settings implements TmcSettings, SpywareSettings {
+public class Settings implements TmcSettings {
 
     private static final Logger logger = LoggerFactory.getLogger(Settings.class);
     private WorkDir workDir;
@@ -128,8 +126,33 @@ public class Settings implements TmcSettings, SpywareSettings {
     }
 
     @Override
+    public Optional<Integer> getId() {
+        return Optional.fromNullable(account.getId());
+    }
+
+    @Override
+    public void setId(int i) {
+        account.setId(i);
+    }
+
+    @Override
     public Optional<String> getUsername() {
         return account.getUsername();
+    }
+
+    @Override
+    public void setUsername(String s) {
+
+    }
+
+    @Override
+    public Optional<String> getEmail() {
+        return null;
+    }
+
+    @Override
+    public void setEmail(String s) {
+
     }
 
     @Override
@@ -227,21 +250,4 @@ public class Settings implements TmcSettings, SpywareSettings {
         account.setOrganization(organization);
     }
 
-    @Override
-    public boolean isSpywareEnabled() {
-        return account.getSendAnalytics();
-    }
-
-    public void setSpywareEnabled(boolean spywareEnabled) {
-        account.setSendAnalytics(spywareEnabled);
-    }
-
-    @Override
-    public boolean isDetailedSpywareEnabled() {
-        return account.getSendDetailedAnalytics();
-    }
-
-    public void setDetailedSpywareEnabled(boolean detailedSpywareEnabled) {
-        account.setSendDetailedAnalytics(detailedSpywareEnabled);
-    }
 }

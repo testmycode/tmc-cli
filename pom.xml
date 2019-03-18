@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fi.helsinki.cs.tmc.cli</groupId>
     <artifactId>tmc-cli</artifactId>
-    <version>0.9.1</version>
+    <version>0.9.2</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>fi.helsinki.cs.tmc</groupId>
             <artifactId>core</artifactId>
-            <version>0.10.3-SNAPSHOT</version>
+            <version>0.10.12-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>

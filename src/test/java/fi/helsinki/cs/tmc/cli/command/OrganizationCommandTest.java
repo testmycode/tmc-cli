@@ -10,9 +10,8 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,9 +59,8 @@ public class OrganizationCommandTest {
         mixedOrganizationList.add(new Organization("D", "", "d", "", false));
         mixedOrganizationList.add(new Organization("E", "", "e", "", false));
 
-        SpywareSettings analyticsSettings = new Settings();
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
-        analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        analyticsFacade = new AnalyticsFacade(eventSendBuffer);
         ctx = new CliContext(io, mockCore, new WorkDir(), settings, analyticsFacade);
         app = new Application(ctx);
 

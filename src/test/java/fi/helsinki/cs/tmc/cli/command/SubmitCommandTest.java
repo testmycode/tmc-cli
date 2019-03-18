@@ -22,9 +22,8 @@ import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -93,8 +92,7 @@ public class SubmitCommandTest {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         core = new TmcCore(settings, tmcLangs);
-        SpywareSettings analyticsSettings = new Settings();
-        analyticsFacade = spy(new AnalyticsFacade(analyticsSettings, new EventSendBuffer(analyticsSettings, new EventStore())));
+        analyticsFacade = spy(new AnalyticsFacade(new EventSendBuffer(new EventStore())));
         ctx = new CliContext(io, this.core, new WorkDir(), new Settings(), this.analyticsFacade);
         app = new Application(ctx);
         workDir = ctx.getWorkDir();

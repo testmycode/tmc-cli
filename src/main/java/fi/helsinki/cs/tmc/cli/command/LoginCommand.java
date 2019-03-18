@@ -107,10 +107,6 @@ public class LoginCommand extends AbstractCommand {
                 "Do you want to send crash reports for client development?",
                                     ctx.getSettings().getSendDiagnostics(), io);
         account.setSendDiagnostics(sendDiagnostics);
-        boolean sendAnalytics = getBooleanAnswerFromUser(Optional.fromNullable(username),
-                "Do you want to send analytics data for research?",
-                                    ctx.getSettings().isSpywareEnabled(), io);
-        account.setSendAnalytics(sendAnalytics);
 
         AccountList list = SettingsIo.loadAccountList();
         list.addAccount(account);

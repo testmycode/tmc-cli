@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.cli.analytics;
 import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
 
 import java.nio.charset.Charset;
 import java.util.Collections;

@@ -25,7 +25,6 @@ public class ConfigCommand extends AbstractCommand {
     private Io io;
     private static final Map<String, PropertyFunctions> ALLOWED_KEYS = new HashMap<>();
     private static final Set<String> PROGRESS_BAR_COLORS = new HashSet<>(Arrays.asList("black", "red", "green", "blue", "yellow", "blue", "purple", "cyan", "white", "none"));
-    private static final String sendAnalyticsKey = "send-analytics";
     private static final String serverAddressKey = "server-address";
     private static final String testResultRightKey = "testresults-right";
     private static final String testResultLeftKey = "testresults-left";
@@ -57,19 +56,7 @@ public class ConfigCommand extends AbstractCommand {
                 SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
             }
         });
-        ALLOWED_KEYS.put(sendAnalyticsKey, new PropertyFunctions() {
-            @Override
-            public String getter() {
-                return Boolean.toString(context.getSettings().isSpywareEnabled());
-            }
 
-            @Override
-            public void setter(String value) throws BadValueTypeException {
-                boolean send = getBooleanSendValue(value);
-                context.getSettings().setSpywareEnabled(send);
-                SettingsIo.saveCurrentSettingsToAccountList(context.getSettings());
-            }
-        });
         ALLOWED_KEYS.put(serverAddressKey, new PropertyFunctions() {
             @Override
             public String getter() {

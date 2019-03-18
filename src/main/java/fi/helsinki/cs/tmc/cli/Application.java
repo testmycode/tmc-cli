@@ -22,8 +22,8 @@ import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.core.utilities.TmcRequestProcessor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Option;
@@ -219,8 +219,8 @@ public class Application {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         TmcCore core = new TmcCore(settings, tmcLangs);
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(settings, new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(settings, eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(eventSendBuffer);
         Application app = new Application(new CliContext(null, core, new WorkDir(), settings, analyticsFacade));
         app.run(args);
         // Because of EventSendBuffer

@@ -19,9 +19,8 @@ import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +45,8 @@ public class SettingsTest {
         testOrganization = new Organization("test", "test", "hy", "test", false);
         settings = new Settings("testuser", "testpassword", testOrganization);
         core = spy(new TmcCore(settings, new TaskExecutorImpl()));
-        SpywareSettings analyticsSettings = settings;
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(eventSendBuffer);
         io = new TestIo();
         context = new CliContext(io, core, new WorkDir(), settings, analyticsFacade);
     }

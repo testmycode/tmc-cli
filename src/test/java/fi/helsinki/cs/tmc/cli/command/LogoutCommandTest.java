@@ -18,8 +18,8 @@ import fi.helsinki.cs.tmc.cli.io.TestIo;
 import fi.helsinki.cs.tmc.cli.io.WorkDir;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,8 +37,8 @@ public class LogoutCommandTest {
     public void setUp() {
         io = new TestIo();
         TmcCore core = new TmcCore(new Settings(), new TaskExecutorImpl());
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(new Settings(), new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new Settings(), new EventSendBuffer(new Settings(), new EventStore()));
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(new EventSendBuffer(new EventStore()));
         app = new Application(new CliContext(io, core, new WorkDir(), new Settings(), analyticsFacade));
 
         mockStatic(SettingsIo.class);

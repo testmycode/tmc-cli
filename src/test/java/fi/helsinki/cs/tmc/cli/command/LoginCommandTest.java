@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.cli.command;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -21,9 +20,8 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,9 +56,8 @@ public class LoginCommandTest {
         Settings settings = new Settings();
         TaskExecutor tmcLangs = new TaskExecutorImpl();
         mockCore = new TmcCore(settings, tmcLangs);
-        SpywareSettings analyticsSettings = new Settings();
-        EventSendBuffer eventSendBuffer = new EventSendBuffer(analyticsSettings, new EventStore());
-        AnalyticsFacade analyticsFacade = new AnalyticsFacade(analyticsSettings, eventSendBuffer);
+        EventSendBuffer eventSendBuffer = new EventSendBuffer(new EventStore());
+        AnalyticsFacade analyticsFacade = new AnalyticsFacade(eventSendBuffer);
 
         ctx = spy(new CliContext(io, mockCore, new WorkDir(), settings, analyticsFacade));
         app = new Application(ctx);
@@ -124,7 +121,6 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt("y");
-        io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
     }
@@ -135,7 +131,6 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", ORGANIZATION};
         io.addLinePrompt(SERVER);
-        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -152,7 +147,6 @@ public class LoginCommandTest {
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt(ORGANIZATION);
         io.addLinePrompt("y");
-        io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
     }
@@ -165,7 +159,6 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         when(ctx.getCourseInfo()).thenReturn(info);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME, "-o", TEST_ORGANIZATION.getSlug()};
-        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -184,7 +177,6 @@ public class LoginCommandTest {
         io.addPasswordPrompt(PASSWORD);
         io.addLinePrompt(ORGANIZATION);
         io.addLinePrompt("y");
-        io.addLinePrompt("y");
         app.run(args);
         io.assertContains("Choose an organization");
     }
@@ -197,7 +189,6 @@ public class LoginCommandTest {
         when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), eq(PASSWORD))).thenReturn(true);
         String[] args = {"login", "-p", PASSWORD, "-u", USERNAME};
         io.addLinePrompt(ORGANIZATION);
-        io.addLinePrompt("y");
         io.addLinePrompt("y");
         app.run(args);
         io.assertAllPromptsUsed();
@@ -227,21 +218,8 @@ public class LoginCommandTest {
         when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
         String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", TEST_ORGANIZATION.getSlug()};
         io.addLinePrompt("y");
-        io.addLinePrompt("y");
         app.run(args);
         io.assertContains("want to send crash reports");
-    }
-
-    @Test
-    public void analyticsAskedOnFirstLogin() {
-        when(SettingsIo.loadAccountList()).thenReturn(new AccountList());
-        when(TmcUtil.tryToLogin(eq(ctx), any(Account.class), eq(PASSWORD))).thenReturn(true);
-        when(TmcUtil.getOrganizationsFromServer(any(CliContext.class))).thenReturn(organizationList);
-        String[] args = {"login", "-u", USERNAME, "-p", PASSWORD, "-o", TEST_ORGANIZATION.getSlug()};
-        io.addLinePrompt("y");
-        io.addLinePrompt("y");
-        app.run(args);
-        io.assertContains("analytics");
     }
 
     @Test

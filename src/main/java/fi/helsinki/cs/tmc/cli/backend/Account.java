@@ -17,6 +17,7 @@ public class Account {
     private OauthCredentials oauthCredentials;
     private Course currentCourse;
     private String token;
+    private Integer id;
     private Organization organization;
     private boolean sendDiagnostics;
     private boolean sendAnalytics;
@@ -151,6 +152,14 @@ public class Account {
 
     public void setServerAddressToDefault() {
         this.serverAddress = DEFAULT_SERVER;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
+        return this.id;
     }
 
     @Override
