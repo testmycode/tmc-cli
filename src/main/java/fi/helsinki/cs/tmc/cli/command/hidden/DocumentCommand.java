@@ -235,7 +235,7 @@ public class DocumentCommand extends AbstractCommand {
         }
 
         try {
-            return IOUtils.toString(stream, StandardCharsets.UTF_8);
+            return IOUtils.toString(stream, StandardCharsets.UTF_8.toString());
         } catch (IOException e) {
             io.errorln("Encoding failure... REALLY???");
             return null;

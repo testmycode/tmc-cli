@@ -17,7 +17,6 @@ TMC-CLI is the command-line client for University of Helsinki's TestMyCode -fram
 
 * Java Runtime Environment 8
 * Linux, Mac OS X or Microsoft Windows
-  * Currently only limited support for Windows
   * Other Unix-like systems may work, but are not tested
 * If you want autocompletion, Bash or a Bash-compatible shell is required
 
@@ -32,6 +31,14 @@ curl -0 https://raw.githubusercontent.com/testmycode/tmc-cli/master/scripts/inst
 ```
 
 TMC-CLI should now be installed. You can try running it with `tmc` in a new terminal.
+
+### Using the Windows installer
+
+Download this [installer](https://github.com/testmycode/tmc-cli/blob/master/installers/TMC-cli_0.9.3_installer.exe)
+
+Run the installation wizard.
+
+TMC-CLI should now be installed. You can try running it with `tmc` in PowerShell/Command Prompt/other terminal software.
 
 ### Manual installation
 
@@ -61,6 +68,10 @@ Now that you've installed tmc-cli, you can view all available commands by runnin
 ## Uninstallation
 
 Delete tmc from the directory where you downloaded it, .tmc-autocomplete.sh from your home directory and remove 'source $HOME/.tmc-autocomplete' from your shell rc file.
+
+### On Windows
+
+If you installed TMC-cli with the installer-exe found in this repository's installers-folder, you can just navigate to where you installed TMC-cli (probably C:\Program Files\TMC-cli), and run the uninstaller `unins000.exe` there.
 
 ## Manual
 
