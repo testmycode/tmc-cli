@@ -46,12 +46,13 @@ Download the latest [release](https://github.com/testmycode/tmc-cli/releases/lat
 
 If you downloaded "tmc", navigate to the download directory on your terminal and make it executable with `chmod u+x ./tmc`.
 
-Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an alias to your .bashrc, enabling you to use tmc-cli by invoking the command `tmc`. For the alias to come into effect, execute `. ~/.bashrc` or simply open a new terminal.
+Launch tmc once with `./tmc`. Running tmc-cli for the first time will add an alias to your .bashrc, enabling you to use tmc-cli by invoking the command `tmc`. For the alias to come into effect, execute `. ~/.bashrc` or simply open a new terminal. If you are using SELinux (Security Enhanced Linux), you may have to issue the command `setsebool -P java_manage_all_user_content=true` as root.
 
 To summarise:
 
 ```
 ~ $ chmod u+x tmc
+~ $ sudo setsebool -P java_manage_all_user_content=true
 ~ $ ./tmc
 ~ $ . ~/.bashrc
 ~ $ echo "Now you can run tmc anywhere."
@@ -67,7 +68,7 @@ Now that you've installed tmc-cli, you can view all available commands by runnin
 
 ## Uninstallation
 
-Delete tmc from the directory where you downloaded it, .tmc-autocomplete.sh from your home directory and remove 'source $HOME/.tmc-autocomplete' from your shell rc file.
+Delete tmc from the directory where you downloaded it, .tmc-autocomplete.sh from your home directory and remove 'source $HOME/.tmc-autocomplete' from your shell rc file. With SELinux, you may want to run `setsebool -P java_manage_all_user_content=false` as root.
 
 ### On Windows
 
