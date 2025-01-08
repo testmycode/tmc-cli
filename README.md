@@ -1,3 +1,8 @@
+# Old Java TMC-cli
+
+See the new TMC-cli: https://github.com/rage/tmc-cli-rust
+
+---------------
 
 [![Build Status](https://travis-ci.org/testmycode/tmc-cli.svg?branch=master)](https://travis-ci.org/testmycode/tmc-cli)
 [![GitHub release](https://img.shields.io/badge/release-latest-brightgreen.svg?style=flat)](https://github.com/testmycode/tmc-cli/releases/latest)
